@@ -1,0 +1,144 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestSparklineSpec } from "../data/teach/sparkline";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/sparkline";
+const spec = specText(smallestSparklineSpec);
+const play = playgroundHref(smallestSparklineSpec);
+const curve = `{
+  "mark": { "curve": "linear" }
+}`;
+const step = `{
+  "mark": { "curve": "step" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+const rows = `{
+  "data": [{ "v": 56 }, { "v": 71 }, { "v": 35 }],
+  "encoding": { "y": { "field": "v" } }
+}`;
+---
+
+<p>
+  A sparkline is a small line with no axes. It sits in a table cell or beside a number. The shape is the chart. The reader already has the value in the label next to it.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a sparkline when the recent shape is enough, and a scale would be noise. Net volume beside a KPI is that chart. A column of services, one line per row, is that chart. The line is short on purpose. The renderer's default height is 32px when <code>size</code> is omitted.
+  </p>
+  <p>
+    A <a href="/docs/charts/line">line</a> is the chart when someone has to read a value off a scale, compare two series in one frame, or see the axis titles. A line has axes and can show a legend. A sparkline does not.
+  </p>
+  <p>
+    A <a href="/docs/charts/mini-area">mini area</a> is the same small frame with the area filled. Use it when the band is the point. A sparkline is the stroke. <code>mark.area</code> can fill under a sparkline, and the type stays <code>sparkline</code>. When the fill is the chart, use <code>type: "mini-area"</code>.
+  </p>
+  <p>
+    A <a href="/docs/charts/spike">spike</a> draws a stem from a baseline. It does not connect the points. A jump from a quiet bucket to a burst stays a stem. A sparkline would draw that jump as a slope.
+  </p>
+  <p>
+    One sparkline is one series. Service health is four sparklines, one spec each, not one spec with four lines. A metric card that already has a label and a delta is a <a href="/docs/charts/kpi">KPI</a>. That card can carry a number array in <code>data</code>. A sparkline on its own does not.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    A plain number array is the usual data. The field name is <code>value</code>. X is the index. Requests is twelve numbers. Net volume is sixteen numbers. Neither spec sets <code>encoding</code>.
+  </p>
+  <p>
+    Row objects work too. Point <code>encoding.y</code> at the number. Disputes uses a <code>v</code> column. There is no <code>encoding.x</code> in that spec, so the position is still the row index.
+  </p>
+  <figure class="code">
+    <figcaption><span>rows</span></figcaption>
+    <pre><code>{rows}</code></pre>
+  </figure>
+  <p>
+    A missing number leaves a gap, unless <code>mark.connectNulls</code> is true. A second measure is a second sparkline, not a second y field.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest sparkline. <code>version</code>, <code>type</code>, <code>data</code>, and <code>a11y.alt</code> are required. The curve comes from the default, so <code>mark</code> can be omitted. The default curve is monotone. There are no axes and no legend. Omit <code>size</code> and the renderer uses a short strip, 32px tall. The docs preview uses a slightly taller card so the line is visible in the rail. A <code>size</code> in the spec wins over that card.
+  </p>
+  <TeachFacts type="sparkline" label="Sparkline packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing sparkline series. Requests is a number array. Net volume is the KPI line, with the tooltip off. Disputes is row objects, and the tooltip names the count.
+  </p>
+</section>
+
+<TeachConcept id="curve" title="Curve">
+  <p>
+    <code>mark.curve</code> is how the line joins the points. <code>monotone</code> is the default. It stays inside the data, so a jump does not overshoot. <code>linear</code> draws straight segments. <code>step</code> holds the value and then jumps, which is the right curve for a count that changes and then sits still.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.curve</span></figcaption>
+    <pre><code>{curve}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.curve step</span></figcaption>
+    <pre><code>{step}</code></pre>
+  </figure>
+  <p>
+    <code>step-before</code> and <code>step-after</code> place the jump on the other side of the point. Set those in the playground. The Curve control does not offer them, so a spec that uses one leaves the buttons unpressed.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on when the key is omitted. Hovering a point shows the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on. Net volume sets <code>false</code> because the number is already beside the chart.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. Disputes names <code>v</code> as Disputes. Change the fields in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.area</code> fills under the stroke. The type is still <code>sparkline</code>, still with no axes. Prefer <a href="/docs/charts/mini-area">mini area</a> when that fill is the chart. <code>mark.gradient</code> fades a fill toward the baseline. <code>mark.strokeWidth</code>, <code>mark.glow</code>, <code>mark.sampling</code>, and <code>mark.connectNulls</code> refine the drawing. <code>mark.points</code> does not apply here. Setting it warns CK3010. A legend is not drawn. Theme presets live on the playground, with the full option list.
+  </p>
+  <p>
+    A <code>title</code> is drawn as text. On a 32px strip that text sits on the line, so these examples leave <code>title</code> off and let the label beside the chart name it.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/mini-area">Mini area</a> is this frame with the band filled in.</li>
+    <li><a href="/docs/charts/line">Line</a> is the trend with axes. <code>mark.area</code> fills that line. The type stays <code>line</code>.</li>
+    <li><a href="/docs/charts/spike">Spike</a> is stems from a baseline, for bursts.</li>
+    <li><a href="/docs/charts/kpi">KPI</a> is the label, the value, and the delta. Its <code>data</code> can be a sparkline.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

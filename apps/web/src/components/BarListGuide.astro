@@ -1,0 +1,142 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestBarListSpec } from "../data/teach/bar-list";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/bar-list";
+const spec = specText(smallestBarListSpec);
+const play = playgroundHref(smallestBarListSpec);
+const track = `{
+  "mark": { "track": "row" }
+}`;
+const format = `{
+  "encoding": {
+    "y": { "field": "visits", "format": "compact" }
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+const importLine = `import { renderBarList } from "@chartkitdev/core/charts/bar-list";`;
+---
+
+<p>
+  A bar list is ranked rows with no axes. The label sits on the row, a track shows the value against the largest row, and the formatted value sits on the right. It is a list, not a chart you read off a scale.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a bar list for a top-n list: pages, payment methods, services. The reader wants the name and the number, in the order you pass. Top pages is five rows. Payments by method is twelve. Top services is four.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares categories on a scale. A horizontal bar still has an axis, from zero to the top of the range. A bar list has no axis. The number is printed. The track is a share of the largest row, not a scale you measure.
+  </p>
+  <p>
+    Order is the order of the rows. <code>mark.sort</code> does not apply to a bar list. Setting it warns CK3010. Sort the data before you pass it. A long comparison that needs a grid is a bar.
+  </p>
+</section>
+
+<section id="import">
+  <h2>Where it loads</h2>
+  <p>
+    Bar list is not in the line bundle or in <code>@chartkitdev/core/all</code>. <code>render()</code> from <code>all</code> returns an error SVG for this type. Call <code>renderBarList</code> from the chart entry.
+  </p>
+  <figure class="code">
+    <figcaption><span>import</span></figcaption>
+    <pre><code>{importLine}</code></pre>
+  </figure>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is a label and a number. <code>encoding.x</code> is the label. <code>encoding.y</code> is the value. Top pages uses <code>page</code> and <code>visits</code>. Payments by method uses <code>method</code> and <code>amount</code>. Top services uses <code>name</code> and <code>value</code>.
+  </p>
+  <p>
+    <code>encoding.y</code> can be a field name. The smallest spec does that. An object adds a format. Top pages uses the <code>compact</code> preset, so 1,840 prints as 1.8K. Payments by method adds a dollar prefix. Top services adds a suffix. The format is how the number on the right is written. It is not a separate control, because each example names a different field.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y.format</span></figcaption>
+    <pre><code>{format}</code></pre>
+  </figure>
+  <p>
+    A row with a missing label or a missing number is skipped. There is one series. A second number is a second list, or a bar.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest bar list. <code>version</code>, <code>type</code>, <code>data</code>, <code>encoding</code>, and <code>a11y.alt</code> are required. <code>mark</code> can be omitted. The track is the short bar. There are no axes and no legend. Omit <code>size.height</code> and the chart grows with the rows, 28px each. A height in the spec wins and can clip rows that do not fit. Payments by method sets 640 by 360, which fits its twelve rows. The docs preview supplies a width when the spec does not.
+  </p>
+  <TeachFacts type="bar-list" label="Bar list packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among three lists. Top pages is the short bar, with visits in the tooltip. Payments by method is the full-row wash. Top services turns the tooltip off, because the rate is already on the row.
+  </p>
+</section>
+
+<TeachConcept id="track" title="Track">
+  <p>
+    <code>mark.track</code> is the shape of the row. Omit it, or set <code>bar</code>, and each row is a short rounded bar on a faint track. The label sits on the bar. The value sits at the right. That is Top pages and Top services.
+  </p>
+  <p>
+    <code>row</code> is a full-height wash behind the label. The width is still the value against the largest row. The count stays on the right. Payments by method uses <code>row</code>. The type is still <code>bar-list</code>. A horizontal bar chart is <code>type: "bar"</code> with <code>mark.orientation</code> set to <code>horizontal</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.track</span></figcaption>
+    <pre><code>{track}</code></pre>
+  </figure>
+  <p>
+    Choosing Bar on an example that omitted <code>mark.track</code> removes the key, so the default stays the short bar. Choosing Bar on Payments by method writes <code>bar</code>, because that example had set <code>row</code>.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    The label and the value are already on the row, so a bar list is readable with no hover card. <code>tooltip</code> is still the shared hover key. It is on when the key is omitted. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on. Top services sets <code>false</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. Top pages names the page and the visits. Change those fields in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>encoding.y.format</code> is the number on the right. A preset such as <code>compact</code>, or an object with a prefix, suffix, or decimals, is the whole formatting story. There is no legend and no axis. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories on a scale, vertical or horizontal.</li>
+    <li><a href="/docs/charts/sparkline">Sparkline</a> is the small inline line, when the list is a trend instead of a rank.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

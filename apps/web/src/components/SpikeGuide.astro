@@ -1,0 +1,141 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestSpikeSpec } from "../data/teach/spike";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/spike";
+const spec = specText(smallestSpikeSpec);
+const play = playgroundHref(smallestSpikeSpec);
+const baseline = `{
+  "mark": { "baseline": 0 }
+}`;
+const axesOff = `{
+  "axes": { "x": false, "y": false }
+}`;
+const rows = `{
+  "data": [
+    { "time": "00:00", "count": 1 },
+    { "time": "00:05", "count": 0 },
+    { "time": "00:10", "count": 8 }
+  ],
+  "encoding": { "x": "time", "y": "count" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A spike draws a thin stem at each position, from a baseline up to the value. Quiet buckets sit on the baseline. A burst is a tall stem. The chart is for events over time, not for comparing thick bars.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a spike when most values hug a baseline and a few jump: blocked requests, jolts, errors in a bucket. The stem makes the burst obvious. The quiet hours stay flat.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> gives each category a width and a scale you can read across. Bars can stack and group. A spike has no bar width and does not stack. It is a stem, not a comparison of totals.
+  </p>
+  <p>
+    A <a href="/docs/charts/sparkline">sparkline</a> connects the points and hides the axes. A jump from 0 to 14 becomes a slope. A spike keeps the zeros on the baseline and draws the 14 as a stem. Spike axes are on unless you turn them off. A sparkline cannot show axes.
+  </p>
+  <p>
+    For a strip in a table, set both axes to false. The stems stay. The labels go away, which is the right trade when the surrounding row already names the series. Axis titles and grid stay in the playground.
+  </p>
+  <figure class="code">
+    <figcaption><span>axes off</span></figcaption>
+    <pre><code>{axesOff}</code></pre>
+  </figure>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    A plain number array works. The field name is <code>value</code>. X is the index. The smallest spec is three numbers, and the second one is the burst.
+  </p>
+  <p>
+    Rows are the usual shape when the x has a name. Point <code>encoding.x</code> at the time or the bucket, and <code>encoding.y</code> at the magnitude. Blocked requests uses <code>time</code> and <code>count</code>. Ridge, as spikes uses <code>hour</code> and <code>jolts</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding</span></figcaption>
+    <pre><code>{rows}</code></pre>
+  </figure>
+  <p>
+    A missing number is skipped. The stem is not drawn for that bucket. Zero is drawn, as a point on the baseline.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest spike. <code>version</code>, <code>type</code>, <code>data</code>, and <code>a11y.alt</code> are required. <code>mark</code> can be omitted. Stems rise from 0. Axes are on. Omit <code>size</code> and the renderer picks a wide, short plot. The docs preview uses the spike card. A <code>size</code> in the spec wins. Ridge, as spikes sets 640 by 280, so the rail uses that size.
+  </p>
+  <TeachFacts type="spike" label="Spike packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches between two spike specs. Blocked requests is six five-minute buckets and an explicit baseline of 0. Ridge, as spikes is sixteen hours, with axis titles, a size, and a tooltip that names the jolts.
+  </p>
+</section>
+
+<TeachConcept id="baseline" title="Baseline">
+  <p>
+    <code>mark.baseline</code> is the value the stems rise from. Omit it and the baseline is 0, which is the right origin for a count. Blocked requests and Ridge, as spikes both set 0. A series that wanders around some other level sets that level here. Stems above the baseline go up. Stems below it go down.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.baseline</span></figcaption>
+    <pre><code>{baseline}</code></pre>
+  </figure>
+  <p>
+    The slider runs from 0 to 12 so the move is easy to see on these examples. The spec accepts any number. Set a baseline outside that range in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    Each stem carries a title with the label and the value. That title is part of the SVG. <code>tooltip</code> is the hover card. It is on when the key is omitted. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. Ridge, as spikes names the hour and the jolts. Change those fields in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.strokeWidth</code> is the stem width in pixels. <code>mark.opacity</code> fades the stems. <code>mark.sampling</code> downsamples a long series and keeps the spikes in each bucket. <code>axes.x.title</code> and <code>axes.y.title</code> name the axes. Ridge, as spikes sets both. A legend is not drawn. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories with a width and a scale.</li>
+    <li><a href="/docs/charts/sparkline">Sparkline</a> connects the points and has no axes.</li>
+    <li><a href="/docs/charts/line">Line</a> is the trend you read against a grid.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
