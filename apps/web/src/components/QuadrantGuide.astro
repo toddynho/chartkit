@@ -1,0 +1,137 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestQuadrantSpec } from "../data/teach/quadrant";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/quadrant";
+const spec = specText(smallestQuadrantSpec);
+const play = playgroundHref(smallestQuadrantSpec);
+const names = `{
+  "quadrants": ["Quick wins", "Big bets", "Fill-ins", "Thankless"]
+}`;
+const axis = `{
+  "encoding": {
+    "x": { "field": "x", "title": "Low effort|High effort" },
+    "y": { "field": "y", "title": "Low impact|High impact" }
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A quadrant places one point per row on a square split into four named regions. The split is the midpoint of each axis. The default domain is 0 to 1. The point's name is drawn next to it.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a quadrant when the question is which region a point falls in. Where the quarter goes is effort against impact: quick wins, big bets, fill-ins, and thankless work. Paper Kite bets and Where the next build sits ask the same question with delight instead of impact.
+  </p>
+  <p>
+    A <a href="/docs/charts/scatter">scatter</a> is the free plot of two quantities. The scales fit the data, and there are no four regions and no corner names. Use a scatter when the question is the relationship. Use a quadrant when the midpoint is the decision.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Quadrant and scatter</h2>
+  <p>
+    Both draw a point from <code>x</code> and <code>y</code>. The frame is what changes.
+  </p>
+  <p>
+    <code>type: "quadrant"</code> tints four rectangles and writes <code>quadrants</code> in the corners. Order is top-left, top-right, bottom-left, bottom-right. Axis-end captions come from the channel title, split on <code>|</code>.
+  </p>
+  <p>
+    <code>type: "scatter"</code> has no <code>quadrants</code> array. A size channel there is a bubble field with a pixel range. A quadrant reads a <code>size</code> column as a radius, clamped from 4 to 18.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one point. <code>name</code> is the label. <code>x</code> and <code>y</code> are numbers. <code>encoding.x</code> and <code>encoding.y</code> point at those fields. The domain defaults to 0..1. Set <code>scale.domain</code> when the numbers live somewhere else. A point outside the domain is CK1406 from <code>validatePhase4</code>.
+  </p>
+  <p>
+    <code>quadrants</code> is four strings. Where the quarter goes uses Quick wins, Big bets, Fill-ins, and Thankless. Omit the array and the corners stay blank. Four names stuffed into <code>subtitle</code> with pipes are not a subtitle. <code>validatePhase4</code> reports CK1412 and moves them to <code>quadrants</code>.
+  </p>
+  <p>
+    The low and high captions are the channel <code>title</code>, split on <code>|</code>. <code>Low effort|High effort</code> writes Low effort at the left and High effort at the right. Omit the title and the ends say Low and High.
+  </p>
+  <p>
+    A column named <code>size</code> sets the radius. Omit the column and every point uses 8. <code>encoding.size</code> can name a different field. Deleting <code>encoding.size</code> does not turn size off while a column named <code>size</code> is still in the data. There is no mark key for it. Where the quarter goes sets size. Paper Kite bets and Where the next build sits do not, so those points share one radius.
+  </p>
+  <p>
+    A column named <code>color</code> paints the point. <code>positive</code> and <code>done</code> use the positive token. <code>negative</code> and <code>crit</code> use the negative token. <code>accent</code> and <code>active</code> use the accent. <code>muted</code> uses muted. Any other text uses the series palette by row. An empty color uses the accent. <code>encoding.color</code> can name a different field. The same rule applies: the column is read even when the encoding key is omitted. <code>legend</code> is not read, and point names are always drawn.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+  <figure class="code">
+    <figcaption><span>quadrants</span></figcaption>
+    <pre><code>{names}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>axis captions</span></figcaption>
+    <pre><code>{axis}</code></pre>
+  </figure>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest quadrant. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. The regions are A, B, C, and D. SSO sits in the top-left. R sits in the bottom-right. Size and color can be omitted. The points are one radius, in the accent color.
+  </p>
+  <p>
+    The chart loads from <code>@chartkitdev/core/charts/quadrant</code>, or from <code>@chartkitdev/core/extra</code>. It is not in the line bundle. <code>validate()</code> warns CK1011 and points at <code>validatePhase4()</code>.
+  </p>
+  <TeachFacts type="quadrant" label="Quadrant packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing quadrant specs. Where the quarter goes is the core example, seven points with size and semantic color. Paper Kite bets is the showcase chart from a Mermaid quadrant, four points and no size column. Where the next build sits is the discovery chart. The spec has no title, so the switcher uses the showcase heading.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a quadrant when the key is omitted. Hovering a point shows the name and the two coordinates. The same sentence is the SVG title. <code>tooltip: false</code> tells the hover card not to open. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> is not read. The card is the mark label, not a field table. Turning the card off and on again puts a custom tooltip object back in the spec. The card still uses the mark label.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>subtitle</code> is a second line under the title. It is not where the four region names go. <code>legend</code> does not draw a key for color or size. Theme presets live on the playground, with a wider domain when 0..1 is the wrong scale.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/scatter">Scatter</a> plots two quantities without four named regions. A bubble chart is that scatter with <code>encoding.size</code>.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

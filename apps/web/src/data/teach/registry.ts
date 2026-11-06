@@ -2,8 +2,11 @@ import { barTeach } from "./bar.ts";
 import { comboTeach } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { funnelTeach } from "./funnel.ts";
+import { ganttTeach } from "./gantt.ts";
+import { journeyTeach } from "./journey.ts";
 import { lineTeach } from "./line.ts";
 import { pieTeach } from "./pie.ts";
+import { quadrantTeach } from "./quadrant.ts";
 import { radialBarTeach } from "./radial-bar.ts";
 import { roseTeach } from "./rose.ts";
 import { sankeyTeach } from "./sankey.ts";
@@ -11,8 +14,10 @@ import { scatterTeach } from "./scatter.ts";
 import { stackedAreaTeach } from "./stacked-area.ts";
 import { streamgraphTeach } from "./streamgraph.ts";
 import { sunburstTeach } from "./sunburst.ts";
+import { timelineTeach } from "./timeline.ts";
 import { treeTeach } from "./tree.ts";
 import { treemapTeach } from "./treemap.ts";
+import { vennTeach } from "./venn.ts";
 import { waterfallTeach } from "./waterfall.ts";
 import type { TeachModule } from "./types.ts";
 
@@ -38,6 +43,11 @@ export const teachModules: Record<string, TeachModule> = {
   waterfall: waterfallTeach,
   tree: treeTeach,
   streamgraph: streamgraphTeach,
+  gantt: ganttTeach,
+  timeline: timelineTeach,
+  quadrant: quadrantTeach,
+  venn: vennTeach,
+  journey: journeyTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

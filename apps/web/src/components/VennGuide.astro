@@ -1,0 +1,124 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestVennSpec } from "../data/teach/venn";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/venn";
+const spec = specText(smallestVennSpec);
+const play = playgroundHref(smallestVennSpec);
+const sets = `[
+  { "set": "Search", "size": 1280 },
+  { "set": "Filters", "size": 860 },
+  { "set": "Search+Filters", "size": 410 }
+]`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A venn draws two or three sets as overlapping circles. A row is one set, or one intersection. Two-set areas follow the sizes. Three-set areas are a best effort, and the chart says so.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a venn when the question is who sits in more than one set. What customers use together is search, filters, and saved views, including the 90 customers in all three. Wheel, glaze, kiln and What notebooks combine are the same shape.
+  </p>
+  <p>
+    A <a href="/docs/charts/pie">pie</a> or a <a href="/docs/charts/donut">donut</a> splits one total. A slice is not in two sets. A <a href="/docs/charts/treemap">treemap</a> and a <a href="/docs/charts/sunburst">sunburst</a> nest a hierarchy. A child belongs to one parent. A venn is the chart when membership overlaps.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Venn and the part-to-whole charts</h2>
+  <p>
+    Pie, donut, treemap, and sunburst account for one whole. The parts do not overlap, and they add up.
+  </p>
+  <p>
+    <code>type: "venn"</code> does not start from one total. Each set has its own size. The intersection is its own row. A customer in Search and Filters is counted in both sets and in the overlap. The circles are not slices of a pie.
+  </p>
+  <p>
+    Two sets are area-proportional: the circle area follows the set size, and the lens follows the intersection. Three sets are approximate. The chart adds the line "3-set areas are approximate". Four or more sets are an error, not a fourth circle.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one region. <code>set</code> is the name, or several names joined with <code>+</code>. <code>size</code> is the weight. <code>encoding.x</code> is the set name and <code>encoding.y</code> is the size. The defaults are those column names, so a small spec can omit <code>encoding</code>.
+  </p>
+  <p>
+    <code>Search+Filters</code> is the pairwise overlap. <code>Search+Filters+Saved views</code> is the triple. The chart matches the names either way around, so <code>Filters+Search</code> is the same region. An intersection larger than its smallest set is CK1408. One set, or four or more, is CK1407.
+  </p>
+  <p>
+    Set names sit by the circles. Counts sit in the regions. There is no <code>legend</code>. <code>legend</code> is not read, and there is no key that makes a three-set area exact.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart. Say that three-set areas are approximate when the chart has three sets.</p>
+  <figure class="code">
+    <figcaption><span>sets and one overlap</span></figcaption>
+    <pre><code>{sets}</code></pre>
+  </figure>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest venn. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. A and B are the sets. A+B is the overlap. Two sets, so the areas follow the sizes and there is no approximate caption.
+  </p>
+  <p>
+    The chart loads from <code>@chartkitdev/core/charts/venn</code>, or from <code>@chartkitdev/core/extra</code>. It is not in the line bundle. <code>validate()</code> warns CK1011 and points at <code>validatePhase4()</code>.
+  </p>
+  <TeachFacts type="venn" label="Venn packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing venn specs. What customers use together is the core example, three sets. Wheel, glaze, kiln is the showcase chart from a Mermaid venn. What notebooks combine is the discovery chart. The spec has no title, so the switcher uses the showcase heading. All three are three-set charts, so the areas are approximate.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a venn when the key is omitted. Hovering a circle shows the set name and its size. Hovering a count shows the sets in that region and the size. The same sentence is the SVG title. <code>tooltip: false</code> tells the hover card not to open. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> is not read. The card is the mark label, not a field table. Turning the card off and on again puts a custom tooltip object back in the spec. The card still uses the mark label.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    There is no mark key for the circle layout, and no legend position. A fourth set is a second chart, not a smaller circle. Theme presets live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/pie">Pie</a> and <a href="/docs/charts/donut">donut</a> split one total. The parts do not overlap.</li>
+    <li><a href="/docs/charts/treemap">Treemap</a> and <a href="/docs/charts/sunburst">sunburst</a> nest a hierarchy.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

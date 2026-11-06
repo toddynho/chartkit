@@ -1,0 +1,142 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestGanttSpec } from "../data/teach/gantt";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/gantt";
+const spec = specText(smallestGanttSpec);
+const play = playgroundHref(smallestGanttSpec);
+const row = `{
+  "id": "web",
+  "task": "Build the web app",
+  "section": "Build",
+  "start": "2026-03-23",
+  "end": "2026-04-10",
+  "progress": 0.3,
+  "status": "crit",
+  "depends": "design"
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A gantt draws each task as a bar on a calendar. The bar runs from <code>start</code> to <code>end</code>. Sections group the rows. A milestone is a diamond. A dependency is an elbow from one task to the next.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a gantt when the question is when the work happens, what it depends on, and how far along it is. Northstar launch is that chart: plan, build, and launch, with a today line and two milestones. Prep lanes for Cinder is the same idea for one vehicle.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares amounts. The categories are not dates, the bar starts from a baseline, and nothing depends on another bar. A <a href="/docs/charts/timeline">timeline</a> places events and eras on a date line. It does not give each row a task bar, a progress fill, or a dependency.
+  </p>
+  <p>
+    A handful of tasks stays readable. Paper Kite has four. Northstar launch has eight. A long list of named amounts, with no dates, is a bar.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Gantt, timeline, and bar</h2>
+  <p>
+    All three can put a name next to a mark. The axis is what changes.
+  </p>
+  <p>
+    <code>type: "gantt"</code> maps time to the horizontal axis. <code>start</code> and <code>end</code> are calendar days. The bar's length is the span, not a measure from zero. <code>depends</code> draws an elbow between task ids.
+  </p>
+  <p>
+    <code>type: "timeline"</code> is the event chart. A point is one day. A period is a rounded span. There is no task id and no dependency.
+  </p>
+  <p>
+    <code>type: "bar"</code> is the comparison. <code>type: "bar-range"</code> floats a bar between two numbers on a value axis. That pair is not a start date and an end date.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one task. <code>task</code> is the name. <code>start</code> is <code>YYYY-MM-DD</code>. <code>end</code> is the last day, or omit it and set <code>duration</code> as a number of days or a string such as <code>5d</code> or <code>2w</code>. <code>id</code> is how another row names this task.
+  </p>
+  <p>
+    <code>section</code> groups rows. Northstar launch uses Plan, Build, and Launch. Leave it off and the tasks are one list. Point <code>encoding.y</code> at the section field when the column has another name. <code>encoding.x</code> is the task, <code>encoding.open</code> and <code>encoding.close</code> are the dates, <code>encoding.color</code> is the status, and <code>encoding.source</code> and <code>encoding.target</code> are the id and the dependency. The default names are <code>task</code>, <code>section</code>, <code>start</code>, <code>end</code>, <code>status</code>, <code>id</code>, and <code>depends</code>, so a small spec can omit <code>encoding</code>.
+  </p>
+  <p>
+    <code>status</code> is <code>done</code>, <code>active</code>, or <code>crit</code>. <code>complete</code> and <code>completed</code> count as done. <code>wip</code> counts as active. <code>critical</code> and <code>delayed</code> count as crit. Done uses the positive color, active the accent, and crit the negative color. Any other status uses the first series color. The chart draws a Done, Active, and Critical key with the chart. That key is not <code>legend</code>.
+  </p>
+  <p>
+    <code>progress</code> fills the bar, from 0 to 1. A number from 1 to 100 is read as a percent. Omit it and the bar is solid. <code>depends</code> is a comma-separated list of task ids. The elbow runs from the predecessor to this task. A missing id is reported by <code>validatePhase4</code> as CK1404.
+  </p>
+  <p>
+    <code>milestone: true</code> draws a diamond on <code>start</code>. A duration of 0, or the same start and end, is a milestone too. A <code>today</code> date on any row draws a dashed line when that day sits inside the range. Northstar launch sets it on the first task.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+  <figure class="code">
+    <figcaption><span>one task</span></figcaption>
+    <pre><code>{row}</code></pre>
+  </figure>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest gantt. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Task A has a start and an end. Task B is a milestone that depends on A. The field names are the defaults, so <code>encoding</code> can be omitted.
+  </p>
+  <p>
+    The chart loads from <code>@chartkitdev/core/charts/gantt</code>, or from <code>@chartkitdev/core/extra</code>. It is not in the line bundle. <code>validate()</code> warns CK1011 and points at <code>validatePhase4()</code>, which checks the dates and the dependencies. A missing start is CK1401. A row with no end, duration, or milestone is CK1402.
+  </p>
+  <TeachFacts type="gantt" label="Gantt packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing gantt specs. Northstar launch is the core example: eight tasks, progress, a today line, and two milestones. Paper Kite is the showcase chart from a Mermaid gantt, with sections and one milestone. Prep lanes for Cinder is the launch-manifest chart. The spec has no title, so the switcher uses the showcase heading.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a gantt when the key is omitted. Hovering a bar or a diamond shows the task, the dates, the status, and the progress when the row has one. The same sentence is the SVG title. <code>tooltip: false</code> tells the hover card not to open. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> is not read. The card is the mark label, not a field table. Turning the card off and on again puts a custom tooltip object back in the spec. The card still uses the mark label.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    The Done, Active, and Critical key is part of the chart. It sits beside a short title, and on the next row when the title is long. <code>legend: false</code> does not hide it. <code>legend.position</code> does not move it. There is no <code>mark</code> key for progress, dependencies, milestones, or the today line. Those come from the rows. Theme presets live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/timeline">Timeline</a> is events and eras on a date line, without task bars or dependencies.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares amounts. The axis is not a calendar.</li>
+    <li><a href="/docs/charts/bar-range">Bar range</a> floats a bar between two values, not two dates.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
