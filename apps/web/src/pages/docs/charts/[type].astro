@@ -4,8 +4,11 @@ import ChartDoc from "../../../components/ChartDoc.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
 import FunnelGuide from "../../../components/FunnelGuide.astro";
+import GanttGuide from "../../../components/GanttGuide.astro";
+import JourneyGuide from "../../../components/JourneyGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
 import PieGuide from "../../../components/PieGuide.astro";
+import QuadrantGuide from "../../../components/QuadrantGuide.astro";
 import RadialBarGuide from "../../../components/RadialBarGuide.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
 import RoseGuide from "../../../components/RoseGuide.astro";
@@ -15,8 +18,10 @@ import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
 import StreamgraphGuide from "../../../components/StreamgraphGuide.astro";
 import SunburstGuide from "../../../components/SunburstGuide.astro";
 import TeachChart from "../../../components/TeachChart.astro";
+import TimelineGuide from "../../../components/TimelineGuide.astro";
 import TreeGuide from "../../../components/TreeGuide.astro";
 import TreemapGuide from "../../../components/TreemapGuide.astro";
+import VennGuide from "../../../components/VennGuide.astro";
 import WaterfallGuide from "../../../components/WaterfallGuide.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import { teachModule, teachModules } from "../../../data/teach/registry";
@@ -39,6 +44,11 @@ const guided = new Set([
   "waterfall",
   "tree",
   "streamgraph",
+  "gantt",
+  "timeline",
+  "quadrant",
+  "venn",
+  "journey",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -87,6 +97,11 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "waterfall" ? <WaterfallGuide /> : null}
       {module.type === "tree" ? <TreeGuide /> : null}
       {module.type === "streamgraph" ? <StreamgraphGuide /> : null}
+      {module.type === "gantt" ? <GanttGuide /> : null}
+      {module.type === "timeline" ? <TimelineGuide /> : null}
+      {module.type === "quadrant" ? <QuadrantGuide /> : null}
+      {module.type === "venn" ? <VennGuide /> : null}
+      {module.type === "journey" ? <JourneyGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

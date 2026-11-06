@@ -1,0 +1,129 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestJourneySpec } from "../data/teach/journey";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/journey";
+const spec = specText(smallestJourneySpec);
+const play = playgroundHref(smallestJourneySpec);
+const step = `{
+  "section": "Pay",
+  "step": "Fix a declined card",
+  "score": 1,
+  "actors": "Shopper, Payments, Support"
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A journey lists steps in order. Each step has a score from 1 to 5, drawn as a face on a five-step scale. Sections group the steps. Actors are chips on the step and across the top.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a journey when the question is how a step felt, and who was in it. Checkout is smooth until payment: a declined card scores 1, then confirmation recovers. Paper Kite playtest and First note are the same shape for a game and a notebook.
+  </p>
+  <p>
+    A <a href="/docs/charts/funnel">funnel</a> is a count at each stage. The width is how many remain. A journey score is not a count. A low score is a painful step, not a smaller population. A <a href="/docs/charts/timeline">timeline</a> places events on dates. Journey steps have no dates. The order is the row order.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Journey, funnel, and timeline</h2>
+  <p>
+    All three can show a sequence. The value is what changes.
+  </p>
+  <p>
+    <code>type: "journey"</code> maps <code>score</code> to a face. 1 and 2 use the negative color. 3 uses muted. 4 and 5 use the positive color. The other marks on the scale stay as small dots.
+  </p>
+  <p>
+    <code>type: "funnel"</code> maps a count to the width. Visit, signup, pay is that chart. Do not put a satisfaction score in a funnel, and do not put a headcount in a journey.
+  </p>
+  <p>
+    <code>type: "timeline"</code> needs a date. A journey does not. If the question is when the step happened, use a timeline.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one step. <code>section</code> groups the rows. <code>step</code> is the label. <code>score</code> is an integer from 1 to 5. <code>actors</code> is a comma-separated list. Checkout uses Shopper, then Shopper, Payments, then Shopper, Payments, Support.
+  </p>
+  <p>
+    <code>encoding.x</code> is the step, <code>encoding.y</code> is the score, <code>encoding.series</code> is the section, and <code>encoding.color</code> can name the actor field. The defaults are <code>step</code>, <code>score</code>, <code>section</code>, and <code>actors</code>, so a small spec can omit <code>encoding</code>. A column named <code>actors</code> is read even when <code>encoding.color</code> is omitted.
+  </p>
+  <p>
+    The chips are drawn from that field. They are not a <code>legend</code>. <code>legend</code> does not place them or hide them. A missing section is CK1410. A missing score, or a score outside 1..5, is CK1409. Both come from <code>validatePhase4</code>.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+  <figure class="code">
+    <figcaption><span>one step</span></figcaption>
+    <pre><code>{step}</code></pre>
+  </figure>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest journey. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. One section, Pay. One step, Card, scoring 2, with one actor. The face sits on 2. The other four marks stay empty.
+  </p>
+  <p>
+    The chart loads from <code>@chartkitdev/core/charts/journey</code>, or from <code>@chartkitdev/core/extra</code>. It is not in the line bundle. <code>validate()</code> warns CK1011 and points at <code>validatePhase4()</code>. <code>user-journey</code> repairs to <code>journey</code>.
+  </p>
+  <TeachFacts type="journey" label="Journey packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing journey specs. Checkout is the core example, nine steps from browse to tracking the parcel. Paper Kite playtest is the showcase chart from a Mermaid journey. First note is the discovery chart. The spec has no title, so the switcher uses the showcase heading.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a journey when the key is omitted. Hovering a face shows the step, the score out of 5, and the actors on that step. The same sentence is the SVG title. <code>tooltip: false</code> tells the hover card not to open. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> is not read. The card is the mark label, not a field table. Turning the card off and on again puts a custom tooltip object back in the spec. The card still uses the mark label.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    There is no mark key for the face, the 1–5 scale, or the chips. The score is the row. <code>legend</code> does not restyle the actors. Theme presets live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/funnel">Funnel</a> is how many remain at each stage, not how the stage felt.</li>
+    <li><a href="/docs/charts/timeline">Timeline</a> is dated events and eras.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares scores across categories when the steps are not a sequence.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

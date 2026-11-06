@@ -5,9 +5,12 @@ import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
+import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smallestGanttSpec } from "./gantt.ts";
+import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
+import { applyQuadrantAction, quadrantControlState, quadrantExamples, quadrantTeach, smallestQuadrantSpec } from "./quadrant.ts";
 import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
 import { teachModule, teachModules } from "./registry.ts";
 import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRoseSpec } from "./rose.ts";
@@ -30,8 +33,10 @@ import {
 } from "./stacked-area.ts";
 import { applySunburstAction, smallestSunburstSpec, sunburstControlState, sunburstExamples, sunburstTeach } from "./sunburst.ts";
 import { applyTooltip } from "./tooltip.ts";
+import { applyTimelineAction, smallestTimelineSpec, timelineControlState, timelineExamples, timelineTeach } from "./timeline.ts";
 import { applyTreeAction, smallestTreeSpec, treeControlState, treeExamples, treeTeach } from "./tree.ts";
 import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapExamples, treemapTeach } from "./treemap.ts";
+import { applyVennAction, smallestVennSpec, vennControlState, vennExamples, vennTeach } from "./venn.ts";
 import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
 
 test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow", () => {
@@ -40,8 +45,11 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow"
     "combo",
     "donut",
     "funnel",
+    "gantt",
+    "journey",
     "line",
     "pie",
+    "quadrant",
     "radial-bar",
     "rose",
     "sankey",
@@ -49,8 +57,10 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow"
     "stacked-area",
     "streamgraph",
     "sunburst",
+    "timeline",
     "tree",
     "treemap",
+    "venn",
     "waterfall",
   ]);
   assert.equal(teachModule("area"), undefined);
@@ -1116,4 +1126,113 @@ test("streamgraph actions edit offset, order, curve, legend, and tooltip", () =>
     ["4 series", "2 series", "expand"],
   );
   for (const example of streamgraphExamples) assert.equal(example.spec.type, "streamgraph");
+});
+
+test("planning charts toggle tooltip and do not pretend legend, size, or color is a control", () => {
+  const modules = [
+    {
+      type: "gantt",
+      teach: ganttTeach,
+      apply: applyGanttAction,
+      state: ganttControlState,
+      examples: ganttExamples,
+      smallest: smallestGanttSpec,
+      titles: ["Northstar launch", "Paper Kite", "Prep lanes for Cinder"],
+      meta: ["8 tasks", "4 tasks", "5 tasks"],
+    },
+    {
+      type: "timeline",
+      teach: timelineTeach,
+      apply: applyTimelineAction,
+      state: timelineControlState,
+      examples: timelineExamples,
+      smallest: smallestTimelineSpec,
+      titles: ["Northstar, 2014 to 2026", "Lumen and Co", "Northline, year by year"],
+      meta: ["6 events", "3 events", "4 events"],
+    },
+    {
+      type: "quadrant",
+      teach: quadrantTeach,
+      apply: applyQuadrantAction,
+      state: quadrantControlState,
+      examples: quadrantExamples,
+      smallest: smallestQuadrantSpec,
+      titles: ["Where the quarter goes", "Paper Kite bets", "Where the next build sits"],
+      meta: ["7 points", "4 points", "5 points"],
+    },
+    {
+      type: "venn",
+      teach: vennTeach,
+      apply: applyVennAction,
+      state: vennControlState,
+      examples: vennExamples,
+      smallest: smallestVennSpec,
+      titles: ["What customers use together", "Wheel, glaze, kiln", "What notebooks combine"],
+      meta: ["3 sets", "3 sets", "3 sets"],
+    },
+    {
+      type: "journey",
+      teach: journeyTeach,
+      apply: applyJourneyAction,
+      state: journeyControlState,
+      examples: journeyExamples,
+      smallest: smallestJourneySpec,
+      titles: ["Checkout", "Paper Kite playtest", "First note"],
+      meta: ["9 steps", "5 steps", "6 steps"],
+    },
+  ] as const;
+
+  for (const item of modules) {
+    assert.equal(teachModule(item.type), item.teach);
+    assert.equal(item.smallest.type, item.type);
+    assert.deepEqual(
+      item.teach.controls.map((control) => control.id),
+      ["tooltip"],
+    );
+    assert.equal(item.teach.controls.some((control) => control.id === "legend" || control.id === "size" || control.id === "color"), false);
+    assert.deepEqual(
+      item.examples.map((example) => example.title),
+      [...item.titles],
+    );
+    assert.deepEqual(
+      item.examples.map((example) => example.meta),
+      [...item.meta],
+    );
+
+    const omitted = structuredClone(item.examples[0]!.spec);
+    assert.equal(omitted.tooltip, undefined);
+    const before = structuredClone(omitted);
+    item.state(omitted);
+    assert.deepEqual(omitted, before);
+    assert.equal(item.state(omitted).tooltip, "on");
+    item.apply(omitted, { id: "tooltip", value: "off" });
+    assert.equal(omitted.tooltip, false);
+    assert.equal(item.state(omitted).tooltip, "off");
+    item.apply(omitted, { id: "tooltip", value: "on", restore: undefined });
+    assert.equal("tooltip" in omitted, false);
+    assert.equal(omitted.type, item.type);
+
+    const custom = structuredClone(item.examples[0]!.spec);
+    const tip = structuredClone(customTip);
+    custom.tooltip = structuredClone(tip);
+    const opened = openTeachExample(custom);
+    assert.deepEqual(opened.tooltip, custom.tooltip);
+    assert.notEqual(opened.tooltip, custom.tooltip);
+    item.apply(custom, { id: "tooltip", value: "off" });
+    assert.equal(custom.tooltip, false);
+    item.apply(custom, { id: "tooltip", value: "on", restore: tip });
+    assert.deepEqual(custom.tooltip, tip);
+    assert.equal(custom.type, item.type);
+
+    for (const example of item.examples) assert.equal(example.spec.type, item.type);
+  }
+
+  const quarter = quadrantExamples[0]!.spec.encoding as { size: string; color: string };
+  assert.equal(quarter.size, "size");
+  assert.equal(quarter.color, "color");
+  assert.equal((quadrantExamples[1]!.spec.encoding as { size?: unknown }).size, undefined);
+  const northstar = ganttExamples[0]!.spec;
+  assert.equal((northstar.size as { width?: number } | undefined)?.width, undefined);
+  assert.equal((ganttExamples[1]!.spec.size as { width: number }).width, 880);
+  assert.equal(timelineExamples[0]!.title, "Northstar, 2014 to 2026");
 });

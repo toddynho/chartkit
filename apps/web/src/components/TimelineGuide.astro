@@ -1,0 +1,129 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestTimelineSpec } from "../data/teach/timeline";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/timeline";
+const spec = specText(smallestTimelineSpec);
+const play = playgroundHref(smallestTimelineSpec);
+const period = `{
+  "label": "Platform",
+  "start": "2024-01-15",
+  "end": "2026-06-01",
+  "kind": "period"
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A timeline places named marks on one date axis. An event is a point. A period is a span. Overlapping periods stack in lanes. The labels move to a free side of the axis.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a timeline when the question is what happened, and which eras overlap. Northstar, 2014 to 2026 is that chart: founding, two rounds, and a platform era. Northline, year by year is the same idea for a launch pad.
+  </p>
+  <p>
+    A <a href="/docs/charts/gantt">gantt</a> is the task chart. Each row has a bar, a section, a status, and often a dependency. A timeline row is not a task. It has no progress and no elbow. A <a href="/docs/charts/line">line</a> is a measure over ordered x. It is not a list of named events.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Timeline and gantt</h2>
+  <p>
+    Both use calendar days. The mark is what changes.
+  </p>
+  <p>
+    <code>type: "timeline"</code> draws a circle for an event and a rounded bar for a period. <code>kind</code> is <code>event</code>, <code>period</code>, or <code>era</code>. A start and an end that are different days are a period when <code>kind</code> is omitted. <code>kind: "event"</code> stays a point even when start and end differ.
+  </p>
+  <p>
+    <code>type: "gantt"</code> draws a task bar from start to end, with sections and dependencies. Do not use a timeline to show that one task waits on another.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one mark. <code>label</code> is the name. An event uses <code>date</code>, or <code>start</code>. A period uses <code>start</code> and <code>end</code>, both <code>YYYY-MM-DD</code>. Lumen and Co leaves <code>kind</code> off. Night builds is a period because the end is after the start. The other rows are events because they only have a date.
+  </p>
+  <p>
+    <code>encoding.x</code> is the label. <code>encoding.open</code> and <code>encoding.close</code> are the period ends. <code>encoding.color</code> can name the kind field. The defaults are <code>label</code>, <code>start</code>, <code>end</code>, and <code>kind</code>, and a <code>date</code> column is read when it is present. A small spec can omit <code>encoding</code>.
+  </p>
+  <p>
+    Overlapping periods take the next lane. Northstar, 2014 to 2026 stacks Series A, Remote years, and Platform when they overlap. Events share one axis. Their labels alternate above and below so neighbors do not collide.
+  </p>
+  <p>
+    A period with no start or no end, or an event with no date, is CK1405 from <code>validatePhase4</code>. There is no <code>legend</code> on this chart. <code>legend</code> is not read.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+  <figure class="code">
+    <figcaption><span>one period</span></figcaption>
+    <pre><code>{period}</code></pre>
+  </figure>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest timeline. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Start is an event in 2014. Span is a period from 2024 to 2026.
+  </p>
+  <p>
+    The chart loads from <code>@chartkitdev/core/charts/timeline</code>, or from <code>@chartkitdev/core/extra</code>. It is not in the line bundle. <code>validate()</code> warns CK1011 and points at <code>validatePhase4()</code>.
+  </p>
+  <TeachFacts type="timeline" label="Timeline packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing timeline specs. Northstar, 2014 to 2026 is the core example, six events and three periods. The title is the full spec title. Lumen and Co is the showcase chart from a Mermaid timeline. Northline, year by year is the launch-manifest chart. The spec has no title, so the switcher uses the showcase heading.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a timeline when the key is omitted. Hovering an event shows the label and the day. Hovering a period shows the label and the two days. The same sentence is the SVG title. <code>tooltip: false</code> tells the hover card not to open. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> is not read. The card is the mark label, not a field table. Turning the card off and on again puts a custom tooltip object back in the spec. The card still uses the mark label.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    There is no legend to place. Period colors follow the lane, and events use the accent. <code>legend</code> does not add a key or hide the labels. Theme presets live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/gantt">Gantt</a> is tasks with sections, progress, and dependencies.</li>
+    <li><a href="/docs/charts/line">Line</a> is a measure across ordered x, not a list of named events.</li>
+    <li><a href="/docs/charts/journey">Journey</a> scores steps. The steps are not dates.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
