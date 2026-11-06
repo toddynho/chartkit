@@ -1,0 +1,189 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestMapPointsSpec } from "../data/teach/map-points";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/map-points";
+const spec = specText(smallestMapPointsSpec);
+const play = playgroundHref(smallestMapPointsSpec);
+const atlas = `{
+  "mark": { "atlas": "world", "projection": "equalEarth" }
+}`;
+const size = `{
+  "encoding": {
+    "size": { "field": "pop", "format": { "suffix": " million" }, "title": "Population" }
+  }
+}`;
+const labels = `{
+  "encoding": { "label": "name" },
+  "mark": { "labelCount": 18 }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const legendOff = `{
+  "mark": { "legend": false }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A point map places one mark per row at a latitude and longitude. The atlas is the land behind the marks. <code>encoding.size</code> turns the marks into bubbles.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a point map when each row is a place you can point to, not a region you shade. Largest urban areas is one bubble per city, sized by population.
+  </p>
+  <p>
+    A <a href="/docs/charts/choropleth">choropleth</a> shades regions from a name or an id. It has no latitude column. Use it when the value belongs to the whole area.
+  </p>
+  <p>
+    A <a href="/docs/charts/scatter">scatter</a> also draws a point per row, and both axes are quantities. A point map does not. Longitude and latitude are a location, not <code>encoding.x</code> and <code>encoding.y</code>. A <a href="/docs/charts/heatmap">heatmap</a> colors a grid of cells. It does not place cities on land.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    One row per point. <code>encoding.latitude</code> and <code>encoding.longitude</code> name the columns. <code>lat</code> and <code>lon</code> are aliases. A latitude outside −90 to 90, or a longitude outside −180 to 180, is skipped.
+  </p>
+  <p>
+    <code>encoding.label</code> is the name drawn next to a point. <code>encoding.size</code> is the bubble field. <code>encoding.color</code> can be a second number. When color and size are the same field, the bubbles stay one accent and the legend is a size key. Largest urban areas does that with <code>pop</code>.
+  </p>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest point map. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Tokyo and Sydney, labeled, with no size channel, so both marks share one radius. The atlas is the world. There is no tile layer, and no pan or zoom.
+  </p>
+  <TeachFacts type="map-points" label="Map points packages" spec={spec} />
+  <figure class="code">
+    <figcaption><span>geo</span></figcaption>
+    <pre><code>{`import { render, validate } from "@chartkitdev/geo";
+
+const checked = validate(spec);
+const svg = await render(spec);`}</code></pre>
+  </figure>
+  <p>
+    <code>render</code> from <code>@chartkitdev/core</code> does not draw this type. Core <code>validate()</code> warns CK3057 and leaves latitude and longitude to the geo package. Call <code>validate</code> from <code>@chartkitdev/geo</code>. Its warnings are CK3050 through CK3056, and the SVG still draws.
+  </p>
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail shows Largest urban areas, the cities map already published for this type. Twenty-two cities. Size and color are both population. <code>mark.labelCount</code> is 18. The title is the example name. There is no counter and no previous or next control, because this page has one example.
+  </p>
+</section>
+
+<TeachConcept id="atlas" title="Atlas">
+  <p>
+    <code>mark.atlas</code> is <code>world</code>, <code>us</code>, <code>canada</code>, or <code>eu</code>. Omit it and the map is the world. The US atlas pairs with <code>mark.projection</code> <code>albersUsa</code>. World, Canada, and the EU pair with <code>equalEarth</code>. This control writes that pair. Largest urban areas is the world.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.atlas</span></figcaption>
+    <pre><code>{atlas}</code></pre>
+  </figure>
+  <p>
+    The points have to fall on the atlas you pick. These rows are world cities. Another atlas clips marks that land outside its frame. <code>mercator</code>, <code>equirectangular</code>, and <code>fit</code> stay in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="size" title="Size">
+  <p>
+    <code>encoding.size</code> is the bubble channel. It is a field name, or an object with <code>field</code>, <code>format</code>, and <code>title</code>. Omit it and every point uses one radius. Largest urban areas sizes by <code>pop</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.size</span></figcaption>
+    <pre><code>{size}</code></pre>
+  </figure>
+  <p>
+    Off removes the channel. On puts this example's size channel back, including its format and title. Largest urban areas also sets <code>encoding.color</code> to <code>pop</code>. While size and color are the same field, the bubbles stay one accent. Remove size and that color field paints a ramp, and the radius is shared.
+  </p>
+  <p>
+    A pixel <code>range</code> on the size channel is not what sets these radii. The geo renderer maps the field from the smallest value to the largest. Set a separate color field, or <code>encoding.color.scale.type</code>, in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    <code>encoding.label</code> is the name of each point. Omit it and the marks stay, without tags. <code>mark.labelCount</code> is how many of the largest points try to take a tag. Omit it and the cap is 12. Largest urban areas sets 18.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.label</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    Off removes <code>encoding.label</code>. On puts the example's label field back. <code>labelCount</code> stays on <code>mark</code>. Change the cap in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A size legend is on when the bubbles encode a field. A color legend is on when color is its own number. Omit <code>legend</code> and it sits on the right. <code>legend.position</code> <code>"bottom"</code> moves it under the map. <code>"right"</code> is the other side this chart draws. <code>top</code>, <code>left</code>, and <code>inside</code> are not drawn.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.legend false</span></figcaption>
+    <pre><code>{legendOff}</code></pre>
+  </figure>
+  <p>
+    Off writes <code>mark.legend: false</code>. That is the key that hides the legend. <code>legend: false</code> does not. The map still draws the legend on the right.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    On the other charts, omit <code>tooltip</code> and the hover card is on. <code>tooltip: false</code> turns that card off. <code>tooltip: true</code> turns it on. This control writes the same keys, so a spec you carry to those charts behaves the same way.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>@chartkitdev/geo</code> does not read <code>tooltip: false</code> yet. The point title stays in the SVG, and <code>attach()</code> from that package still shows it. Off updates the snippet. It does not remove the title. Turning the control back on deletes an omitted tooltip, or puts a tooltip object back if the example had one. Largest urban areas does not set <code>tooltip.fields</code>. Add extra hover columns in the playground, with <code>tooltip.fields</code> or <code>encoding.tooltip</code>.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.land</code> and <code>mark.water</code> take a <code>#rrggbb</code> color. A point map does not hatch empty regions. Theme presets live on the playground. This page does not add a theme control. The example keeps the size written on the spec.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/choropleth">Choropleth</a> shades a region from a name or an id.</li>
+    <li><a href="/docs/charts/scatter">Scatter</a> plots two quantities, with an optional size channel.</li>
+    <li><a href="/docs/charts/heatmap">Heatmap</a> colors a grid. It does not use an atlas.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

@@ -4,6 +4,7 @@ import { barRangeTeach } from "./bar-range.ts";
 import { barTeach } from "./bar.ts";
 import { bulletTeach } from "./bullet.ts";
 import { candlestickTeach } from "./candlestick.ts";
+import { choroplethTeach } from "./choropleth.ts";
 import { comboTeach } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { errorbarTeach } from "./errorbar.ts";
@@ -14,6 +15,7 @@ import { heatmapTeach } from "./heatmap.ts";
 import { journeyTeach } from "./journey.ts";
 import { kpiTeach } from "./kpi.ts";
 import { lineTeach } from "./line.ts";
+import { mapPointsTeach } from "./map-points.ts";
 import { miniAreaTeach } from "./mini-area.ts";
 import { pieTeach } from "./pie.ts";
 import { progressRingTeach } from "./progress-ring.ts";
@@ -76,6 +78,8 @@ export const teachModules: Record<string, TeachModule> = {
   kpi: kpiTeach,
   "progress-ring": progressRingTeach,
   bullet: bulletTeach,
+  choropleth: choroplethTeach,
+  "map-points": mapPointsTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

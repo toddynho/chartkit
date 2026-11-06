@@ -1,5 +1,6 @@
 ---
-import { paintSpec } from "../lib/chartkit";
+import { paintSpec, type RailResult } from "../lib/chartkit";
+import { isGeoSpec, paintGeo } from "../lib/paint-geo";
 import { withPreviewSize } from "../data/preview-size";
 import { teachModule } from "../data/teach/registry";
 import { formatNumber, playgroundHref, specText } from "../data/teach/spec";
@@ -17,21 +18,26 @@ if (!initial) throw new Error(`${type} demo has no example`);
 const several = module.examples.length > 1;
 const paintType = module.type;
 
+async function paintExample(spec: Record<string, unknown>): Promise<RailResult> {
+  if (isGeoSpec(spec)) return paintGeo(spec);
+  return paintSpec(spec);
+}
+
 for (const example of module.examples) {
-  const painted = paintSpec(withPreviewSize(example.spec));
+  const painted = await paintExample(withPreviewSize(example.spec));
   if (!painted.ok || !painted.svg.includes(`data-ck-type="${paintType}"`) || painted.svg.includes("ck-chart-error")) {
     const detail = painted.issues.map((issue) => `${issue.code} ${issue.message}`).join("; ");
     throw new Error(`${type} example ${example.id} did not render. ${detail}`);
   }
 }
-const rawSmallest = paintSpec(module.smallestSpec);
+const rawSmallest = await paintExample(module.smallestSpec);
 if (!rawSmallest.ok || !rawSmallest.svg.includes(`data-ck-type="${paintType}"`) || rawSmallest.svg.includes("ck-chart-error")) {
   const detail = rawSmallest.issues.map((issue) => `${issue.code} ${issue.message}`).join("; ");
   throw new Error(`Smallest ${type} spec did not render. ${detail}`);
 }
 
 const state = module.controlState(initial.spec);
-const preview = paintSpec(withPreviewSize(initial.spec));
+const preview = await paintExample(withPreviewSize(initial.spec));
 const snippet = specText(initial.spec);
 const play = playgroundHref(initial.spec);
 
