@@ -1,0 +1,177 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestDensitySpec } from "../data/teach/density";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/density";
+const spec = specText(smallestDensitySpec);
+const play = playgroundHref(smallestDensitySpec);
+const bandwidth = `{
+  "mark": { "bandwidth": 3 }
+}`;
+const bandwidthAuto = `{
+  "mark": { "bandwidth": "auto" }
+}`;
+const normalize = `{
+  "mark": { "normalize": "count" }
+}`;
+const rug = `{
+  "mark": { "rug": true }
+}`;
+const orientation = `{
+  "mark": { "orientation": "vertical" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A density draws a kernel curve of one quantitative sample. The rows stay the observations. The spec does not contain a density transform. <code>encoding.x</code> is the sample. The curve is the estimate.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a density when the question is the shape of a distribution: where the mass sits, and whether there is a second bump. Wait time has a pile near 15 minutes and a smaller pile near 40.
+  </p>
+  <p>
+    A <a href="/docs/charts/histogram">histogram</a> answers the same sample with counts in bins. The bars are the counts. A density smooths them into one curve. A <a href="/docs/charts/boxplot">box plot</a> or a <a href="/docs/charts/strip">strip</a> is the chart when the reader needs a median and quartiles, or every point. A density with a group field is one curve per group. It is not a violin.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one observation. <code>encoding.x</code> is quantitative. A string field name is enough. An object can set the axis title. Wait time titles the sample Minutes.
+  </p>
+  <p>
+    <code>encoding.color</code> or <code>encoding.series</code> draws one curve per group. Wait by desk colors by <code>desk</code>. Front and back overlay. They share one extent. v1 does not stack the curves.
+  </p>
+  <p>
+    Fewer than two finite numbers in a group is not a curve. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, about the shape. State where the mass is. The bandwidth is an implementation detail.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest density. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Five waits, and no <code>mark</code>. Bandwidth is Scott's rule. The curve is sampled at 64 points. The density axis starts at 0. One curve uses the accent color.
+  </p>
+  <TeachFacts type="density" label="Density packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing density specs. Wait time is one sample and Scott's rule. Wait by desk is two groups, a bandwidth of 3, and counts. Vertical waits runs the sample down the page and draws a rug of the raw points.
+  </p>
+</section>
+
+<TeachConcept id="bandwidth" title="Bandwidth">
+  <p>
+    <code>mark.bandwidth</code> is the Gaussian width in data units. Omit it, or set <code>"auto"</code>, and the width is Scott's rule: 1.06 times the standard deviation times the sample size to the power −1/5. A number greater than 0 is used as given. Wait by desk sets 3.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.bandwidth</span></figcaption>
+    <pre><code>{bandwidth}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.bandwidth auto</span></figcaption>
+    <pre><code>{bandwidthAuto}</code></pre>
+  </figure>
+  <p>
+    Auto removes the key, which is the same picture as <code>"auto"</code>. 3 and 8 write that width. A narrower kernel keeps a second bump. A wider one can hide it. Any other number is set in the playground, and this control leaves it until you pick Auto, 3, or 8.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="normalize" title="Normalize">
+  <p>
+    <code>mark.normalize</code> is the height of the curve. Omit it, or set <code>density</code>, and the curve integrates to 1. <code>count</code> multiplies by the sample size, so the height reads as a count. Wait by desk uses <code>count</code>, and the axis title is Waits.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.normalize</span></figcaption>
+    <pre><code>{normalize}</code></pre>
+  </figure>
+  <p>The two settings share the same shape. The axis numbers change. Stacked densities are a later chart. These curves overlay.</p>
+</TeachConcept>
+
+<TeachConcept id="rug" title="Rug">
+  <p>
+    <code>mark.rug</code> draws a tick for each raw observation on the baseline. Omit it and the curve is the only mark. Vertical waits sets <code>true</code>, so you can see the two clusters the kernel is smoothing.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.rug</span></figcaption>
+    <pre><code>{rug}</code></pre>
+  </figure>
+  <p>Off removes the key. On writes <code>true</code>. The rest of <code>mark</code> stays, including orientation and extent.</p>
+</TeachConcept>
+
+<TeachConcept id="orientation" title="Orientation">
+  <p>
+    <code>mark.orientation</code> chooses which axis holds the sample. Omit it and the chart is horizontal: the sample runs along x and the density along y. <code>vertical</code> swaps them. Vertical waits is that chart. The word is the same one a bar uses, and the default is the other way around.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.orientation</span></figcaption>
+    <pre><code>{orientation}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    One curve hides the legend. A color field with more than one group shows it. Omit <code>legend</code>, or set <code>true</code>, and the legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <p>Wait time is one curve, so the legend stays hidden until you are on Wait by desk. Off still writes <code>legend: false</code>.</p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a density when the key is omitted. Hovering the curve shows the sample value and the density, plus the group when there is one. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. These examples omit the key. Turning the card off and on again puts that object back when the example had one, and deletes the key when the example omitted it.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.steps</code> is how many samples the curve is drawn through. The default is 64. <code>mark.extent</code> is <code>pad</code>, <code>data</code>, or a pair of numbers. Pad extends the sample by three bandwidths. Vertical waits clips to the sample with <code>data</code>. <code>mark.dims: 2</code> is a contour and is not drawn in this version. <code>mark.bins</code> belongs on a histogram. On a density, repair removes it. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/histogram">Histogram</a> counts the same sample into bins.</li>
+    <li><a href="/docs/charts/boxplot">Box plot</a> gives each category a median and quartiles.</li>
+    <li><a href="/docs/charts/strip">Strip</a> draws every observation, with one row per group.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

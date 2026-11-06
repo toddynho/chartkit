@@ -1,17 +1,20 @@
 ---
 import AreaRangeGuide from "../../../components/AreaRangeGuide.astro";
 import BarGuide from "../../../components/BarGuide.astro";
+import BoxplotGuide from "../../../components/BoxplotGuide.astro";
 import BarListGuide from "../../../components/BarListGuide.astro";
 import BarRangeGuide from "../../../components/BarRangeGuide.astro";
 import CandlestickGuide from "../../../components/CandlestickGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ChoroplethGuide from "../../../components/ChoroplethGuide.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
+import DensityGuide from "../../../components/DensityGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
 import ErrorbarGuide from "../../../components/ErrorbarGuide.astro";
 import FunnelGuide from "../../../components/FunnelGuide.astro";
 import GanttGuide from "../../../components/GanttGuide.astro";
 import HeatmapGuide from "../../../components/HeatmapGuide.astro";
+import HistogramGuide from "../../../components/HistogramGuide.astro";
 import JourneyGuide from "../../../components/JourneyGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
 import MapPointsGuide from "../../../components/MapPointsGuide.astro";
@@ -28,6 +31,7 @@ import SparklineGuide from "../../../components/SparklineGuide.astro";
 import SpikeGuide from "../../../components/SpikeGuide.astro";
 import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
 import StreamgraphGuide from "../../../components/StreamgraphGuide.astro";
+import StripGuide from "../../../components/StripGuide.astro";
 import SunburstGuide from "../../../components/SunburstGuide.astro";
 import TeachChart from "../../../components/TeachChart.astro";
 import TimelineGuide from "../../../components/TimelineGuide.astro";
@@ -81,6 +85,10 @@ const guided = new Set([
   "bullet",
   "choropleth",
   "map-points",
+  "histogram",
+  "density",
+  "boxplot",
+  "strip",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -150,6 +158,10 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "bullet" ? <BulletGuide /> : null}
       {module.type === "choropleth" ? <ChoroplethGuide /> : null}
       {module.type === "map-points" ? <MapPointsGuide /> : null}
+      {module.type === "histogram" ? <HistogramGuide /> : null}
+      {module.type === "density" ? <DensityGuide /> : null}
+      {module.type === "boxplot" ? <BoxplotGuide /> : null}
+      {module.type === "strip" ? <StripGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

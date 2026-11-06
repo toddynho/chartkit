@@ -1,0 +1,183 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestStripSpec } from "../data/teach/strip";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/strip";
+const spec = specText(smallestStripSpec);
+const play = playgroundHref(smallestStripSpec);
+const summary = `{
+  "mark": { "summary": "mean" }
+}`;
+const band = `{
+  "mark": { "band": "range" }
+}`;
+const orientation = `{
+  "mark": { "orientation": "vertical" }
+}`;
+const jitter = `{
+  "mark": { "jitter": "none" }
+}`;
+const sort = `{
+  "mark": { "sort": "asc" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A strip draws every observation as a dot on one numeric axis, with one row per group. A tick marks the median unless you ask for the mean or for no tick. Horizontal is the default: <code>encoding.x</code> is the value and <code>encoding.y</code> is the group.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a strip when the groups are few and you want the distribution, not one bar per group. Tokens by library is the reference: five libraries, nine models each, a median tick, and a min-to-max band.
+  </p>
+  <p>
+    A <a href="/docs/charts/boxplot">box plot</a> is the summary once there are many groups: quartiles, whiskers, and outlier dots, without a dot for every row. A <a href="/docs/charts/scatter">scatter</a> is the chart when both axes are quantitative. A <a href="/docs/charts/bar">bar</a> is the chart when each group is one aggregate.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one observation. On a horizontal strip, <code>encoding.x</code> is the number and <code>encoding.y</code> is the group. <code>mark.orientation</code> <code>vertical</code> swaps them. Minutes by desk puts the desks on x and the minutes on y.
+  </p>
+  <p>
+    <code>encoding.color</code> colors the dots. Minutes by desk colors by <code>shift</code>. <code>encoding.label</code> is the point name in the tooltip. It is not drawn on the plot. Tokens by library labels each dot with the model. <code>encoding.note</code> is a second line under the category. That line stays in the playground.
+  </p>
+  <p>
+    One point in every group becomes a dot plot. The summary tick and the band are hidden, because a single point has no spread. Latency by region is that chart. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the comparison.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest strip. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two times in each of three regions, and no <code>mark</code>. The rows run down the page. Each row has a median tick. The dots share one radius.
+  </p>
+  <TeachFacts type="strip" label="Strip packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing strip specs. Tokens by library is nine models in each of five libraries, sorted by the median, with ChartKit highlighted. Latency by region is one point per region. Minutes by desk is vertical, with a mean tick and an interquartile band.
+  </p>
+</section>
+
+<TeachConcept id="summary" title="Summary">
+  <p>
+    <code>mark.summary</code> is the tick drawn across each group. Omit it and the tick is the median. <code>mean</code> is the arithmetic mean. <code>none</code> draws no tick. Minutes by desk uses the mean.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.summary</span></figcaption>
+    <pre><code>{summary}</code></pre>
+  </figure>
+  <p>
+    When every group has one point, the tick stays hidden whatever this key says. Latency by region is that case. A group with more points shows the tick again.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="band" title="Band">
+  <p>
+    <code>mark.band</code> is the bar behind the dots. Omit it, or set <code>none</code>, and the row is dots and a tick. <code>range</code> runs from the minimum to the maximum. <code>iqr</code> runs from the first quartile to the third. Tokens by library uses the range. Minutes by desk uses the interquartile range.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.band</span></figcaption>
+    <pre><code>{band}</code></pre>
+  </figure>
+  <p>A group with fewer than three points draws no band. A one-point strip draws none of them.</p>
+</TeachConcept>
+
+<TeachConcept id="orientation" title="Orientation">
+  <p>
+    <code>mark.orientation</code> swaps the axes. Omit it and the strip is horizontal: groups run down the page and the number runs across. <code>vertical</code> puts the groups on x. Minutes by desk sets vertical. The encoding swaps with the orientation. Horizontal reads <code>x</code> as the value and <code>y</code> as the group.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.orientation</span></figcaption>
+    <pre><code>{orientation}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="jitter" title="Jitter">
+  <p>
+    <code>mark.jitter</code> spreads dots that share a position. Omit it, or set <code>auto</code>, and a dot moves only when another dot in the group is within one diameter. <code>none</code> never offsets. Tokens by library sets <code>none</code>, so equal token counts sit on the same line.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.jitter</span></figcaption>
+    <pre><code>{jitter}</code></pre>
+  </figure>
+  <p>A number is the maximum offset in pixels, and it moves every dot. Set that distance in the playground. The offset is a function of the row, so a server render matches the client.</p>
+</TeachConcept>
+
+<TeachConcept id="sort" title="Sort">
+  <p>
+    <code>mark.sort</code> orders the groups. Omit it, or set <code>none</code>, and the groups stay in the order they first appear. <code>asc</code> and <code>desc</code> order them by the summary. When the tick is <code>none</code>, that order still uses the median. Tokens by library sorts ascending, so the lowest median is first.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.sort</span></figcaption>
+    <pre><code>{sort}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A strip with no color field draws no swatches. A color field with more than one value shows a legend. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <p>Minutes by desk is the example with a legend, Weeknight and Saturday. Off still writes <code>legend: false</code> on a strip that has nothing to list.</p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a strip when the key is omitted. Hovering a dot shows the group, the value, and <code>encoding.label</code> when that field is set. Tokens by library names the model. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. These examples omit the tooltip key. Turning the card off and on again puts that object back when the example had one, and deletes the key when the example omitted it.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.highlight</code> names a group or a series to emphasize. Tokens by library highlights ChartKit. <code>mark.emphasis</code> is <code>muted</code>, <code>ring</code>, or <code>color</code>. Omitted means muted when a highlight is set. <code>mark.note</code>, <code>mark.pin</code>, <code>mark.zebra</code>, <code>mark.gutter</code>, and the end-label keys are refinements. A <code>compare</code> annotation draws the bracket between two groups. Tokens by library keeps that bracket. Edit those keys in the playground. Theme presets live there too.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/boxplot">Box plot</a> replaces the dots with quartiles once the groups multiply.</li>
+    <li><a href="/docs/charts/scatter">Scatter</a> places two quantitative fields, with no group row.</li>
+    <li><a href="/docs/charts/bar">Bar</a> is one aggregate per category.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

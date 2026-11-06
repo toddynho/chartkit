@@ -1,0 +1,139 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestHistogramSpec } from "../data/teach/histogram";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/histogram";
+const spec = specText(smallestHistogramSpec);
+const play = playgroundHref(smallestHistogramSpec);
+const bins = `{
+  "mark": { "bins": 16 }
+}`;
+const rule = `{
+  "mark": { "bin": "sturges" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+const prebinned = `{
+  "encoding": { "x": "grams", "y": "crates" }
+}`;
+---
+
+<p>
+  A histogram counts one quantitative field into equal-width bins. Each bar is a range of values. The height is how many rows fall in that range. <code>encoding.x</code> is the value to bin.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a histogram when the question is how a single number is spread: where the counts pile up, and how long the tail is. Checkout time is two hundred durations. Response time distribution is the same idea in milliseconds.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares categories you already named. The categories are the data. A histogram invents the ranges by splitting one numeric field. A <a href="/docs/charts/density">density</a> draws a smooth kernel of the same sample. It answers where the mass sits. A histogram answers with counts in bins.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one observation. <code>encoding.x</code> is a quantitative field. A string field name is enough. Checkout time bins <code>ms</code>. Checkout scores bins <code>score</code>.
+  </p>
+  <p>
+    There is one series. A histogram does not take a color field, and the renderer draws no legend. <code>legend: false</code> on Response time distribution changes nothing you can see.
+  </p>
+  <p>
+    <code>encoding.y</code> is a count you already computed. The bars then use those counts, and <code>mark.bins</code> is ignored because the bins are the rows. How the weights fall, in the orchard showcase, is that chart. Set it in the playground when the sample is already counted.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y</span></figcaption>
+    <pre><code>{prebinned}</code></pre>
+  </figure>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest histogram. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Four times, and no <code>mark</code>. The bin count defaults to 8. The bin rule defaults to <code>count</code>, which uses that number.
+  </p>
+  <TeachFacts type="histogram" label="Histogram packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing histogram specs. Checkout time is two hundred times in sixteen bins. Checkout scores is four scores in two bins. Response time distribution is the homepage sample in fourteen bins.
+  </p>
+</section>
+
+<TeachConcept id="bins" title="Bins">
+  <p>
+    <code>mark.bins</code> is the number of equal-width bins when the rule is <code>count</code> or omitted. Omit it and the chart uses 8. Checkout time sets 16. Checkout scores sets 2. Response time distribution sets 14. The renderer keeps the count between 1 and 60.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.bins</span></figcaption>
+    <pre><code>{bins}</code></pre>
+  </figure>
+  <p>
+    The slider writes <code>mark.bins</code>. Sturges, square root, and Freedman–Diaconis ignore that number and choose a count from the data. Switch the rule back to <code>count</code> and the number is used again.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="bin" title="Bin rule">
+  <p>
+    <code>mark.bin</code> chooses how the edges are picked. Omit it, or set <code>count</code>, and <code>mark.bins</code> is the count. <code>sturges</code> uses the log of the sample size. <code>sqrt</code> uses the square root of the sample size. <code>fd</code> is Freedman–Diaconis: the bin width comes from the interquartile range.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.bin</span></figcaption>
+    <pre><code>{rule}</code></pre>
+  </figure>
+  <p>
+    <code>width</code> uses <code>mark.binWidth</code>, a width in data units. That pair lives in the playground. These three examples all use the count rule.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a histogram when the key is omitted. Hovering a bar shows the range and the count. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. These examples omit the key, so the card uses the bin label and the count. Turning the card off and on again puts that object back when the example had one, and deletes the key when the example omitted it.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.binLabel</code> draws the bin count at the top right of the plot. Omit it and that corner stays empty. <code>mark.binWidth</code> is the width when <code>mark.bin</code> is <code>width</code>. A pre-binned <code>encoding.y</code> is a different data shape. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories you named. A histogram bins one number.</li>
+    <li><a href="/docs/charts/density">Density</a> smooths the same sample into a kernel curve.</li>
+    <li><a href="/docs/charts/boxplot">Box plot</a> summarizes each category with quartiles.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
