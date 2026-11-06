@@ -2,16 +2,19 @@ import { areaRangeTeach } from "./area-range.ts";
 import { barListTeach } from "./bar-list.ts";
 import { barRangeTeach } from "./bar-range.ts";
 import { barTeach } from "./bar.ts";
+import { candlestickTeach } from "./candlestick.ts";
 import { comboTeach } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { errorbarTeach } from "./errorbar.ts";
 import { funnelTeach } from "./funnel.ts";
 import { ganttTeach } from "./gantt.ts";
+import { heatmapTeach } from "./heatmap.ts";
 import { journeyTeach } from "./journey.ts";
 import { lineTeach } from "./line.ts";
 import { miniAreaTeach } from "./mini-area.ts";
 import { pieTeach } from "./pie.ts";
 import { quadrantTeach } from "./quadrant.ts";
+import { radarTeach } from "./radar.ts";
 import { radialBarTeach } from "./radial-bar.ts";
 import { roseTeach } from "./rose.ts";
 import { sankeyTeach } from "./sankey.ts";
@@ -62,6 +65,9 @@ export const teachModules: Record<string, TeachModule> = {
   "mini-area": miniAreaTeach,
   spike: spikeTeach,
   "bar-list": barListTeach,
+  heatmap: heatmapTeach,
+  radar: radarTeach,
+  candlestick: candlestickTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

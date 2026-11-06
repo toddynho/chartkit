@@ -5,17 +5,26 @@ import { applyAreaRangeAction, areaRangeControlState, areaRangeExamples, areaRan
 import { applyBarListAction, barListControlState, barListExamples, barListTeach, smallestBarListSpec } from "./bar-list.ts";
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
 import { applyBarRangeAction, barRangeControlState, barRangeExamples, barRangeTeach, smallestBarRangeSpec } from "./bar-range.ts";
+import {
+  applyCandlestickAction,
+  candlestickControlState,
+  candlestickExamples,
+  candlestickTeach,
+  smallestCandlestickSpec,
+} from "./candlestick.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { applyErrorbarAction, errorbarControlState, errorbarExamples, errorbarTeach, smallestErrorbarSpec } from "./errorbar.ts";
 import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
 import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smallestGanttSpec } from "./gantt.ts";
+import { applyHeatmapAction, heatmapControlState, heatmapExamples, heatmapTeach, smallestHeatmapSpec } from "./heatmap.ts";
 import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
 import { applyMiniAreaAction, miniAreaControlState, miniAreaExamples, miniAreaTeach, smallestMiniAreaSpec } from "./mini-area.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
 import { applyQuadrantAction, quadrantControlState, quadrantExamples, quadrantTeach, smallestQuadrantSpec } from "./quadrant.ts";
+import { applyRadarAction, radarControlState, radarExamples, radarTeach, smallestRadarSpec } from "./radar.ts";
 import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
 import { teachModule, teachModules } from "./registry.ts";
 import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRoseSpec } from "./rose.ts";
@@ -54,16 +63,19 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, and
     "bar",
     "bar-list",
     "bar-range",
+    "candlestick",
     "combo",
     "donut",
     "errorbar",
     "funnel",
     "gantt",
+    "heatmap",
     "journey",
     "line",
     "mini-area",
     "pie",
     "quadrant",
+    "radar",
     "radial-bar",
     "rose",
     "sankey",
@@ -180,6 +192,21 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, and
     ["track", "tooltip"],
   );
   assert.equal(barListTeach.controls.some((control) => control.id === "legend" || control.id === "sort" || control.id === "orientation"), false);
+  assert.deepEqual(
+    heatmapTeach.controls.map((control) => control.id),
+    ["scheme", "tooltip"],
+  );
+  assert.equal(heatmapTeach.controls.some((control) => control.id === "layout" || control.id === "weeks" || control.id === "legend"), false);
+  assert.deepEqual(
+    radarTeach.controls.map((control) => control.id),
+    ["legend", "tooltip"],
+  );
+  assert.equal(radarTeach.controls.some((control) => control.id === "rings" || control.id === "fill"), false);
+  assert.deepEqual(
+    candlestickTeach.controls.map((control) => control.id),
+    ["volume", "tooltip"],
+  );
+  assert.equal(candlestickTeach.controls.some((control) => control.id === "gap" || control.id === "legend"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -1694,4 +1721,189 @@ test("bar list actions edit the track and the tooltip", () => {
     assert.equal(example.spec.type, "bar-list");
     assertCompactPaint("bar-list", example.spec, example.id);
   }
+});
+
+test("heatmap actions edit the scheme and tooltip, and layout stays on the example", () => {
+  assert.equal(smallestHeatmapSpec.type, "heatmap");
+  assert.equal(smallestHeatmapSpec.mark, undefined);
+  assert.equal(heatmapControlState(smallestHeatmapSpec).scheme, "blue");
+
+  const requests = structuredClone(heatmapExamples[0]!.spec);
+  assert.equal(heatmapControlState(requests).scheme, "blue");
+  assert.equal(heatmapControlState(requests).tooltip, "on");
+  assert.equal(requests.tooltip, undefined);
+  assert.equal((requests.mark as { layout: string }).layout, "grid");
+  const untouched = structuredClone(requests);
+  heatmapControlState(requests);
+  assert.deepEqual(requests, untouched);
+  applyHeatmapAction(requests, { id: "scheme", value: "teal", restore: heatmapExamples[0]!.spec });
+  const color = requests.encoding as { color: { field: string; type: string; title: string; scale: { scheme: string } } };
+  assert.equal(color.color.field, "value");
+  assert.equal(color.color.type, "quantitative");
+  assert.equal(color.color.title, "Requests");
+  assert.equal(color.color.scale.scheme, "teal");
+  assert.equal((requests.mark as { layout: string }).layout, "grid");
+  applyHeatmapAction(requests, { id: "scheme", value: "blue", restore: heatmapExamples[0]!.spec });
+  assert.deepEqual((requests.encoding as { color: unknown }).color, (heatmapExamples[0]!.spec.encoding as { color: unknown }).color);
+  applyHeatmapAction(requests, { id: "tooltip", value: "off" });
+  assert.equal(requests.tooltip, false);
+  assert.equal(heatmapControlState(requests).tooltip, "off");
+  applyHeatmapAction(requests, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in requests, false);
+  assert.equal((requests.size as { width: number }).width, 640);
+
+  const load = structuredClone(heatmapExamples[1]!.spec);
+  assert.equal((load.encoding as { color: string }).color, "load");
+  applyHeatmapAction(load, { id: "scheme", value: "orange", restore: heatmapExamples[1]!.spec });
+  assert.equal(((load.encoding as { color: { field: string; scale: { scheme: string } } }).color).field, "load");
+  assert.equal(((load.encoding as { color: { scale: { scheme: string } } }).color).scale.scheme, "orange");
+  applyHeatmapAction(load, { id: "scheme", value: "blue", restore: heatmapExamples[1]!.spec });
+  assert.equal((load.encoding as { color: string }).color, "load");
+  const loadTip = structuredClone(customTip);
+  load.tooltip = structuredClone(loadTip);
+  const opened = openTeachExample(load);
+  assert.deepEqual(opened.tooltip, load.tooltip);
+  assert.notEqual(opened.tooltip, load.tooltip);
+  applyHeatmapAction(load, { id: "tooltip", value: "off" });
+  assert.equal(load.tooltip, false);
+  applyHeatmapAction(load, { id: "tooltip", value: "on", restore: loadTip });
+  assert.deepEqual(load.tooltip, loadTip);
+  assert.equal((load.size as { width: number }).width, 560);
+
+  const commits = structuredClone(heatmapExamples[2]!.spec);
+  assert.equal((commits.mark as { layout: string; weeks: number }).layout, "calendar");
+  assert.equal((commits.mark as { weeks: number }).weeks, 12);
+  assert.equal((commits.size as { height: number }).height, 180);
+  applyHeatmapAction(commits, { id: "scheme", value: "violet", restore: heatmapExamples[2]!.spec });
+  assert.equal(((commits.encoding as { color: { field: string; scale: { scheme: string } } }).color).scale.scheme, "violet");
+  assert.equal((commits.mark as { weeks: number }).weeks, 12);
+  const storedOff = structuredClone(commits);
+  storedOff.tooltip = false;
+  applyHeatmapAction(storedOff, { id: "tooltip", value: "on", restore: false });
+  assert.equal(storedOff.tooltip, true);
+
+  assert.deepEqual(
+    heatmapExamples.map((example) => example.title),
+    ["Requests by hour", "Load by service", "Commit calendar"],
+  );
+  assert.deepEqual(
+    heatmapExamples.map((example) => example.meta),
+    ["7 days", "4 services", "12 weeks"],
+  );
+  for (const example of heatmapExamples) assert.equal(example.spec.type, "heatmap");
+});
+
+test("radar actions edit the legend and tooltip", () => {
+  assert.equal(smallestRadarSpec.type, "radar");
+  assert.equal(smallestRadarSpec.mark, undefined);
+  assert.equal(radarControlState(smallestRadarSpec).legend, "bottom");
+
+  const models = structuredClone(radarExamples[0]!.spec);
+  assert.equal(radarControlState(models).legend, "bottom");
+  assert.equal(radarControlState(models).tooltip, "on");
+  assert.equal(models.tooltip, undefined);
+  const untouched = structuredClone(models);
+  radarControlState(models);
+  assert.deepEqual(models, untouched);
+  applyRadarAction(models, { id: "legend", value: "right" });
+  assert.deepEqual(models.legend, { position: "right" });
+  applyRadarAction(models, { id: "legend", value: "bottom" });
+  assert.deepEqual(models.legend, { position: "bottom" });
+  applyRadarAction(models, { id: "legend", value: "off" });
+  assert.equal(models.legend, false);
+  applyRadarAction(models, { id: "tooltip", value: "off" });
+  assert.equal(models.tooltip, false);
+  applyRadarAction(models, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in models, false);
+  assert.equal(models.size, undefined);
+
+  const skills = structuredClone(radarExamples[1]!.spec);
+  assert.equal(radarControlState(skills).legend, "off");
+  assert.equal((skills.size as { width: number; height: number }).width, 520);
+  assert.equal((skills.size as { height: number }).height, 300);
+  applyRadarAction(skills, { id: "legend", value: "right" });
+  assert.deepEqual(skills.legend, { position: "right" });
+  const skillsTip = structuredClone(customTip);
+  skills.tooltip = structuredClone(skillsTip);
+  const opened = openTeachExample(skills);
+  assert.deepEqual(opened.tooltip, skills.tooltip);
+  assert.notEqual(opened.tooltip, skills.tooltip);
+  applyRadarAction(skills, { id: "tooltip", value: "off" });
+  assert.equal(skills.tooltip, false);
+  applyRadarAction(skills, { id: "tooltip", value: "on", restore: skillsTip });
+  assert.deepEqual(skills.tooltip, skillsTip);
+  const storedOff = structuredClone(radarExamples[1]!.spec);
+  storedOff.tooltip = false;
+  applyRadarAction(storedOff, { id: "tooltip", value: "on", restore: false });
+  assert.equal(storedOff.tooltip, true);
+
+  assert.deepEqual(
+    radarExamples.map((example) => example.title),
+    ["Model comparison", "Team skills"],
+  );
+  assert.deepEqual(
+    radarExamples.map((example) => example.meta),
+    ["2 series", "1 series"],
+  );
+  for (const example of radarExamples) assert.equal(example.spec.type, "radar");
+});
+
+test("candlestick actions edit volume and tooltip", () => {
+  assert.equal(smallestCandlestickSpec.type, "candlestick");
+  assert.equal(smallestCandlestickSpec.mark, undefined);
+  assert.equal(candlestickControlState(smallestCandlestickSpec).volume, "off");
+
+  const northstar = structuredClone(candlestickExamples[0]!.spec);
+  assert.equal(candlestickControlState(northstar).volume, "on");
+  assert.equal(candlestickControlState(northstar).tooltip, "on");
+  assert.equal(northstar.tooltip, undefined);
+  assert.equal(northstar.legend, false);
+  const untouched = structuredClone(northstar);
+  candlestickControlState(northstar);
+  assert.deepEqual(northstar, untouched);
+  applyCandlestickAction(northstar, { id: "volume", value: "off" });
+  assert.equal((northstar.encoding as { volume?: unknown }).volume, undefined);
+  assert.equal((northstar.encoding as { open: string }).open, "open");
+  assert.equal((northstar.encoding as { close: string }).close, "close");
+  assert.equal(northstar.legend, false);
+  applyCandlestickAction(northstar, { id: "volume", value: "on", restore: candlestickExamples[0]!.spec });
+  assert.equal((northstar.encoding as { volume: string }).volume, "volume");
+  applyCandlestickAction(northstar, { id: "tooltip", value: "off" });
+  assert.equal(northstar.tooltip, false);
+  applyCandlestickAction(northstar, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in northstar, false);
+  assert.equal((northstar.size as { width: number }).width, 640);
+
+  const quote = structuredClone(candlestickExamples[1]!.spec);
+  assert.equal(candlestickControlState(quote).volume, "off");
+  assert.equal((quote.size as { width: number; height: number }).height, 300);
+  applyCandlestickAction(quote, { id: "volume", value: "on", restore: candlestickExamples[1]!.spec });
+  assert.equal("volume" in (quote.encoding as object), false);
+  const quoteTip = structuredClone(customTip);
+  quote.tooltip = structuredClone(quoteTip);
+  const opened = openTeachExample(quote);
+  assert.deepEqual(opened.tooltip, quote.tooltip);
+  assert.notEqual(opened.tooltip, quote.tooltip);
+  applyCandlestickAction(quote, { id: "tooltip", value: "off" });
+  assert.equal(quote.tooltip, false);
+  applyCandlestickAction(quote, { id: "tooltip", value: "on", restore: quoteTip });
+  assert.deepEqual(quote.tooltip, quoteTip);
+
+  const week = structuredClone(candlestickExamples[2]!.spec);
+  assert.equal(candlestickControlState(week).volume, "off");
+  assert.equal((week.size as { width: number }).width, 560);
+  const storedOff = structuredClone(week);
+  storedOff.tooltip = false;
+  applyCandlestickAction(storedOff, { id: "tooltip", value: "on", restore: false });
+  assert.equal(storedOff.tooltip, true);
+
+  assert.deepEqual(
+    candlestickExamples.map((example) => example.title),
+    ["Northstar", "CK / USD", "A week of prices"],
+  );
+  assert.deepEqual(
+    candlestickExamples.map((example) => example.meta),
+    ["10 sessions", "12 sessions", "5 sessions"],
+  );
+  for (const example of candlestickExamples) assert.equal(example.spec.type, "candlestick");
 });

@@ -1,0 +1,138 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestRadarSpec } from "../data/teach/radar";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/radar";
+const spec = specText(smallestRadarSpec);
+const play = playgroundHref(smallestRadarSpec);
+const legend = `{
+  "legend": { "position": "right" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A radar draws one polygon per series around a shared set of spokes. Each spoke is a category. The distance from the center is the value. The shape is the comparison.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a radar when several things are scored on the same spokes and the shape matters. Model comparison is a car and a bike on speed, handling, comfort, safety, range, and cost. The car reaches farther on comfort. The bike reaches farther on cost and handling. Team skills is one polygon: design is high, data is low.
+  </p>
+  <p>
+    A <a href="/docs/charts/rose">rose</a> gives every category the same angle and maps one number to the radius. The sector is filled out to that value. It is a magnitude, not two profiles on the same spokes. A <a href="/docs/charts/radial-bar">radial bar</a> draws a bar on a track. The length is the radius, and several series sit side by side in the category, or stack outward.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> is the chart when the reader should rank one number per category on a straight axis. A radar wants a short list of spokes that share a scale. Model comparison has six. Fewer than three spokes does not draw.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Radar, rose, and radial bar</h2>
+  <p>
+    <code>type: "radar"</code> keeps the spokes fixed and draws a closed shape through the values. Two series are two polygons. They are not slices of a whole, and they do not sit side by side in a wedge.
+  </p>
+  <p>
+    <code>type: "rose"</code> encodes one value as the radius and keeps the angles equal. <code>polarArea</code>, <code>nightingale</code>, and <code>rose-chart</code> repair to rose. <code>radar-chart</code> and <code>radar-beta</code> repair to radar. The names are not interchangeable.
+  </p>
+  <p>
+    <code>type: "radial-bar"</code> is still a bar. The track, the hole, and <code>mark.stack</code> belong to that chart. A radar has no track and does not stack.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one spoke. <code>encoding.x</code> is the spoke name. <code>encoding.y</code> is one field, or a list of fields for wide data. Model comparison uses <code>spoke</code> and the list <code>car</code>, <code>bike</code>. Team skills uses <code>axis</code> and <code>score</code>.
+  </p>
+  <p>
+    Spokes run in the order they first appear, starting at the top and going clockwise. A negative value is drawn at the center. The scale runs from zero to the largest value in the spec, unless a single <code>encoding.y</code> object sets <code>scale.domain</code>.
+  </p>
+  <p>
+    Long data uses one value field and <code>encoding.series</code> to split the rows into polygons. Model comparison is wide, so it does not set <code>series</code>.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest radar. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Three spokes and two series are enough to draw a comparison, so <code>mark</code> can be omitted. The polygons are filled. The names sit along the bottom.
+  </p>
+  <TeachFacts type="radar" label="Radar packages" spec={spec} />
+  <p>
+    Radar ships in <code>@chartkitdev/core/extra</code>. Import it from <code>@chartkitdev/core/charts/radar</code>. <code>createRenderer([line])</code> does not include it.
+  </p>
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    Model comparison is the radar in the core examples and in the gallery: six spokes, car and bike. Team skills is the homepage chart, one series, with the legend turned off. The spokes are self-assessed scores.
+  </p>
+</section>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A radar with two or more series draws the series names when <code>legend</code> is omitted. Those names sit along the bottom. <code>legend: false</code> hides them. <code>legend.position</code> <code>right</code> moves the list to the right. <code>bottom</code> is that same bottom list, written out.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <p>
+    <code>top</code> is the shared legend default. On a radar it keeps the bottom names, so this control does not offer it. <code>left</code> and <code>inside</code> are in the playground. A position this control does not list leaves every button up.
+  </p>
+  <p>
+    Team skills is one series, so the names stay off the chart even when the key is omitted. The chart sets <code>legend: false</code>. The control still writes the key. The picture waits for a second series.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a radar when the key is omitted. Hovering a polygon shows the series and the value on each spoke. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    The polygon is filled at the theme's fill opacity, and the stroke is the series color. There is no <code>mark.fill</code> for a radar. <code>mark.fillOpacity</code> applies to lines, areas, and bars. On a radar it warns CK3010. The grid is four rings. <code>mark.rings</code> is a progress-ring key and does not change those rings. A score out of 100 sets <code>encoding.y.scale.domain</code> on a single series. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/rose">Rose</a> uses equal angles. The radius is one value per category.</li>
+    <li><a href="/docs/charts/radial-bar">Radial bar</a> draws a bar along the radius, on a track.</li>
+    <li><a href="/docs/charts/bar">Bar</a> ranks categories on a straight axis.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
