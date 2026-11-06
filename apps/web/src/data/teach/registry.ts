@@ -1,6 +1,9 @@
+import { areaRangeTeach } from "./area-range.ts";
+import { barRangeTeach } from "./bar-range.ts";
 import { barTeach } from "./bar.ts";
 import { comboTeach } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
+import { errorbarTeach } from "./errorbar.ts";
 import { funnelTeach } from "./funnel.ts";
 import { ganttTeach } from "./gantt.ts";
 import { journeyTeach } from "./journey.ts";
@@ -48,6 +51,9 @@ export const teachModules: Record<string, TeachModule> = {
   quadrant: quadrantTeach,
   venn: vennTeach,
   journey: journeyTeach,
+  "area-range": areaRangeTeach,
+  "bar-range": barRangeTeach,
+  errorbar: errorbarTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

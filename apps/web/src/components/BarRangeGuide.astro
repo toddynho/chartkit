@@ -1,0 +1,122 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestBarRangeSpec } from "../data/teach/bar-range";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/bar-range";
+const spec = specText(smallestBarRangeSpec);
+const play = playgroundHref(smallestBarRangeSpec);
+const ends = `{
+  "encoding": { "x": "month", "low": "min", "high": "max" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A range bar draws a floating bar from a low value to a high value. The bar is the span. It does not start at zero. The type is <code>bar-range</code>.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a range bar when each category is a span and the ends are the story. Monthly temperature runs from a low to a high, and January sits below zero. Pell glasshouse is the same reading across a season, with a line through the midpoint.
+  </p>
+  <p>
+    Use a <a href="/docs/charts/bar">bar</a> when the number is an amount from a baseline. Use an <a href="/docs/charts/errorbar">error bar</a> when you have a center value and the span is the uncertainty around it. Use a <a href="/docs/charts/area-range">range area</a> when the span is a band along an ordered line.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Range bar, bar, and error bar</h2>
+  <p>
+    A bar encodes one amount. The bar grows from zero, or from the baseline you set. Several series group or stack. <code>mark.orientation</code> turns it horizontal. Those keys belong to <code>type: "bar"</code>.
+  </p>
+  <p>
+    A range bar has two ends and no amount from zero. January can run from −2 to 6. The rectangle sits between those values. <code>columnrange</code> and <code>floating-bar</code> repair to <code>bar-range</code>.
+  </p>
+  <p>
+    An error bar draws a center and a whisker. With <code>mark.error</code> set to <code>bar</code>, the bar still starts at zero and the whisker is the range. A range bar has no whisker and no center mark. The bar is the range.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one category and two numbers. <code>encoding.x</code> is the category. <code>encoding.low</code> and <code>encoding.high</code> are the ends. <code>encoding.y</code> is not required. Monthly temperature names <code>min</code> and <code>max</code>. Pell glasshouse names <code>low</code> and <code>high</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.low and encoding.high</span></figcaption>
+    <pre><code>{ends}</code></pre>
+  </figure>
+  <p>
+    Columns named <code>low</code>, <code>lo</code>, or <code>min</code>, and <code>high</code>, <code>hi</code>, or <code>max</code>, are found when the keys are omitted. Name them on a first chart. A y object with <code>lo</code> and <code>hi</code> is the other spelling. A missing end skips that bar. When every low sits above its high, repair swaps the two fields.
+  </p>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart. The chart loads from <code>@chartkitdev/core/charts/bar-range</code>, in <code>@chartkitdev/core/extra</code>. <code>createRenderer([line])</code> does not include it.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest range bar. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Four months, from <code>min</code> to <code>max</code>. The axis suffix is °C. There is no <code>mark</code>, because the span is the encoding.
+  </p>
+  <TeachFacts type="bar-range" label="Range bar packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing range bar specs. Monthly temperature is the gallery chart, with the four months from the core example. The chart title on that spec is Temperature. Pell glasshouse is the showcase: eight months, explicit ticks, and a season line through the midpoint.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a range bar when the key is omitted. Hovering a bar shows the category and the span, low through high. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Change those in the playground. Turning the card off and on again puts that object back. An omitted tooltip comes back as an omitted key.
+  </p>
+  <p>
+    A range bar draws one series, and this renderer does not paint a legend. <code>legend</code> is not a control here. Gap, orientation, and value labels belong to <a href="/docs/charts/bar">bar</a>.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>axes.y.format</code> adds a suffix such as °C. <code>axes.y.ticks</code> places the grid. Pell glasshouse sets both, and sets the high field's scale domain so March and July stay inside the frame. A trendline annotation fits the midpoint. Theme presets and the full option list live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> encodes one amount from the baseline. Series can group or stack.</li>
+    <li><a href="/docs/charts/errorbar">Error bar</a> marks a center value and draws a whisker for the uncertainty.</li>
+    <li><a href="/docs/charts/area-range">Range area</a> draws the span as a band along an ordered x, with an optional center line.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

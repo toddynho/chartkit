@@ -1,8 +1,11 @@
 ---
+import AreaRangeGuide from "../../../components/AreaRangeGuide.astro";
 import BarGuide from "../../../components/BarGuide.astro";
+import BarRangeGuide from "../../../components/BarRangeGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
+import ErrorbarGuide from "../../../components/ErrorbarGuide.astro";
 import FunnelGuide from "../../../components/FunnelGuide.astro";
 import GanttGuide from "../../../components/GanttGuide.astro";
 import JourneyGuide from "../../../components/JourneyGuide.astro";
@@ -49,6 +52,9 @@ const guided = new Set([
   "quadrant",
   "venn",
   "journey",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -102,6 +108,9 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "quadrant" ? <QuadrantGuide /> : null}
       {module.type === "venn" ? <VennGuide /> : null}
       {module.type === "journey" ? <JourneyGuide /> : null}
+      {module.type === "area-range" ? <AreaRangeGuide /> : null}
+      {module.type === "bar-range" ? <BarRangeGuide /> : null}
+      {module.type === "errorbar" ? <ErrorbarGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

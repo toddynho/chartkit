@@ -1,0 +1,171 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestAreaRangeSpec } from "../data/teach/area-range";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/area-range";
+const spec = specText(smallestAreaRangeSpec);
+const play = playgroundHref(smallestAreaRangeSpec);
+const lineOff = `{
+  "mark": { "line": false }
+}`;
+const lineOn = `{
+  "mark": { "line": true }
+}`;
+const dash = `{
+  "mark": { "strokeDash": true }
+}`;
+const bands = `{
+  "encoding": {
+    "y": [
+      { "lo": "wideLo", "hi": "wideHi", "title": "95%" },
+      { "lo": "tightLo", "hi": "tightHi", "title": "80%" },
+      { "field": "seats", "title": "Seats" }
+    ]
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A range area draws a band between a low and a high across an ordered x. <code>encoding.y</code> is an optional center line through that band. The type is <code>area-range</code>.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a range area when the question is an interval around a measure: a forecast that opens after today, a confidence band, or a low and a high that travel with a line. Revenue forecast is that chart. The line is known from January, and the band starts in April. Seats filled at Pell Hall nests an 80% band inside a 95% band and dashes the line once the forecast starts.
+  </p>
+  <p>
+    Use a <a href="/docs/charts/line">line</a> when you only have the measure. Use a <a href="/docs/charts/stacked-area">stacked area</a> when several series add into one total. Use a <a href="/docs/charts/bar-range">range bar</a> when each category is a span and there is no center line.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Range area, filled line, and stacked area</h2>
+  <p>
+    A filled line is <code>type: "line"</code> with <code>mark.area</code> set to true. There is no <code>type: "area"</code>. <a href="/docs/charts/area">Area</a> is the note for that fill. The fill runs from the line down to the baseline. It is one series painted to zero, and a second series can overlap it.
+  </p>
+  <p>
+    A stacked area adds the series. The top of the shape is the total, or 100% when <code>mark.stack</code> is <code>percent</code>. The bands are parts. They sit on each other.
+  </p>
+  <p>
+    A range area band is the span from low to high. Nested bands share the center line and paint the wider interval underneath. They do not add. <code>arearange</code> repairs to <code>area-range</code>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one x, a low, a high, and an optional center. <code>encoding.x</code> is the category or the time. <code>encoding.low</code> and <code>encoding.high</code> name the band. <code>encoding.y</code> is the center line. Revenue forecast uses <code>lo</code>, <code>hi</code>, and <code>revenue</code>.
+  </p>
+  <p>
+    A null low or high breaks the band on that row. That is how a forecast starts later than the line. Columns named <code>low</code>, <code>lo</code>, or <code>min</code>, and <code>high</code>, <code>hi</code>, or <code>max</code>, are found when the keys are omitted. Name them anyway on a first chart.
+  </p>
+  <p>
+    Several bands are a <code>y</code> list. Each item has <code>lo</code>, <code>hi</code>, and a <code>title</code>. One more item, with <code>field</code>, is the center line. Seats filled at Pell Hall lists a 95% band, an 80% band, and seats. A title that is a percent, such as <code>95%</code>, is labeled <code>95% interval</code> when the center line is drawn. <code>low</code> and <code>high</code> on a y item repair to <code>lo</code> and <code>hi</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y bands</span></figcaption>
+    <pre><code>{bands}</code></pre>
+  </figure>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart. The chart loads from <code>@chartkitdev/core/charts/area-range</code>, in <code>@chartkitdev/core/extra</code>. <code>createRenderer([line])</code> does not include it.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest range area. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Six months. The band is empty until April, so <code>lo</code> and <code>hi</code> are null on the earlier rows. The center line comes from <code>encoding.y</code>, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="area-range" label="Range area packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing range area specs. Revenue forecast is the gallery and core chart: one band, a center line, and a rule at April. Seats filled at Pell Hall is the showcase: two bands, a dashed forecast, and a full-house shade.
+  </p>
+</section>
+
+<TeachConcept id="line" title="Center line">
+  <p>
+    <code>mark.line</code> draws the center line through <code>encoding.y</code>. Omit it, or set true, and the line is on when y is set. <code>false</code> draws the band only.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.line false</span></figcaption>
+    <pre><code>{lineOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.line true</span></figcaption>
+    <pre><code>{lineOn}</code></pre>
+  </figure>
+  <p>
+    Revenue forecast and Seats filled at Pell Hall leave <code>mark.line</code> unset, so the line is on. Turning the line off and on again puts that omitted key back. A chart that had set true comes back with true.
+  </p>
+  <p>
+    When the line and at least one band are both drawn, their names sit in a row above the plot. A percent band is named as an interval. That row is part of the marks. <code>legend</code> does not move it, so this page has no legend control. Placement stays in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="dash" title="Forecast dash">
+  <p>
+    <code>mark.strokeDash</code> dashes the center line where a band is present and keeps the earlier line solid. Both parts use the line color. Omit it, or set false, and the whole line stays solid. Seats filled at Pell Hall sets true, so January through August stay solid and September onward is dashed.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.strokeDash</span></figcaption>
+    <pre><code>{dash}</code></pre>
+  </figure>
+  <p>
+    If the band covers every row, the whole center line is dashed. Turning the dash off deletes the key when the example omitted it, and writes false when the example had set it.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a range area when the key is omitted. Hovering a position shows the line and the band. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Change those in the playground. Turning the card off and on again puts that object back. An omitted tooltip comes back as an omitted key.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.stroke</code> outlines the band. It is off unless you set true, so a nested interval stays a fill in the line color. A y item can set its own <code>color</code>. A combo series with <code>mark</code> <code>range</code> and <code>lo</code> / <code>hi</code> paints this same band under the other series. That spec type is <code>combo</code>. Theme presets, sampling, and axis format live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/line">Line</a> draws the measure. <code>mark.area</code> fills down to the baseline.</li>
+    <li><a href="/docs/charts/area">Area</a> is that filled line. The spec type is still <code>line</code>.</li>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> adds series into one shape. The top is the total.</li>
+    <li><a href="/docs/charts/bar-range">Range bar</a> floats from low to high, with no center line.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

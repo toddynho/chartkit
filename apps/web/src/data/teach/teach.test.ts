@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { applyDonutAction, donutControlState, donutExamples } from "../donut-teach.ts";
+import { applyAreaRangeAction, areaRangeControlState, areaRangeExamples, areaRangeTeach, smallestAreaRangeSpec } from "./area-range.ts";
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
+import { applyBarRangeAction, barRangeControlState, barRangeExamples, barRangeTeach, smallestBarRangeSpec } from "./bar-range.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
+import { applyErrorbarAction, errorbarControlState, errorbarExamples, errorbarTeach, smallestErrorbarSpec } from "./errorbar.ts";
 import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
 import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smallestGanttSpec } from "./gantt.ts";
 import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
@@ -41,9 +44,12 @@ import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, wat
 
 test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
+    "area-range",
     "bar",
+    "bar-range",
     "combo",
     "donut",
+    "errorbar",
     "funnel",
     "gantt",
     "journey",
@@ -129,6 +135,21 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow"
     ["offset", "order", "curve", "legend", "tooltip"],
   );
   assert.equal(streamgraphTeach.controls.some((control) => control.id === "stack"), false);
+  assert.deepEqual(
+    areaRangeTeach.controls.map((control) => control.id),
+    ["line", "dash", "tooltip"],
+  );
+  assert.equal(areaRangeTeach.controls.some((control) => control.id === "legend" || control.id === "stroke"), false);
+  assert.deepEqual(
+    barRangeTeach.controls.map((control) => control.id),
+    ["tooltip"],
+  );
+  assert.equal(barRangeTeach.controls.some((control) => control.id === "legend" || control.id === "orientation"), false);
+  assert.deepEqual(
+    errorbarTeach.controls.map((control) => control.id),
+    ["anchor", "tooltip"],
+  );
+  assert.equal(errorbarTeach.controls.some((control) => control.id === "legend" || control.id === "pointSize"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -1235,4 +1256,176 @@ test("planning charts toggle tooltip and do not pretend legend, size, or color i
   assert.equal((northstar.size as { width?: number } | undefined)?.width, undefined);
   assert.equal((ganttExamples[1]!.spec.size as { width: number }).width, 880);
   assert.equal(timelineExamples[0]!.title, "Northstar, 2014 to 2026");
+});
+
+test("range area actions edit the center line, the forecast dash, and tooltip", () => {
+  assert.equal(smallestAreaRangeSpec.type, "area-range");
+  assert.equal(smallestAreaRangeSpec.mark, undefined);
+  assert.equal(areaRangeControlState(smallestAreaRangeSpec).line, "on");
+  assert.equal(areaRangeControlState(smallestAreaRangeSpec).dash, "off");
+
+  const forecast = structuredClone(areaRangeExamples[0]!.spec);
+  assert.equal(areaRangeControlState(forecast).line, "on");
+  assert.equal(areaRangeControlState(forecast).dash, "off");
+  assert.equal(areaRangeControlState(forecast).tooltip, "on");
+  assert.equal(forecast.tooltip, undefined);
+  const untouched = structuredClone(forecast);
+  areaRangeControlState(forecast);
+  assert.deepEqual(forecast, untouched);
+  applyAreaRangeAction(forecast, { id: "line", value: "off" });
+  assert.equal((forecast.mark as { line: boolean }).line, false);
+  assert.deepEqual(forecast.annotations, areaRangeExamples[0]!.spec.annotations);
+  applyAreaRangeAction(forecast, { id: "line", value: "on", restore: areaRangeExamples[0]!.spec });
+  assert.equal(forecast.mark, undefined);
+  applyAreaRangeAction(forecast, { id: "dash", value: "on", restore: areaRangeExamples[0]!.spec });
+  assert.equal((forecast.mark as { strokeDash: boolean }).strokeDash, true);
+  applyAreaRangeAction(forecast, { id: "dash", value: "off", restore: areaRangeExamples[0]!.spec });
+  assert.equal(forecast.mark, undefined);
+  applyAreaRangeAction(forecast, { id: "tooltip", value: "off" });
+  assert.equal(forecast.tooltip, false);
+  applyAreaRangeAction(forecast, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in forecast, false);
+  assert.equal((forecast.size as { width: number }).width, 640);
+
+  const pell = structuredClone(areaRangeExamples[1]!.spec);
+  assert.equal(areaRangeControlState(pell).dash, "on");
+  assert.equal(areaRangeControlState(pell).line, "on");
+  applyAreaRangeAction(pell, { id: "dash", value: "off", restore: areaRangeExamples[1]!.spec });
+  assert.equal((pell.mark as { strokeDash: boolean }).strokeDash, false);
+  const y = (pell.encoding as { y: { title?: string; field?: string }[] }).y;
+  assert.equal(y[2]!.field, "seats");
+  applyAreaRangeAction(pell, { id: "dash", value: "on", restore: areaRangeExamples[1]!.spec });
+  assert.equal((pell.mark as { strokeDash: boolean }).strokeDash, true);
+  applyAreaRangeAction(pell, { id: "line", value: "off", restore: areaRangeExamples[1]!.spec });
+  assert.equal((pell.mark as { line: boolean; strokeDash: boolean }).line, false);
+  assert.equal((pell.mark as { strokeDash: boolean }).strokeDash, true);
+  applyAreaRangeAction(pell, { id: "line", value: "on", restore: areaRangeExamples[1]!.spec });
+  assert.equal((pell.mark as { line?: boolean }).line, undefined);
+  assert.equal((pell.mark as { strokeDash: boolean }).strokeDash, true);
+  const tip = structuredClone(customTip);
+  pell.tooltip = structuredClone(tip);
+  const opened = openTeachExample(pell);
+  assert.deepEqual(opened.tooltip, pell.tooltip);
+  assert.notEqual(opened.tooltip, pell.tooltip);
+  applyAreaRangeAction(pell, { id: "tooltip", value: "off" });
+  assert.equal(pell.tooltip, false);
+  applyAreaRangeAction(pell, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(pell.tooltip, tip);
+  assert.equal((pell.size as { width: number }).width, 1040);
+  assert.equal(pell.type, "area-range");
+
+  assert.deepEqual(
+    areaRangeExamples.map((example) => example.title),
+    ["Revenue forecast", "Seats filled at Pell Hall"],
+  );
+  assert.deepEqual(
+    areaRangeExamples.map((example) => example.meta),
+    ["6 months", "2 bands"],
+  );
+  for (const example of areaRangeExamples) assert.equal(example.spec.type, "area-range");
+});
+
+test("range bar tooltip turns off and restores an omitted or custom tooltip", () => {
+  assert.equal(smallestBarRangeSpec.type, "bar-range");
+  assert.equal(smallestBarRangeSpec.mark, undefined);
+  assert.equal(barRangeControlState(smallestBarRangeSpec).tooltip, "on");
+
+  const temperature = structuredClone(barRangeExamples[0]!.spec);
+  assert.equal(temperature.tooltip, undefined);
+  assert.equal((temperature.encoding as { low: string; high: string }).low, "min");
+  assert.equal((temperature.encoding as { high: string }).high, "max");
+  const untouched = structuredClone(temperature);
+  barRangeControlState(temperature);
+  assert.deepEqual(temperature, untouched);
+  applyBarRangeAction(temperature, { id: "tooltip", value: "off" });
+  assert.equal(temperature.tooltip, false);
+  assert.equal(barRangeControlState(temperature).tooltip, "off");
+  applyBarRangeAction(temperature, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in temperature, false);
+  assert.equal((temperature.size as { width: number }).width, 560);
+  assert.equal(temperature.title, "Temperature");
+
+  const glass = structuredClone(barRangeExamples[1]!.spec);
+  assert.equal((glass.size as { height: number }).height, 480);
+  const tip = structuredClone(customTip);
+  glass.tooltip = structuredClone(tip);
+  const opened = openTeachExample(glass);
+  assert.deepEqual(opened.tooltip, glass.tooltip);
+  assert.notEqual(opened.tooltip, glass.tooltip);
+  applyBarRangeAction(glass, { id: "tooltip", value: "off" });
+  assert.equal(glass.tooltip, false);
+  applyBarRangeAction(glass, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(glass.tooltip, tip);
+  assert.equal(glass.type, "bar-range");
+
+  assert.deepEqual(
+    barRangeExamples.map((example) => example.title),
+    ["Monthly temperature", "Pell glasshouse"],
+  );
+  assert.deepEqual(
+    barRangeExamples.map((example) => example.meta),
+    ["4 months", "8 months"],
+  );
+  for (const example of barRangeExamples) assert.equal(example.spec.type, "bar-range");
+});
+
+test("error bar actions edit the anchor and tooltip", () => {
+  assert.equal(smallestErrorbarSpec.type, "errorbar");
+  assert.equal(smallestErrorbarSpec.mark, undefined);
+  assert.equal(errorbarControlState(smallestErrorbarSpec).anchor, "point");
+  assert.equal(errorbarControlState(smallestErrorbarSpec).tooltip, "on");
+
+  const lab = structuredClone(errorbarExamples[0]!.spec);
+  assert.equal(errorbarControlState(lab).anchor, "point");
+  assert.equal(lab.tooltip, undefined);
+  const untouched = structuredClone(lab);
+  errorbarControlState(lab);
+  assert.deepEqual(lab, untouched);
+  applyErrorbarAction(lab, { id: "anchor", value: "bar", restore: errorbarExamples[0]!.spec });
+  assert.equal((lab.mark as { error: string }).error, "bar");
+  applyErrorbarAction(lab, { id: "anchor", value: "point", restore: errorbarExamples[0]!.spec });
+  assert.equal(lab.mark, undefined);
+  applyErrorbarAction(lab, { id: "tooltip", value: "off" });
+  assert.equal(lab.tooltip, false);
+  applyErrorbarAction(lab, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in lab, false);
+  assert.equal((lab.size as { width: number }).width, 560);
+
+  const dishes = structuredClone(errorbarExamples[1]!.spec);
+  assert.equal(errorbarControlState(dishes).anchor, "bar");
+  applyErrorbarAction(dishes, { id: "anchor", value: "point", restore: errorbarExamples[1]!.spec });
+  assert.equal((dishes.mark as { error: string }).error, "point");
+  applyErrorbarAction(dishes, { id: "anchor", value: "bar", restore: errorbarExamples[1]!.spec });
+  assert.equal((dishes.mark as { error: string }).error, "bar");
+  assert.equal((dishes.size as { width: number }).width, 1040);
+
+  const week = structuredClone(errorbarExamples[2]!.spec);
+  assert.equal(errorbarControlState(week).anchor, "point");
+  assert.equal((week.mark as { pointSize: number }).pointSize, 5);
+  applyErrorbarAction(week, { id: "anchor", value: "bar", restore: errorbarExamples[2]!.spec });
+  assert.equal((week.mark as { error: string; pointSize: number }).error, "bar");
+  assert.equal((week.mark as { pointSize: number }).pointSize, 5);
+  applyErrorbarAction(week, { id: "anchor", value: "point", restore: errorbarExamples[2]!.spec });
+  assert.equal((week.mark as { error: string }).error, "point");
+  assert.equal((week.mark as { pointSize: number }).pointSize, 5);
+  const tip = structuredClone(customTip);
+  week.tooltip = structuredClone(tip);
+  const opened = openTeachExample(week);
+  assert.deepEqual(opened.tooltip, week.tooltip);
+  assert.notEqual(opened.tooltip, week.tooltip);
+  applyErrorbarAction(week, { id: "tooltip", value: "off" });
+  assert.equal(week.tooltip, false);
+  applyErrorbarAction(week, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(week.tooltip, tip);
+  assert.equal(week.type, "errorbar");
+
+  assert.deepEqual(
+    errorbarExamples.map((example) => example.title),
+    ["Lab measurements", "Dish means", "Salt, Monday to Friday"],
+  );
+  assert.deepEqual(
+    errorbarExamples.map((example) => example.meta),
+    ["3 assays", "6 dishes", "5 days"],
+  );
+  for (const example of errorbarExamples) assert.equal(example.spec.type, "errorbar");
 });

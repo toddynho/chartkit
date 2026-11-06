@@ -1,0 +1,153 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestErrorbarSpec } from "../data/teach/errorbar";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/errorbar";
+const spec = specText(smallestErrorbarSpec);
+const play = playgroundHref(smallestErrorbarSpec);
+const point = `{
+  "mark": { "error": "point" }
+}`;
+const bar = `{
+  "mark": { "error": "bar" }
+}`;
+const plusMinus = `{
+  "encoding": { "x": "assay", "y": "mean", "error": "delta" }
+}`;
+const bounds = `{
+  "encoding": { "x": "assay", "y": "mean", "low": "lo", "high": "hi" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  An error bar draws a center value and a whisker from a low to a high. The center is a point, or a bar from zero. The whisker is the uncertainty. The type is <code>errorbar</code>.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use an error bar when each category has a center and a range around it. Lab measurements is three assays, each a mean with a whisker. Dish means uses a bar for the mean and a whisker for the three runs. Salt, Monday to Friday follows one dish across the week, one point per day.
+  </p>
+  <p>
+    Use a <a href="/docs/charts/bar-range">range bar</a> when the span itself is the mark and there is no center. Use a <a href="/docs/charts/scatter">scatter</a> when both axes are quantitative and each row is a point in that plane. Use a <a href="/docs/charts/bar">bar</a> when you only have the amount.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Error bar, range bar, and scatter</h2>
+  <p>
+    A range bar floats from low to high. The rectangle is the span. It does not start at zero, and it has no center dot. An error bar always has a center at <code>encoding.y</code>. The whisker runs from low to high around that center. With <code>mark.error</code> set to <code>bar</code>, the bar grows from zero to y and the whisker is drawn on top of it.
+  </p>
+  <p>
+    A scatter places each row by two quantitative fields. Color and size can add more. It does not draw a whisker from a low and a high. An error bar keeps categories on x and one center on y. <code>errorbars</code> repairs to <code>errorbar</code>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one category, a center, and a range. <code>encoding.x</code> is the category. <code>encoding.y</code> is the center. <code>encoding.low</code> and <code>encoding.high</code> are the whisker ends. Lab measurements names <code>mean</code>, <code>lo</code>, and <code>hi</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.low and encoding.high</span></figcaption>
+    <pre><code>{bounds}</code></pre>
+  </figure>
+  <p>
+    <code>encoding.error</code> is the other shape. The field is a ± half-width around y. A mean of 140 and a delta of 2 draw a whisker from 138 to 142. <code>encoding.low</code> and <code>encoding.high</code> override it when both are set.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.error</span></figcaption>
+    <pre><code>{plusMinus}</code></pre>
+  </figure>
+  <p>
+    Columns named <code>low</code>, <code>lo</code>, or <code>min</code>, and <code>high</code>, <code>hi</code>, or <code>max</code>, are found when those keys are omitted. Name them on a first chart. A missing end skips the whisker and still draws the center.
+  </p>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart. The chart loads from <code>@chartkitdev/core/charts/errorbar</code>, in <code>@chartkitdev/core/extra</code>. <code>createRenderer([line])</code> does not include it.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest error bar. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Three assays. The anchor is a point, so <code>mark</code> can be omitted. The whisker uses <code>lo</code> and <code>hi</code>.
+  </p>
+  <TeachFacts type="errorbar" label="Error bar packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing error bar specs. Lab measurements is the gallery and core chart: points, and a whisker from low to high. Dish means is the bar anchor from the Salt assay showcase. Salt, Monday to Friday is the same dish as points, with <code>mark.pointSize</code> set to 5.
+  </p>
+</section>
+
+<TeachConcept id="anchor" title="Anchor">
+  <p>
+    <code>mark.error</code> is <code>point</code> or <code>bar</code>. Omit it, or set <code>point</code>, and each category is a marker at y. <code>bar</code> draws a bar from zero to y and keeps the whisker. The domain includes zero, so the bar has a baseline. Dish means sets <code>bar</code>. Lab measurements leaves the key off.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.error point</span></figcaption>
+    <pre><code>{point}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.error bar</span></figcaption>
+    <pre><code>{bar}</code></pre>
+  </figure>
+  <p>
+    Choosing Point again deletes the key when the example omitted it, and writes <code>point</code> when the example set it. Salt, Monday to Friday keeps <code>pointSize</code> either way. Choosing Bar writes <code>bar</code> and leaves the other mark keys in place.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for an error bar when the key is omitted. Hovering a category shows the span from low to high. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Change those in the playground. Turning the card off and on again puts that object back. An omitted tooltip comes back as an omitted key.
+  </p>
+  <p>
+    An error bar draws one series, and this renderer does not paint a legend. <code>legend</code> is not a control here.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.pointSize</code> is the point radius in pixels. The default is 4.5. Salt, Monday to Friday sets 5, and the whisker caps grow with that radius. <code>encoding.y.scale.domain</code> holds the axis when the means sit in a narrow band. A rule annotation can mark a reference, the way Dish means marks the blank. Theme presets and the full option list live on the playground.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar-range">Range bar</a> floats from low to high. The bar is the span, and there is no center.</li>
+    <li><a href="/docs/charts/scatter">Scatter</a> places points on two quantitative fields. It does not draw a whisker.</li>
+    <li><a href="/docs/charts/bar">Bar</a> encodes one amount from the baseline, with no low and high.</li>
+    <li><a href="/docs/charts/area-range">Range area</a> draws a band along an ordered x, with an optional center line.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
