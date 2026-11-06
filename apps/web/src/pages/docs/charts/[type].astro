@@ -1,7 +1,6 @@
 ---
 import ChartDoc from "../../../components/ChartDoc.astro";
-import ResponseRail from "../../../components/ResponseRail.astro";
-import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
+import { chartPage, chartPageTypes } from "../../../data/docs-catalog";
 import Docs from "../../../layouts/Docs.astro";
 
 export function getStaticPaths() {
@@ -9,7 +8,6 @@ export function getStaticPaths() {
 }
 
 const chart = chartPage(Astro.params.type ?? "");
-const spec = specForChart(chart);
 const href = `/docs/charts/${chart.type}`;
 const geoCopy: Record<string, { title: string; lede: string }> = {
   choropleth: {
@@ -26,7 +24,6 @@ const title = geo?.title ?? chart.title;
 const lede = geo?.lede ?? chart.lede;
 ---
 
-<Docs title={title} description={lede} lede={lede} href={href}>
+<Docs title={title} description={lede} lede={lede} href={href} studio>
   <ChartDoc chart={chart} />
-  {geo ? null : <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />}
 </Docs>

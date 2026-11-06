@@ -1,5 +1,4 @@
 import {
-  OPTION_GROUPS,
   getPath,
   optionBlocked,
   optionCatalog,
@@ -12,7 +11,8 @@ import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
 import { previewSize, readExplicitSize, stripPreviewSize, type PreviewPreset } from "../data/preview-size";
 import { menuPosition } from "./menu-place";
-import { optionEffect } from "../data/option-effect";
+import { bindExamplePicker, selectExample } from "./example-picker";
+import { mountOptionControls, type OptionControls } from "./option-controls";
 import { chartType, drawChart } from "../lib/paint-chart";
 import { isRecord, pretty } from "../lib/spec-text";
 
@@ -39,21 +39,14 @@ interface IssueRow {
   path: string;
 }
 
-const SWATCHES = ["#335c84", "#0a63e6", "#2e9a5c", "#c24b3a", "#8a5cf6", "#17181a"];
-const SERIES_COLORS = ["#335c84", "#2e9a5c", "#c24b3a", "#8a5cf6", "#0a63e6", "#17181a"];
-
-const RAIL_KEY = "ck-playground-rail";
 const TAB_KEY = "ck-playground-tab";
 const ZOOM_KEY = "ck-playground-zoom";
 const ZOOM_STEPS = [50, 75, 100, 125, 150, 175, 200];
-const CHEVRON = `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M10.2 3.2 5.4 8l4.8 4.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export function mountPlayground(root: HTMLElement, data: PlayData): void {
   const examples = data.examples.filter((item) => item.spec && typeof item.spec === "object");
-  const storedRail = localStorage.getItem(RAIL_KEY);
-  const narrow = window.matchMedia("(max-width: 1100px)").matches;
-  const railOpen = storedRail === null ? !narrow : storedRail === "1";
   const tab = (localStorage.getItem(TAB_KEY) as TabName) || "options";
+  const picker = root.querySelector<HTMLElement>("[data-example-picker]");
 
   const state = {
     examples,
@@ -65,14 +58,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     tab: (["options", "spec", "data"] as TabName[]).includes(tab) ? tab : "options",
     size: "card" as SizeName,
     mode: "auto" as ModeName,
-    railOpen,
     zoom: readZoom(),
-    search: "",
-    setOnly: false,
     pasteOpen: false,
     copied: false,
-    open: new Set<string>(["Essentials"]),
-    unsupported: new Set<string>(),
     dirty: new Set<string>(),
     flash: new Set<string>(),
     hiddenY: [] as unknown[],
@@ -83,17 +71,22 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     warnCount: 0,
   };
 
+  let controls: OptionControls | null = null;
+  let optionsHost: HTMLElement | null = null;
+  let resetOptions = false;
+
   let paintGen = 0;
   let liveDestroy: (() => void) | null = null;
 
-  root.classList.toggle("is-rail-closed", !state.railOpen);
-  root.classList.toggle("is-rail-auto", storedRail === null);
-  root.style.setProperty("--rail", state.railOpen ? "220px" : "52px");
+  picker?.remove();
   root.innerHTML = shell();
+  const pickerSlot = root.querySelector("[data-picker-slot]");
+  if (picker && pickerSlot) pickerSlot.append(picker);
   bind(root);
+  if (picker) bindExamplePicker(picker, (slug) => applyExample(slug));
   readHash();
+  selectExample(picker, state.slug);
   paintText();
-  renderRail();
   renderTabs();
   renderPanel();
   renderPreviewChrome();
@@ -103,15 +96,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   function shell(): string {
     return `
       <div class="play-work">
-        <nav class="play-rail" aria-label="Examples">
-          <div class="play-rail__head">
-            <button type="button" class="play-rail__toggle" data-rail aria-expanded="true" title="Collapse examples" aria-label="Collapse examples">${CHEVRON}</button>
-            <span>Examples</span>
-            <em data-ex-count></em>
-          </div>
-          <div class="play-rail__list" data-examples></div>
-          <div class="play-rail__foot">More in the <a href="/gallery">gallery →</a></div>
-        </nav>
         <aside class="play-panel">
           <div class="play-tabs" role="tablist" data-tabs></div>
           <div data-panel style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
@@ -144,6 +128,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
             </div>
             </div>
           </div>
+          <div class="play-picker-slot" data-picker-slot></div>
           <div class="play-canvas" data-canvas></div>
           <div class="play-foot">
             <button type="button" class="play-issue is-ok" data-issue><i></i><span></span><b></b></button>
@@ -154,14 +139,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   function bind(host: HTMLElement) {
-    host.querySelector<HTMLButtonElement>("[data-rail]")?.addEventListener("click", () => {
-      state.railOpen = !state.railOpen;
-      localStorage.setItem(RAIL_KEY, state.railOpen ? "1" : "0");
-      root.classList.toggle("is-rail-closed", !state.railOpen);
-      root.classList.remove("is-rail-auto");
-      root.style.setProperty("--rail", state.railOpen ? "220px" : "52px");
-      syncRail();
-    });
     host.querySelector("[data-zoom-out]")?.addEventListener("click", () => stepZoom(-1));
     host.querySelector("[data-zoom-in]")?.addEventListener("click", () => stepZoom(1));
     host.querySelector("[data-zoom-fit]")?.addEventListener("click", () => setZoom(100));
@@ -345,59 +322,14 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     return optionCatalog.filter((field) => (!field.appliesTo || field.appliesTo.includes(type)) && !optionBlocked(state.spec, field.path));
   }
 
-  function supportedFields(fields: OptionField[]): OptionField[] {
-    const type = chartType(state.spec);
-    return fields.filter((field) => optionEffect(type, field.path).status !== "not-yet");
-  }
-
   function setCount(fields: OptionField[]): number {
     return fields.filter((field) => readOption(state.spec, field).set).length;
-  }
-
-  function syncRail(): void {
-    const button = root.querySelector<HTMLButtonElement>("[data-rail]");
-    if (!button) return;
-    const label = state.railOpen ? "Collapse examples" : "Expand examples";
-    button.setAttribute("aria-expanded", state.railOpen ? "true" : "false");
-    button.title = label;
-    button.setAttribute("aria-label", label);
-  }
-
-  function renderRail(): void {
-    const list = root.querySelector("[data-examples]");
-    const count = root.querySelector("[data-ex-count]");
-    if (count) count.textContent = String(examples.length);
-    syncRail();
-    if (!list) return;
-    list.replaceChildren();
-    for (const example of examples) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "play-ex";
-      button.title = example.title;
-      if (example.slug === state.slug) button.classList.add("is-on");
-      const thumb = document.createElement("span");
-      thumb.className = "play-ex__thumb";
-      thumb.innerHTML = example.svg;
-      const copy = document.createElement("span");
-      copy.className = "play-ex__copy";
-      const name = document.createElement("strong");
-      name.textContent = example.title;
-      name.title = example.title;
-      const meta = document.createElement("span");
-      const rows = rowsOf(example.spec).length;
-      meta.textContent = `${example.type} · ${rows} row${rows === 1 ? "" : "s"}`;
-      copy.append(name, meta);
-      button.append(thumb, copy);
-      button.addEventListener("click", () => applyExample(example.slug));
-      list.append(button);
-    }
   }
 
   function renderTabs(): void {
     const host = root.querySelector("[data-tabs]");
     if (!host) return;
-    const fields = supportedFields(fieldsFor(chartType(state.spec)));
+    const fields = fieldsFor(chartType(state.spec));
     const lines = state.text.split("\n").length;
     const rows = rowsOf(state.good).length;
     const badges = [`${setCount(fields)} set`, `${lines} lines`, `${rows} rows`];
@@ -418,20 +350,43 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     });
   }
 
+  function ensureControls(): OptionControls {
+    if (!optionsHost) {
+      optionsHost = document.createElement("div");
+      optionsHost.dataset.optionControls = "";
+      controls = mountOptionControls(optionsHost, {
+        readSpec: () => state.spec,
+        readHiddenY: () => state.hiddenY,
+        setHiddenY: (items) => {
+          state.hiddenY = items;
+        },
+        commit: (field, value) => commit(field, value),
+        replace: (next, path) => {
+          state.dirty.add(path);
+          state.flash.add(path);
+          setSpec(next, true);
+        },
+      });
+    }
+    return controls as OptionControls;
+  }
+
   function renderPanel(): void {
     const panel = root.querySelector("[data-panel]");
     if (!panel) return;
-    const groups = root.querySelector(".play-groups");
     const table = root.querySelector(".play-table");
-    const savedGroups = groups?.scrollTop ?? 0;
     const savedTable = table?.scrollTop ?? 0;
-    const search = root.querySelector<HTMLInputElement>("[data-search]");
-    const caret = search && document.activeElement === search ? search.selectionStart : null;
-    panel.replaceChildren();
-    if (state.tab === "options") panel.append(optionsView());
-    else if (state.tab === "spec") panel.append(specView());
-    else panel.append(dataView());
-    const fields = supportedFields(fieldsFor(chartType(state.spec)));
+    if (state.tab === "options") {
+      const host = ensureControls();
+      if (optionsHost && optionsHost.parentElement !== panel) panel.replaceChildren(optionsHost);
+      host.refresh(resetOptions);
+      resetOptions = false;
+    } else {
+      panel.replaceChildren();
+      if (state.tab === "spec") panel.append(specView());
+      else panel.append(dataView());
+    }
+    const fields = fieldsFor(chartType(state.spec));
     const note = root.querySelector("[data-foot-note]");
     const action = root.querySelector("[data-foot-action]");
     if (state.tab === "options") {
@@ -447,433 +402,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       if (note) note.textContent = `${rows.length} rows · ${cols} fields`;
       if (action) action.textContent = "Download CSV";
     }
-    const nextGroups = root.querySelector(".play-groups");
     const nextTable = root.querySelector(".play-table");
-    if (nextGroups) nextGroups.scrollTop = savedGroups;
     if (nextTable) nextTable.scrollTop = savedTable;
-    const nextSearch = root.querySelector<HTMLInputElement>("[data-search]");
-    if (nextSearch && caret != null) {
-      nextSearch.focus();
-      nextSearch.setSelectionRange(caret, caret);
-    }
     root.dataset.jsonFallbacks = String(fields.filter((field) => usesJson(field, state.spec, state.hiddenY)).length);
-  }
-
-  function optionsView(): HTMLElement {
-    const wrap = document.createElement("div");
-    wrap.className = "play-options";
-    const search = document.createElement("div");
-    search.className = "play-search";
-    const input = document.createElement("input");
-    input.type = "search";
-    input.dataset.search = "";
-    input.placeholder = "Search options…  e.g. legend, brand, axis";
-    input.value = state.search;
-    input.addEventListener("input", () => {
-      state.search = input.value;
-      renderPanel();
-    });
-    const filter = document.createElement("button");
-    filter.type = "button";
-    filter.className = "play-setonly";
-    if (state.setOnly) filter.classList.add("is-on");
-    const fields = fieldsFor(chartType(state.spec));
-    filter.textContent = `Set · ${setCount(supportedFields(fields))}`;
-    filter.addEventListener("click", () => {
-      state.setOnly = !state.setOnly;
-      renderPanel();
-    });
-    search.append(input, filter);
-    const groups = document.createElement("div");
-    groups.className = "play-groups";
-    const q = state.search.trim().toLowerCase();
-    const essentials = fields.filter((field) => field.essential);
-    const sections: { id: string; label: string; items: OptionField[] }[] = [
-      { id: "Essentials", label: "Essentials", items: essentials },
-      ...OPTION_GROUPS.map((group) => ({
-        id: group,
-        label: group,
-        items: fields.filter((field) => field.group === group && !field.essential),
-      })),
-    ];
-    let shown = 0;
-    const typeName = chartType(state.spec);
-    for (const section of sections) {
-      let items = section.items;
-      if (q) items = items.filter((field) => `${field.label} ${field.path} ${field.description}`.toLowerCase().includes(q));
-      if (state.setOnly) items = items.filter((field) => readOption(state.spec, field).set);
-      const ready = items.filter((field) => optionEffect(typeName, field.path).status !== "not-yet");
-      const later = items.filter((field) => optionEffect(typeName, field.path).status === "not-yet");
-      const reveal = Boolean(q || state.unsupported.has(section.id));
-      const visible = reveal ? [...ready, ...later] : ready;
-      if (!visible.length && !later.length) continue;
-      shown += visible.length;
-      const open = Boolean(q || state.setOnly || state.open.has(section.id));
-      const box = document.createElement("div");
-      box.className = "play-group";
-      if (open) box.classList.add("is-open");
-      const head = document.createElement("button");
-      head.type = "button";
-      const caret = document.createElement("i");
-      caret.textContent = "▶";
-      const title = document.createElement("span");
-      title.textContent = section.label;
-      const setHere = ready.filter((field) => readOption(state.spec, field).set).length;
-      const badge = document.createElement("em");
-      badge.textContent = setHere ? `${setHere} set · ${ready.length}` : String(ready.length || later.length);
-      if (setHere) badge.classList.add("is-set");
-      head.append(caret, title, badge);
-      head.addEventListener("click", () => {
-        if (state.open.has(section.id)) state.open.delete(section.id);
-        else state.open.add(section.id);
-        renderPanel();
-      });
-      box.append(head);
-      if (open) {
-        const body = document.createElement("div");
-        body.className = "play-group__body";
-        for (const field of visible) body.append(optionRow(field));
-        if (later.length && !q) {
-          const toggle = document.createElement("button");
-          toggle.type = "button";
-          toggle.className = "play-unsupported";
-          toggle.textContent = reveal ? "Hide unsupported" : `Show unsupported (${later.length})`;
-          toggle.addEventListener("click", () => {
-            if (state.unsupported.has(section.id)) state.unsupported.delete(section.id);
-            else state.unsupported.add(section.id);
-            renderPanel();
-          });
-          body.append(toggle);
-        }
-        box.append(body);
-      }
-      groups.append(box);
-    }
-    wrap.append(search, groups);
-    if (!shown) {
-      const empty = document.createElement("div");
-      empty.className = "play-empty";
-      empty.append(`No options match “${state.search.trim()}”. `);
-      const link = document.createElement("a");
-      link.href = "/docs/options";
-      link.textContent = "Search the docs →";
-      empty.append(link);
-      groups.append(empty);
-    }
-    return wrap;
-  }
-
-  function optionRow(field: OptionField): HTMLElement {
-    const view = readOption(state.spec, field);
-    const effect = optionEffect(chartType(state.spec), field.path);
-    const row = document.createElement("div");
-    row.className = "play-opt";
-    row.dataset.path = field.path;
-    if (effect.status === "not-yet") row.classList.add("is-unsupported");
-    if (view.set) row.classList.add("is-set");
-    const dot = document.createElement("span");
-    dot.className = "play-opt__dot";
-    const head = document.createElement("div");
-    head.className = "play-opt__head";
-    const label = document.createElement("strong");
-    label.textContent = field.label;
-    const path = document.createElement("a");
-    path.href = field.docs;
-    path.textContent = field.path;
-    head.append(label, path);
-    if (view.set) {
-      const reset = document.createElement("button");
-      reset.type = "button";
-      reset.textContent = "Reset";
-      reset.addEventListener("click", () => commit(field, undefined));
-      head.append(reset);
-    }
-    const control = controlFor(field, view);
-    if (effect.status === "not-yet") {
-      control.inert = true;
-      const nodes = [control, ...control.querySelectorAll("input, button, select, textarea")];
-      for (const node of nodes) {
-        if (node instanceof HTMLInputElement || node instanceof HTMLButtonElement || node instanceof HTMLSelectElement || node instanceof HTMLTextAreaElement) node.disabled = true;
-      }
-    }
-    row.append(dot, head, control);
-    if (effect.status === "not-yet") {
-      const note = document.createElement("div");
-      note.className = "play-opt__note";
-      note.textContent = `Not yet supported for ${chartType(state.spec)}`;
-      row.append(note);
-    } else if (effect.hint) {
-      const note = document.createElement("div");
-      note.className = "play-opt__note";
-      note.textContent = effect.hint;
-      row.append(note);
-    }
-    if (field.description) {
-      const help = document.createElement("div");
-      help.className = "play-opt__help";
-      help.textContent = firstSentence(field.description);
-      help.title = field.description;
-      row.append(help);
-    }
-    return row;
-  }
-
-  function controlFor(field: OptionField, view: { value: unknown; set: boolean; complex: boolean }): HTMLElement {
-    if (field.path === "encoding.y" && (Array.isArray(getPath(state.spec, "encoding.y")) || state.hiddenY.length)) return seriesEditor();
-    if (field.path === "mark.colorRules") return rulesEditor();
-    if (field.path === "mark.palette" && (view.value == null || Array.isArray(view.value))) return paletteEditor(Array.isArray(view.value) ? view.value : []);
-    if (view.complex || field.control === "json") {
-      const area = document.createElement("textarea");
-      area.className = "play-json";
-      area.spellcheck = false;
-      area.value = view.value === undefined ? "" : JSON.stringify(view.value, null, 2);
-      area.addEventListener("change", () => {
-        const text = area.value.trim();
-        if (!text) {
-          commit(field, undefined);
-          return;
-        }
-        try {
-          commit(field, JSON.parse(text) as unknown);
-        } catch {
-          area.setAttribute("aria-invalid", "true");
-        }
-      });
-      return area;
-    }
-    if (field.control === "boolean" || field.storage === "union-boolean") {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "play-toggle";
-      const on = view.value === true;
-      if (on) button.classList.add("is-on");
-      const track = document.createElement("i");
-      button.append(track, document.createTextNode(on ? "On" : "Off"));
-      button.addEventListener("click", () => commit(field, !on));
-      return button;
-    }
-    const enums = field.enumValues ?? [];
-    if (field.control === "enum" && enums.length > 0 && enums.length <= 4 && !view.complex) {
-      const seg = document.createElement("div");
-      seg.className = "play-mini";
-      const current = view.value == null || view.value === "" ? "" : String(view.value);
-      for (const value of enums) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = value;
-        if (current === value) button.classList.add("is-on");
-        button.addEventListener("click", () => commit(field, value));
-        seg.append(button);
-      }
-      return seg;
-    }
-    if (field.control === "enum") {
-      const select = document.createElement("select");
-      const blank = document.createElement("option");
-      blank.value = "";
-      blank.textContent = field.defaultValue == null ? "—" : `${String(field.defaultValue)} · default`;
-      select.append(blank);
-      const current = view.value == null ? "" : String(view.value);
-      const values = [...enums];
-      if (current && !values.includes(current)) values.unshift(current);
-      for (const value of values) {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.append(option);
-      }
-      select.value = view.set ? current : "";
-      select.addEventListener("change", () => commit(field, select.value));
-      return select;
-    }
-    if (field.control === "color") {
-      const wrap = document.createElement("div");
-      wrap.className = "play-swatches";
-      const current = typeof view.value === "string" ? view.value : "";
-      for (const hex of SWATCHES) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.title = hex;
-        button.style.background = hex;
-        if (current.toLowerCase() === hex.toLowerCase()) button.classList.add("is-on");
-        button.addEventListener("click", () => commit(field, hex));
-        wrap.append(button);
-      }
-      const hex = document.createElement("input");
-      hex.type = "text";
-      hex.value = current;
-      hex.spellcheck = false;
-      hex.addEventListener("change", () => commit(field, hex.value.trim()));
-      wrap.append(hex);
-      return wrap;
-    }
-    if (field.control === "number") {
-      const wrap = document.createElement("div");
-      wrap.className = "play-step";
-      const input = document.createElement("input");
-      input.type = "number";
-      if (typeof field.minimum === "number") input.min = String(field.minimum);
-      if (typeof field.maximum === "number") input.max = String(field.maximum);
-      const span = (field.maximum ?? 1) - (field.minimum ?? 0);
-      input.step = field.coerce === "integer" ? "1" : span <= 2 ? "0.01" : "0.1";
-      if (typeof view.value === "number") input.value = String(view.value);
-      const stepBy = (dir: number) => {
-        const base = input.value.trim() === "" ? Number(field.defaultValue ?? field.minimum ?? 0) : Number(input.value);
-        const next = Math.round((base + dir * Number(input.step)) * 1000) / 1000;
-        commit(field, next);
-      };
-      const minus = document.createElement("button");
-      minus.type = "button";
-      minus.textContent = "−";
-      minus.addEventListener("click", () => stepBy(-1));
-      const plus = document.createElement("button");
-      plus.type = "button";
-      plus.textContent = "+";
-      plus.addEventListener("click", () => stepBy(1));
-      input.addEventListener("change", () => {
-        if (input.value.trim() === "") commit(field, undefined);
-        else if (Number.isFinite(Number(input.value))) commit(field, Number(input.value));
-      });
-      wrap.append(minus, input, plus);
-      return wrap;
-    }
-    const text = document.createElement("input");
-    text.type = "text";
-    text.value = view.value == null ? "" : String(view.value);
-    if (field.defaultValue != null) text.placeholder = String(field.defaultValue);
-    text.addEventListener("change", () => commit(field, text.value));
-    return text;
-  }
-
-  function seriesEditor(): HTMLElement {
-    const wrap = document.createElement("div");
-    wrap.className = "play-series";
-    const current = getPath(state.spec, "encoding.y");
-    const items = Array.isArray(current) ? current : [];
-    items.forEach((item, index) => wrap.append(seriesRow(item, index, true)));
-    state.hiddenY.forEach((item, index) => wrap.append(seriesRow(item, index, false)));
-    return wrap;
-  }
-
-  function seriesRow(item: unknown, index: number, shown: boolean): HTMLElement {
-    const row = document.createElement("div");
-    row.className = "play-series__row";
-    const field = typeof item === "string" ? item : isRecord(item) && typeof item.field === "string" ? item.field : `series ${index + 1}`;
-    const name = isRecord(item) && typeof item.title === "string" ? item.title : field;
-    const color = isRecord(item) && typeof item.color === "string" ? item.color : SERIES_COLORS[index % SERIES_COLORS.length] ?? "#335c84";
-    const swatch = document.createElement("i");
-    swatch.style.background = shown ? color : "#dcdcd8";
-    const label = document.createElement("span");
-    label.textContent = name;
-    label.style.color = shown ? "#17181a" : "#a0a2a7";
-    const code = document.createElement("code");
-    code.textContent = field;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = shown ? "Hide" : "Show";
-    button.addEventListener("click", () => {
-      const spec = clone(state.spec);
-      const encoding = isRecord(spec.encoding) ? spec.encoding : {};
-      const list = Array.isArray(encoding.y) ? [...encoding.y] : [];
-      if (shown) {
-        const [removed] = list.splice(index, 1);
-        if (removed !== undefined) state.hiddenY.push(removed);
-      } else {
-        const [restored] = state.hiddenY.splice(index, 1);
-        if (restored !== undefined) list.push(restored);
-      }
-      encoding.y = list;
-      spec.encoding = encoding;
-      state.dirty.add("encoding.y");
-      setSpec(spec, true);
-    });
-    row.append(swatch, label, code, button);
-    return row;
-  }
-
-  function rulesEditor(): HTMLElement {
-    const wrap = document.createElement("div");
-    wrap.className = "play-rules";
-    const rules = getPath(state.spec, "mark.colorRules");
-    const list = Array.isArray(rules) ? rules.filter(isRecord) : [];
-    list.forEach((rule, index) => {
-      const row = document.createElement("div");
-      row.className = "play-rules__row";
-      const when = document.createElement("input");
-      when.type = "text";
-      when.value = ruleWhen(rule);
-      when.addEventListener("change", () => updateRule(index, { ...rule, ...parseWhen(when.value) }));
-      const swatch = document.createElement("i");
-      const color = typeof rule.color === "string" ? rule.color : "#335c84";
-      swatch.style.background = color;
-      const hex = document.createElement("input");
-      hex.type = "text";
-      hex.value = color;
-      hex.style.width = "86px";
-      hex.addEventListener("change", () => updateRule(index, { ...rule, color: hex.value.trim() }));
-      row.append(when, swatch, hex);
-      wrap.append(row);
-    });
-    const add = document.createElement("button");
-    add.type = "button";
-    add.className = "play-add";
-    add.textContent = "+ Add rule";
-    add.addEventListener("click", () => {
-      const spec = clone(state.spec);
-      const mark = isRecord(spec.mark) ? spec.mark : {};
-      const next = Array.isArray(mark.colorRules) ? [...mark.colorRules] : [];
-      next.push({ color: "#2e9a5c", gt: 0 });
-      mark.colorRules = next;
-      spec.mark = mark;
-      state.dirty.add("mark.colorRules");
-      setSpec(spec, true);
-    });
-    wrap.append(add);
-    return wrap;
-  }
-
-  function updateRule(index: number, rule: Record<string, unknown>): void {
-    const spec = clone(state.spec);
-    const mark = isRecord(spec.mark) ? spec.mark : {};
-    const next = Array.isArray(mark.colorRules) ? [...mark.colorRules] : [];
-    next[index] = rule;
-    mark.colorRules = next;
-    spec.mark = mark;
-    state.dirty.add("mark.colorRules");
-    setSpec(spec, true);
-  }
-
-  function paletteEditor(colors: unknown[]): HTMLElement {
-    const wrap = document.createElement("div");
-    wrap.className = "play-swatches";
-    colors.forEach((color, index) => {
-      if (typeof color !== "string") return;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = color;
-      input.addEventListener("change", () => {
-        const next = [...colors];
-        next[index] = input.value.trim();
-        writePalette(next);
-      });
-      wrap.append(input);
-    });
-    const add = document.createElement("button");
-    add.type = "button";
-    add.className = "play-add";
-    add.textContent = "+ Add";
-    add.addEventListener("click", () => writePalette([...colors.filter((color) => typeof color === "string"), "#335c84"]));
-    wrap.append(add);
-    return wrap;
-  }
-
-  function writePalette(colors: unknown[]): void {
-    const spec = clone(state.spec);
-    const mark = isRecord(spec.mark) ? spec.mark : {};
-    mark.palette = colors;
-    spec.mark = mark;
-    state.dirty.add("mark.palette");
-    setSpec(spec, true);
   }
 
   function specView(): HTMLElement {
@@ -1258,13 +789,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
 
   function jump(path: string): void {
     setTab("options");
-    const field = optionCatalog.find((item) => item.path === path || path.startsWith(`${item.path}.`) || item.path.startsWith(`${path}.`));
-    const group = field?.essential ? "Essentials" : field?.group;
-    if (group) state.open.add(group);
-    renderPanel();
-    const wanted = field?.path || path;
-    const row = [...root.querySelectorAll<HTMLElement>("[data-path]")].find((item) => item.dataset.path === wanted || item.dataset.path === path);
-    row?.scrollIntoView({ block: "center" });
+    ensureControls().reveal(path);
   }
 
   async function repair(): Promise<void> {
@@ -1329,16 +854,14 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     state.baseline = clone(example.spec);
     state.hiddenY = [];
     state.dirty.clear();
-    state.search = "";
-    state.setOnly = false;
     state.pasteOpen = false;
-    state.open = new Set(["Essentials"]);
     state.tab = "options";
     state.mode = modeOf(example.spec);
     localStorage.setItem(TAB_KEY, "options");
+    resetOptions = true;
     setSpec(clone(example.spec), true);
     renderPreviewChrome();
-    renderRail();
+    selectExample(picker, slug);
   }
 
   function setTab(tab: TabName): void {
@@ -1480,29 +1003,6 @@ function jsonPath(path: string | undefined): string {
   return path.replace(/^\//, "").replace(/\//g, ".").replace(/\.\d+(?=\.|$)/g, "");
 }
 
-function ruleWhen(rule: Record<string, unknown>): string {
-  if (typeof rule.test === "string") return rule.test;
-  if (typeof rule.gt === "number") return `> ${rule.gt}`;
-  if (typeof rule.gte === "number") return `>= ${rule.gte}`;
-  if (typeof rule.lt === "number") return `< ${rule.lt}`;
-  if (typeof rule.lte === "number") return `<= ${rule.lte}`;
-  if (typeof rule.eq === "number") return `= ${rule.eq}`;
-  return "";
-}
-
-function parseWhen(text: string): Record<string, unknown> {
-  const trimmed = text.trim();
-  if (trimmed === "negative" || trimmed === "positive") return { test: trimmed };
-  const match = /^(>=|<=|>|<|=)\s*(-?\d+(?:\.\d+)?)$/.exec(trimmed);
-  if (!match) return {};
-  const value = Number(match[2]);
-  if (match[1] === ">") return { gt: value };
-  if (match[1] === ">=") return { gte: value };
-  if (match[1] === "<") return { lt: value };
-  if (match[1] === "<=") return { lte: value };
-  return { eq: value };
-}
-
 function altText(spec: Record<string, unknown>): string {
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt.trim() : "";
   if (alt) return alt;
@@ -1530,13 +1030,6 @@ function sameValue(base: unknown, next: unknown): boolean {
   const keys = new Set([...Object.keys(base), ...Object.keys(next)]);
   for (const key of keys) if (!sameValue(base[key], next[key])) return false;
   return true;
-}
-
-function firstSentence(text: string): string {
-  const trimmed = text.trim();
-  const match = /^[\s\S]*?[.!?](?=\s|$)/.exec(trimmed);
-  const sentence = match?.[0] ?? trimmed;
-  return sentence.length > 220 ? `${sentence.slice(0, 217)}…` : sentence;
 }
 
 function writeData(current: unknown, rows: Record<string, unknown>[]): unknown {

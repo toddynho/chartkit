@@ -1,0 +1,47 @@
+.ex-picker {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ex-picker__row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.ex-picker__row button {
+  flex: none;
+  border: 1px solid #dcdcd8;
+  background: #fff;
+  color: #17181a;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ex-picker__row button:hover { border-color: #17181a; }
+
+.ex-picker__row button.is-on {
+  background: #17181a;
+  border-color: #17181a;
+  color: #fff;
+}
+
+.ex-picker__caption {
+  margin: 8px 0 0;
+  color: #55575c;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ex-picker__caption[hidden] { display: none; }

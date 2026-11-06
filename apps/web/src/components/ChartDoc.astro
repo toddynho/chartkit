@@ -1,15 +1,16 @@
 ---
+import "../styles/playground.css";
 import {
   specForChart,
   type ChartDoc,
 } from "../data/docs-catalog";
+import { paintSpec } from "../lib/chartkit";
 import { loadMaps } from "../lib/batch3";
 import { loadExample, loadExamplesIndex } from "../lib/surfaces";
-import { pretty } from "../lib/spec-text";
-import { optionEffect } from "../data/option-effect";
+import { pretty, scriptJson } from "../lib/spec-text";
+import ExamplePicker from "./ExamplePicker.astro";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
-import SpecEditor from "./SpecEditor.astro";
 import StackSample from "./StackSample.astro";
 
 interface Props {
@@ -27,8 +28,7 @@ interface ShownExample {
 
 const { chart } = Astro.props;
 const href = `/docs/charts/${chart.type}`;
-const spec = specForChart(chart);
-const playHref = `/playground#${encodeURIComponent(JSON.stringify(spec))}`;
+const fallback = specForChart(chart);
 
 const examples: ShownExample[] = loadExamplesIndex()
   .examples.filter((example) => example.type === chart.type)
@@ -53,6 +53,12 @@ if (chart.type === "choropleth" || chart.type === "map-points") {
     });
   });
 }
+
+const initial = examples[0];
+const initialSpec = initial?.spec ?? fallback;
+const initialSvg = initial?.svg || paintSpec(initialSpec).svg;
+const initialAlt = initial?.alt || (typeof initialSpec.a11y === "object" && initialSpec.a11y && "alt" in initialSpec.a11y ? String(initialSpec.a11y.alt) : chart.title);
+const playHref = `/playground#${encodeURIComponent(JSON.stringify(initialSpec))}`;
 ---
 
 <div class="facts" aria-label={`${chart.title} facts`}>
@@ -74,129 +80,93 @@ if (chart.type === "choropleth" || chart.type === "map-points") {
   </span>
 </div>
 
-<p>
-  <a href="#examples">Examples</a>
-  {" · "}
-  <a href={playHref}>Open in playground</a>
-</p>
-
-<h2>Spec</h2>
-{
-  chart.type === "area" ? (
-    <p>
-      Filled line. The spec <code>type</code> is <code>line</code>, with <code>mark.area</code>.
-    </p>
-  ) : null
-}
-<SpecEditor spec={spec} />
-<StackSample />
-
-{
-  chart.anatomy.length ? (
-    <>
-      <h2>Anatomy</h2>
-      <ol class="anatomy">
-        {chart.anatomy.map((item) => (
-          <li>
-            <Prose text={item.replace(/^\d+(?=\S)/, "").replace(/^\d+\s*/, "")} />
-          </li>
-        ))}
-      </ol>
-    </>
-  ) : null
-}
-
-{
-  chart.options.length ? (
-    <>
-      <h2>Options that apply</h2>
-      <table class="opt-table">
-        <thead>
-          <tr>
-            <th>Path</th>
-            <th>Role</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {chart.options.map((option) => (
-            <tr>
-              <td>
-                <Prose text={option.path} />
-                {optionEffect(chart.type, option.path.replace(/`/g, "").trim()).status === "not-yet" ? (
-                  <span class="not-yet">Not yet on {chart.type}</span>
-                ) : null}
-              </td>
-              <td class="muted">
-                <Prose text={option.role} />
-              </td>
-              <td>
-                <span class:list={["status-pill", option.status === "drawn" || option.status === "in the library" ? "is-drawn" : "is-planned"]}>
-                  {option.status || "noted"}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
-  ) : null
-}
-
-{
-  chart.notes.map((section) => (
-    <section>
-      <h2>{section.title}</h2>
-      {section.paragraphs.map((paragraph) => (
+<div class="chart-studio" id="chart-studio">
+  <div class="chart-studio__copy">
+    {
+      chart.type === "area" ? (
         <p>
-          <Prose text={paragraph} />
+          Filled line. The spec <code>type</code> is <code>line</code>, with <code>mark.area</code>.
+          {
+            examples.length === 0 ? (
+              <>
+                {" "}
+                Worked examples are on <a href="/docs/charts/line">Line</a> and{" "}
+                <a href="/docs/charts/stacked-area">Stacked area</a>.
+              </>
+            ) : null
+          }
         </p>
-      ))}
-      {section.list.length ? (
-        <ul>
-          {section.list.map((item) => (
-            <li>
-              <Prose text={item} />
-            </li>
+      ) : null
+    }
+    {
+      chart.anatomy.length ? (
+        <>
+          <h2>Anatomy</h2>
+          <ol class="anatomy">
+            {chart.anatomy.map((item) => (
+              <li>
+                <Prose text={item.replace(/^\d+(?=\S)/, "").replace(/^\d+\s*/, "")} />
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : null
+    }
+    {
+      chart.notes.map((section) => (
+        <section>
+          <h2>{section.title}</h2>
+          {section.paragraphs.map((paragraph) => (
+            <p>
+              <Prose text={paragraph} />
+            </p>
           ))}
-        </ul>
-      ) : null}
-      {section.code.map((code) => (
-        <figure class="code">
-          <figcaption>sample</figcaption>
-          <pre><code>{code}</code></pre>
-        </figure>
-      ))}
-    </section>
-  ))
-}
+          {section.list.length ? (
+            <ul>
+              {section.list.map((item) => (
+                <li>
+                  <Prose text={item} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {section.code.map((code) => (
+            <figure class="code">
+              <figcaption>sample</figcaption>
+              <pre><code>{code}</code></pre>
+            </figure>
+          ))}
+        </section>
+      ))
+    }
+    <StackSample />
+  </div>
 
-<h2 id="examples">Examples</h2>
-{
-  chart.type === "area" && examples.length === 0 ? (
-    <p>
-      A filled line is <code>type: "line"</code> with <code>mark.area</code>. Worked examples are on{" "}
-      <a href="/docs/charts/line#examples">Line</a> and <a href="/docs/charts/stacked-area#examples">Stacked area</a>.
+  <div class="chart-studio__options">
+    <h2>Options</h2>
+    <div data-options></div>
+  </div>
+
+  <aside class="chart-studio__stage" aria-label="Preview">
+    {
+      examples.length ? (
+        <ExamplePicker examples={examples.map((example) => ({ slug: example.slug, title: example.title, blurb: example.blurb }))} active={initial?.slug} />
+      ) : (
+        <p class="chart-studio__empty">The spec is the sample for this type.</p>
+      )
+    }
+    <div class="chart-studio__preview">
+      <div data-chart role="img" aria-label={initialAlt} set:html={initialSvg} />
+    </div>
+    <figure class="code chart-studio__code">
+      <figcaption>spec</figcaption>
+      <pre><code data-code>{pretty(initialSpec)}</code></pre>
+    </figure>
+    <p class="chart-studio__play">
+      <a data-play href={playHref}>Open in playground</a>
     </p>
-  ) : examples.length === 0 ? (
-    <p>The spec above is the sample for this type.</p>
-  ) : (
-    examples.map((example) => (
-      <section id={`example-${example.slug}`}>
-        <h3>{example.title}</h3>
-        <p>{example.blurb}</p>
-        <div class="example-preview" role="img" aria-label={example.alt} set:html={example.svg} />
-        <figure class="code">
-          <figcaption>spec</figcaption>
-          <pre><code>{pretty(example.spec)}</code></pre>
-        </figure>
-        <p>
-          <a href={`/playground#${encodeURIComponent(JSON.stringify(example.spec))}`}>Open in playground</a>
-        </p>
-      </section>
-    ))
-  )
-}
+  </aside>
+</div>
 
 <p>
   <a href="/docs/encoding">Encoding</a>
@@ -206,3 +176,20 @@ if (chart.type === "choropleth" || chart.type === "map-points") {
   <a href="/gallery">Gallery</a>
 </p>
 <PageNav href={href} />
+
+<script id="chart-studio-data" type="application/json" is:inline set:html={scriptJson({
+  examples: examples.map((example) => ({
+    slug: example.slug,
+    title: example.title,
+    blurb: example.blurb,
+    alt: example.alt,
+    spec: example.spec,
+  })),
+  fallback,
+})} />
+<script>
+  import { mountChartStudio } from "../scripts/chart-studio";
+
+  const root = document.getElementById("chart-studio");
+  if (root) mountChartStudio(root);
+</script>

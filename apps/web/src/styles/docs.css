@@ -1308,6 +1308,104 @@ html.is-rail-drag * {
 }
 .example-preview svg { display: block; width: 100%; height: auto; }
 
+.docs-frame .docs-main--studio {
+  max-width: none;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.chart-studio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 8px 32px;
+  align-items: start;
+  min-width: 0;
+  margin: 8px 0 28px;
+}
+
+.chart-studio__copy,
+.chart-studio__options,
+.chart-studio__stage { min-width: 0; max-width: 100%; }
+
+.chart-studio__copy { grid-column: 1; grid-row: 1; }
+.chart-studio__options { grid-column: 1; grid-row: 2; }
+.chart-studio__options > h2 { margin-top: 8px; }
+
+.chart-studio__stage {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: calc(var(--header) + 16px);
+  max-height: calc(100vh - var(--header) - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.chart-studio__preview {
+  flex: none;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e6e6e2;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+
+.chart-studio__preview svg,
+.chart-studio__svg svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.docs-frame .docs-main figure.code.chart-studio__code {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+}
+
+.chart-studio__play { margin: 0; flex: none; }
+
+.chart-studio .ex-picker__row {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+.chart-studio .ex-picker__row button {
+  white-space: normal;
+  max-width: 100%;
+}
+.chart-studio__empty { margin: 0; color: #55575c; }
+
+.chart-studio .play-options,
+.chart-studio .play-groups {
+  flex: none;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 960px) {
+  .docs-frame .docs-main--studio { padding: 20px 16px 72px; }
+  .chart-studio {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .chart-studio__stage {
+    grid-column: 1;
+    grid-row: 1;
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .chart-studio__copy { grid-column: 1; grid-row: 2; }
+  .chart-studio__options { grid-column: 1; grid-row: 3; }
+  .chart-studio__code { max-height: 280px; }
+}
+
 .opt-ref { margin-top: 1.5rem; }
 .opt-ref dl { margin: 0 0 1.25rem; }
 .opt-ref__row {

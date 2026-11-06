@@ -1,0 +1,45 @@
+---
+import "../styles/example-picker.css";
+
+export interface PickerExample {
+  slug: string;
+  title: string;
+  blurb: string;
+}
+
+interface Props {
+  examples: PickerExample[];
+  active?: string;
+}
+
+const { examples, active = "" } = Astro.props;
+const selected = active || examples[0]?.slug || "";
+---
+
+{
+  examples.length ? (
+    <div class="ex-picker" data-example-picker>
+      <div class="ex-picker__row" role="tablist" aria-label="Examples">
+        {examples.map((example) => (
+          <button
+            type="button"
+            role="tab"
+            id={`example-${example.slug}`}
+            data-example={example.slug}
+            aria-selected={example.slug === selected ? "true" : "false"}
+            class:list={[example.slug === selected && "is-on"]}
+          >
+            {example.title}
+          </button>
+        ))}
+      </div>
+      <div class="ex-picker__captions">
+        {examples.map((example) => (
+          <p class="ex-picker__caption" data-caption={example.slug} hidden={example.slug !== selected}>
+            {example.blurb}
+          </p>
+        ))}
+      </div>
+    </div>
+  ) : null
+}

@@ -1,5 +1,6 @@
 ---
 import "../styles/playground.css";
+import ExamplePicker from "../components/ExamplePicker.astro";
 import Base from "../layouts/Base.astro";
 import { loadExample, loadExamplesIndex } from "../lib/surfaces";
 import { scriptJson } from "../lib/spec-text";
@@ -7,14 +8,16 @@ import { scriptJson } from "../lib/spec-text";
 const data = loadExamplesIndex();
 const examples = data.examples.map((card) => {
   const file = loadExample(card.slug);
-  return { slug: file.slug, title: file.title, type: file.type, svg: file.svg, spec: file.spec };
+  return { slug: file.slug, title: file.title, blurb: file.blurb, type: file.type, svg: file.svg, spec: file.spec };
 });
 if (!examples.length) throw new Error("Playground has no examples.");
 const description = "Edit a ChartKit spec in the playground. Options, JSON, and data stay in sync, and the preview renders with ChartKit.";
 ---
 
 <Base title="Playground" description={description} tone="light">
-  <div class="play" id="play"></div>
+  <div class="play" id="play">
+    <ExamplePicker examples={examples.map((example) => ({ slug: example.slug, title: example.title, blurb: example.blurb }))} active={examples[0]?.slug} />
+  </div>
   <script id="play-data" type="application/json" is:inline set:html={scriptJson({ examples })} />
   <script>
     import { mountPlayground } from "../scripts/playground";

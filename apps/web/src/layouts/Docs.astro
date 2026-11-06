@@ -12,9 +12,11 @@ interface Props {
   href: string;
   /** Chart-type index: breadcrumb, then the gallery grid. */
   browse?: boolean;
+  /** Chart page: prose and option controls beside a pinned preview. */
+  studio?: boolean;
 }
 
-const { title, description, lede, href, browse = false } = Astro.props;
+const { title, description, lede, href, browse = false, studio = false } = Astro.props;
 const crumbs = crumbsFor(href);
 ---
 
@@ -36,7 +38,7 @@ const crumbs = crumbsFor(href);
   </script>
   <div class="docs-frame">
     <DocsNav />
-    <article class:list={["docs-main", browse && "docs-main--browse"]}>
+    <article class:list={["docs-main", browse && "docs-main--browse", studio && "docs-main--studio"]}>
       <nav class="breadcrumb" aria-label="Breadcrumb">
         {
           crumbs.map((crumb, index) => (
