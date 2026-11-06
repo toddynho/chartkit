@@ -1,0 +1,216 @@
+/*
+  Two-column docs page: teaching on the left, a live demo on the right.
+  Only /docs/charts/donut uses this layout.
+*/
+
+.docs-frame.docs-frame--teach {
+  grid-template-columns: 264px minmax(0, 1fr);
+}
+
+.docs-frame .docs-main.docs-main--teach {
+  max-width: none;
+  min-width: 0;
+}
+
+.teach {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+  gap: 36px 40px;
+  align-items: start;
+  min-width: 0;
+}
+
+.teach__copy,
+.teach__demo,
+.chart-demo {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.teach__demo {
+  position: sticky;
+  top: calc(var(--header) + 12px);
+  max-height: calc(100vh - var(--header) - 24px);
+  overflow: auto;
+  padding-bottom: 8px;
+}
+
+.docs-frame .docs-main .teach__copy > p,
+.docs-frame .docs-main .teach__copy section > p,
+.docs-frame .docs-main .teach__copy section > ul {
+  margin: 0 0 16px;
+  max-width: 68ch;
+  color: #55575c;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.teach__copy section + section { margin-top: 8px; }
+
+.teach__copy .fact__v {
+  max-width: none;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+}
+
+.docs-frame .docs-main .teach__copy .concept figure.code { margin-bottom: 16px; }
+
+.chart-demo__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.chart-demo__example,
+.chart-demo__choice {
+  max-width: 100%;
+  border: 1px solid #e6e6e2;
+  border-radius: 12px;
+  background: #fff;
+  color: #55575c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: break-word;
+  cursor: pointer;
+}
+
+.chart-demo__example {
+  flex: 1 1 9.5rem;
+  padding: 7px 12px;
+}
+
+.chart-demo__choice {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.chart-demo__example:hover,
+.chart-demo__choice:hover { color: #17181a; }
+
+.chart-demo__example.is-on,
+.chart-demo__choice.is-on {
+  border-color: #17181a;
+  background: #17181a;
+  color: #fff;
+  font-weight: 600;
+}
+
+.chart-demo__example:focus-visible,
+.chart-demo__choice:focus-visible,
+.chart-demo a:focus-visible,
+.chart-demo input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chart-demo__blurb {
+  margin: 0 0 12px;
+  color: #55575c;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.chart-demo__chart {
+  margin: 0 0 12px;
+  padding: 8px;
+  border: 1px solid #e6e6e2;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.chart-demo__chart svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.chart-demo__error {
+  margin: 8px 0 0;
+  color: #9f1239;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.chart-demo__error[hidden] { display: none; }
+
+.docs-frame .docs-main .chart-demo figure.code { margin-bottom: 12px; }
+
+.docs-frame .docs-main .chart-demo figure.code pre {
+  max-height: 9.5rem;
+  overflow: auto;
+}
+
+.chart-demo__controls { display: grid; gap: 12px; margin: 0 0 12px; }
+
+.chart-demo__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 8px;
+  margin: 0 0 6px;
+  color: #17181a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chart-demo__label code { font-weight: 500; }
+
+.chart-demo__range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.chart-demo__range input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.chart-demo__range output {
+  min-width: 2.5rem;
+  color: #55575c;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.chart-demo__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chart-demo__play {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .docs-frame.docs-frame--teach { grid-template-columns: 240px minmax(0, 1fr); }
+  .teach { grid-template-columns: minmax(0, 1fr); }
+  .teach__demo {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    order: -1;
+  }
+  .docs-frame .docs-main .chart-demo figure.code pre { max-height: none; }
+}
+
+@media (max-width: 760px) {
+  .docs-frame.docs-frame--teach { grid-template-columns: minmax(0, 1fr); }
+  .docs-frame .docs-main.docs-main--teach { padding: 20px 16px 72px; }
+}

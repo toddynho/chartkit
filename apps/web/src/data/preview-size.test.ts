@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { previewSize, readExplicitSize, stripPreviewSize } from "./preview-size.ts";
+import { previewSize, readExplicitSize, stripPreviewSize, withPreviewSize } from "./preview-size.ts";
 
 test("quadrant is larger and squarer than the old 380×180 card", () => {
   const box = previewSize("quadrant", "card", {});
@@ -14,6 +14,12 @@ test("sparkline and gauge stay compact", () => {
   const gauge = previewSize("gauge", "card", {});
   assert.ok(spark.width <= 320 && (spark.height ?? 0) <= 80);
   assert.ok(gauge.width <= 320 && (gauge.height ?? 0) <= 220);
+});
+
+test("donut preview keeps a spec size and otherwise uses the type default", () => {
+  assert.deepEqual(withPreviewSize({ type: "donut", size: { width: 420, height: 340 } }).size, { width: 420, height: 340 });
+  assert.deepEqual(withPreviewSize({ type: "donut" }).size, { width: 480, height: 420 });
+  assert.deepEqual(withPreviewSize({ type: "donut", theme: "soft" }).theme, "soft");
 });
 
 test("an explicit width, height, or aspect ratio wins over the type default", () => {

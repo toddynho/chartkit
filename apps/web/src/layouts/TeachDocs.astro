@@ -1,0 +1,75 @@
+---
+/**
+ * Docs page with a teaching column and a demo column.
+ * Only the donut chart page uses this layout. Other chart pages stay on Docs.astro.
+ */
+import "../styles/docs.css";
+import "../styles/teach.css";
+import Base from "./Base.astro";
+import DocsNav from "../components/DocsNav.astro";
+import { crumbsFor } from "../data/docs-catalog";
+
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+}
+
+const { title, description, href } = Astro.props;
+const crumbs = crumbsFor(href);
+---
+
+<Base tone="light" title={title} description={description}>
+  <div class="docs-frame docs-frame--teach">
+    <DocsNav />
+    <article class="docs-main docs-main--teach">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        {
+          crumbs.map((crumb, index) => (
+            <>
+              {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
+              {index === crumbs.length - 1 || !crumb.href ? (
+                <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
+              ) : (
+                <a href={crumb.href}>{crumb.label}</a>
+              )}
+            </>
+          ))
+        }
+      </nav>
+      <div class="teach">
+        <div class="teach__copy">
+          <slot />
+        </div>
+        <aside class="teach__demo" aria-label="Chart demo">
+          <slot name="demo" />
+        </aside>
+      </div>
+    </article>
+  </div>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".docs-main figure.code").forEach((figure) => {
+    const caption = figure.querySelector("figcaption");
+    if (!caption || caption.querySelector("button")) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy-pill";
+    button.textContent = "Copy";
+    button.addEventListener("click", async () => {
+      const text = figure.querySelector("code")?.textContent ?? "";
+      try {
+        await navigator.clipboard.writeText(text.replace(/^\n/, "").replace(/\s+$/, ""));
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Copy";
+        return;
+      }
+      window.setTimeout(() => {
+        button.textContent = "Copy";
+      }, 1200);
+    });
+    caption.append(button);
+  });
+</script>
