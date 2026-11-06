@@ -4,10 +4,13 @@ import { applyDonutAction, donutControlState, donutExamples } from "../donut-tea
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
+import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
+import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
 import { teachModule, teachModules } from "./registry.ts";
+import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRoseSpec } from "./rose.ts";
 import { applyScatterAction, scatterControlState, scatterExamples, scatterTeach, smallestScatterSpec } from "./scatter.ts";
 import { openTeachExample } from "./spec.ts";
 import {
@@ -17,14 +20,31 @@ import {
   stackedAreaExamples,
   stackedAreaTeach,
 } from "./stacked-area.ts";
+import { applySunburstAction, smallestSunburstSpec, sunburstControlState, sunburstExamples, sunburstTeach } from "./sunburst.ts";
 import { applyTooltip } from "./tooltip.ts";
+import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapExamples, treemapTeach } from "./treemap.ts";
 
-test("the kit is donut, pie, line, and the cartesian batch", () => {
-  assert.deepEqual(Object.keys(teachModules).sort(), ["bar", "combo", "donut", "line", "pie", "scatter", "stacked-area"]);
+test("the kit is donut, pie, line, the cartesian batch, and part-to-whole", () => {
+  assert.deepEqual(Object.keys(teachModules).sort(), [
+    "bar",
+    "combo",
+    "donut",
+    "funnel",
+    "line",
+    "pie",
+    "radial-bar",
+    "rose",
+    "scatter",
+    "stacked-area",
+    "sunburst",
+    "treemap",
+  ]);
   assert.equal(teachModule("area"), undefined);
-  assert.equal(teachModule("funnel"), undefined);
   assert.equal(teachModule("histogram"), undefined);
+  assert.equal(teachModule("sankey"), undefined);
   assert.equal(teachModule("streamgraph"), undefined);
+  assert.equal(teachModule("tree"), undefined);
+  assert.equal(teachModule("waterfall"), undefined);
   assert.equal(donutTeach.controls.some((control) => control.id === "innerRadius"), true);
   assert.equal(pieTeach.controls.some((control) => control.id === "innerRadius"), false);
   assert.deepEqual(
@@ -47,6 +67,29 @@ test("the kit is donut, pie, line, and the cartesian batch", () => {
     stackedAreaTeach.controls.map((control) => control.id),
     ["curve", "stack", "legend", "tooltip"],
   );
+  assert.deepEqual(
+    funnelTeach.controls.map((control) => control.id),
+    ["shape", "labels", "legend", "tooltip"],
+  );
+  assert.equal(funnelTeach.controls.some((control) => control.id === "sort" || control.id === "orientation"), false);
+  assert.deepEqual(
+    treemapTeach.controls.map((control) => control.id),
+    ["depth", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    sunburstTeach.controls.map((control) => control.id),
+    ["innerRadius", "depth", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    roseTeach.controls.map((control) => control.id),
+    ["startAngle", "labels", "legend", "tooltip"],
+  );
+  assert.equal(roseTeach.controls.some((control) => control.id === "sort" || control.id === "innerRadius"), false);
+  assert.deepEqual(
+    radialBarTeach.controls.map((control) => control.id),
+    ["innerRadius", "startAngle", "stack", "labels", "legend", "tooltip"],
+  );
+  assert.equal(radialBarTeach.controls.some((control) => control.id === "sort"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -518,4 +561,306 @@ test("legend keeps the other keys and reads the omitted place", () => {
   assert.deepEqual(spec.legend, { values: true, interactive: true, position: "right" });
   applyLegend(spec, "off");
   assert.equal(spec.legend, false);
+});
+
+const customTip = { position: "top", fields: [{ field: "value", title: "Value" }] };
+
+test("funnel actions edit shape, labels, legend, and tooltip", () => {
+  assert.equal(smallestFunnelSpec.type, "funnel");
+  assert.equal(smallestFunnelSpec.mark, undefined);
+
+  const signup = structuredClone(funnelExamples[0]!.spec);
+  assert.equal(funnelControlState(signup).shape, "trapezoid");
+  assert.equal(funnelControlState(signup).labels, "on");
+  assert.equal(funnelControlState(signup).legend, "off");
+  assert.equal(signup.tooltip, undefined);
+  const untouched = structuredClone(signup);
+  funnelControlState(signup);
+  assert.deepEqual(signup, untouched);
+  applyFunnelAction(signup, { id: "shape", value: "bar" });
+  assert.equal((signup.mark as { shape: string }).shape, "bar");
+  applyFunnelAction(signup, { id: "shape", value: "trapezoid" });
+  assert.equal((signup.mark as { shape: string }).shape, "trapezoid");
+  applyFunnelAction(signup, { id: "labels", value: "off" });
+  assert.equal((signup.mark as { labels: boolean }).labels, false);
+  assert.equal((signup.mark as { shape: string }).shape, "trapezoid");
+  applyFunnelAction(signup, { id: "labels", value: "on", restore: funnelExamples[0]!.spec });
+  assert.equal((signup.mark as { labels?: boolean }).labels, undefined);
+  assert.equal((signup.mark as { shape: string }).shape, "trapezoid");
+  applyFunnelAction(signup, { id: "legend", value: "top" });
+  assert.deepEqual(signup.legend, { position: "top" });
+  applyFunnelAction(signup, { id: "tooltip", value: "off" });
+  assert.equal(signup.tooltip, false);
+  applyFunnelAction(signup, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in signup, false);
+
+  const formatted = structuredClone(funnelExamples[2]!.spec);
+  (formatted.mark as { labelFormat: unknown }).labelFormat = { style: "currency", currency: "USD", decimals: 0 };
+  const formattedOriginal = structuredClone(formatted);
+  applyFunnelAction(formatted, { id: "labels", value: "off" });
+  assert.equal((formatted.mark as { labels: boolean }).labels, false);
+  assert.equal((formatted.mark as { labelFormat?: unknown }).labelFormat, undefined);
+  assert.equal((formatted.mark as { shape: string }).shape, "trapezoid");
+  applyFunnelAction(formatted, { id: "labels", value: "on", restore: formattedOriginal });
+  assert.equal((formatted.mark as { labels?: boolean }).labels, undefined);
+  assert.deepEqual((formatted.mark as { labelFormat: unknown }).labelFormat, { style: "currency", currency: "USD", decimals: 0 });
+  assert.equal((formatted.mark as { shape: string }).shape, "trapezoid");
+
+  const pitch = structuredClone(funnelExamples[1]!.spec);
+  assert.equal(funnelControlState(pitch).legend, "top");
+  const pitchTip = structuredClone(customTip);
+  pitch.tooltip = structuredClone(pitchTip);
+  const opened = openTeachExample(pitch);
+  assert.deepEqual(opened.tooltip, pitch.tooltip);
+  assert.notEqual(opened.tooltip, pitch.tooltip);
+  applyFunnelAction(pitch, { id: "tooltip", value: "off" });
+  assert.equal(pitch.tooltip, false);
+  applyFunnelAction(pitch, { id: "tooltip", value: "on", restore: pitchTip });
+  assert.deepEqual(pitch.tooltip, pitchTip);
+  applyFunnelAction(pitch, { id: "legend", value: "bottom" });
+  assert.deepEqual(pitch.legend, { position: "bottom" });
+
+  assert.deepEqual(
+    funnelExamples.map((example) => example.title),
+    ["Signup funnel", "From pitch to liftoff", "From enquiry to a seat"],
+  );
+  assert.deepEqual(
+    funnelExamples.map((example) => example.meta),
+    ["5 stages", "5 stages", "4 stages"],
+  );
+  for (const example of funnelExamples) assert.equal(example.spec.type, "funnel");
+});
+
+test("treemap actions edit levels, legend, and tooltip", () => {
+  assert.equal(smallestTreemapSpec.type, "treemap");
+  assert.equal(smallestTreemapSpec.mark, undefined);
+  assert.equal((smallestTreemapSpec.encoding as { color: string }).color, "group");
+
+  const inventory = structuredClone(treemapExamples[0]!.spec);
+  assert.equal(treemapControlState(inventory).depth, "all");
+  assert.equal(treemapControlState(inventory).legend, "top");
+  assert.equal(inventory.tooltip, undefined);
+  const untouched = structuredClone(inventory);
+  treemapControlState(inventory);
+  assert.deepEqual(inventory, untouched);
+  applyTreemapAction(inventory, { id: "depth", value: "1" });
+  assert.equal((inventory.mark as { depth: number }).depth, 1);
+  assert.equal((inventory.encoding as { color: string }).color, "group");
+  applyTreemapAction(inventory, { id: "depth", value: "all" });
+  assert.equal(inventory.mark, undefined);
+  applyTreemapAction(inventory, { id: "legend", value: "off" });
+  assert.equal(inventory.legend, false);
+  applyTreemapAction(inventory, { id: "tooltip", value: "off" });
+  assert.equal(inventory.tooltip, false);
+  applyTreemapAction(inventory, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in inventory, false);
+
+  const cellar = structuredClone(treemapExamples[1]!.spec);
+  assert.equal(treemapControlState(cellar).depth, "all");
+  assert.equal(treemapControlState(cellar).legend, "bottom");
+  applyTreemapAction(cellar, { id: "depth", value: "2" });
+  assert.equal((cellar.mark as { depth: number }).depth, 2);
+  assert.equal((cellar.legend as { position: string }).position, "bottom");
+  applyTreemapAction(cellar, { id: "legend", value: "right" });
+  assert.deepEqual(cellar.legend, { position: "right" });
+  const cellarTip = structuredClone(customTip);
+  cellar.tooltip = structuredClone(cellarTip);
+  const opened = openTeachExample(cellar);
+  assert.deepEqual(opened.tooltip, cellar.tooltip);
+  assert.notEqual(opened.tooltip, cellar.tooltip);
+  applyTreemapAction(cellar, { id: "tooltip", value: "off" });
+  assert.equal(cellar.tooltip, false);
+  applyTreemapAction(cellar, { id: "tooltip", value: "on", restore: cellarTip });
+  assert.deepEqual(cellar.tooltip, cellarTip);
+  assert.equal((cellar.size as { width: number }).width, 560);
+
+  assert.deepEqual(
+    treemapExamples.map((example) => example.title),
+    ["Inventory by material", "Litres by cask", "Where the crates sat"],
+  );
+  assert.deepEqual(
+    treemapExamples.map((example) => example.meta),
+    ["12 tiles", "3 levels", "3 levels"],
+  );
+  for (const example of treemapExamples) assert.equal(example.spec.type, "treemap");
+});
+
+test("sunburst actions edit the hole, levels, legend, and tooltip", () => {
+  assert.equal(smallestSunburstSpec.type, "sunburst");
+  assert.equal(smallestSunburstSpec.mark, undefined);
+  assert.equal(sunburstControlState(smallestSunburstSpec).innerRadius, 0.28);
+
+  const traffic = structuredClone(sunburstExamples[0]!.spec);
+  assert.equal(sunburstControlState(traffic).innerRadius, 0.28);
+  assert.equal(sunburstControlState(traffic).depth, "all");
+  assert.equal(sunburstControlState(traffic).legend, "top");
+  assert.equal(traffic.tooltip, undefined);
+  const untouched = structuredClone(traffic);
+  sunburstControlState(traffic);
+  assert.deepEqual(traffic, untouched);
+  applySunburstAction(traffic, { id: "innerRadius", value: 0 });
+  assert.equal((traffic.mark as { innerRadius: number }).innerRadius, 0);
+  assert.equal(traffic.type, "sunburst");
+  applySunburstAction(traffic, { id: "depth", value: "1" });
+  assert.equal((traffic.mark as { depth: number; innerRadius: number }).depth, 1);
+  assert.equal((traffic.mark as { innerRadius: number }).innerRadius, 0);
+  applySunburstAction(traffic, { id: "tooltip", value: "off" });
+  assert.equal(traffic.tooltip, false);
+  applySunburstAction(traffic, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in traffic, false);
+
+  const cellar = structuredClone(sunburstExamples[1]!.spec);
+  assert.equal(sunburstControlState(cellar).innerRadius, 0.42);
+  assert.equal(sunburstControlState(cellar).legend, "bottom");
+  applySunburstAction(cellar, { id: "innerRadius", value: 0.5 });
+  assert.equal((cellar.mark as { innerRadius: number }).innerRadius, 0.5);
+  applySunburstAction(cellar, { id: "depth", value: "2" });
+  assert.equal((cellar.mark as { depth: number; innerRadius: number }).depth, 2);
+  assert.equal((cellar.mark as { innerRadius: number }).innerRadius, 0.5);
+  applySunburstAction(cellar, { id: "depth", value: "all" });
+  assert.equal((cellar.mark as { depth?: number }).depth, undefined);
+  assert.equal((cellar.mark as { innerRadius: number }).innerRadius, 0.5);
+  applySunburstAction(cellar, { id: "legend", value: "off" });
+  assert.equal(cellar.legend, false);
+  const cellarTip = structuredClone(customTip);
+  cellar.tooltip = structuredClone(cellarTip);
+  const opened = openTeachExample(cellar);
+  assert.deepEqual(opened.tooltip, cellar.tooltip);
+  assert.notEqual(opened.tooltip, cellar.tooltip);
+  applySunburstAction(cellar, { id: "tooltip", value: "off" });
+  assert.equal(cellar.tooltip, false);
+  applySunburstAction(cellar, { id: "tooltip", value: "on", restore: cellarTip });
+  assert.deepEqual(cellar.tooltip, cellarTip);
+  assert.equal(cellar.type, "sunburst");
+
+  assert.deepEqual(
+    sunburstExamples.map((example) => example.title),
+    ["Traffic by source", "The same cellar, in rings", "Shed, boat, job"],
+  );
+  assert.deepEqual(
+    sunburstExamples.map((example) => example.meta),
+    ["2 rings", "3 rings", "3 rings"],
+  );
+  for (const example of sunburstExamples) assert.equal(example.spec.type, "sunburst");
+});
+
+test("rose actions edit start angle, labels, legend, and tooltip", () => {
+  assert.equal(smallestRoseSpec.type, "rose");
+  assert.equal(smallestRoseSpec.mark, undefined);
+  assert.equal(roseExamples.length, 1);
+
+  const audience = structuredClone(roseExamples[0]!.spec);
+  assert.equal(roseControlState(audience).startAngle, 0);
+  assert.equal(roseControlState(audience).labels, "on");
+  assert.equal(roseControlState(audience).legend, "top");
+  assert.equal(audience.tooltip, undefined);
+  const untouched = structuredClone(audience);
+  roseControlState(audience);
+  assert.deepEqual(audience, untouched);
+  applyRoseAction(audience, { id: "startAngle", value: "-90" });
+  assert.equal((audience.mark as { startAngle: number }).startAngle, -90);
+  assert.equal((audience.mark as { padAngle: number }).padAngle, 1.2);
+  applyRoseAction(audience, { id: "labels", value: "off" });
+  assert.equal((audience.mark as { labels: boolean }).labels, false);
+  assert.equal((audience.mark as { padAngle: number }).padAngle, 1.2);
+  applyRoseAction(audience, { id: "labels", value: "on", restore: roseExamples[0]!.spec });
+  assert.equal((audience.mark as { labels: boolean }).labels, true);
+  assert.equal((audience.mark as { padAngle: number }).padAngle, 1.2);
+  applyRoseAction(audience, { id: "legend", value: "bottom" });
+  assert.deepEqual(audience.legend, { position: "bottom" });
+  applyRoseAction(audience, { id: "tooltip", value: "off" });
+  assert.equal(audience.tooltip, false);
+  applyRoseAction(audience, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in audience, false);
+
+  const custom = structuredClone(roseExamples[0]!.spec);
+  const tip = structuredClone(customTip);
+  custom.tooltip = structuredClone(tip);
+  const opened = openTeachExample(custom);
+  assert.deepEqual(opened.tooltip, custom.tooltip);
+  assert.notEqual(opened.tooltip, custom.tooltip);
+  applyRoseAction(custom, { id: "tooltip", value: "off" });
+  assert.equal(custom.tooltip, false);
+  applyRoseAction(custom, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(custom.tooltip, tip);
+  assert.equal((custom.size as { width: number }).width, 520);
+
+  assert.deepEqual(
+    roseExamples.map((example) => example.title),
+    ["Saturday audience"],
+  );
+  assert.deepEqual(
+    roseExamples.map((example) => example.meta),
+    ["6 categories"],
+  );
+  for (const example of roseExamples) assert.equal(example.spec.type, "rose");
+});
+
+test("radial bar actions edit the hole, start, stack, labels, legend, and tooltip", () => {
+  assert.equal(smallestRadialBarSpec.type, "radial-bar");
+  assert.equal(smallestRadialBarSpec.mark, undefined);
+  assert.equal(radialBarControlState(smallestRadialBarSpec).innerRadius, 0.34);
+  assert.equal(radialBarControlState(smallestRadialBarSpec).stack, "none");
+
+  const lumen = structuredClone(radialBarExamples[0]!.spec);
+  assert.equal(radialBarControlState(lumen).innerRadius, 0.34);
+  assert.equal(radialBarControlState(lumen).startAngle, 0);
+  assert.equal(radialBarControlState(lumen).stack, "none");
+  assert.equal(radialBarControlState(lumen).labels, "off");
+  assert.equal(radialBarControlState(lumen).legend, "top");
+  assert.equal(lumen.tooltip, undefined);
+  const untouched = structuredClone(lumen);
+  radialBarControlState(lumen);
+  assert.deepEqual(lumen, untouched);
+  applyRadialBarAction(lumen, { id: "innerRadius", value: 0.5 });
+  assert.equal((lumen.mark as { innerRadius: number }).innerRadius, 0.5);
+  assert.equal((lumen.mark as { padAngle: number }).padAngle, 2);
+  assert.equal((lumen.mark as { cornerRadius: number }).cornerRadius, 4);
+  applyRadialBarAction(lumen, { id: "startAngle", value: "90" });
+  assert.equal((lumen.mark as { startAngle: number }).startAngle, 90);
+  applyRadialBarAction(lumen, { id: "stack", value: "stack" });
+  assert.equal((lumen.mark as { stack: string }).stack, "stack");
+  applyRadialBarAction(lumen, { id: "stack", value: "percent" });
+  assert.equal((lumen.mark as { stack: string }).stack, "percent");
+  const series = (lumen.encoding as { y: { field: string }[] }).y;
+  assert.deepEqual(
+    series.map((channel) => channel.field),
+    ["weeknight", "saturday"],
+  );
+  applyRadialBarAction(lumen, { id: "labels", value: "on", restore: radialBarExamples[0]!.spec });
+  assert.equal((lumen.mark as { labels: boolean }).labels, true);
+  applyRadialBarAction(lumen, { id: "labels", value: "off" });
+  assert.equal((lumen.mark as { labels: boolean }).labels, false);
+  applyRadialBarAction(lumen, { id: "tooltip", value: "off" });
+  assert.equal(lumen.tooltip, false);
+  applyRadialBarAction(lumen, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in lumen, false);
+
+  const minutes = structuredClone(radialBarExamples[1]!.spec);
+  assert.equal(radialBarControlState(minutes).legend, "off");
+  assert.equal(radialBarControlState(minutes).labels, "off");
+  assert.equal((minutes.size as { height: number }).height, 300);
+  applyRadialBarAction(minutes, { id: "legend", value: "bottom" });
+  assert.deepEqual(minutes.legend, { position: "bottom" });
+  assert.equal((minutes.size as { width: number }).width, 520);
+  const tip = structuredClone(customTip);
+  minutes.tooltip = structuredClone(tip);
+  const opened = openTeachExample(minutes);
+  assert.deepEqual(opened.tooltip, minutes.tooltip);
+  assert.notEqual(opened.tooltip, minutes.tooltip);
+  applyRadialBarAction(minutes, { id: "tooltip", value: "off" });
+  assert.equal(minutes.tooltip, false);
+  applyRadialBarAction(minutes, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(minutes.tooltip, tip);
+  assert.equal(minutes.type, "radial-bar");
+
+  assert.deepEqual(
+    radialBarExamples.map((example) => example.title),
+    ["Lumen, minutes by desk", "Minutes by desk"],
+  );
+  assert.deepEqual(
+    radialBarExamples.map((example) => example.meta),
+    ["6 categories", "5 categories"],
+  );
+  for (const example of radialBarExamples) assert.equal(example.spec.type, "radial-bar");
 });

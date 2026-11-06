@@ -1,0 +1,152 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestTreemapSpec } from "../data/teach/treemap";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/treemap";
+const spec = specText(smallestTreemapSpec);
+const play = playgroundHref(smallestTreemapSpec);
+const depth = `{
+  "mark": { "depth": 2 }
+}`;
+const color = `{
+  "encoding": { "x": "name", "y": "size", "color": "group" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A treemap shows parts of a whole as tiles. The area of a tile is the value. A flat list can group tiles by a color field. A hierarchy nests tiles inside their parent.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a treemap when the question is which parts make up a total, and the parts are numerous enough that a pie becomes a ring of slivers. Inventory by material is twelve products in three groups. Litres by cask is the same idea with three levels: orchard, apple, then cask.
+  </p>
+  <p>
+    A <a href="/docs/charts/sunburst">sunburst</a> is the same hierarchy drawn as concentric rings. Color follows the top branch there too. A <a href="/docs/charts/pie">pie</a> or a <a href="/docs/charts/donut">donut</a> is the flat chart for a handful of parts. A <a href="/docs/charts/bar">bar</a> is the chart when you are comparing amounts that do not need to add to one rectangle.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Treemap, sunburst, pie, and donut</h2>
+  <p>
+    Treemap and sunburst read the same trees. Nested <code>children</code>, <code>encoding.path</code>, or <code>encoding.id</code> with <code>encoding.parent</code>. A parent with no value is the sum of its leaves.
+  </p>
+  <p>
+    <code>type: "treemap"</code> packs that tree into rectangles. <code>type: "sunburst"</code> gives each level a ring. Pie and donut have no levels. Each row is one slice of a single disk.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    A flat treemap is one row per tile. <code>encoding.x</code> is the name. <code>encoding.y</code> is the size. <code>encoding.color</code> is an optional group. Tiles in a group share a series color, in lighter and darker tints, and sit together. Inventory by material points color at <code>group</code>. Wood, metal, and glass are the three groups.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.color</span></figcaption>
+    <pre><code>{color}</code></pre>
+  </figure>
+  <p>
+    A nested treemap puts <code>children</code> on a node. Litres by cask and Where the crates sat are that shape. The leaf holds the number. The name field is still <code>encoding.x</code>, and the number is <code>encoding.y</code>. You can also pass flat rows with <code>encoding.path</code>, a list of fields from the root down to the leaf, or with <code>encoding.id</code> and <code>encoding.parent</code>.
+  </p>
+  <p>
+    A missing number, a zero, or a negative number is left out of the tiles. On a nested node, leave the value off and it becomes the sum of the leaves. If you set a parent value, it has to match that sum.
+  </p>
+  <p>
+    <code>mark.palette</code> does not apply to a treemap. It warns CK3010. Flat color comes from <code>encoding.color</code> and the theme series. Nested color follows the top branch.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest treemap. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Three flat tiles and a color group need no <code>mark</code>.
+  </p>
+  <TeachFacts type="treemap" label="Treemap packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing treemap specs. Inventory by material is twelve flat tiles in three color groups. Litres by cask and Where the crates sat are three levels of nested children. The level control changes those two. It does not fold a flat color group.
+  </p>
+</section>
+
+<TeachConcept id="levels" title="Levels">
+  <p>
+    <code>mark.depth</code> is how many levels to draw under the root. Deeper nodes fold into that level. Omit it and the cap is 8, which is the whole tree for these examples. <code>1</code> draws the top branches only. <code>2</code> draws the top branch and its children. <code>3</code> reaches the leaves of Litres by cask and Where the crates sat.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.depth</span></figcaption>
+    <pre><code>{depth}</code></pre>
+  </figure>
+  <p>
+    Inventory by material is flat rows plus <code>encoding.color</code>. It is not a hierarchy, so the cap does not change the tiles. The key is still written.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A treemap with more than one color group, or more than one top branch, shows a legend. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. Litres by cask and Where the crates sat set <code>bottom</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <p>
+    One group draws no legend. The tiles still take the series color.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a treemap when the key is omitted. Hovering a tile shows its name and its value. A nested tile also shows the path, the share of its parent, and the share of the total. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    The tile name, and the value when the rectangle is tall enough, are drawn to fit. There is no <code>mark.labels</code> switch on a treemap. <code>mark.gap</code> and <code>mark.cornerRadius</code> are accepted keys. The tiles on this page keep the layout's own padding and corner. Edit those keys in the playground. <code>encoding.color.scale</code> is the continuous color ramp, for a flat treemap whose color field is a number. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/sunburst">Sunburst</a> draws this hierarchy as rings. Color follows the top branch.</li>
+    <li><a href="/docs/charts/pie">Pie</a> is a flat set of parts, as a solid disk.</li>
+    <li><a href="/docs/charts/donut">Donut</a> is that disk with a hole.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

@@ -1,0 +1,184 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestRadialBarSpec } from "../data/teach/radial-bar";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/radial-bar";
+const spec = specText(smallestRadialBarSpec);
+const play = playgroundHref(smallestRadialBarSpec);
+const hole = `{
+  "mark": { "innerRadius": 0.34 }
+}`;
+const start = `{
+  "mark": { "startAngle": 90 }
+}`;
+const stack = `{
+  "mark": { "stack": "stack" }
+}`;
+const labels = `{
+  "mark": { "labels": true }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A radial bar puts categories around a circle. The length of the bar is the value. A track runs out to the edge behind each bar. A second series is another bar in that same category, beside the first or stacked outward.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a radial bar when the categories belong on a dial and you are comparing one or more measures. Lumen, minutes by desk is six desks, weeknight against Saturday. Music is the long bar on both series.
+  </p>
+  <p>
+    A <a href="/docs/charts/rose">rose</a> also lays categories around a circle, and the radius is the value, but it fills the whole equal angle. It does not draw a bar on a track, and a single series has no side-by-side pair. A <a href="/docs/charts/bar">bar</a> is the same comparison on a straight axis. Use it when the names are long or the list is not a cycle. A <a href="/docs/charts/pie">pie</a> encodes share as the angle. A radial bar keeps the angles equal.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Radial bar, rose, and bar</h2>
+  <p>
+    <code>type: "radial-bar"</code> bends bars around a circle. <code>encoding.y</code> is the radius. Several y fields group side by side unless <code>mark.stack</code> is <code>stack</code> or <code>percent</code>. <code>radialBar</code>, <code>polar-bar</code>, and <code>polar</code> repair to radial bar. Setting <code>layout.coordinate</code> to <code>polar</code> on a bar repairs the type here too.
+  </p>
+  <p>
+    <code>type: "rose"</code> fills equal angles out to the value. <code>type: "bar"</code> is the cartesian chart. <code>layout.coordinate</code> <code>cartesian</code> on a radial bar warns CK3078. The chart stays polar.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one category and one or more numbers. <code>encoding.x</code> is the category. <code>encoding.y</code> is a field name, or a list of channels when each series is its own column. Lumen, minutes by desk lists <code>weeknight</code> and <code>saturday</code>.
+  </p>
+  <p>
+    The categories run clockwise from the start angle, in data order. <code>mark.sort</code> is a pie and donut key. On a radial bar it warns CK3010 and the order stays put.
+  </p>
+  <p>
+    A negative radius warns CK3073 and is drawn as zero. Fewer than three categories warns CK3074. More than sixteen warns CK3079.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest radial bar. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. <code>layout.coordinate</code> is <code>polar</code>. The hole defaults to 0.34, the gap to 2 degrees, and the bars are grouped, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="radial-bar" label="Radial bar packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing radial bars. Lumen, minutes by desk is the core example, six categories and two series. Minutes by desk is the homepage chart. It drops Ident, sets a size, and turns the legend off.
+  </p>
+</section>
+
+<TeachConcept id="hole" title="Hole">
+  <p>
+    <code>mark.innerRadius</code> is the hole the bars grow from, as a fraction of the radius, from 0 to 0.95. Omit it and a radial bar uses 0.34. Lumen, minutes by desk sets that same hole. The track behind each bar starts there.
+  </p>
+  <p>
+    <code>0</code> starts the bars at the center. The chart stays a radial bar. A rose is the type that fills an equal angle, and its hole defaults to 0. This control stops at 0.75. A value above 0.85 warns CK3075.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.innerRadius</span></figcaption>
+    <pre><code>{hole}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="start" title="Start angle">
+  <p>
+    <code>mark.startAngle</code> is where the first category starts, in degrees. <code>0</code> is the top, and the bars run clockwise. The value can be from -360 to 360. Omit it and the first category starts at the top.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.startAngle</span></figcaption>
+    <pre><code>{start}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="stack" title="Stack">
+  <p>
+    <code>mark.stack</code> is how several series share a category. Omit it, or set <code>none</code>, and the bars sit side by side inside the category's angle. That is grouped. <code>stack</code> runs the series outward from the hole, in one bar. <code>percent</code> makes each category 100%, so you compare the mix.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.stack</span></figcaption>
+    <pre><code>{stack}</code></pre>
+  </figure>
+  <p>
+    One series looks the same grouped or stacked. Lumen, minutes by desk and Minutes by desk are two series, so the choice changes the picture.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    <code>mark.labels</code> draws the value on a bar tall enough to hold it. Omit it, or set false, and the bars are unlabeled. The category names stay outside the circle. Set true and the number is drawn. Both examples omit it, so the labels start off.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.labels</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    Turning labels off and on again puts the example's label keys back.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A radial bar with one series hides the legend. A radial bar with several series shows it. Omit <code>legend</code>, or set <code>true</code>, and the legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. Minutes by desk sets <code>false</code>. Lumen, minutes by desk leaves the key off, so the two series get a legend on top.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a radial bar when the key is omitted. Hovering a bar shows the category, the series, and the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.padAngle</code> is the gap between categories, in degrees. A radial bar defaults to 2. Lumen, minutes by desk sets that gap. Above 8 degrees warns CK3076. <code>mark.cornerRadius</code> rounds the outer end of the bar, in px. The default is 3, and Lumen, minutes by desk sets 4. <code>mark.gap</code> is the share of the category left between grouped series. A radius domain that excludes zero warns CK3080. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/rose">Rose</a> fills an equal angle out to the value. It does not draw a bar on a track.</li>
+    <li><a href="/docs/charts/bar">Bar</a> is the same comparison on a straight axis.</li>
+    <li><a href="/docs/charts/pie">Pie</a> and <a href="/docs/charts/donut">donut</a> encode a share as the angle.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
