@@ -12,7 +12,7 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { runCapture } from "./capture.mjs";
 import {
   DEFAULT_BASE_URL,
@@ -23,8 +23,10 @@ import {
   hostNeedsKey,
   isCrusoe,
   listModels,
+  maxImagesForModel,
   multimodalModels,
   parseReview,
+  pickImagesForReview,
   pickModel,
   postChat,
 } from "./model.mjs";
@@ -46,7 +48,7 @@ function stopChild(child) {
   }
 }
 
-function formatDuration(ms) {
+export function formatDuration(ms) {
   const seconds = Math.round(ms / 1000);
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
@@ -68,7 +70,7 @@ Headless Chromium. Install it once:
 
 Flags
   --url <site>         Already-running server. Skips build and preview.
-  --only <type>        One docs chart type, for example progress-ring.
+  --only <types>       Comma-separated chart types, for example progress-ring,rose.
   --widths <list>      Rail widths. Default 280,380,720. 380 is the unset default.
   --no-model           Capture and deterministic checks only.
   --list-models        Print multimodal models from GET /v1/models and exit.
@@ -216,7 +218,7 @@ async function launchBrowser(headed) {
   }
 }
 
-function visionConfig(args) {
+export function visionConfig(args) {
   const baseUrl = (args.baseUrl || process.env.QA_VISION_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
   const apiKey = process.env.QA_VISION_API_KEY || process.env.CRUSOE_API_KEY || "";
   const explicit = args.model || process.env.QA_VISION_MODEL || "";
@@ -241,7 +243,7 @@ async function printModels(config) {
   }
 }
 
-async function reviewShots(shots, config, args) {
+export async function reviewShots(shots, config, args) {
   let picked = config.explicit ? { id: config.explicit, reason: "explicit" } : null;
   if (!picked) {
     const models = await listModels(config);
@@ -251,11 +253,22 @@ async function reviewShots(shots, config, args) {
     throw new Error("No multimodal model from GET /v1/models. Pass --model. Ollama does not tag modality.");
   }
   console.log(`Vision model: ${picked.id} (${picked.reason})`);
+  const imageCap = maxImagesForModel(picked.id);
   let cursor = 0;
   let imagesSent = 0;
   let estimatedTokens = 0;
+  let done = 0;
+  let problems = 0;
   const usage = { prompt_tokens: 0, completion_tokens: 0 };
   const workers = Math.max(1, Math.min(args.concurrency, shots.length || 1));
+
+  function note(shot) {
+    done += 1;
+    if (shot.model?.error || shot.model?.issues?.length) problems += 1;
+    if (done % 10 === 0 || done === shots.length) {
+      console.log(`${done}/${shots.length} images sent ${imagesSent} flagged or error ${problems}`);
+    }
+  }
 
   async function worker() {
     for (;;) {
@@ -264,18 +277,21 @@ async function reviewShots(shots, config, args) {
       const shot = shots[index];
       if (!shot.images?.length) {
         shot.model = { issues: [], error: "no screenshot", finishReason: "" };
+        note(shot);
         continue;
       }
       try {
-        const images = [];
+        const loaded = [];
         for (const image of shot.images) {
           const bytes = await readFile(join(args.out, image.file));
-          images.push({ dataUri: dataUri(bytes) });
-          imagesSent += 1;
+          loaded.push({ ...image, dataUri: dataUri(bytes) });
         }
-        const body = buildChatRequest({ model: picked.id, maxTokens: args.maxTokens, shot, images });
-        estimatedTokens += estimateRequestTokens(shot, args.maxTokens);
+        const chosen = pickImagesForReview(loaded, imageCap);
+        const body = buildChatRequest({ model: picked.id, maxTokens: args.maxTokens, shot, images: chosen });
         const result = await postChat({ baseUrl: config.baseUrl, apiKey: config.apiKey, body });
+        const sent = chosen.slice(0, result.imagesSent ?? chosen.length);
+        imagesSent += sent.length;
+        estimatedTokens += estimateRequestTokens(shot, args.maxTokens, sent);
         const parsed = parseReview(result.content);
         if (result.usage) {
           usage.prompt_tokens += Number(result.usage.prompt_tokens) || 0;
@@ -289,6 +305,7 @@ async function reviewShots(shots, config, args) {
       } catch (err) {
         shot.model = { issues: [], error: err instanceof Error ? err.message : String(err), finishReason: "" };
       }
+      note(shot);
     }
   }
 
@@ -419,7 +436,12 @@ async function main() {
   if (!modelInfo) console.log(`estimated tokens if those images were sent ${estimated}`);
 }
 
-main().catch((err) => {
-  console.error(err instanceof Error ? err.message : err);
-  process.exitCode = 1;
-});
+function runMain() {
+  main().catch((err) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  });
+}
+
+const entry = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : "";
+if (import.meta.url === entry) runMain();

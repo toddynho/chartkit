@@ -40,7 +40,7 @@ An already-running server skips the build:
 
 ```bash
 npm run qa:visual -- --url http://127.0.0.1:4321 --no-model
-npm run qa:visual -- --url http://127.0.0.1:4321 --only progress-ring
+npm run qa:visual -- --url http://127.0.0.1:4321 --only progress-ring,rose
 ```
 
 ## What it opens
@@ -60,7 +60,7 @@ Deterministic checks run in the page and are stored with the shot: a scrollbar i
 | Flag | |
 |---|---|
 | `--url <site>` | Use a server that is already up. |
-| `--only <type>` | One chart type. |
+| `--only <types>` | Comma-separated chart types, for example `progress-ring,rose`. |
 | `--widths <list>` | Comma-separated rail widths. `default` is 380. |
 | `--no-model` | Capture and checks only. |
 | `--list-models` | Print multimodal models and exit. |
@@ -75,7 +75,18 @@ Environment: `QA_VISION_BASE_URL` (default `https://api.inference.crusoecloud.co
 
 ## Time
 
-On a headless Linux box, after `npm ci` and the Playwright install, a full `--no-model` sweep was about 2 minutes: about 30 seconds to build the site and about 80 seconds to capture. That run took 486 shots and 968 images (a viewport shot plus a chart crop). A model sweep would send those 968 images, on the order of 800,000 estimated input tokens. The command prints the exact counts. A cold build on a slower machine takes longer than 30 seconds.
+On a headless Linux box, after `npm ci` and the Playwright install, a full `--no-model` sweep was about 2 minutes: about 30 seconds to build the site and about 80 seconds to capture. That run took 486 shots and wrote 968 images (a viewport shot plus a chart crop). The command prints the exact counts. A cold build on a slower machine takes longer than 30 seconds.
+
+Nemotron-3.5-Super-VL accepts one image per request, so a review sends the page viewport and leaves the chart crop on disk. Other models get the page and the crop. A full Nemotron pass is about 10 seconds per shot, about 80 minutes for 486 shots. Use `--only` for a subset.
+
+To review a report that is already on disk, without recapturing:
+
+```bash
+node scripts/visual-qa/review-existing.mjs --only progress-ring,rose
+node scripts/visual-qa/review-existing.mjs --model Qwen/Qwen3.8-27B --only /docs/charts/donut
+```
+
+`--only` there is chart types or page paths. `--out`, `--base-url`, `--max-tokens`, and `--concurrency` (default 3) match the sweep. Results merge back onto the same shots by page, demo, viewport, and rail width, and the HTML and JSON are rewritten.
 
 ## Mac and Ollama
 

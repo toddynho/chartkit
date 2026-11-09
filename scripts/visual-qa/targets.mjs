@@ -47,15 +47,29 @@ export function parseWidths(text) {
     });
 }
 
+export function parseOnly(only) {
+  if (only == null || only === "") return [];
+  const parts = Array.isArray(only) ? only : [only];
+  return parts
+    .flatMap((part) => String(part).split(","))
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 /**
  * Desktop docs pages vary the rail. Mobile stacks the rail, so it is one pass.
- * Homepage and compare are included unless --only names a chart type.
+ * Homepage and compare are included unless --only names chart types.
+ * --only is a comma-separated list. Every unknown name is reported.
  */
 export function planJobs({ types, only, widths, playgroundTypes = PLAYGROUND_TYPES }) {
-  const wanted = only ? types.filter((type) => type === only) : types;
-  if (only && !wanted.length) {
-    throw new Error(`Unknown chart page "${only}". chartPageTypes does not include it.`);
+  const names = parseOnly(only);
+  const known = new Set(types);
+  const unknown = names.filter((name) => !known.has(name));
+  if (unknown.length) {
+    const quoted = unknown.map((name) => `"${name}"`).join(", ");
+    throw new Error(`Unknown chart page ${quoted}. chartPageTypes does not include ${unknown.length === 1 ? "it" : "them"}.`);
   }
+  const wanted = names.length ? types.filter((type) => names.includes(type)) : types;
   const jobs = [];
   for (const type of wanted) {
     for (const rail of widths) {
@@ -79,13 +93,13 @@ export function planJobs({ types, only, widths, playgroundTypes = PLAYGROUND_TYP
       rail: null,
     });
   }
-  if (!only) {
+  if (!names.length) {
     for (const viewport of [DESKTOP, MOBILE]) {
       jobs.push({ kind: "home", type: null, path: "/", label: "home", viewport: viewport.name, width: viewport.width, height: viewport.height, rail: null });
       jobs.push({ kind: "compare", type: null, path: "/compare", label: "compare", viewport: viewport.name, width: viewport.width, height: viewport.height, rail: null });
     }
   }
-  const playTypes = only ? playgroundTypes.filter((type) => type === only) : [null, ...playgroundTypes];
+  const playTypes = names.length ? playgroundTypes.filter((type) => names.includes(type)) : [null, ...playgroundTypes];
   for (const type of playTypes) {
     for (const viewport of [DESKTOP, MOBILE]) {
       jobs.push({

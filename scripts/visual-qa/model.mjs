@@ -115,6 +115,49 @@ export function estimateTextTokens(text) {
   return Math.ceil(String(text ?? "").length / 4);
 }
 
+/** Crusoe's Nemotron-3.5-Super-VL rejects more than one image. Nano Omni does not. */
+export function maxImagesForModel(id) {
+  const text = String(id ?? "");
+  if (/nemotron/i.test(text) && !/nano-omni/i.test(text)) return 1;
+  return 2;
+}
+
+/**
+ * One image prefers the page viewport. Two images are the page, then the chart crop.
+ */
+export function pickImagesForReview(images, max) {
+  const list = Array.isArray(images) ? images.filter(Boolean) : [];
+  const page = list.filter((image) => image.role === "page");
+  const chart = list.filter((image) => image.role === "chart");
+  const rest = list.filter((image) => image.role !== "page" && image.role !== "chart");
+  const cap = Number.isInteger(max) && max > 0 ? max : 0;
+  if (cap === 0) return [];
+  if (cap === 1) {
+    const preferred = page[0] || chart[0] || rest[0];
+    return preferred ? [preferred] : [];
+  }
+  return [...page, ...chart, ...rest].slice(0, cap);
+}
+
+export const IMAGE_CAPTION = {
+  both: "The first image is the page viewport. The second image is the chart pane cropped on its own.",
+  chart: "The image is the chart pane cropped on its own.",
+  page: "The image is the page viewport.",
+};
+
+export function imageCaption(images) {
+  const list = images || [];
+  const roles = list.map((image) => image?.role);
+  const page = roles.includes("page");
+  const chart = roles.includes("chart");
+  if (page && chart) return IMAGE_CAPTION.both;
+  if (chart) return IMAGE_CAPTION.chart;
+  if (page) return IMAGE_CAPTION.page;
+  if (list.length >= 2) return IMAGE_CAPTION.both;
+  if (list.length === 1) return IMAGE_CAPTION.page;
+  return "";
+}
+
 export function buildChatRequest({ model, maxTokens, shot, images }) {
   const findingText = shot.checks?.length
     ? shot.checks.map((finding) => `- ${finding.type} (${finding.severity}): ${finding.detail}`).join("\n")
@@ -122,6 +165,7 @@ export function buildChatRequest({ model, maxTokens, shot, images }) {
   const rail = shot.rail
     ? `Rail width: ${shot.rail.px}px${shot.rail.store ? "" : " (default)"}`
     : "Rail width: n/a";
+  const caption = imageCaption(images);
   const text = [
     `Page: ${shot.page}`,
     shot.demo ? `Demo: ${shot.demo}` : null,
@@ -129,7 +173,7 @@ export function buildChatRequest({ model, maxTokens, shot, images }) {
     rail,
     "Deterministic findings:",
     findingText,
-    "The first image is the viewport. A second image, when present, is the chart pane cropped on its own.",
+    caption || null,
     "Return JSON only.",
   ]
     .filter(Boolean)
@@ -150,17 +194,60 @@ export function buildChatRequest({ model, maxTokens, shot, images }) {
   };
 }
 
-export function estimateRequestTokens(shot, maxTokens = DEFAULT_MAX_TOKENS) {
+export function estimateRequestTokens(shot, maxTokens = DEFAULT_MAX_TOKENS, images = shot.images) {
+  const sent = images || [];
   const body = buildChatRequest({
     model: "estimate",
     maxTokens,
     shot,
-    images: (shot.images || []).map((image) => ({ dataUri: "data:image/png;base64,AA==" })),
+    images: sent.map((image) => ({ dataUri: "data:image/png;base64,AA==", role: image.role })),
   });
-  const text = JSON.stringify({ ...body, messages: body.messages.map((message) => ({ ...message, content: message.content })) });
+  const text = JSON.stringify(body);
   let tokens = estimateTextTokens(text);
-  for (const image of shot.images || []) tokens += estimateImageTokens(image.width, image.height);
+  for (const image of sent) tokens += estimateImageTokens(image.width, image.height);
   return tokens;
+}
+
+export function imageLimitFromError(text) {
+  const match = String(text ?? "").match(/At most\s+(\d+)\s+image/i);
+  if (!match) return null;
+  const limit = Number(match[1]);
+  return Number.isInteger(limit) ? limit : null;
+}
+
+function replaceCaption(text, caption) {
+  if (text.includes(IMAGE_CAPTION.both)) return text.replace(IMAGE_CAPTION.both, caption);
+  if (text.includes(IMAGE_CAPTION.chart)) return text.replace(IMAGE_CAPTION.chart, caption);
+  if (text.includes(IMAGE_CAPTION.page)) return text.replace(IMAGE_CAPTION.page, caption);
+  return caption ? `${text}\n${caption}` : text;
+}
+
+function captionAfterTrim(previous, kept) {
+  if (kept >= 2) return IMAGE_CAPTION.both;
+  if (kept !== 1) return "";
+  if (previous.includes(IMAGE_CAPTION.chart) && !previous.includes(IMAGE_CAPTION.both)) return IMAGE_CAPTION.chart;
+  return IMAGE_CAPTION.page;
+}
+
+/** Drop extra image_url parts and rewrite the sentence that names them. */
+export function trimChatImages(body, limit) {
+  const next = structuredClone(body);
+  const user = next.messages?.find((message) => message.role === "user");
+  if (!Array.isArray(user?.content)) return next;
+  const textPart = user.content.find((part) => part?.type === "text");
+  const images = user.content.filter((part) => part?.type === "image_url");
+  const kept = images.slice(0, Math.max(0, limit));
+  if (textPart && typeof textPart.text === "string") {
+    textPart.text = replaceCaption(textPart.text, captionAfterTrim(textPart.text, kept.length));
+  }
+  user.content = [textPart, ...kept].filter(Boolean);
+  return next;
+}
+
+export function requestImageCount(body) {
+  const user = body?.messages?.find((message) => message.role === "user");
+  if (!Array.isArray(user?.content)) return 0;
+  return user.content.filter((part) => part?.type === "image_url").length;
 }
 
 function normalizeIssue(raw) {
@@ -201,23 +288,38 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function postChat({ baseUrl, apiKey, body, fetchImpl, attempts = 4, sleepImpl = sleep }) {
+export function retryDelayMs(attempt) {
+  return Math.min(8000, 750 * 2 ** attempt);
+}
+
+export async function postChat({ baseUrl, apiKey, body, fetchImpl, attempts = 6, sleepImpl = sleep }) {
   const fetchFn = fetchImpl ?? globalThis.fetch;
   const url = `${String(baseUrl).replace(/\/$/, "")}/chat/completions`;
   const headers = { "content-type": "application/json" };
   if (apiKey) headers.authorization = `Bearer ${apiKey}`;
+  let payload = body;
   let lastErr = new Error("chat completion failed");
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {
-      const res = await fetchFn(url, { method: "POST", headers, body: JSON.stringify(body) });
+      const res = await fetchFn(url, { method: "POST", headers, body: JSON.stringify(payload) });
       const text = await res.text();
       if (res.status === 429 || res.status >= 500) {
         lastErr = new Error(`HTTP ${res.status}: ${redact(text.slice(0, 300), apiKey)}`);
         lastErr.retryable = true;
-        if (attempt < attempts - 1) await sleepImpl(500 * 2 ** attempt);
+        if (attempt < attempts - 1) await sleepImpl(retryDelayMs(attempt));
         continue;
       }
       if (!res.ok) {
+        const limit = imageLimitFromError(text);
+        if (limit != null) {
+          const trimmed = trimChatImages(payload, limit);
+          if (requestImageCount(trimmed) < requestImageCount(payload)) {
+            payload = trimmed;
+            lastErr = new Error(`HTTP ${res.status}: ${redact(text.slice(0, 300), apiKey)}`);
+            lastErr.retryable = true;
+            if (attempt < attempts - 1) continue;
+          }
+        }
         const err = new Error(`HTTP ${res.status}: ${redact(text.slice(0, 500), apiKey)}`);
         err.retryable = false;
         throw err;
@@ -237,12 +339,13 @@ export async function postChat({ baseUrl, apiKey, body, fetchImpl, attempts = 4,
         content,
         finishReason: choice?.finish_reason ?? "",
         usage: json.usage ?? null,
+        imagesSent: requestImageCount(payload),
       };
     } catch (err) {
       if (err.retryable === false) throw err;
       lastErr = err instanceof Error ? err : new Error(String(err));
       lastErr.retryable = true;
-      if (attempt < attempts - 1) await sleepImpl(500 * 2 ** attempt);
+      if (attempt < attempts - 1) await sleepImpl(retryDelayMs(attempt));
     }
   }
   throw lastErr;

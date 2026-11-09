@@ -9,6 +9,9 @@ import {
   isMultimodal,
   multimodalModels,
   parseReview,
+  imageLimitFromError,
+  maxImagesForModel,
+  pickImagesForReview,
   pickModel,
   postChat,
   redact,
@@ -83,6 +86,7 @@ test("chat request sends base64 image_url parts, the rubric, findings, and room 
   assert.equal(user[1].type, "image_url");
   assert.equal(user[1].image_url.url, dataUri);
   assert.equal(user[2].image_url.url.startsWith("data:image/png;base64,"), true);
+  assert.match(user[0].text, /The first image is the page viewport\. The second image is the chart pane/);
   assert.ok(estimateImageTokens(1440, 900) > 85);
 });
 
@@ -99,6 +103,49 @@ test("parseReview accepts fenced JSON and a single issue object", () => {
   assert.deepEqual(empty.issues, []);
   assert.equal(parseReview("not json").ok, false);
   assert.equal(parseReview("").ok, false);
+});
+
+test("Nemotron Super VL sends one image; Nano Omni and other models send two", () => {
+  assert.equal(maxImagesForModel("nvidia/NVIDIA-Nemotron-3.5-Super-VL"), 1);
+  assert.equal(maxImagesForModel("NVIDIA/Nemotron-3.5-Super-VL"), 1);
+  assert.equal(maxImagesForModel("nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B"), 2);
+  assert.equal(maxImagesForModel("Qwen/Qwen3.8-27B"), 2);
+  const images = [
+    { role: "chart", file: "chart.png" },
+    { role: "page", file: "page.png" },
+  ];
+  assert.deepEqual(pickImagesForReview(images, 1).map((image) => image.role), ["page"]);
+  assert.deepEqual(pickImagesForReview(images, 2).map((image) => image.role), ["page", "chart"]);
+  assert.deepEqual(pickImagesForReview([{ role: "chart", file: "chart.png" }], 1).map((image) => image.role), ["chart"]);
+  assert.equal(imageLimitFromError('{"error":"At most 1 image(s)"}'), 1);
+  assert.equal(imageLimitFromError("something else"), null);
+});
+
+test("a chart-only request names the crop, and a page-only request names the viewport", () => {
+  const shot = {
+    page: "/docs/charts/rose",
+    demo: "audience",
+    viewport: "desktop",
+    viewportSize: { width: 1440, height: 900 },
+    rail: { px: 280, store: true },
+    checks: [],
+  };
+  const chart = buildChatRequest({
+    model: "nvidia/NVIDIA-Nemotron-3.5-Super-VL",
+    maxTokens: 4096,
+    shot,
+    images: [{ role: "chart", dataUri: "data:image/png;base64,QQ==" }],
+  });
+  assert.match(chart.messages[1].content[0].text, /The image is the chart pane cropped on its own/);
+  assert.equal(chart.messages[1].content.filter((part) => part.type === "image_url").length, 1);
+  const page = buildChatRequest({
+    model: "nvidia/NVIDIA-Nemotron-3.5-Super-VL",
+    maxTokens: 4096,
+    shot,
+    images: [{ role: "page", dataUri: "data:image/png;base64,QQ==" }],
+  });
+  assert.match(page.messages[1].content[0].text, /The image is the page viewport\./);
+  assert.doesNotMatch(page.messages[1].content[0].text, /chart pane/);
 });
 
 test("postChat retries 503s and does not echo the key", async () => {
@@ -130,4 +177,54 @@ test("postChat retries 503s and does not echo the key", async () => {
   assert.equal(result.finishReason, "stop");
   assert.match(result.content, /"issues":\[\]/);
   assert.equal(redact("secret-key leaked", "secret-key").includes("secret-key"), false);
+});
+
+test("postChat trims to the image limit and retries", async () => {
+  const bodies = [];
+  const fetchImpl = async (_url, init) => {
+    const body = JSON.parse(init.body);
+    bodies.push(body);
+    const images = body.messages[1].content.filter((part) => part.type === "image_url");
+    if (images.length > 1) return new Response('{"error":"At most 1 image(s)"}', { status: 400 });
+    return new Response(
+      JSON.stringify({
+        choices: [{ finish_reason: "stop", message: { content: '{"page":"p","viewport":"desktop","issues":[]}' } }],
+      }),
+      { status: 200 },
+    );
+  };
+  const shot = {
+    page: "/docs/charts/line",
+    demo: "sales",
+    viewport: "desktop",
+    viewportSize: { width: 1440, height: 900 },
+    rail: null,
+    checks: [],
+  };
+  const request = buildChatRequest({
+    model: "nvidia/NVIDIA-Nemotron-3.5-Super-VL",
+    maxTokens: 4096,
+    shot,
+    images: [
+      { role: "page", dataUri: "data:image/png;base64,QQ==" },
+      { role: "chart", dataUri: "data:image/png;base64,AA==" },
+    ],
+  });
+  const result = await postChat({
+    baseUrl: CRUSOE,
+    apiKey: "secret-key",
+    body: request,
+    fetchImpl,
+    sleepImpl: async () => {},
+  });
+  assert.equal(bodies.length, 2);
+  assert.match(bodies[0].messages[1].content[0].text, /The first image is the page viewport/);
+  assert.equal(bodies[0].messages[1].content.filter((part) => part.type === "image_url").length, 2);
+  assert.match(bodies[1].messages[1].content[0].text, /The image is the page viewport\./);
+  assert.doesNotMatch(bodies[1].messages[1].content[0].text, /second image/);
+  const kept = bodies[1].messages[1].content.filter((part) => part.type === "image_url");
+  assert.equal(kept.length, 1);
+  assert.equal(kept[0].image_url.url, "data:image/png;base64,QQ==");
+  assert.equal(result.imagesSent, 1);
+  assert.equal(result.finishReason, "stop");
 });

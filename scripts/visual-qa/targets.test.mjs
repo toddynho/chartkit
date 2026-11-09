@@ -40,5 +40,15 @@ test("jobs cover every demo width on desktop and one mobile pass", () => {
   const only = planJobs({ types, only: "progress-ring", widths });
   assert.equal(only.some((job) => job.kind === "home"), false);
   assert.equal(only.filter((job) => job.kind === "play").length, 2);
-  assert.throws(() => planJobs({ types, only: "not-a-chart", widths }), /Unknown chart page/);
+  assert.throws(() => planJobs({ types, only: "not-a-chart", widths }), /Unknown chart page "not-a-chart"/);
+  assert.throws(() => planJobs({ types, only: "not-a-chart,still-missing", widths }), (err) => {
+    assert.match(err.message, /"not-a-chart"/);
+    assert.match(err.message, /"still-missing"/);
+    return true;
+  });
+  const pair = planJobs({ types, only: "line,progress-ring", widths });
+  assert.equal(pair.filter((job) => job.kind === "docs" && job.type === "line").length, 4);
+  assert.equal(pair.filter((job) => job.kind === "docs" && job.type === "progress-ring").length, 4);
+  assert.equal(pair.some((job) => job.kind === "home"), false);
+  assert.equal(pair.some((job) => job.kind === "docs" && job.type === "bar"), false);
 });
