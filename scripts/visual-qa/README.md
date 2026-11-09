@@ -15,6 +15,12 @@ npx playwright install --with-deps chromium
 npm run qa:visual -- --no-model
 ```
 
+GitHub's `ubuntu-latest` is Ubuntu 26.04. Playwright 1.55 has no browser build for it, and `--with-deps` exits with `does not support chromium on ubuntu26.04-x64`. CI installs the Ubuntu 24 build instead, which lands in the same cache path:
+
+```bash
+PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64 npx playwright install chromium
+```
+
 That builds the site, previews it, and writes `visual-qa-report/`. The folder is gitignored. `index.html` and `report.json` sit next to `shots/`. Image paths are relative, so zip the folder to share it.
 
 A model pass uses Crusoe Managed Inference unless you point it somewhere else. The key stays in the environment.
