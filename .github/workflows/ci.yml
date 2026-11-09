@@ -15,6 +15,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Playwright 1.55 ships no Ubuntu 26 browser. ubuntu-latest is 26.04, and
+      # --with-deps fails with "does not support chromium on ubuntu26.04-x64".
+      # The Ubuntu 24 build uses the same cache path the tests launch.
+      - run: PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64 npx playwright install chromium
       - run: npm ci
         working-directory: bench
       - run: npx playwright install --with-deps chromium
