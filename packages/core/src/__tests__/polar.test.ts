@@ -129,6 +129,41 @@ describe("polar charts", () => {
     expect(cartesian.errors.some((item) => item.code === "CK3078")).toBe(false);
   });
 
+  it("keeps rose names and values off the heading and off each other", () => {
+    const svg = render({
+      version: "1",
+      type: "rose",
+      title: "Saturday audience",
+      subtitle: "Listeners by neighbourhood.",
+      locale: "en-GB",
+      data: [
+        { place: "Hale", listeners: 4200 },
+        { place: "Mill", listeners: 3100 },
+        { place: "Quay", listeners: 5600 },
+        { place: "Ridge", listeners: 1800 },
+        { place: "Yard", listeners: 2400 },
+        { place: "Orchard", listeners: 3900 },
+      ],
+      encoding: { x: "place", y: { field: "listeners", format: { specifier: ",.0f" } } },
+      mark: { padAngle: 1.2, labels: true },
+      size: { width: 520, height: 480 },
+      a11y: { alt },
+    });
+    expect(svg).toContain(">Orchard<");
+    expect(svg).toContain(">3,900<");
+    expect(svg).toContain(">Hale<");
+    expect(svg).toContain(">4,200<");
+    const texts = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => ({
+      y: Number(/ y="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      value: match[2] ?? "",
+    }));
+    const yOf = (value: string) => texts.find((item) => item.value === value)?.y ?? 0;
+    expect(yOf("3,900")).toBeGreaterThan(yOf("Listeners by neighbourhood.") + 16);
+    expect(yOf("Orchard")).toBeGreaterThan(yOf("3,900") + 10);
+    expect(yOf("Hale")).toBeGreaterThan(yOf("4,200") + 10);
+    expect(svg).not.toContain("…");
+  });
+
   it("warns when a polar chart has too few or too many categories", () => {
     const few = validate(spec("rose", { data: rows.slice(0, 2) }));
     expect(few.ok).toBe(true);

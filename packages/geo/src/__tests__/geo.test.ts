@@ -288,6 +288,35 @@ describe("render", () => {
     expect(narrow).not.toContain('font-size="16"');
   });
 
+  it("keeps a legend title clear of the top tick", async () => {
+    const svg = await render({
+      type: "choropleth",
+      title: "Population change, 2020–2023",
+      theme: "midnight",
+      data: [
+        { id: "NY", change: -2.1 },
+        { id: "TX", change: 4.3 },
+        { id: "ID", change: 6.2 },
+        { id: "FL", change: 4.7 },
+        { id: "CA", change: -0.5 },
+      ],
+      encoding: { region: "id", color: { field: "change", format: "%", title: "Change" } },
+      mark: { atlas: "us", projection: "albersUsa", scale: "diverging" },
+      size: { width: 880, height: 560 },
+      a11y: { alt: "Idaho grew and New York shrank." },
+    });
+    const texts = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => ({
+      y: Number(/\by="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      value: match[2] ?? "",
+    }));
+    const title = texts.find((item) => item.value === "Change");
+    const ticks = texts.filter((item) => item.value.endsWith("%"));
+    expect(title).toBeTruthy();
+    expect(ticks.length).toBeGreaterThan(1);
+    const top = Math.min(...ticks.map((item) => item.y));
+    expect(top).toBeGreaterThan((title?.y ?? 0) + 16);
+  });
+
   it("uses a diverging scale and puts Alaska and Hawaii in the lower insets", async () => {
     const svg = await render({
       type: "choropleth",

@@ -3,6 +3,7 @@ import { legendLabel, legendMarkup, legendShownValue, legendSpace, readLegend } 
 import { asNumber, column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
+import type { RosePlace } from "./rose-labels";
 import { fill, fmt, openMark, str, text, valueFormat, viewOf } from "./plot";
 
 /**
@@ -18,7 +19,7 @@ interface Series {
   values: number[];
 }
 
-export function renderPolar(spec: Record<string, unknown>, kind: Kind): string | null {
+export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: RosePlace): string | null {
   const view = viewOf(spec, kind, 520, 460);
   if (!view) return null;
   const { frame, parts, table } = view;
@@ -95,9 +96,8 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
   const bottom = frame.height - legendH;
   const cx = frame.width / 2;
   const cy = top + (bottom - top) / 2;
-  const outer = Math.max(40, Math.min(cx - 52, (bottom - top) / 2 - 6));
+  let outer = Math.max(40, Math.min(cx - 52, (bottom - top) / 2 - 6));
   const innerFrac = fraction(frame.mark.innerRadius, kind === "radial-bar" ? 0.34 : 0);
-  const inner = Math.min(outer * innerFrac, outer - 8);
   const start = numberOf(frame.mark.startAngle, 0);
   const pad = Math.min(8, Math.max(0, numberOf(frame.mark.padAngle, kind === "rose" ? 1.2 : 2)));
   const gap = Math.min(0.9, Math.max(0, numberOf(frame.mark.gap, series.length > 1 && mode === "none" ? 0.16 : 0)));
@@ -107,6 +107,35 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
   const grid = cssVar("grid", frame.preset.grid);
   const ink = cssVar("text", frame.preset.text);
   const muted = cssVar("muted", frame.preset.muted);
+  let roseMarks = "";
+  if (place) {
+    const fit = place({
+      categories,
+      series,
+      mode,
+      scaleMax,
+      start,
+      pad,
+      gap,
+      outer,
+      innerFrac,
+      cx,
+      cy,
+      width: frame.width,
+      top,
+      bottom,
+      labelsOn,
+      locale: frame.locale,
+      format,
+      ink,
+      muted,
+    });
+    if (fit) {
+      outer = fit.outer;
+      roseMarks = fit.marks;
+    }
+  }
+  const inner = Math.min(outer * innerFrac, outer - 8);
 
   parts.push(`<g data-ck-coordinate="polar">`);
   for (let ring = 1; ring <= 4; ring++) {
@@ -153,15 +182,18 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
       const label = series.length > 1 ? `${category}, ${item.name}: ${shown}` : `${category}: ${shown}`;
       parts.push(openMark("path", kind, label, `d="${path}" fill="${color}"`, item.name, index));
       parts.push("</path>");
-      if (labelsOn && r1 - r0 > 16) {
+      if (!roseMarks && labelsOn && r1 - r0 > 16) {
         const mid = polar(cx, cy, outer + 56, angle + span / 2);
         parts.push(text(mid.x, mid.y + 4, shown, ink, 11, "650", "middle"));
       }
     });
-    const mid = polar(cx, cy, outer + 36, origin + usable / 2);
-    const anchor = mid.x < cx - 10 ? "end" : mid.x > cx + 10 ? "start" : "middle";
-    parts.push(text(mid.x, mid.y, clip(category, 16), muted, 12, "560", anchor));
+    if (!roseMarks) {
+      const mid = polar(cx, cy, outer + 36, origin + usable / 2);
+      const anchor = mid.x < cx - 10 ? "end" : mid.x > cx + 10 ? "start" : "middle";
+      parts.push(text(mid.x, mid.y, clip(category, 16), muted, 12, "560", anchor));
+    }
   });
+  if (roseMarks) parts.push(roseMarks);
   parts.push("</g>");
 
   if (showLegend) {
