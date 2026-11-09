@@ -387,8 +387,8 @@ function applyQuadrantDomain(spec: Record<string, unknown>): void {
 function withDomain(channel: unknown, span: [number, number] | undefined): unknown {
   if (!span) return channel;
   const [min, max] = span;
-  const base = typeof channel === "string" ? { field: channel } : isRecord(channel) ? { ...channel } : {};
-  const scale = isRecord(base.scale) ? { ...base.scale } : {};
+  const base: Record<string, unknown> = typeof channel === "string" ? { field: channel } : isRecord(channel) ? { ...channel } : {};
+  const scale: Record<string, unknown> = isRecord(base.scale) ? { ...base.scale } : {};
   const domain = scale.domain;
   if (Array.isArray(domain) && domain.length >= 2 && typeof domain[0] === "number" && typeof domain[1] === "number" && domain[0] <= min && domain[1] >= max) {
     return channel;
