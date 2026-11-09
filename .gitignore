@@ -42,6 +42,7 @@ bench/results/agent/matrix/
 scripts/.interact-out/
 scripts/design/.out/
 scripts/render-harness/out/
+visual-qa-report/
 
 # Misc
 *.tgz
