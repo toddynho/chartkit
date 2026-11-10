@@ -591,13 +591,15 @@ test("scatter actions edit size, shape, legend, and tooltip", () => {
   assert.equal((smallestScatterSpec.encoding as { size?: unknown }).size, undefined);
 
   const seats = structuredClone(scatterExamples[0]!.spec);
-  assert.equal(scatterControlState(seats).size, "off");
   assert.equal(scatterControlState(seats).shape, "circle");
   assert.equal(scatterControlState(seats).legend, "off");
   assert.equal(seats.tooltip, undefined);
-  applyScatterAction(seats, { id: "size", value: "on", restore: scatterExamples[0]!.spec });
+  assert.equal(scatterControlState(seats).size, "on");
+  applyScatterAction(seats, { id: "size", value: "off" });
   assert.equal((seats.encoding as { size?: unknown }).size, undefined);
   assert.equal(scatterControlState(seats).size, "off");
+  applyScatterAction(seats, { id: "size", value: "on", restore: scatterExamples[0]!.spec });
+  assert.deepEqual((seats.encoding as { size?: { field: string } }).size, { field: "seats", range: [4, 14] });
   applyScatterAction(seats, { id: "shape", value: "diamond" });
   assert.equal((seats.mark as { pointShape: string; pointSize: number }).pointShape, "diamond");
   assert.equal((seats.mark as { pointSize: number }).pointSize, 5);
@@ -1754,7 +1756,8 @@ test("mini area actions edit the curve, the fade, and the tooltip", () => {
   assert.equal(miniAreaControlState(holds).tooltip, "on");
   assert.deepEqual(withPreviewSize(holds).size, { width: 640, height: 200 });
   applyMiniAreaAction(holds, { id: "gradient", value: "on", restore: miniAreaExamples[1]!.spec });
-  assert.equal((holds.mark as { gradient: boolean }).gradient, false);
+  assert.equal(holds.mark, undefined);
+  assert.equal(miniAreaControlState(holds).gradient, "on");
   const opened = openTeachExample(holds);
   assert.deepEqual(opened.tooltip, holds.tooltip);
   assert.notEqual(opened.tooltip, holds.tooltip);
@@ -2042,10 +2045,12 @@ test("candlestick actions edit volume and tooltip", () => {
   assert.equal((northstar.size as { width: number }).width, 640);
 
   const quote = structuredClone(candlestickExamples[1]!.spec);
-  assert.equal(candlestickControlState(quote).volume, "off");
+  assert.equal(candlestickControlState(quote).volume, "on");
   assert.equal((quote.size as { width: number; height: number }).height, 300);
-  applyCandlestickAction(quote, { id: "volume", value: "on", restore: candlestickExamples[1]!.spec });
+  applyCandlestickAction(quote, { id: "volume", value: "off" });
   assert.equal("volume" in (quote.encoding as object), false);
+  applyCandlestickAction(quote, { id: "volume", value: "on", restore: candlestickExamples[1]!.spec });
+  assert.equal((quote.encoding as { volume: string }).volume, "volume");
   const quoteTip = structuredClone(customTip);
   quote.tooltip = structuredClone(quoteTip);
   const opened = openTeachExample(quote);
@@ -2057,7 +2062,7 @@ test("candlestick actions edit volume and tooltip", () => {
   assert.deepEqual(quote.tooltip, quoteTip);
 
   const week = structuredClone(candlestickExamples[2]!.spec);
-  assert.equal(candlestickControlState(week).volume, "off");
+  assert.equal(candlestickControlState(week).volume, "on");
   assert.equal((week.size as { width: number }).width, 560);
   const storedOff = structuredClone(week);
   storedOff.tooltip = false;

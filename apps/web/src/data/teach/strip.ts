@@ -146,7 +146,7 @@ export const stripExamples: TeachExample[] = [
   {
     id: "regions",
     title: "Latency by region",
-    blurb: "One point per region. The summary tick stays off.",
+    blurb: "Several times in each region, including ties the jitter can split.",
     meta: "3 regions",
     spec: {
       version: "1",
@@ -154,8 +154,14 @@ export const stripExamples: TeachExample[] = [
       type: "strip",
       data: [
         { region: "North", ms: 42 },
+        { region: "North", ms: 42 },
+        { region: "North", ms: 60 },
         { region: "South", ms: 55 },
+        { region: "South", ms: 55 },
+        { region: "South", ms: 33 },
         { region: "East", ms: 31 },
+        { region: "East", ms: 48 },
+        { region: "East", ms: 48 },
       ],
       encoding: { x: "ms", y: "region" },
       a11y: { alt: "South is slowest at 55 ms." },
@@ -173,9 +179,11 @@ export const stripExamples: TeachExample[] = [
       data: [
         { desk: "A", minutes: 12, shift: "Weeknight" },
         { desk: "A", minutes: 18, shift: "Weeknight" },
+        { desk: "A", minutes: 18, shift: "Weeknight" },
         { desk: "A", minutes: 28, shift: "Saturday" },
         { desk: "A", minutes: 40, shift: "Saturday" },
         { desk: "B", minutes: 14, shift: "Weeknight" },
+        { desk: "B", minutes: 22, shift: "Weeknight" },
         { desk: "B", minutes: 22, shift: "Weeknight" },
         { desk: "B", minutes: 36, shift: "Saturday" },
         { desk: "B", minutes: 44, shift: "Saturday" },

@@ -3,6 +3,8 @@
  * A control passes only when the SVG changes in the dimension that control draws.
  * Legend position is the legend box against the plot or mark box, not the data-ck-legend attribute.
  * A value that paints the same picture as another is a failure, unless CLAIM_ALLOWLIST names it and says why.
+ * A waiver may let some values share one picture. It may not omit `values` for a control on the page:
+ * that excuses every value painting the same chart.
  * Nested treemap shading is a separate painted claim (treemapShadeProblems). It is not listed here.
  */
 
@@ -28,8 +30,8 @@ export type ClaimWaiver = {
   id: string;
   /**
    * Values that may share one painted result with each other.
-   * Omit to waive the whole effect claim for this control.
    * Other values must still differ from each other and from this shared picture.
+   * Omitting this waives every value. The docs sweep rejects that for a control on the page.
    */
   values?: string[];
   /** Also skip the legend box checks. Only for a legend whose placement is a known design exception. */
@@ -38,9 +40,9 @@ export type ClaimWaiver = {
 };
 
 /**
- * Known gaps. Each entry is a control that does not change the painted picture, with the reason.
+ * Design exceptions. Each entry names values that may share one picture, and why.
  * An entry does not relax a different claim, and it does not hide a legend that sits on the marks
- * unless `legend` is set.
+ * unless `legend` is set. Omitting `values` is rejected when the control is on the page.
  */
 export const CLAIM_ALLOWLIST: ClaimWaiver[] = [
   {
@@ -64,101 +66,6 @@ export const CLAIM_ALLOWLIST: ClaimWaiver[] = [
     values: ["all", "2", "3"],
     reason:
       "Traffic by source is two rings. Depth 2, 3, and all draw that whole tree. Depth 1 draws the sources only.",
-  },
-  {
-    type: "line",
-    example: "quarterly",
-    id: "legend",
-    legend: true,
-    reason: "Quarterly units is one series. A line draws no legend unless there are two series, so every legend value paints the same chart.",
-  },
-  {
-    type: "line",
-    example: "deploys",
-    id: "legend",
-    legend: true,
-    reason: "Deploys is one series. A line draws no legend unless there are two series, so every legend value paints the same chart.",
-  },
-  {
-    type: "bar",
-    example: "signups",
-    id: "legend",
-    legend: true,
-    reason: "Signups is one series. A bar draws no legend unless there are two series, so every legend value paints the same chart.",
-  },
-  {
-    type: "bar",
-    example: "regions",
-    id: "legend",
-    legend: true,
-    reason: "Regions is one series. A bar draws no legend unless there are two series, so every legend value paints the same chart.",
-  },
-  {
-    type: "radar",
-    example: "skills",
-    id: "legend",
-    legend: true,
-    reason: "Team skills is one polygon. A radar draws no legend for a single series, so off, bottom, and right paint the same chart.",
-  },
-  {
-    type: "scatter",
-    example: "seats",
-    id: "legend",
-    legend: true,
-    reason: "Seats has no color field. A scatter draws no legend without categories, so every legend value paints the same points.",
-  },
-  {
-    type: "scatter",
-    example: "yield",
-    id: "legend",
-    legend: true,
-    reason: "Yield has no color field. A scatter draws no legend without categories, so every legend value paints the same bubbles.",
-  },
-  {
-    type: "density",
-    example: "wait",
-    id: "legend",
-    legend: true,
-    reason: "Wait is one series. A density draws no legend for a single curve, so every legend value paints the same chart.",
-  },
-  {
-    type: "density",
-    example: "vertical",
-    id: "legend",
-    legend: true,
-    reason: "Vertical is one series. A density draws no legend for a single curve, so every legend value paints the same chart.",
-  },
-  {
-    type: "strip",
-    example: "tokens",
-    id: "legend",
-    legend: true,
-    reason: "Tokens is one group. A strip draws no legend without a second group, so every legend value paints the same dots.",
-  },
-  {
-    type: "strip",
-    example: "regions",
-    id: "legend",
-    legend: true,
-    reason: "Regions is one group. A strip draws no legend without a second group, so every legend value paints the same dots.",
-  },
-  {
-    type: "tree",
-    example: "produce",
-    id: "layout",
-    reason: "Produce is balanced. Every leaf is already on the last depth, so tidy and cluster place the same nodes.",
-  },
-  {
-    type: "candlestick",
-    example: "ck-usd",
-    id: "volume",
-    reason: "This price series has no volume field. Turning volume on has nothing to restore, so the candles stay the same.",
-  },
-  {
-    type: "candlestick",
-    example: "week",
-    id: "volume",
-    reason: "This price series has no volume field. Turning volume on has nothing to restore, so the candles stay the same.",
   },
   {
     type: "kpi",
@@ -237,31 +144,6 @@ export const CLAIM_ALLOWLIST: ClaimWaiver[] = [
       "Hover points are not in the static SVG. They appear on hover. Always paints the dots, and that picture has to differ from none and hover.",
   },
   {
-    type: "combo",
-    example: "pace",
-    id: "points",
-    reason: "Pace draws a diamond from pointShape on every vertex. The points control does not add or remove those markers.",
-  },
-  {
-    type: "bar",
-    example: "signups",
-    id: "stack",
-    values: ["none", "stack"],
-    reason: "Signups is one series. Stacking one series does not move the bars. Percent still rescales them.",
-  },
-  {
-    type: "bar",
-    example: "regions",
-    id: "stack",
-    reason: "Regions is one series of one bar per category. Grouped, stacked, and percent paint the same bars.",
-  },
-  {
-    type: "scatter",
-    example: "seats",
-    id: "size",
-    reason: "Seats has no size field. Off and on both keep the one point radius.",
-  },
-  {
     type: "stacked-area",
     example: "mix",
     id: "stack",
@@ -288,42 +170,6 @@ export const CLAIM_ALLOWLIST: ClaimWaiver[] = [
     id: "order",
     values: ["inside-out", "none", "ascending"],
     reason: "On this weekly stream, inside-out, data order, and ascending lay the series in the same order. Descending still has to differ.",
-  },
-  {
-    type: "mini-area",
-    example: "holds",
-    id: "gradient",
-    reason: "Holds stores mark.gradient false. On restores that saved false, so both values paint a solid band. Signups, which omits the key, still fades.",
-  },
-  {
-    type: "kpi",
-    example: "churn",
-    id: "direction",
-    reason: "Churn is inside a threshold band, and that band sets the ink. Good-when does not change the painted color while the threshold is on.",
-  },
-  {
-    type: "strip",
-    example: "regions",
-    id: "summary",
-    reason: "Regions has one dot in each row. A one-dot row has no median to draw, so median, mean, and none paint the same dots.",
-  },
-  {
-    type: "strip",
-    example: "regions",
-    id: "band",
-    reason: "Regions has one dot in each row. A range or an interquartile band needs more than one dot, so none, range, and iqr paint the same dots.",
-  },
-  {
-    type: "strip",
-    example: "regions",
-    id: "jitter",
-    reason: "Regions has one dot in each row. There is no second dot to nudge, so auto and none paint the same point.",
-  },
-  {
-    type: "strip",
-    example: "desks",
-    id: "jitter",
-    reason: "Desks does not spread its dots when jitter is on, so auto and none paint the same points.",
   },
   {
     type: "strip",

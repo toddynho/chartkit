@@ -5,7 +5,7 @@ import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge } from "../glyphs";
-import { legendSpace, paintLegend, readLegend } from "../legend";
+import { legendPinned, legendSpace, paintLegend, readLegend } from "../legend";
 import {
   asNumber,
   axisOn,
@@ -83,7 +83,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
   const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
 
-  const showLegend = !ramp && frame.legend !== false && categories.length > 1;
+  const pinned = legendPinned(spec);
+  if (!categories.length && pinned) categories.push(yField || "y");
+  const showLegend = !ramp && frame.legend !== false && (categories.length > 1 || pinned);
   const legendBox = readLegend(spec);
   const legendAtBottom = showLegend && legendBox?.position === "bottom";
   const legendSide = showLegend && (legendBox?.position === "right" || legendBox?.position === "left");

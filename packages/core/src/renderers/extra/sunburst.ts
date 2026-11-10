@@ -1,7 +1,7 @@
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { legendAt, legendSpace, paintLegend } from "../../legend";
+import { legendAt, legendPinned, legendSpace, paintLegend } from "../../legend";
 import { esc, isRecord, n, ch } from "../../svg";
 import { fill, fmt, valueFormat, viewOf } from "./plot";
 
@@ -47,7 +47,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
   const branches = root.children.length ? root.children : root.value > 0 ? [root] : [];
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0) || root.value || 1;
-  const legendOn = frame.legend !== false && branches.length > 1;
+  const legendOn = frame.legend !== false && branches.length > 0 && (branches.length > 1 || legendPinned(spec));
   const explicit = isRecord(spec.legend) && spec.legend.show !== false;
   const legendBox = legendOn && explicit ? legendAt(spec, "bottom") : null;
   const legendItems = branches.map((node, index) => ({ name: node.name, color: fill(frame, index) }));

@@ -1,7 +1,7 @@
 import { categoryX, chooseTicks, keepClearTicks, labelStep, lockDomain, placedAxisTitles, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { column, fieldOf, readColor } from "../../frame";
-import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
+import { legendPinned, legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
 import { cssVar, paint } from "../../theme";
 import { formatZoned, instantOf, zoneOf } from "../../timezone";
 import { formatValue } from "../../format";
@@ -71,7 +71,7 @@ export function renderStreamgraph(spec: Record<string, unknown>): string | null 
   const y0 = Math.min(locked0, yTicks[0] ?? locked0, yMin);
   const y1 = Math.max(locked1, yTicks[yTicks.length - 1] ?? locked1, yMax);
 
-  const legendOn = frame.legend !== false && stacked.length > 1;
+  const legendOn = frame.legend !== false && (stacked.length > 1 || legendPinned(spec));
   const hide = legendHide(spec);
   const colorOf = layerColor(frame, spec, stacked.map((layer) => layer.name));
   const items: LegendItem[] = stacked

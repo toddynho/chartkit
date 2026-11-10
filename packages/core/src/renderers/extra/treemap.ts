@@ -1,5 +1,5 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
-import { legendAt, legendShownValue, legendSpace, paintLegend, type LegendBox, type LegendItem } from "../../legend";
+import { legendAt, legendPinned, legendShownValue, legendSpace, paintLegend, type LegendBox, type LegendItem } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { resolve, ratio } from "../../ink";
@@ -98,7 +98,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   }));
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const legendItems = grouped.map((node) => ({ name: node.label, color: node.fill, value: legendShownValue(spec, node.value) }));
-  const categorical = frame.legend !== false && !ramp && colors.size > 1;
+  const categorical = frame.legend !== false && !ramp && colors.size > 0 && (colors.size > 1 || legendPinned(spec));
   const placed = reserveLegend(spec, frame, legendItems, categorical);
   if (ramp && frame.legend !== false) placed.plot.bottom -= colorLegendHeight;
   parts.push(mat(frame, placed.plot));
@@ -258,7 +258,7 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
   const branches = root.children.length ? root.children : root.value > 0 ? [root] : [];
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0);
-  const legend = frame.legend !== false && branches.length > 1;
+  const legend = frame.legend !== false && branches.length > 0 && (branches.length > 1 || legendPinned(spec));
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const colors = branches.map((_, index) => fill(frame, index));
   let ordinal = 0;
