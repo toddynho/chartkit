@@ -77,6 +77,34 @@ export function readLegend(spec: Record<string, unknown>): LegendBox | null {
   };
 }
 
+/**
+ * A positioned legend, including a plain top.
+ * `readLegend` leaves top null so older charts can keep their own row.
+ * `fallback` is used when the spec omits a position.
+ */
+export function legendAt(spec: Record<string, unknown>, fallback: LegendPos): LegendBox | null {
+  if (spec.legend === false) return null;
+  if (isRecord(spec.legend) && spec.legend.show === false) return null;
+  const rich = readLegend(spec);
+  if (rich) return rich;
+  const stated = isRecord(spec.legend) && typeof spec.legend.position === "string" && POS.has(spec.legend.position)
+    ? (spec.legend.position as LegendPos)
+    : undefined;
+  const position = stated ?? fallback;
+  const side = position === "left" || position === "right";
+  const title = isRecord(spec.legend) && typeof spec.legend.title === "string" ? spec.legend.title : "";
+  return {
+    position,
+    anchor: position === "inside" ? "top-right" : "top-left",
+    align: "start",
+    orient: side ? "vertical" : "horizontal",
+    title,
+    hide: [],
+    symbol: "",
+    symbols: {},
+  };
+}
+
 export interface LegendSpace {
   band: number;
   side: number;

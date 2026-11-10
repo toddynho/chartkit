@@ -39,7 +39,7 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
   const label = metric.label ?? frame.title;
   if (label) parts.push(text(20, frame.title ? 40 : 32, label, muted, 13, "500"));
   const valueY = label ? (frame.title ? 72 : 64) : 48;
-  parts.push(text(20, valueY, valueText, ink, 28, "700"));
+  parts.push(text(20, valueY, valueText, ink, 28, "700", valueText));
   if (metric.delta !== undefined) {
     const deltaText = `${deltaUp ? "↗" : "↘"} ${formatValue(metric.delta, metric.deltaFormat, frame.locale)}`;
     const valueWidth = ch(valueText.length, 17);
@@ -52,6 +52,7 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
     const h = Math.max(24, frame.height - y - 16);
     parts.push(sparkPath(spark, x, y, w, h, sparkColor, frame.preset.lines, stroke, strokeAttr, fillPaint));
   }
+  parts.push(`<rect data-ck-mark="kpi" aria-label="${esc(valueText)}" x="0" y="0" width="${n(frame.width)}" height="${n(frame.height)}" fill="transparent" />`);
   parts.push(closeChart());
   return parts.join("");
 }
@@ -145,6 +146,7 @@ function inkFor(color: string, fallback: string): string {
   return lum > 0.62 ? "#1a1a1a" : "#ffffff";
 }
 
-function text(x: number, y: number, value: string, fill: string, size: number, weight: string): string {
-  return `<text x="${n(x)}" y="${n(y)}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
+function text(x: number, y: number, value: string, fill: string, size: number, weight: string, label?: string): string {
+  const named = label ? ` data-ck-mark="kpi" aria-label="${esc(label)}"` : "";
+  return `<text${named} x="${n(x)}" y="${n(y)}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

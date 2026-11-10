@@ -86,10 +86,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const showLegend = !ramp && frame.legend !== false && categories.length > 1;
   const legendBox = readLegend(spec);
   const legendAtBottom = showLegend && legendBox?.position === "bottom";
+  const legendSide = showLegend && (legendBox?.position === "right" || legendBox?.position === "left");
   let top = 16;
   if (frame.title) top = 38;
   if (frame.subtitle) top += 18;
-  if (showLegend && !legendAtBottom) top += 22;
+  if (showLegend && !legendAtBottom && !legendSide) top += 22;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
   const footer = ramp && frame.legend !== false ? colorLegendHeight : 0;
@@ -111,6 +112,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const yRight = yAxis.end;
   let plotLeft = showY && yAxis.labels && !yRight ? left : 16;
   let plotRight = frame.width - (showY && yAxis.labels && yRight ? left : 16);
+  if (legendSide && legendBox) {
+    const side = legendSpace(legendBox, categories.map((name) => ({ name: name || " ", color: "#000" })), 120).side;
+    if (legendBox.position === "right") plotRight -= side;
+    else plotLeft += side;
+  }
   let plotTop = top;
   let plotBottom = frame.height - footer - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
   if (xAxis.end && showX && xAxis.labels) plotTop += 28;
@@ -186,7 +192,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
-  if (showLegend && !legendAtBottom) {
+  if (showLegend && !legendAtBottom && !legendSide) {
     let cx = plot.left;
     const bits: string[] = [];
     for (let index = 0; index < categories.length; index++) {
@@ -363,7 +369,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const anchor = xAxis.titleAt === "start" ? "start" : xAxis.titleAt === "end" ? "end" : "middle";
     parts.push(angle ? rotated(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), angle) : label(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", anchor));
   }
-  if (legendAtBottom && legendBox) {
+  if ((legendAtBottom || legendSide) && legendBox) {
     const items = categories.map((name) => ({ name: name || " ", color: colorOf(name) }));
     parts.push(paintLegend(legendBox, items, { plot, width: frame.width, height: frame.height, preset: frame.preset }));
   }

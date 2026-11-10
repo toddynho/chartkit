@@ -48,6 +48,9 @@ const EXTRA_MARK = new Set([
   "streamgraph",
   "density",
   "tree",
+  "gauge",
+  "kpi",
+  "progress-ring",
 ]);
 
 export type DemoTip = "geo" | "extra" | "interact";

@@ -1270,7 +1270,7 @@ test("tree actions edit layout, direction, links, and tooltip", () => {
   );
   assert.deepEqual(
     treeExamples.map((example) => example.meta),
-    ["9 nodes", "cluster"],
+    ["10 nodes", "cluster"],
   );
   for (const example of treeExamples) assert.equal(example.spec.type, "tree");
 });

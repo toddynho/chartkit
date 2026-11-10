@@ -57,7 +57,7 @@ export const treeExamples: TeachExample[] = [
     id: "support",
     title: "Support org",
     blurb: "Support splits into Inbox, Docs, and Billing. Dots and names, not boxes.",
-    meta: "9 nodes",
+    meta: "10 nodes",
     spec: {
       version: "1",
       type: "tree",
@@ -72,6 +72,7 @@ export const treeExamples: TeachExample[] = [
         { id: "Guides", parent: "Docs" },
         { id: "Reference", parent: "Docs" },
         { id: "Invoices", parent: "Billing" },
+        { id: "Refunds", parent: "Invoices" },
       ],
       encoding: { id: "id", parent: "parent" },
       a11y: { alt: "Support splits into Inbox, Docs, and Billing. Each of those has its own work." },

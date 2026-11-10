@@ -1,8 +1,9 @@
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { esc, n, ch } from "../../svg";
-import { fill, fit, fmt, valueFormat, viewOf } from "./plot";
+import { legendAt, legendSpace, paintLegend } from "../../legend";
+import { esc, isRecord, n, ch } from "../../svg";
+import { fill, fmt, valueFormat, viewOf } from "./plot";
 
 function share(part: number, whole: number): string {
   if (!whole) return "0%";
@@ -46,13 +47,29 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
   const branches = root.children.length ? root.children : root.value > 0 ? [root] : [];
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0) || root.value || 1;
-  const legend = frame.legend !== false && branches.length > 1;
-  const top = frame.title ? 36 : 8;
-  const legendH = legend ? 28 : 8;
+  const legendOn = frame.legend !== false && branches.length > 1;
+  const explicit = isRecord(spec.legend) && spec.legend.show !== false;
+  const legendBox = legendOn && explicit ? legendAt(spec, "bottom") : null;
+  const legendItems = branches.map((node, index) => ({ name: node.name, color: fill(frame, index) }));
+  const legendRoom = legendBox ? legendSpace(legendBox, legendItems, Math.max(80, frame.width - 32)) : null;
+  let top = frame.title ? 36 : 8;
+  let legendH = legendOn && !legendBox ? 28 : 8;
+  let right = frame.width;
+  if (legendBox?.position === "top" && legendRoom) {
+    top += legendRoom.band + 10;
+    legendH = 8;
+  } else if (legendBox?.position === "bottom" && legendRoom) {
+    legendH = legendRoom.band + 10;
+  } else if (legendBox?.position === "right" && legendRoom) {
+    right = frame.width - legendRoom.side - 12;
+    legendH = 8;
+  } else if (legendBox?.position === "left" && legendRoom) {
+    legendH = 8;
+  }
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const hole = typeof frame.mark.innerRadius === "number" ? Math.min(0.9, Math.max(0, frame.mark.innerRadius)) : 0.28;
-  const outer = Math.max(24, Math.min(frame.width - 24, frame.height - top - legendH) / 2);
-  const cx = frame.width / 2;
+  const outer = Math.max(24, Math.min(right - 24, frame.height - top - legendH) / 2);
+  const cx = legendBox?.position === "right" ? Math.max(24, right) / 2 : frame.width / 2;
   const cy = top + (frame.height - top - legendH) / 2;
   const rings = Math.max(1, depthOf({ ...root, children: branches }));
   const inner = outer * hole;
@@ -96,7 +113,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     cy,
     outer,
     top,
-    width: frame.width,
+    width: right,
     height: frame.height,
     legendH,
   });
@@ -112,14 +129,18 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     parts.push(`<text x="${n(cx)}" y="${n(cy + (sub ? -2 : 4))}" text-anchor="middle" fill="${ink}" font-size="13" font-weight="650">${esc(centre)}</text>`);
     if (sub) parts.push(`<text x="${n(cx)}" y="${n(cy + 14)}" text-anchor="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${esc(sub)}</text>`);
   }
-  if (legend) {
+  if (legendBox) {
+    const items = branches.map((node, index) => ({ name: node.name, color: colors[index] ?? fill(frame, index) }));
+    const plotRight = legendBox.position === "right" ? right : frame.width - 12;
+    const plotBottom = frame.height - (legendBox.position === "bottom" ? legendH : 8);
+    parts.push(paintLegend(legendBox, items, { plot: { left: 12, top, right: plotRight, bottom: plotBottom }, width: frame.width, height: frame.height, preset: frame.preset }));
+  } else if (legendOn) {
     let x = 12;
     const y = frame.height - 8;
     branches.forEach((node, index) => {
       const color = colors[index] ?? fill(frame, index);
-      const name = fit(node.name, 88, 12) || node.name;
-      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`);
-      x += 14 + Math.min(name.length, 12) * 7 + 14;
+      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(node.name)}</text>`);
+      x += 14 + Math.min(node.name.length, 12) * 7 + 14;
     });
   }
   return view.done();
