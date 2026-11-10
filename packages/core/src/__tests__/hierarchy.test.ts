@@ -224,7 +224,8 @@ describe("hierarchy", () => {
         expect(svg, theme).not.toContain('fill="#fff"');
       }
       expect(tree, theme).toContain("color-mix(in srgb,");
-      expect(tree, theme).toContain("42%");
+      expect(tree, theme).toContain("64%");
+      expect(tree, theme).not.toContain("42%");
       expect(tree, theme).toContain(">$25<");
     }
     const tight = render({ ...wide, size: { width: 120, height: 80 } }) ?? "";

@@ -56,7 +56,7 @@ function reserveLegend(
   return { box, plot };
 }
 
-/** Squarified tiles. A label is the whole name or it is omitted. Leaves in a group stay in that group's hue, in darker steps. */
+/** Squarified tiles. A label is the whole name or it is omitted. Leaves in a group stay in that group's hue, stepped by value. */
 export function renderTreemap(spec: Record<string, unknown>): string | null {
   const hierarchical = renderLevels(spec);
   if (hierarchical !== undefined) return hierarchical;
@@ -115,7 +115,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       const w = Math.max(1, tile.w - pad * 2);
       const h = Math.max(1, tile.h - pad * 2);
       const label = `${tile.label}: ${fmt(tile.value, frame.locale, shown)}${tile.group && tile.group !== tile.label ? ` · ${tile.group}` : ""}`;
-      const paint = shade(tile.fill, 1, ranked.get(tile) ?? 0, inner.length);
+      const paint = shade(tile.fill, ranked.get(tile) ?? 0, inner.length);
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="2" fill="${paint}"`, tile.label, ranked.get(tile) ?? 0));
       parts.push("</rect>");
       if (w > 36 && h > 22) {
@@ -135,13 +135,13 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
 }
 
 /**
- * Largest sibling keeps the branch hue. Smaller ones step toward black in light
- * mode and toward white in dark mode, so each scheme gets a wide lightness range
- * that still clears the page. A lone tile stays the hue.
+ * Largest sibling keeps the branch hue. Smaller ones walk evenly to 64% of that
+ * hue: toward black in light mode, toward white in dark mode. 64% stays in the
+ * family. A header passes a count of 1 and keeps the hue. A lone tile stays the hue.
  */
-function shade(base: string, depth: number, rank: number, count: number): string {
-  if (depth <= 0 || count <= 1) return base;
-  const pct = Math.round(100 - (rank / (count - 1)) * 58);
+function shade(base: string, rank: number, count: number): string {
+  if (count <= 1) return base;
+  const pct = Math.round(100 - (rank / (count - 1)) * 36);
   if (pct >= 100) return base;
   return `color-mix(in srgb, ${base} ${pct}%, light-dark(#000000, #ffffff))`;
 }
@@ -268,11 +268,11 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     const y = y0 + gap;
     const w = Math.max(1, w0 - gap * 2);
     const h = Math.max(1, h0 - gap * 2);
-    const paint = shade(color, depth, rank, siblings);
+    const band = node.children.length > 0 && w >= 36 && h >= 36 ? 16 : 0;
+    const paint = shade(color, rank, band ? 1 : siblings);
     const label = tip(node, parent, total, frame.locale, shown);
     const index = ordinal;
     ordinal += 1;
-    const band = node.children.length > 0 && w >= 36 && h >= 36 ? 16 : 0;
     if (!band) {
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="2" fill="${paint}"`, branch, index));
       parts.push("</rect>");

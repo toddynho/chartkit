@@ -96,8 +96,15 @@ test("flat nested treemap fills fail the shade claim, and the allowlist does not
   const problems = treemapShadeProblems(flat);
   assert.ok(problems.some((line) => /L\*/.test(line)), problems.join("\n"));
   const pale = `color-mix(in srgb, ${green} 42%, light-dark(#000000, #ffffff))`;
-  const shaded = `<svg xmlns="http://www.w3.org/2000/svg" data-ck-type="treemap" viewBox="0 0 220 200"><rect x="10" y="10" width="16" height="80" fill="${green}" data-ck-mark="group" aria-label="Metal / Nonferrous: 44"></rect><rect x="10" y="28" width="70" height="60" fill="${green}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Aluminum: 22"></rect><rect x="82" y="28" width="70" height="60" fill="${pale}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Copper: 14"></rect></svg>`;
+  const shaded = `<svg xmlns="http://www.w3.org/2000/svg" data-ck-type="treemap" viewBox="0 0 220 200"><rect x="4" y="4" width="200" height="16" fill="${green}" data-ck-mark="group" aria-label="Metal: 80"></rect><rect x="10" y="28" width="180" height="16" fill="${green}" data-ck-mark="group" aria-label="Metal / Nonferrous: 44"></rect><rect x="10" y="48" width="70" height="60" fill="${green}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Aluminum: 22"></rect><rect x="82" y="48" width="70" height="60" fill="${pale}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Copper: 14"></rect><g data-ck-legend-row="0"><rect x="12" y="8" width="10" height="10" fill="${green}"/><text x="28" y="16">Metal</text></g></svg>`;
   assert.deepEqual(treemapShadeProblems(shaded), [], treemapShadeProblems(shaded).join("\n"));
+  const darkHeader = shaded.replace(`width="180" height="16" fill="${green}" data-ck-mark="group"`, `width="180" height="16" fill="${pale}" data-ck-mark="group"`);
+  assert.ok(treemapShadeProblems(darkHeader).some((line) => /header is not the Metal color/.test(line)), treemapShadeProblems(darkHeader).join("\n"));
+  const wrongSwatch = shaded.replace(`width="10" height="10" fill="${green}"`, `width="10" height="10" fill="${pale}"`);
+  assert.ok(treemapShadeProblems(wrongSwatch).some((line) => /legend swatch is not the group color/.test(line)), treemapShadeProblems(wrongSwatch).join("\n"));
+  const close = `color-mix(in srgb, ${green} 97%, light-dark(#000000, #ffffff))`;
+  const tight = shaded.replace(`fill="${pale}" data-ck-mark="tile"`, `fill="${close}" data-ck-mark="tile"`);
+  assert.ok(treemapShadeProblems(tight).some((line) => /L\*/.test(line)), treemapShadeProblems(tight).join("\n"));
   assert.deepEqual(treemapShadeProblems(`<svg data-ck-type="treemap"><rect x="0" y="0" width="40" height="40" fill="${green}" data-ck-mark="tile" aria-label="Wood: 12"></rect></svg>`), []);
   for (const key of readAllowlist()) assert.equal(String(key).includes("treemap-shade"), false, key);
   for (const key of readClaimAllowlist()) assert.equal(String(key).includes("treemap-shade"), false, key);

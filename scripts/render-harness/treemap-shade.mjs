@@ -1,11 +1,13 @@
 /**
- * Nested treemap siblings need a real lightness spread, black-or-white ink
- * chosen by contrast, and a gap of at least 1px. A flat fill fails the spread.
- * This claim is not allowlisted.
+ * Nested treemap siblings need a lightness step and a span, black-or-white ink
+ * chosen by contrast, and a gap of at least 1px. Header bands match the group
+ * colour, which is also the legend swatch. A flat fill fails. Not allowlisted.
  */
 import { contrast, resolvePaint } from "./colors.mjs";
 
-const SPREAD = 12;
+/** Under the 64% hue end. The weakest pair still clears these. A flat fill does not. */
+const SPREAD = 6;
+const STEP = 3;
 
 export function treemapShadeProblems(svg) {
   if (!svg || !svg.includes('data-ck-type="treemap"')) return [];
@@ -20,13 +22,39 @@ export function treemapShadeProblems(svg) {
     list.push(node);
     groups.set(key, list);
   }
+  const roots = new Map();
+  for (const node of nodes) {
+    if (node.mark === "group" && node.path.length === 1) roots.set(node.path[0], node.fill);
+  }
+  for (const node of nodes) {
+    if (node.mark !== "group" || node.path.length < 2) continue;
+    const want = roots.get(node.path[0]);
+    if (want && node.fill !== want) problems.push(`${nameOf(node)} header is not the ${node.path[0]} color`);
+  }
+  for (const swatch of legendSwatches(svg)) {
+    for (const [name, fill] of roots) {
+      if (swatch.name !== name && !swatch.name.startsWith(`${name} `)) continue;
+      if (swatch.fill !== fill) problems.push(`${name} legend swatch is not the group color`);
+    }
+  }
   for (const [key, list] of groups) {
-    if (list.length < 2) continue;
-    for (const mode of ["light", "dark"]) {
-      const lights = list.map((node) => lightness(node.fill, mode)).filter((value) => value != null);
-      if (lights.length < 2) continue;
-      const span = Math.max(...lights) - Math.min(...lights);
-      if (span < SPREAD) problems.push(`${key} siblings span ${span.toFixed(1)} L* in ${mode} mode, need ${SPREAD}`);
+    const tiles = list.filter((node) => node.mark === "tile");
+    if (tiles.length >= 2) {
+      const ranked = [...tiles].sort((a, b) => b.value - a.value);
+      for (const mode of ["light", "dark"]) {
+        const lights = ranked.map((node) => lightness(node.fill, mode));
+        const usable = lights.filter((value) => value != null);
+        if (usable.length < 2) continue;
+        const span = Math.max(...usable) - Math.min(...usable);
+        if (span < SPREAD) problems.push(`${key} siblings span ${span.toFixed(1)} L* in ${mode} mode, need ${SPREAD}`);
+        for (let i = 1; i < ranked.length; i++) {
+          const left = lights[i - 1];
+          const right = lights[i];
+          if (left == null || right == null) continue;
+          const step = Math.abs(left - right);
+          if (step < STEP) problems.push(`${nameOf(ranked[i - 1])} and ${nameOf(ranked[i])} are ${step.toFixed(1)} L* apart in ${mode} mode, need ${STEP}`);
+        }
+      }
     }
     for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
@@ -54,20 +82,34 @@ export function treemapShadeProblems(svg) {
   }
   const labels = texts(svg);
   for (const list of groups.values()) {
+    const tiles = list.filter((node) => node.mark === "tile");
     for (const mode of ["light", "dark"]) {
-      for (let i = 0; i < list.length; i++) {
-        for (let j = i + 1; j < list.length; j++) {
-          const left = lightness(list[i].fill, mode);
-          const right = lightness(list[j].fill, mode);
+      for (let i = 0; i < tiles.length; i++) {
+        for (let j = i + 1; j < tiles.length; j++) {
+          const left = lightness(tiles[i].fill, mode);
+          const right = lightness(tiles[j].fill, mode);
           if (left == null || right == null || Math.abs(left - right) >= 8) continue;
-          const a = painted(list[i], labels, mode);
-          const b = painted(list[j], labels, mode);
-          if (a && b && a !== b) problems.push(`${nameOf(list[i])} and ${nameOf(list[j])} flip ink across ${Math.abs(left - right).toFixed(1)} L*`);
+          const a = painted(tiles[i], labels, mode);
+          const b = painted(tiles[j], labels, mode);
+          if (a && b && a !== b) problems.push(`${nameOf(tiles[i])} and ${nameOf(tiles[j])} flip ink across ${Math.abs(left - right).toFixed(1)} L*`);
         }
       }
     }
   }
   return problems;
+}
+
+function legendSwatches(svg) {
+  const out = [];
+  for (const match of svg.matchAll(/<g\b[^>]*data-ck-legend-row="[^"]*"[^>]*>([\s\S]*?)<\/g>/g)) {
+    const chunk = match[1];
+    const fills = [...chunk.matchAll(/<rect\b[^>]*\bfill="([^"]*)"[^>]*\/?>/g)];
+    const names = [...chunk.matchAll(/<text\b[^>]*>([^<]*)<\/text>/g)];
+    for (let i = 0; i < fills.length && i < names.length; i++) {
+      out.push({ name: decode(names[i][1]).trim(), fill: fills[i][1] });
+    }
+  }
+  return out;
 }
 
 function painted(node, labels, mode) {
@@ -126,10 +168,17 @@ function rects(svg) {
   const nodes = [];
   for (const match of svg.matchAll(/<rect\b[^>]*>/g)) {
     const tag = match[0];
-    if (!/data-ck-mark="(?:tile|group)"/.test(tag)) continue;
-    const label = decode(/aria-label="([^"]*)"/.exec(tag)?.[1] ?? "").split(":")[0] ?? "";
+    const mark = /data-ck-mark="(tile|group)"/.exec(tag)?.[1];
+    if (!mark) continue;
+    const raw = decode(/aria-label="([^"]*)"/.exec(tag)?.[1] ?? "");
+    const colon = raw.indexOf(":");
+    const label = colon < 0 ? raw : raw.slice(0, colon);
+    const amount = colon < 0 ? "" : raw.slice(colon + 1).split("·")[0];
+    const value = Number(amount.replace(/,/g, "").match(/-?\d+(?:\.\d+)?/)?.[0] ?? "");
     nodes.push({
+      mark,
       path: label.split(" / ").map((part) => part.trim()).filter(Boolean),
+      value: Number.isFinite(value) ? value : 0,
       x: num(tag, "x"),
       y: num(tag, "y"),
       w: num(tag, "width"),
