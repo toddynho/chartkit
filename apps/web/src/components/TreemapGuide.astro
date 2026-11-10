@@ -32,7 +32,7 @@ const tooltipOn = `{
 <section id="when-to-use">
   <h2>When to use it</h2>
   <p>
-    Use a treemap when the question is which parts make up a total, and the parts are numerous enough that a pie becomes a ring of slivers. Inventory by material is twelve products in three groups. Litres by cask is the same idea with three levels: orchard, apple, then cask.
+    Use a treemap when the question is which parts make up a total, and the parts are numerous enough that a pie becomes a ring of slivers. Inventory by material is twelve products under three materials, each split into a kind. Litres by cask is the same idea with three levels: orchard, apple, then cask.
   </p>
   <p>
     A <a href="/docs/charts/sunburst">sunburst</a> is the same hierarchy drawn as concentric rings. Color follows the top branch there too. A <a href="/docs/charts/pie">pie</a> or a <a href="/docs/charts/donut">donut</a> is the flat chart for a handful of parts. A <a href="/docs/charts/bar">bar</a> is the chart when you are comparing amounts that do not need to add to one rectangle.
@@ -52,7 +52,7 @@ const tooltipOn = `{
 <section id="data">
   <h2>Data</h2>
   <p>
-    A flat treemap is one row per tile. <code>encoding.x</code> is the name. <code>encoding.y</code> is the size. <code>encoding.color</code> is an optional group. Tiles in a group share a series color, in lighter and darker tints, and sit together. Inventory by material points color at <code>group</code>. Wood, metal, and glass are the three groups.
+    A flat treemap is one row per tile. <code>encoding.x</code> is the name. <code>encoding.y</code> is the size. <code>encoding.color</code> is an optional group. Tiles in a group share a series color, in lighter and darker tints, and sit together. The smallest spec points color at <code>group</code>. Wood, metal, and glass are the three groups.
   </p>
   <figure class="code">
     <figcaption><span>encoding.color</span></figcaption>
@@ -83,21 +83,18 @@ const tooltipOn = `{
 <section id="examples">
   <h2>Examples</h2>
   <p>
-    The rail switches among existing treemap specs. Inventory by material is twelve flat tiles in three color groups. Litres by cask and Where the crates sat are three levels of nested children. The level control changes those two. It does not fold a flat color group.
+    The rail switches among existing treemap specs. Inventory by material is twelve products under material, then kind. Litres by cask is orchard, apple, then cask. Where the crates sat is row, stall, then good. Each one is three levels of nested children, so the level control changes the tiles on every example.
   </p>
 </section>
 
 <TeachConcept id="levels" title="Levels">
   <p>
-    <code>mark.depth</code> is how many levels to draw under the root. Deeper nodes fold into that level. Omit it and the cap is 8, which is the whole tree for these examples. <code>1</code> draws the top branches only. <code>2</code> draws the top branch and its children. <code>3</code> reaches the leaves of Litres by cask and Where the crates sat.
+    <code>mark.depth</code> is how many levels to draw under the root. Deeper nodes fold into that level. Omit it and the cap is 8, which is the whole tree for these examples. <code>1</code> draws the top branches only. <code>2</code> draws the top branch and its children. <code>3</code> reaches the leaves: the product, the cask, or the good.
   </p>
   <figure class="code">
     <figcaption><span>mark.depth</span></figcaption>
     <pre><code>{depth}</code></pre>
   </figure>
-  <p>
-    Inventory by material is flat rows plus <code>encoding.color</code>. It is not a hierarchy, so the cap does not change the tiles. The key is still written.
-  </p>
 </TeachConcept>
 
 <TeachConcept id="legend" title="Legend">

@@ -239,6 +239,67 @@ describe("hierarchy", () => {
     expect(sharedInk(["#111111", "#f5f5f7"])).toBeNull();
   });
 
+  it("keeps each treemap legend outside the tiles and paints a different cut at each depth", () => {
+    const tree = {
+      version: "1",
+      type: "treemap",
+      title: "Inventory by material",
+      data: [
+        {
+          name: "Wood",
+          children: [
+            { name: "Hardwood", children: [{ name: "Oak", size: 42 }, { name: "Walnut", size: 12 }] },
+            { name: "Softwood", children: [{ name: "Pine", size: 28 }, { name: "Maple", size: 18 }] },
+          ],
+        },
+        {
+          name: "Metal",
+          children: [
+            { name: "Ferrous", children: [{ name: "Steel", size: 36 }] },
+            { name: "Nonferrous", children: [{ name: "Aluminum", size: 22 }, { name: "Copper", size: 14 }, { name: "Tin", size: 8 }] },
+          ],
+        },
+        {
+          name: "Glass",
+          children: [
+            { name: "Sheet", children: [{ name: "Clear", size: 24 }, { name: "Tinted", size: 16 }] },
+            { name: "Worked", children: [{ name: "Laminated", size: 11 }, { name: "Mirror", size: 7 }] },
+          ],
+        },
+      ],
+      encoding: { x: "name", y: "size" },
+      a11y: { alt },
+      size: { width: 640, height: 420 },
+    };
+    const flat = render(load("20-treemap.json")) ?? "";
+    expect(flat).toContain('data-ck-legend="top"');
+    expect(flat).toContain(">Wood<");
+    expect(flat).toContain(">Metal<");
+    expect(flat).toContain(">Glass<");
+    assertLegend(flat, "top", 640, 420);
+    for (const position of ["top", "bottom", "right", "left"] as const) {
+      const svg = render({ ...tree, legend: { position } }) ?? "";
+      expect(svg, position).toContain(`data-ck-legend="${position}"`);
+      expect(svg, position).toContain(">Hardwood<");
+      expect(svg, position).not.toContain(">Hard…<");
+      assertLegend(svg, position, 640, 420);
+    }
+    const depth = (cap: number) => render({ ...tree, mark: { depth: cap } }) ?? "";
+    const one = depth(1);
+    const two = depth(2);
+    const three = depth(3);
+    expect(nesting(one)).toBe(1);
+    expect(nesting(two)).toBe(2);
+    expect(nesting(three)).toBe(3);
+    expect(one.match(/data-ck-mark=/g)?.length).toBeLessThan(two.match(/data-ck-mark=/g)?.length ?? 0);
+    expect(two.match(/data-ck-mark=/g)?.length).toBeLessThan(three.match(/data-ck-mark=/g)?.length ?? 0);
+    expect(one).toContain(">Wood<");
+    expect(one).not.toContain("Hardwood");
+    expect(two).toContain("Hardwood");
+    expect(two).not.toContain(">Oak<");
+    expect(three).toContain(">Oak<");
+  });
+
   it("still repairs a legacy treemap parent onto color when there is no id", () => {
     const spec = {
       version: "1",
@@ -254,6 +315,62 @@ describe("hierarchy", () => {
     expect(fixed.encoding.parent).toBeUndefined();
   });
 });
+
+function tagBox(tag: string): { x: number; y: number; w: number; h: number } {
+  const num = (name: string) => Number(new RegExp(`\\b${name}="([^"]+)"`).exec(tag)?.[1]);
+  return { x: num("x"), y: num("y"), w: num("width"), h: num("height") };
+}
+
+function legendPlate(svg: string): { x: number; y: number; w: number; h: number } {
+  const tag = svg.match(/<rect\b[^>]*data-ck-legend-plate="1"[^>]*>/)?.[0] ?? "";
+  return tagBox(tag);
+}
+
+function tileUnion(svg: string): { x: number; y: number; w: number; h: number } {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (const match of svg.matchAll(/<rect\b[^>]*data-ck-mark="(?:tile|group)"[^>]*>/g)) {
+    const box = tagBox(match[0]);
+    x0 = Math.min(x0, box.x);
+    y0 = Math.min(y0, box.y);
+    x1 = Math.max(x1, box.x + box.w);
+    y1 = Math.max(y1, box.y + box.h);
+  }
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+
+function overlaps(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }): boolean {
+  const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+  const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+  return ix > 0.5 && iy > 0.5;
+}
+
+function assertLegend(svg: string, position: "top" | "bottom" | "right" | "left", width: number, height: number): void {
+  const legend = legendPlate(svg);
+  const tiles = tileUnion(svg);
+  expect(Number.isFinite(legend.w) && legend.w > 2, position).toBe(true);
+  expect(legend.x, position).toBeGreaterThanOrEqual(-1);
+  expect(legend.y, position).toBeGreaterThanOrEqual(-1);
+  expect(legend.x + legend.w, position).toBeLessThanOrEqual(width + 1);
+  expect(legend.y + legend.h, position).toBeLessThanOrEqual(height + 1);
+  expect(overlaps(legend, tiles), position).toBe(false);
+  if (position === "top") expect(legend.y + legend.h, position).toBeLessThanOrEqual(tiles.y + 0.5);
+  if (position === "bottom") expect(legend.y, position).toBeGreaterThanOrEqual(tiles.y + tiles.h - 0.5);
+  if (position === "right") expect(legend.x, position).toBeGreaterThanOrEqual(tiles.x + tiles.w - 0.5);
+  if (position === "left") expect(legend.x + legend.w, position).toBeLessThanOrEqual(tiles.x + 0.5);
+}
+
+function nesting(svg: string): number {
+  let max = 1;
+  for (const match of svg.matchAll(/aria-label="([^"]*)"/g)) {
+    const head = (match[1] ?? "").split(":")[0] ?? "";
+    const segs = head.split(" / ").filter(Boolean).length;
+    if (segs > max) max = segs;
+  }
+  return max;
+}
 
 function labeled(svg: string, mark: string): Array<[string, string]> {
   const chunks = svg.split(`data-ck-mark="${mark}"`);

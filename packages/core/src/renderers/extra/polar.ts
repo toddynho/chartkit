@@ -1,5 +1,5 @@
 import { headingInset } from "../../chrome";
-import { legendAt, legendLabel, legendMarkup, legendShownValue, legendSpace, paintLegend, readLegend } from "../../legend";
+import { legendAt, legendShownValue, legendSpace, paintLegend } from "../../legend";
 import { asNumber, column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -90,21 +90,26 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: R
   const roseBottom = roseBox?.position === "bottom" && roseRoom ? roseRoom.band + 8 : 0;
   const roseRight = roseBox?.position === "right" && roseRoom ? roseRoom.side + 12 : 0;
   const showLegend = frame.legend !== false && series.length > 1;
-  const legendBox = showLegend ? readLegend(spec) : null;
+  const legendBox = showLegend ? legendAt(spec, "top") : null;
   const legendItems = series.map((item, index) => ({
     name: item.name,
     color: fill(frame, index),
     value: legendShownValue(spec, item.values.at(-1)),
   }));
-  const topBand = legendBox?.position === "top" ? legendSpace(legendBox, legendItems, frame.width - 32).band : 0;
+  const legendRoom = legendBox ? legendSpace(legendBox, legendItems, Math.max(80, frame.width - 32)) : null;
+  const seriesTop = legendBox?.position === "top" && legendRoom ? legendRoom.band + 8 : 0;
+  const seriesBottom = legendBox?.position === "bottom" && legendRoom ? legendRoom.band + 8 : 0;
+  const seriesRight = legendBox?.position === "right" && legendRoom ? legendRoom.side + 12 : 0;
+  const seriesLeft = legendBox?.position === "left" && legendRoom ? legendRoom.side + 12 : 0;
   const inset = headingInset(frame);
-  const legendH = showLegend && !topBand ? 28 : 8;
-  const top = 8 + inset + topBand + roseTop;
-  const bottom = frame.height - legendH - roseBottom;
-  const plotRight = frame.width - roseRight;
-  const cx = plotRight / 2;
+  const top = 8 + inset + seriesTop + roseTop;
+  const bottom = frame.height - 8 - seriesBottom - roseBottom;
+  const plotLeft = seriesLeft;
+  const plotRight = frame.width - roseRight - seriesRight;
+  const cx = (plotLeft + plotRight) / 2;
   const cy = top + (bottom - top) / 2;
-  let outer = Math.max(40, Math.min(cx - 52, (bottom - top) / 2 - 6));
+  const nameRoom = legendBox && (legendBox.position === "top" || legendBox.position === "bottom") ? 44 : 6;
+  let outer = Math.max(40, Math.min(cx - plotLeft - 52, (bottom - top) / 2 - nameRoom));
   const innerFrac = fraction(frame.mark.innerRadius, kind === "radial-bar" ? 0.34 : 0);
   const start = numberOf(frame.mark.startAngle, 0);
   const pad = Math.min(8, Math.max(0, numberOf(frame.mark.padAngle, kind === "rose" ? 1.2 : 2)));
@@ -143,8 +148,11 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: R
       roseMarks = fit.marks;
     }
   }
+  const labelBox = legendBox
+    ? { left: Math.max(8, plotLeft + 4), top: top + 2, right: Math.min(frame.width - 8, plotRight - 4), bottom: bottom - 2 }
+    : { left: 6, top: 6, right: frame.width - 6, bottom: frame.height - 6 };
   if (!place) {
-    outer = fitRadialLabels(outer, categories, series, labelsOn, cx, cy, start, pad, gap, mode, frame.width, frame.height, frame.locale, format);
+    outer = fitRadialLabels(outer, categories, series, labelsOn, cx, cy, start, pad, gap, mode, labelBox, frame.locale, format);
   }
   const inner = Math.min(outer * innerFrac, outer - 8);
 
@@ -201,7 +209,7 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: R
     if (!roseMarks && !place) {
       const mid = polar(cx, cy, outer + 36, origin + usable / 2);
       const anchor = mid.x < cx - 10 ? "end" : mid.x > cx + 10 ? "start" : "middle";
-      parts.push(text(mid.x, mid.y, category, muted, 12, "560", anchor));
+      if (labelInside(mid.x, mid.y, category, 12, anchor, labelBox)) parts.push(text(mid.x, mid.y, category, muted, 12, "560", anchor));
     }
   });
   if (roseMarks) parts.push(roseMarks);
@@ -217,25 +225,14 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: R
       }),
     );
   }
-  if (showLegend) {
-    const items = series.map((item, index) => ({
-      name: clip(item.name, 18),
-      color: fill(frame, index),
-      value: legendShownValue(spec, item.values.at(-1)),
-    }));
-    let x = 16;
-    const y = frame.height - 16;
-    const fallback = series
-      .map((item, index) => {
-        const name = legendLabel(clip(item.name, 18), legendShownValue(spec, item.values.at(-1)));
-        const mark = `<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`;
-        const label = text(x + 14, y, name, ink, 12, "500");
-        x += 14 + ch(name.length, 7) + 16;
-        return mark + label;
-      })
-      .join("");
+  if (legendBox) {
     parts.push(
-      legendMarkup(spec, items, { plot: { left: 16, top, right: frame.width - 16, bottom }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+      paintLegend(legendBox, legendItems, {
+        plot: { left: Math.max(14, plotLeft + 8), top, right: Math.min(plotRight - 8, frame.width - 16), bottom },
+        width: frame.width,
+        height: frame.height,
+        preset: frame.preset,
+      }),
     );
   }
   return view.done();
@@ -305,8 +302,7 @@ function fitRadialLabels(
   pad: number,
   gap: number,
   mode: Stack,
-  width: number,
-  height: number,
+  bounds: { left: number; top: number; right: number; bottom: number },
   locale: string,
   format: unknown,
 ): number {
@@ -317,19 +313,18 @@ function fitRadialLabels(
   const innerGap = grouped ? usable * gap : 0;
   const span = grouped ? (usable - innerGap) / series.length : usable;
   const step = grouped ? span + innerGap / series.length : span;
-  const inset = 6;
   const fits = (radius: number) => {
     for (let index = 0; index < categories.length; index++) {
       const origin = start + index * slot + gutter / 2;
       const nameAt = polar(cx, cy, radius + 36, origin + usable / 2);
       const anchor = nameAt.x < cx - 10 ? "end" : nameAt.x > cx + 10 ? "start" : "middle";
-      if (!labelInside(nameAt.x, nameAt.y, categories[index] ?? "", 12, anchor, width, height, inset)) return false;
+      if (!labelInside(nameAt.x, nameAt.y, categories[index] ?? "", 12, anchor, bounds)) return false;
       if (!labelsOn) continue;
       for (let seriesIndex = 0; seriesIndex < series.length; seriesIndex++) {
         const raw = series[seriesIndex]?.values[index] ?? 0;
         const angle = (grouped ? origin + seriesIndex * step : origin) + span / 2;
         const at = polar(cx, cy, radius + 56, angle);
-        if (!labelInside(at.x, at.y + 4, fmt(raw, locale, format), 11, "middle", width, height, inset)) return false;
+        if (!labelInside(at.x, at.y + 4, fmt(raw, locale, format), 11, "middle", bounds)) return false;
       }
     }
     return true;
@@ -342,17 +337,19 @@ function fitRadialLabels(
   return Math.max(36, radius);
 }
 
-function labelInside(x: number, y: number, label: string, size: number, anchor: string, width: number, height: number, inset: number): boolean {
+function labelInside(
+  x: number,
+  y: number,
+  label: string,
+  size: number,
+  anchor: string,
+  bounds: { left: number; top: number; right: number; bottom: number },
+): boolean {
   const wide = ch(label.length, size * 0.62) + 4;
   const tall = size + 6;
   const left = anchor === "end" ? x - wide : anchor === "middle" ? x - wide / 2 : x;
   const top = y - size;
-  return left >= inset && top >= inset && left + wide <= width - inset && top + tall <= height - inset;
-}
-
-function clip(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, Math.max(1, max - 1))}…`;
+  return left >= bounds.left && top >= bounds.top && left + wide <= bounds.right && top + tall <= bounds.bottom;
 }
 
 function spanOf(start: number, end: number): number {

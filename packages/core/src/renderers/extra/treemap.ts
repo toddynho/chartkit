@@ -1,10 +1,10 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
-import { legendLabel, legendMarkup, legendShownValue, legendSpace, readLegend, type LegendItem } from "../../legend";
+import { legendAt, legendShownValue, legendSpace, paintLegend, type LegendBox, type LegendItem } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, markMix, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { esc, font, isRecord, n, ch } from "../../svg";
+import { esc, isRecord, n, ch } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
@@ -21,16 +21,39 @@ interface Tile extends Leaf {
   h: number;
 }
 
+interface PlotBox {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
 /** Same heading-to-plot gap as the shared cartesian plot. */
 function plotTop(frame: { title?: string; subtitle?: string }): number {
   return (frame.title ? 40 : 12) + (frame.subtitle ? 18 : 0);
 }
 
-/** A rich top legend sits under the title, so the tiles start below that band. */
-function topBand(spec: Record<string, unknown>, items: LegendItem[], width: number): number {
-  const box = readLegend(spec);
-  if (!box || box.position !== "top") return 0;
-  return legendSpace(box, items, width).band;
+/**
+ * Shrink the tile rectangle so a legend sits outside it.
+ * An omitted position is top, above the tiles. The gap keeps the tile stroke off the legend.
+ */
+function reserveLegend(
+  spec: Record<string, unknown>,
+  frame: { title?: string; subtitle?: string; width: number; height: number },
+  items: LegendItem[],
+  on: boolean,
+): { box: LegendBox | null; plot: PlotBox } {
+  const plot: PlotBox = { left: 10, top: plotTop(frame), right: frame.width - 10, bottom: frame.height - 12 };
+  if (!on) return { box: null, plot };
+  const box = legendAt(spec, "top");
+  if (!box || box.position === "inside") return { box, plot };
+  const room = legendSpace(box, items, Math.max(80, frame.width - 24));
+  const gap = 8;
+  if (box.position === "top") plot.top += room.band + gap;
+  else if (box.position === "bottom") plot.bottom -= room.band + gap;
+  else if (box.position === "right") plot.right -= room.side + gap;
+  else if (box.position === "left") plot.left += room.side + gap;
+  return { box, plot };
 }
 
 /** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
@@ -66,9 +89,6 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     });
   });
   if (!leaves.length) return null;
-  const top = plotTop(frame);
-  const legend = frame.legend !== false && (Boolean(ramp) || colors.size > 1);
-  const legendH = ramp && frame.legend !== false ? colorLegendHeight : legend ? 28 : 12;
   const grouped = [...groupLeaves(leaves)].map(([name, kids]) => ({
     label: name,
     value: kids.reduce((sum, leaf) => sum + leaf.value, 0),
@@ -78,9 +98,10 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   }));
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const legendItems = grouped.map((node) => ({ name: node.label, color: node.fill, value: legendShownValue(spec, node.value) }));
-  const band = legend ? topBand(spec, legendItems, frame.width - 24) : 0;
-  const origin = top + band;
-  const outer = squarify(grouped, 10, origin, frame.width - 20, frame.height - origin - (band ? 12 : legendH));
+  const categorical = frame.legend !== false && !ramp && colors.size > 1;
+  const placed = reserveLegend(spec, frame, legendItems, categorical);
+  if (ramp && frame.legend !== false) placed.plot.bottom -= colorLegendHeight;
+  const outer = squarify(grouped, placed.plot.left, placed.plot.top, Math.max(1, placed.plot.right - placed.plot.left), Math.max(1, placed.plot.bottom - placed.plot.top));
   for (const block of outer) {
     const inner = block.kids.length > 1
       ? squarify(block.kids, block.x + 3, block.y + 3, Math.max(1, block.w - 6), Math.max(1, block.h - 6))
@@ -105,22 +126,8 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   }
   if (ramp && frame.legend !== false) {
     parts.push(ramp.legend(12, frame.height - colorLegendHeight, scaleLabel(frame.preset)));
-  } else if (frame.legend !== false && colors.size > 1) {
-    const totals = new Map(grouped.map((block) => [block.label, block.value]));
-    const items = [...colors].map(([name, color]) => ({ name, color, value: legendShownValue(spec, totals.get(name)) }));
-    let x = 12;
-    const y = frame.height - 8;
-    const fallback = [...colors]
-      .map(([name, color]) => {
-        const label = fit(legendLabel(name, legendShownValue(spec, totals.get(name))), 80, 12);
-        const mark = `<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${label}</text>`;
-        x += 14 + Math.min(name.length, 12) * 7 + 14;
-        return mark;
-      })
-      .join("");
-    parts.push(
-      legendMarkup(spec, items, { plot: { left: 12, top: origin, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
-    );
+  } else if (placed.box && legendItems.length) {
+    parts.push(paintLegend(placed.box, legendItems, { plot: placed.plot, width: frame.width, height: frame.height, preset: frame.preset }));
   }
   return view.done();
 }
@@ -224,8 +231,6 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0);
   const legend = frame.legend !== false && branches.length > 1;
-  const top = plotTop(frame);
-  const legendH = legend ? 28 : 12;
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const colors = branches.map((_, index) => fill(frame, index));
   let ordinal = 0;
@@ -264,32 +269,13 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     inner.forEach((child, childIndex) => paintNode(child, color, branch, depth + 1, child.x, child.y, child.w, child.h, node.value, childIndex, inner.length));
   };
   const levelItems = branches.map((node, index) => ({ name: node.name, color: colors[index] ?? fill(frame, index), value: legendShownValue(spec, node.value) }));
-  const band = legend ? topBand(spec, levelItems, frame.width - 24) : 0;
-  const origin = top + band;
-  const outer = squarify(branches, 10, origin, frame.width - 20, frame.height - origin - (band ? 12 : legendH));
+  const placed = reserveLegend(spec, frame, levelItems, legend);
+  const outer = squarify(branches, placed.plot.left, placed.plot.top, Math.max(1, placed.plot.right - placed.plot.left), Math.max(1, placed.plot.bottom - placed.plot.top));
   outer.forEach((tile, index) => {
     paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total, index, outer.length);
   });
-  if (legend) {
-    const items = branches.map((node, index) => ({
-      name: node.name,
-      color: colors[index] ?? fill(frame, index),
-      value: legendShownValue(spec, node.value),
-    }));
-    let x = 12;
-    const y = frame.height - 8;
-    const fallback = branches
-      .map((node, index) => {
-        const color = colors[index] ?? fill(frame, index);
-        const name = fit(legendLabel(node.name, legendShownValue(spec, node.value)), 88, 12) || node.name;
-        const mark = `<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`;
-        x += 14 + Math.min(name.length, 12) * 7 + 14;
-        return mark;
-      })
-      .join("");
-    parts.push(
-      legendMarkup(spec, items, { plot: { left: 12, top: origin, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
-    );
+  if (placed.box && levelItems.length) {
+    parts.push(paintLegend(placed.box, levelItems, { plot: placed.plot, width: frame.width, height: frame.height, preset: frame.preset }));
   }
   return view.done();
 }

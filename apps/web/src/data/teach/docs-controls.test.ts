@@ -1,14 +1,15 @@
 /**
  * Docs control sweep.
- * Every teach-page chart type and every focused control is applied to one
- * example. Combo also applies every control value, and every combination of
- * those controls, to every combo example.
- * Each control id has a claim checker. A new id fails until it is
- * checked or named in CLAIM_ALLOWLIST with a reason. The allowlist stays empty.
- * Every painted control state has to validate and draw a chart. A CK error or an
- * empty chart fails. Frame, legend, and tooltip claims stay on the example
- * where the control changes the drawing.
- * Legend position, tooltip on/off, and the docs rail scroll are explicit claims.
+ * Every teach-page chart type, every focused control, and every example is painted.
+ * Combo also applies every combination of its controls to every combo example.
+ * Each control id has a claim checker. A new id fails until it is checked.
+ * A value that paints the same picture as another fails, unless CLAIM_ALLOWLIST
+ * names that value and says why. The checker reads the painted SVG, not the spec.
+ * Legend position compares the legend box to the plot or mark box. Top means the
+ * legend's bottom edge is at or above the plot's top. Bottom, right, and left
+ * mirror that. The legend also has to sit inside the frame and off the marks.
+ * A legend that only exists, or that moves a few pixels, fails.
+ * Every painted control state has to validate and draw a chart.
  * Range sliders are sampled at the minimum, the midpoint, and the maximum.
  */
 import assert from "node:assert/strict";
@@ -20,6 +21,7 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { chromium, type Page } from "playwright";
 import { docsNavLinks } from "../nav.ts";
 import { withPreviewSize } from "../preview-size.ts";
+import { CLAIM_ALLOWLIST, effectProblems, legendProblems, legendWaived, type LegendRead } from "./docs-claims.ts";
 import { demoTip, type DemoTip } from "./demo-tip.ts";
 import { teachModules } from "./registry.ts";
 import type { TeachControl, TeachModule } from "./types.ts";
@@ -27,12 +29,6 @@ import type { TeachControl, TeachModule } from "./types.ts";
 const css = ["global.css", "docs.css", "teach.css"]
   .map((name) => readFileSync(new URL(`../../styles/${name}`, import.meta.url), "utf8"))
   .join("\n");
-
-/**
- * A control with no checker has to be listed here. Keep this list small.
- * Type is omitted when the skip is the control itself.
- */
-const CLAIM_ALLOWLIST: { type?: string; id: string; reason: string }[] = [];
 
 const EFFECT_IDS = [
   "anchor",
@@ -92,20 +88,7 @@ type Fail = string;
 type Measure = {
   overlaps: string[];
   outside: string[];
-  legend: null | {
-    pos: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    marks: number;
-    insideView: boolean;
-    screenInside: boolean;
-    plot: { x: number; y: number; w: number; h: number } | null;
-    markBox: { x: number; y: number; w: number; h: number } | null;
-    swatches: number;
-    texts: string[];
-  };
+  legend: LegendRead | null;
 };
 
 type DiagnosticResult = { ok: boolean; errors: { code: string; message: string }[] };
@@ -162,10 +145,6 @@ async function loadRuntime(): Promise<Runtime> {
   return import(pathToFileURL(outfile).href) as Promise<Runtime>;
 }
 
-function allowReason(type: string, id: string): string | undefined {
-  return CLAIM_ALLOWLIST.find((item) => item.id === id && (item.type == null || item.type === type))?.reason;
-}
-
 function valuesOf(control: TeachControl): (string | number)[] {
   if (control.kind === "choice") return control.options.map((option) => option.value);
   const mid = control.min + Math.round((control.max - control.min) / 2 / control.step) * control.step;
@@ -212,30 +191,6 @@ function applied(module: TeachModule, example: TeachModule["examples"][number], 
   return spec;
 }
 
-/** Use the published example where this control actually changes the drawing. Tooltip stays on the opening example. */
-async function chooseExample(module: TeachModule, control: TeachControl): Promise<TeachModule["examples"][number]> {
-  const first = module.examples[0];
-  if (!first) throw new Error(`${module.type} has no example`);
-  if (control.id === "tooltip") return first;
-  const values = valuesOf(control);
-  for (const example of module.examples) {
-    const fingerprints: string[] = [];
-    let legend = 0;
-    for (const value of values) {
-      try {
-        const svg = await paint(applied(module, example, control, value));
-        fingerprints.push(normalize(svg));
-        if (control.id === "legend" && value !== "off" && (svg.includes("data-ck-legend=") || svg.includes('width="10"'))) legend += 1;
-      } catch {
-        fingerprints.push("");
-      }
-    }
-    if (control.id === "legend" && legend > 0) return example;
-    if (control.id !== "legend" && new Set(fingerprints.filter(Boolean)).size >= 2) return example;
-  }
-  return first;
-}
-
 async function paint(spec: Record<string, unknown>): Promise<string> {
   const sized = withPreviewSize(spec);
   if (sized.type === "choropleth" || sized.type === "map-points") return runtime.renderGeo(sized);
@@ -246,10 +201,6 @@ async function paint(spec: Record<string, unknown>): Promise<string> {
 
 function xml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function normalize(svg: string): string {
-  return svg.replace(/\s+id="[^"]*"/g, "").replace(/url\(#[^)]+\)/g, "url(#)").replace(/\s+clip-path="[^"]*"/g, "");
 }
 
 async function mountChart(page: Page): Promise<void> {
@@ -300,136 +251,169 @@ async function measure(page: Page, markup: string): Promise<Measure> {
         }
       }
     }
-    const clip = svgEl.querySelector("clipPath rect");
-    const plot = clip
-      ? {
-          x: Number(clip.getAttribute("x")) || 0,
-          y: Number(clip.getAttribute("y")) || 0,
-          w: Number(clip.getAttribute("width")) || 0,
-          h: Number(clip.getAttribute("height")) || 0,
-        }
-      : null;
-    const legendEl = svgEl.querySelector("[data-ck-legend]");
-    let local = { x: 0, y: 0, width: 0, height: 0 };
-    let screen = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
-    let marks = 0;
-    let pos = "";
-    if (legendEl instanceof SVGGraphicsElement) {
-      const box = legendEl.getBBox();
-      local = { x: box.x, y: box.y, width: box.width, height: box.height };
-      const seen = legendEl.getBoundingClientRect();
-      screen = { left: seen.left, top: seen.top, right: seen.right, bottom: seen.bottom, width: seen.width, height: seen.height };
-      pos = legendEl.getAttribute("data-ck-legend") || "";
-      marks = [...legendEl.querySelectorAll("text,rect,circle,path")].filter((node) => {
-        if (!(node instanceof SVGGraphicsElement)) return false;
-        const mark = node.getBoundingClientRect();
-        return mark.width > 0.5 && mark.height > 0.5;
-      }).length;
-    } else {
-      const swatches = [...svgEl.querySelectorAll("rect")].filter((node) => {
-        const w = Number(node.getAttribute("width"));
-        const h = Number(node.getAttribute("height"));
-        if (!(w >= 8 && w <= 14 && h >= 8 && h <= 14)) return false;
-        const next = node.nextElementSibling;
-        if (!(next instanceof SVGGraphicsElement) || next.localName !== "text") return false;
-        const x = Number(node.getAttribute("x"));
-        const y = Number(node.getAttribute("y"));
-        if (!plot || plot.w <= 0) return true;
-        const cx = x + w / 2;
-        const cy = y + h / 2;
-        const outsidePlot = cx < plot.x - 2 || cx > plot.x + plot.w + 2 || cy < plot.y - 2 || cy > plot.y + plot.h + 2;
-        const inTopBand = cy < plot.y + 40;
-        const inBottomBand = cy > plot.y + plot.h - 40;
-        return outsidePlot || inTopBand || inBottomBand;
-      });
-      if (swatches.length) {
-        let x0 = Infinity;
-        let y0 = Infinity;
-        let x1 = -Infinity;
-        let y1 = -Infinity;
-        for (const node of swatches) {
-          const box = node.getBBox();
-          x0 = Math.min(x0, box.x);
-          y0 = Math.min(y0, box.y);
-          x1 = Math.max(x1, box.x + box.width);
-          y1 = Math.max(y1, box.y + box.height);
-          const next = node.nextElementSibling;
-          if (next instanceof SVGGraphicsElement && next.localName === "text") {
-            const text = next.getBBox();
-            x0 = Math.min(x0, text.x);
-            y0 = Math.min(y0, text.y);
-            x1 = Math.max(x1, text.x + text.width);
-            y1 = Math.max(y1, text.y + text.height);
-          }
-        }
-        local = { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
-        const seen = swatches[0].getBoundingClientRect();
-        screen = { left: seen.left, top: seen.top, right: seen.right, bottom: seen.bottom, width: seen.width, height: seen.height };
-        marks = swatches.length;
-        const midY = local.y + local.height / 2;
-        const midX = local.x + local.width / 2;
-        if (plot && midY < plot.y + 8) pos = "top";
-        else if (plot && midY > plot.y + plot.h - 2) pos = "bottom";
-        else if (plot && midX > plot.x + plot.w - 2) pos = "right";
-        else if (plot && local.x + local.width < plot.x + 16) pos = "left";
-        else pos = "top";
+    const shown = (node: Element) => {
+      let el: Element | null = node;
+      while (el && el !== svgEl) {
+        const style = el.getAttribute("style") || "";
+        if (/display\s*:\s*none/.test(style)) return false;
+        el = el.parentElement;
+      }
+      return true;
+    };
+    const viewW = view.width || Number(svgEl.getAttribute("width")) || 0;
+    const viewH = view.height || Number(svgEl.getAttribute("height")) || 0;
+    const markBoxes: { x: number; y: number; w: number; h: number }[] = [];
+    let mx0 = Infinity;
+    let my0 = Infinity;
+    let mx1 = -Infinity;
+    let my1 = -Infinity;
+    for (const node of svgEl.querySelectorAll("[data-ck-mark], .ck-geo-region, .ck-geo-point")) {
+      if (!(node instanceof SVGGraphicsElement) || !shown(node) || node.closest("[data-ck-legend]")) continue;
+      const box = node.getBBox();
+      if (box.width < 0.5 && box.height < 0.5) continue;
+      if (viewW > 0 && box.width > viewW * 0.95 && box.height > viewH * 0.95) continue;
+      markBoxes.push({ x: box.x, y: box.y, w: box.width, h: box.height });
+      mx0 = Math.min(mx0, box.x);
+      my0 = Math.min(my0, box.y);
+      mx1 = Math.max(mx1, box.x + box.width);
+      my1 = Math.max(my1, box.y + box.height);
+    }
+    let markBox = markBoxes.length ? { x: mx0, y: my0, w: mx1 - mx0, h: my1 - my0 } : null;
+    const clips = [...svgEl.querySelectorAll("clipPath rect")]
+      .map((clip) => ({
+        x: Number(clip.getAttribute("x")) || 0,
+        y: Number(clip.getAttribute("y")) || 0,
+        w: Number(clip.getAttribute("width")) || 0,
+        h: Number(clip.getAttribute("height")) || 0,
+      }))
+      .filter((box) => box.w > 8 && box.h > 8 && (viewW <= 0 || box.w * box.h < viewW * viewH * 0.92));
+    let plot: { x: number; y: number; w: number; h: number } | null = null;
+    let best = 0;
+    for (const box of clips) {
+      let hits = 0;
+      for (const mark of markBoxes) {
+        const cx = mark.x + mark.w / 2;
+        const cy = mark.y + mark.h / 2;
+        if (cx >= box.x && cx <= box.x + box.w && cy >= box.y && cy <= box.y + box.h) hits += 1;
+      }
+      if (hits > best) {
+        best = hits;
+        plot = box;
       }
     }
-    const slack = 1.5;
-    const legendElNow = svgEl.querySelector("[data-ck-legend]");
-    const swatches = legendElNow
-      ? [...legendElNow.querySelectorAll("rect")].filter((node) => {
-          const w = Number(node.getAttribute("width"));
-          const h = Number(node.getAttribute("height"));
-          return w >= 8 && w <= 14 && h >= 8 && h <= 14;
-        }).length
-      : 0;
-    const legendTexts = legendElNow
-      ? [...legendElNow.querySelectorAll("text")]
-          .map((node) => (node.textContent || "").replace(/\s+/g, " ").trim())
-          .filter(Boolean)
-      : [];
-    let markBox: { x: number; y: number; w: number; h: number } | null = null;
-    const markNodes = [...svgEl.querySelectorAll("[data-ck-mark]")].filter((node) => !node.closest("[data-ck-legend]"));
-    if (markNodes.length) {
+    if (!plot && clips.length === 1 && markBoxes.length === 0) plot = clips[0] ?? null;
+    if (plot && plot.w > 0 && plot.h > 0) {
+      const clipped: { x: number; y: number; w: number; h: number }[] = [];
+      for (const mark of markBoxes) {
+        const x0 = Math.max(mark.x, plot.x);
+        const y0 = Math.max(mark.y, plot.y);
+        const x1 = Math.min(mark.x + mark.w, plot.x + plot.w);
+        const y1 = Math.min(mark.y + mark.h, plot.y + plot.h);
+        if (x1 - x0 < 0.5 || y1 - y0 < 0.5) continue;
+        clipped.push({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+      }
+      markBoxes.length = 0;
+      let cx0 = Infinity;
+      let cy0 = Infinity;
+      let cx1 = -Infinity;
+      let cy1 = -Infinity;
+      for (const mark of clipped) {
+        markBoxes.push(mark);
+        cx0 = Math.min(cx0, mark.x);
+        cy0 = Math.min(cy0, mark.y);
+        cx1 = Math.max(cx1, mark.x + mark.w);
+        cy1 = Math.max(cy1, mark.y + mark.h);
+      }
+      if (clipped.length) markBox = { x: cx0, y: cy0, w: cx1 - cx0, h: cy1 - cy0 };
+      else markBox = null;
+    }
+    const legendEl = svgEl.querySelector("[data-ck-legend]");
+    const legendNodes: SVGGraphicsElement[] = [];
+    if (legendEl) {
+      for (const node of legendEl.querySelectorAll("text,rect,circle,path,line,polygon")) {
+        if (node instanceof SVGGraphicsElement && shown(node)) legendNodes.push(node);
+      }
+    } else {
+      const keyed = [...svgEl.querySelectorAll("[data-ck-key]")].filter((node) => {
+        const key = node.getAttribute("data-ck-key") || "";
+        return key.startsWith("leg:") || key.startsWith("legt:");
+      });
+      if (keyed.length) {
+        for (const node of keyed) if (node instanceof SVGGraphicsElement && shown(node)) legendNodes.push(node);
+      } else {
+        for (const node of svgEl.querySelectorAll("rect,circle,path,polygon")) {
+          if (!(node instanceof SVGGraphicsElement) || node.closest("[data-ck-mark]")) continue;
+          const next = node.nextElementSibling;
+          if (!(next instanceof SVGGraphicsElement) || next.localName !== "text") continue;
+          const box = node.getBBox();
+          if (box.width < 2 || box.height < 2 || box.width > 16 || box.height > 16) continue;
+          legendNodes.push(node, next);
+        }
+      }
+    }
+    let local: { x: number; y: number; w: number; h: number } | null = null;
+    let screen = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
+    if (legendNodes.length) {
       let x0 = Infinity;
       let y0 = Infinity;
       let x1 = -Infinity;
       let y1 = -Infinity;
-      for (const node of markNodes) {
-        if (!(node instanceof SVGGraphicsElement)) continue;
+      let sx0 = Infinity;
+      let sy0 = Infinity;
+      let sx1 = -Infinity;
+      let sy1 = -Infinity;
+      let counted = 0;
+      for (const node of legendNodes) {
         const box = node.getBBox();
-        if (box.width < 0.5 && box.height < 0.5) continue;
+        const seen = node.getBoundingClientRect();
+        if (seen.width < 0.5 && seen.height < 0.5) continue;
+        counted += 1;
         x0 = Math.min(x0, box.x);
         y0 = Math.min(y0, box.y);
         x1 = Math.max(x1, box.x + box.width);
         y1 = Math.max(y1, box.y + box.height);
+        sx0 = Math.min(sx0, seen.left);
+        sy0 = Math.min(sy0, seen.top);
+        sx1 = Math.max(sx1, seen.right);
+        sy1 = Math.max(sy1, seen.bottom);
       }
-      if (x1 > x0 && y1 > y0) markBox = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+      if (counted > 0) {
+        local = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+        screen = { left: sx0, top: sy0, right: sx1, bottom: sy1, width: sx1 - sx0, height: sy1 - sy0 };
+      }
     }
-    const legend =
-      marks > 0
-        ? {
-            pos,
-            x: local.x,
-            y: local.y,
-            w: local.width,
-            h: local.height,
-            marks,
-            insideView: local.x >= -1 && local.y >= -1 && local.x + local.width <= view.width + 1 && local.y + local.height <= view.height + 1,
-            screenInside:
-              screen.width > 1 &&
-              screen.height > 1 &&
-              screen.left >= pane.left - slack &&
-              screen.top >= pane.top - slack &&
-              screen.right <= pane.right + slack &&
-              screen.bottom <= pane.bottom + slack,
-            plot,
-            markBox,
-            swatches,
-            texts: legendTexts,
-          }
-        : null;
+    const slack = 1.5;
+    const swatches = legendNodes.filter((node) => {
+      if (node.localName !== "rect") return false;
+      const w = Number(node.getAttribute("width"));
+      const h = Number(node.getAttribute("height"));
+      return w >= 8 && w <= 14 && h >= 8 && h <= 14;
+    }).length;
+    const legendTexts = legendNodes
+      .filter((node) => node.localName === "text")
+      .map((node) => (node.textContent || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    const legend = local
+      ? {
+          x: local.x,
+          y: local.y,
+          w: local.w,
+          h: local.h,
+          insideView: local.x >= -1 && local.y >= -1 && local.x + local.w <= viewW + 1 && local.y + local.h <= viewH + 1,
+          screenInside:
+            screen.width > 1 &&
+            screen.height > 1 &&
+            screen.left >= pane.left - slack &&
+            screen.top >= pane.top - slack &&
+            screen.right <= pane.right + slack &&
+            screen.bottom <= pane.bottom + slack,
+          plot,
+          markBox,
+          marks: markBoxes,
+          swatches,
+          texts: legendTexts,
+        }
+      : null;
     return { overlaps, outside, legend };
   }, markup);
 }
@@ -447,38 +431,6 @@ function frameProblems(spec: Record<string, unknown>, svg: string, measured: Mea
   return problems;
 }
 
-function legendProblems(value: string | number, measured: Measure, type = ""): string[] {
-  const legend = measured.legend;
-  if (value === "off") {
-    return legend ? [`legend off still paints data-ck-legend="${legend.pos}"`] : [];
-  }
-  if (!legend) return ["legend marks are missing"];
-  const problems: string[] = [];
-  if (legend.marks < 1) problems.push("legend has no visible marks");
-  if (legend.w < 2 || legend.h < 2) problems.push("legend box is zero-size");
-  if (!legend.insideView) problems.push(`legend sits outside the viewBox (${legend.x.toFixed(1)},${legend.y.toFixed(1)} ${legend.w.toFixed(1)}×${legend.h.toFixed(1)})`);
-  if (!legend.screenInside) problems.push("legend is clipped by the chart frame");
-  if (legend.pos !== String(value)) problems.push(`legend position attribute is ${legend.pos}, expected ${value}`);
-  const plot = legend.plot;
-  if (plot && plot.w > 0 && plot.h > 0) {
-    const midY = legend.y + legend.h / 2;
-    const midX = legend.x + legend.w / 2;
-    if (value === "bottom" && midY < plot.y + plot.h - 2) problems.push("bottom legend is not below the plot");
-    if (value === "top" && legend.y + legend.h > plot.y + 16) problems.push("top legend is not above the plot");
-    if (value === "right" && midX < plot.x + plot.w - 2) problems.push("right legend is not to the right of the plot");
-    if (value === "left" && legend.x + legend.w > plot.x + 16) problems.push("left legend is not left of the plot");
-  }
-  const drawn = legend.markBox;
-  const placed = type === "sunburst" || type === "rose" || type === "strip";
-  if (placed && drawn && drawn.w > 0 && drawn.h > 0) {
-    if (value === "bottom" && legend.y < drawn.y + drawn.h - 8) problems.push("bottom legend is not below the marks");
-    if (value === "top" && legend.y + legend.h > drawn.y + 8) problems.push("top legend is not above the marks");
-    if (value === "right" && legend.x < drawn.x + drawn.w - 4) problems.push("right legend is not to the right of the marks");
-    if (value === "left" && legend.x + legend.w > drawn.x + 8) problems.push("left legend is not left of the marks");
-  }
-  return problems;
-}
-
 async function hoverPoints(page: Page): Promise<{ x: number; y: number }[]> {
   return page.evaluate(() => {
     const svg = document.querySelector("#response-chart svg");
@@ -486,15 +438,26 @@ async function hoverPoints(page: Page): Promise<{ x: number; y: number }[]> {
     const box = svg.getBoundingClientRect();
     const marks = [...svg.querySelectorAll("[data-ck-mark], .ck-geo-point, .ck-geo-region[data-ck-value]")];
     const points: { x: number; y: number }[] = [];
+    const push = (x: number, y: number) => {
+      if (x < box.x || y < box.y || x > box.x + box.width || y > box.y + box.height) return;
+      points.push({ x, y });
+    };
     for (const mark of marks) {
       const b = mark.getBoundingClientRect();
       if (b.width < 1 || b.height < 1) continue;
-      points.push({ x: b.x + b.width / 2, y: b.y + b.height / 2 });
-      if (points.length >= 4) break;
+      push(b.x + b.width / 2, b.y + b.height / 2);
+      for (const inset of [3, 6, 12]) {
+        push(b.x + b.width / 2, b.y + inset);
+        push(b.x + b.width / 2, b.y + b.height - inset);
+        push(b.x + inset, b.y + b.height / 2);
+        push(b.x + b.width - inset, b.y + b.height / 2);
+      }
+      if (points.length >= 16) break;
     }
-    points.push({ x: box.x + box.width * 0.42, y: box.y + box.height * 0.48 });
-    points.push({ x: box.x + box.width * 0.62, y: box.y + box.height * 0.55 });
-    return points.slice(0, 6);
+    push(box.x + box.width * 0.42, box.y + box.height * 0.48);
+    push(box.x + box.width * 0.62, box.y + box.height * 0.55);
+    push(box.x + box.width * 0.5, box.y + box.height * 0.32);
+    return points.slice(0, 18);
   });
 }
 
@@ -617,7 +580,7 @@ function docsNavItems(): { href: string; label: string }[] {
   }));
 }
 
-test("docs controls paint a claim for every teach control", { timeout: 600_000 }, async () => {
+test("docs controls paint a claim for every teach control", { timeout: 900_000 }, async () => {
   const seen = new Set<string>();
   for (const module of Object.values(teachModules)) {
     for (const control of module.controls) seen.add(control.id);
@@ -677,18 +640,13 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
     await page.waitForFunction(() => typeof (globalThis as { attach?: unknown }).attach === "function");
 
     for (const module of Object.values(teachModules)) {
-      const example = module.examples[0];
-      if (!example) {
+      if (!module.examples.length) {
         failures.push(`${module.type} has no example`);
         continue;
       }
       for (const control of module.controls) {
-        if (allowReason(module.type, control.id)) continue;
         const values = valuesOf(control);
-        const claimExample = await chooseExample(module, control);
-        const sweepExamples = module.type === "combo" ? module.examples : [claimExample];
-        for (const example of sweepExamples) {
-          const claiming = example.id === claimExample.id;
+        for (const example of module.examples) {
           const painted: { value: string | number; spec: Record<string, unknown>; svg: string; measured: Measure }[] = [];
           for (const value of values) {
             claims += 1;
@@ -707,17 +665,20 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
             }
             for (const issue of ckErrors(module.type, spec)) failures.push(`${where}: ${issue}`);
             if (emptyChart(svg)) failures.push(`${where}: empty chart`);
-            if (!claiming) continue;
             const measured = await measure(page, svg);
-            for (const problem of frameProblems(spec, svg, measured)) {
-              failures.push(`${where}: ${problem}`);
+            const frameWaived = CLAIM_ALLOWLIST.some(
+              (item) => item.id === "frame" && item.type === module.type && (item.example == null || item.example === example.id),
+            );
+            if (!frameWaived) {
+              for (const problem of frameProblems(spec, svg, measured)) {
+                failures.push(`${where}: ${problem}`);
+              }
             }
             painted.push({ value, spec, svg, measured });
           }
-          if (!claiming) continue;
-          if (control.id === "legend") {
+          if (control.id === "legend" && !legendWaived(module.type, example.id)) {
             for (const item of painted) {
-              for (const problem of legendProblems(item.value, item.measured, module.type)) {
+              for (const problem of legendProblems(item.value, item.measured)) {
                 failures.push(`${module.type} ${example.id} legend=${item.value}: ${problem}`);
               }
               if ((module.type === "rose" || module.type === "strip") && item.value !== "off" && (item.measured.legend?.swatches ?? 0) < 1) {
@@ -731,7 +692,6 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
                 }
               }
             }
-            continue;
           }
           if (control.id === "tooltip") {
             for (const item of painted) {
@@ -743,6 +703,25 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
                 shown = await visibleTip(page);
                 if (item.value === "off" && shown) break;
                 if (item.value !== "off" && shown) break;
+              }
+              if (item.value !== "off" && !shown) {
+                const hit = await page.evaluate(() => {
+                  const host = document.querySelector("#response-chart");
+                  if (!(host instanceof HTMLElement)) return null;
+                  const box = host.getBoundingClientRect();
+                  for (let y = box.top + 2; y < box.bottom; y += 6) {
+                    for (let x = box.left + 2; x < box.right; x += 8) {
+                      const el = document.elementFromPoint(x, y);
+                      const mark = el instanceof Element ? el.closest("[data-ck-mark], .ck-geo-region, .ck-geo-point") : null;
+                      if (mark?.getAttribute("aria-label")) return { x, y };
+                    }
+                  }
+                  return null;
+                });
+                if (hit) {
+                  await page.mouse.move(hit.x, hit.y);
+                  shown = await visibleTip(page);
+                }
               }
               if (item.value === "off" && shown) failures.push(`${module.type} ${example.id} tooltip off still shows "${shown}"`);
               if (item.value !== "off" && !shown) failures.push(`${module.type} ${example.id} tooltip on shows no tooltip`);
@@ -767,7 +746,10 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
               }
             }
           }
-          if (module.type === "tree" && control.id === "layout") {
+          const layoutWaived = CLAIM_ALLOWLIST.some(
+            (item) => item.id === "layout" && item.type === module.type && (item.example == null || item.example === example.id) && item.values == null,
+          );
+          if (module.type === "tree" && control.id === "layout" && !layoutWaived) {
             const tidy = painted.find((item) => item.value === "tidy");
             const cluster = painted.find((item) => item.value === "cluster");
             if (tidy && cluster) {
@@ -775,7 +757,7 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
               const clusterLeaves = treeLeaves(cluster.svg);
               const moved = tidyLeaves.some((leaf) => {
                 const other = clusterLeaves.find((item) => item.id === leaf.id);
-                return other !== undefined && (Math.abs(other.x - leaf.x) > 1 || Math.abs(other.y - leaf.y) > 1);
+                return other !== undefined && (Math.abs(other.x - leaf.x) > 12 || Math.abs(other.y - leaf.y) > 12);
               });
               if (!moved) failures.push("tree layout geometry is the same for tidy and cluster");
               const xs = clusterLeaves.map((leaf) => leaf.x);
@@ -784,9 +766,8 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
               if (!aligned) failures.push("cluster leaves are not aligned at one depth");
             }
           }
-          const distinct = new Set(painted.map((item) => normalize(item.svg)));
-          if (painted.length > 1 && distinct.size < 2) {
-            failures.push(`${module.type} ${example.id} ${control.id} does not change the painted chart`);
+          for (const problem of effectProblems(module.type, example.id, control.id, painted)) {
+            failures.push(`${module.type} ${example.id} ${problem}`);
           }
         }
       }
