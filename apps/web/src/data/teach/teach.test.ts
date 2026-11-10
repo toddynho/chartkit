@@ -683,13 +683,15 @@ test("combo actions edit the non-bar series, its axis, points, legend, and toolt
   assert.equal(areaChannels[1]?.mark, "area");
   assert.equal(areaChannels[1]?.axis, "y2");
   applyComboAction(orders, { id: "seriesMark", value: "line" });
-  applyComboAction(orders, { id: "lineAxis", value: "y" });
+  applyComboAction(orders, { id: "lineAxis", value: "y", restore: comboExamples[0]!.spec });
   const leftChannels = (orders.encoding as { y: { mark: string; axis?: string }[] }).y;
   assert.equal(leftChannels[1]?.mark, "line");
   assert.equal(leftChannels[1]?.axis, undefined);
   assert.equal(leftChannels[0]?.mark, "bar");
-  applyComboAction(orders, { id: "lineAxis", value: "y2" });
+  assert.equal(orders.axes, undefined);
+  applyComboAction(orders, { id: "lineAxis", value: "y2", restore: comboExamples[0]!.spec });
   assert.equal((orders.encoding as { y: { axis?: string }[] }).y[1]?.axis, "y2");
+  assert.deepEqual(orders.axes, { y2: { title: "Fill rate" } });
   applyComboAction(orders, { id: "points", value: "always" });
   assert.equal((orders.mark as { points: string }).points, "always");
   applyComboAction(orders, { id: "tooltip", value: "off" });
@@ -698,11 +700,14 @@ test("combo actions edit the non-bar series, its axis, points, legend, and toolt
   assert.equal("tooltip" in orders, false);
 
   const margin = structuredClone(comboExamples[1]!.spec);
-  applyComboAction(margin, { id: "lineAxis", value: "y" });
+  applyComboAction(margin, { id: "lineAxis", value: "y", restore: comboExamples[1]!.spec });
   const marginLine = (margin.encoding as { y: { format?: string; axis?: string; mark: string }[] }).y[1];
   assert.equal(marginLine?.axis, undefined);
   assert.equal(marginLine?.format, "percent");
   assert.equal(marginLine?.mark, "line");
+  assert.equal(margin.axes, undefined);
+  applyComboAction(margin, { id: "lineAxis", value: "y2", restore: comboExamples[1]!.spec });
+  assert.deepEqual(margin.axes, { y2: { title: "Margin", format: "percent" } });
 
   const jars = structuredClone(comboExamples[2]!.spec);
   const jarsTip = structuredClone(jars.tooltip);
@@ -715,6 +720,15 @@ test("combo actions edit the non-bar series, its axis, points, legend, and toolt
   const opened = openTeachExample(comboExamples[2]!.spec);
   assert.deepEqual(opened.tooltip, comboExamples[2]!.spec.tooltip);
   assert.notEqual(opened.tooltip, comboExamples[2]!.spec.tooltip);
+  applyComboAction(jars, { id: "lineAxis", value: "y2", restore: comboExamples[2]!.spec });
+  assert.equal((jars.encoding as { y: { axis?: string }[] }).y[1]?.axis, "y2");
+  assert.equal((jars.axes as { x: { title: string }; y: { title: string }; y2: boolean }).y2, true);
+  assert.equal((jars.axes as { x: { title: string } }).x.title, "Week");
+  assert.equal((jars.axes as { y: { title: string } }).y.title, "Count");
+  applyComboAction(jars, { id: "lineAxis", value: "y", restore: comboExamples[2]!.spec });
+  assert.equal((jars.encoding as { y: { axis?: string }[] }).y[1]?.axis, undefined);
+  assert.equal((jars.axes as { y2?: unknown }).y2, undefined);
+  assert.equal((jars.axes as { y: { title: string } }).y.title, "Count");
   applyComboAction(jars, { id: "tooltip", value: "off" });
   assert.equal(jars.tooltip, false);
   applyComboAction(jars, { id: "tooltip", value: "on", restore: jarsTip });
@@ -724,6 +738,13 @@ test("combo actions edit the non-bar series, its axis, points, legend, and toolt
   const paceTip = structuredClone(pace.tooltip);
   assert.equal(comboControlState(pace).points, "always");
   assert.equal(comboControlState(pace).lineAxis, "y2");
+  applyComboAction(pace, { id: "lineAxis", value: "y", restore: comboExamples[3]!.spec });
+  assert.equal((pace.encoding as { y: { axis?: string }[] }).y[1]?.axis, undefined);
+  assert.equal((pace.axes as { y2?: unknown }).y2, undefined);
+  assert.equal((pace.axes as { x: { title: string } }).x.title, "Week");
+  assert.equal((pace.axes as { y: { title: string } }).y.title, "Kilometres");
+  applyComboAction(pace, { id: "lineAxis", value: "y2", restore: comboExamples[3]!.spec });
+  assert.deepEqual((pace.axes as { y2: unknown }).y2, (comboExamples[3]!.spec.axes as { y2: unknown }).y2);
   applyComboAction(pace, { id: "seriesMark", value: "area" });
   const paceLine = (pace.encoding as { y: { mark: string; axis?: string; pointShape?: string; scale?: { reverse?: boolean } }[] }).y[1];
   assert.equal(paceLine?.mark, "area");

@@ -1,8 +1,13 @@
 /**
  * Docs control sweep.
- * Every teach-page chart type and every focused control is applied to the first
- * example. Each control id has a claim checker. A new id fails until it is
- * checked or named in CLAIM_ALLOWLIST with a reason.
+ * Every teach-page chart type and every focused control is applied to one
+ * example. Combo also applies every control value, and every combination of
+ * those controls, to every combo example.
+ * Each control id has a claim checker. A new id fails until it is
+ * checked or named in CLAIM_ALLOWLIST with a reason. The allowlist stays empty.
+ * Every painted control state has to validate and draw a chart. A CK error or an
+ * empty chart fails. Frame, legend, and tooltip claims stay on the example
+ * where the control changes the drawing.
  * Legend position, tooltip on/off, and the docs rail scroll are explicit claims.
  * Range sliders are sampled at the minimum, the midpoint, and the maximum.
  */
@@ -103,11 +108,18 @@ type Measure = {
   };
 };
 
+type DiagnosticResult = { ok: boolean; errors: { code: string; message: string }[] };
+
 type Runtime = {
   render: (spec: Record<string, unknown>) => string | null;
   renderGeo: (spec: Record<string, unknown>) => Promise<string>;
   renderBarList: (spec: Record<string, unknown>) => string | null;
+  validate: (spec: unknown) => DiagnosticResult;
+  validatePhase4: (spec: unknown) => DiagnosticResult;
+  validateGeo: (spec: unknown) => DiagnosticResult;
 };
+
+const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
 
 const root = fileURLToPath(new URL("../../../../../", import.meta.url));
 
@@ -134,8 +146,16 @@ async function loadRuntime(): Promise<Runtime> {
   const core = join(root, "packages/core/src/extra.ts");
   const geo = join(root, "packages/geo/src/index.ts");
   const barList = join(root, "packages/core/src/charts/bar-list.ts");
+  const validate = join(root, "packages/core/src/validate.ts");
+  const phase4 = join(root, "packages/core/src/validate-phase4.ts");
   await bundle(
-    `export { render } from ${JSON.stringify(core)};\nexport { render as renderGeo } from ${JSON.stringify(geo)};\nexport { renderBarList } from ${JSON.stringify(barList)};\n`,
+    [
+      `export { render } from ${JSON.stringify(core)};`,
+      `export { render as renderGeo, validate as validateGeo } from ${JSON.stringify(geo)};`,
+      `export { renderBarList } from ${JSON.stringify(barList)};`,
+      `export { validate } from ${JSON.stringify(validate)};`,
+      `export { validatePhase4 } from ${JSON.stringify(phase4)};`,
+    ].join("\n"),
     "node",
     outfile,
   );
@@ -151,6 +171,38 @@ function valuesOf(control: TeachControl): (string | number)[] {
   const mid = control.min + Math.round((control.max - control.min) / 2 / control.step) * control.step;
   const clamped = Math.min(control.max, Math.max(control.min, Number(mid.toFixed(6))));
   return [...new Set([control.min, clamped, control.max])];
+}
+
+function ckErrors(type: string, spec: Record<string, unknown>): string[] {
+  const sized = withPreviewSize(spec);
+  const result =
+    type === "choropleth" || type === "map-points"
+      ? runtime.validateGeo(sized)
+      : PHASE4.has(type)
+        ? runtime.validatePhase4(sized)
+        : runtime.validate(sized);
+  return result.errors.map((item) => `${item.code}: ${item.message}`);
+}
+
+/** A blank rail is an error SVG, or a chart frame with no series geometry. */
+function emptyChart(svg: string): boolean {
+  if (!svg.trim() || svg.includes("ck-chart-error")) return true;
+  if (svg.includes("data-ck-mark=")) return false;
+  if (/data-ck-key="[abp]:/.test(svg)) return false;
+  const body = svg.replace(/<defs[\s\S]*?<\/defs>/g, "");
+  return !/<path\b[^>]*\bstroke=/.test(body);
+}
+
+function controlStates(controls: TeachControl[]): { id: string; value: string | number }[][] {
+  let states: { id: string; value: string | number }[][] = [[]];
+  for (const control of controls) {
+    const next: { id: string; value: string | number }[][] = [];
+    for (const state of states) {
+      for (const value of valuesOf(control)) next.push([...state, { id: control.id, value }]);
+    }
+    states = next;
+  }
+  return states;
 }
 
 function applied(module: TeachModule, example: TeachModule["examples"][number], control: TeachControl, value: string | number): Record<string, unknown> {
@@ -587,8 +639,31 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
     browserFile,
   );
 
-  const browser = await chromium.launch({ headless: true });
   const failures: Fail[] = [];
+  const combo = teachModules.combo;
+  if (combo) {
+    for (const example of combo.examples) {
+      for (const state of controlStates(combo.controls)) {
+        const spec = structuredClone(example.spec);
+        for (const action of state) {
+          const restore = action.id === "tooltip" ? example.spec.tooltip : example.spec;
+          combo.apply(spec, { ...action, restore });
+        }
+        const where = `combo ${example.id} ${state.map((action) => `${action.id}=${action.value}`).join(" ")}`;
+        let svg = "";
+        try {
+          svg = await paint(spec);
+        } catch (error) {
+          failures.push(`${where} did not render: ${error instanceof Error ? error.message : error}`);
+          continue;
+        }
+        for (const issue of ckErrors("combo", spec)) failures.push(`${where}: ${issue}`);
+        if (!svg.includes('data-ck-type="combo"') || emptyChart(svg)) failures.push(`${where}: empty chart`);
+      }
+    }
+  }
+
+  const browser = await chromium.launch({ headless: true });
   const consoleErrors: string[] = [];
   let claims = 0;
   try {
@@ -610,100 +685,109 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
       for (const control of module.controls) {
         if (allowReason(module.type, control.id)) continue;
         const values = valuesOf(control);
-        const example = await chooseExample(module, control);
-        const painted: { value: string | number; spec: Record<string, unknown>; svg: string; measured: Measure }[] = [];
-        for (const value of values) {
-          claims += 1;
-          const spec = applied(module, example, control, value);
-          let svg = "";
-          try {
-            svg = await paint(spec);
-          } catch (error) {
-            failures.push(`${module.type} ${control.id}=${value} did not render: ${error instanceof Error ? error.message : error}`);
+        const claimExample = await chooseExample(module, control);
+        const sweepExamples = module.type === "combo" ? module.examples : [claimExample];
+        for (const example of sweepExamples) {
+          const claiming = example.id === claimExample.id;
+          const painted: { value: string | number; spec: Record<string, unknown>; svg: string; measured: Measure }[] = [];
+          for (const value of values) {
+            claims += 1;
+            const where = `${module.type} ${example.id} ${control.id}=${value}`;
+            const spec = applied(module, example, control, value);
+            let svg = "";
+            try {
+              svg = await paint(spec);
+            } catch (error) {
+              failures.push(`${where} did not render: ${error instanceof Error ? error.message : error}`);
+              continue;
+            }
+            if (!svg.includes(`data-ck-type="${module.type}"`)) {
+              failures.push(`${where} painted a different chart`);
+              continue;
+            }
+            for (const issue of ckErrors(module.type, spec)) failures.push(`${where}: ${issue}`);
+            if (emptyChart(svg)) failures.push(`${where}: empty chart`);
+            if (!claiming) continue;
+            const measured = await measure(page, svg);
+            for (const problem of frameProblems(spec, svg, measured)) {
+              failures.push(`${where}: ${problem}`);
+            }
+            painted.push({ value, spec, svg, measured });
+          }
+          if (!claiming) continue;
+          if (control.id === "legend") {
+            for (const item of painted) {
+              for (const problem of legendProblems(item.value, item.measured, module.type)) {
+                failures.push(`${module.type} ${example.id} legend=${item.value}: ${problem}`);
+              }
+              if ((module.type === "rose" || module.type === "strip") && item.value !== "off" && (item.measured.legend?.swatches ?? 0) < 1) {
+                failures.push(`${module.type} ${example.id} legend=${item.value}: legend has no swatches`);
+              }
+              if (module.type === "rose" && item.value !== "off") {
+                for (const name of categoryNames(item.spec)) {
+                  const texts = item.measured.legend?.texts ?? [];
+                  const full = texts.some((text) => text === name || text.startsWith(`${name} `));
+                  if (!full) failures.push(`${module.type} ${example.id} legend=${item.value}: legend label is not the full name "${name}"`);
+                }
+              }
+            }
             continue;
           }
-          if (!svg.includes(`data-ck-type="${module.type}"`)) {
-            failures.push(`${module.type} ${control.id}=${value} painted a different chart`);
+          if (control.id === "tooltip") {
+            for (const item of painted) {
+              await armTip(page, demoTip(module.type), withPreviewSize(item.spec), item.svg);
+              const points = await hoverPoints(page);
+              let shown = "";
+              for (const point of points) {
+                await page.mouse.move(point.x, point.y);
+                shown = await visibleTip(page);
+                if (item.value === "off" && shown) break;
+                if (item.value !== "off" && shown) break;
+              }
+              if (item.value === "off" && shown) failures.push(`${module.type} ${example.id} tooltip off still shows "${shown}"`);
+              if (item.value !== "off" && !shown) failures.push(`${module.type} ${example.id} tooltip on shows no tooltip`);
+              const valueCard = module.type === "gauge" || module.type === "kpi" || module.type === "progress-ring";
+              if (valueCard && item.value !== "off" && shown && !/\d/.test(shown)) {
+                failures.push(`${module.type} ${example.id} tooltip on card has no value ("${shown}")`);
+              }
+            }
             continue;
           }
-          const measured = await measure(page, svg);
-          for (const problem of frameProblems(spec, svg, measured)) {
-            failures.push(`${module.type} ${control.id}=${value}: ${problem}`);
-          }
-          painted.push({ value, spec, svg, measured });
-        }
-        if (control.id === "legend") {
-          for (const item of painted) {
-            for (const problem of legendProblems(item.value, item.measured, module.type)) {
-              failures.push(`${module.type} legend=${item.value}: ${problem}`);
-            }
-            if ((module.type === "rose" || module.type === "strip") && item.value !== "off" && (item.measured.legend?.swatches ?? 0) < 1) {
-              failures.push(`${module.type} legend=${item.value}: legend has no swatches`);
-            }
-            if (module.type === "rose" && item.value !== "off") {
+          if (module.type === "radial-bar") {
+            for (const item of painted) {
               for (const name of categoryNames(item.spec)) {
-                const texts = item.measured.legend?.texts ?? [];
-                const full = texts.some((text) => text === name || text.startsWith(`${name} `));
-                if (!full) failures.push(`${module.type} legend=${item.value}: legend label is not the full name "${name}"`);
+                if (!item.svg.includes(`>${xml(name)}<`) && !item.svg.includes(`>${name}<`)) {
+                  failures.push(`radial-bar ${example.id} ${control.id}=${item.value}: label "${name}" was shortened`);
+                }
+              }
+              for (const width of [280, 380, 720, 390]) {
+                const stuck = await labelsOutsidePane(page, item.svg, width);
+                const where = width === 390 ? "phone" : `${width}px`;
+                if (stuck.length) failures.push(`radial-bar ${example.id} ${control.id}=${item.value} at ${where}: ${stuck.slice(0, 3).join("; ")}`);
               }
             }
           }
-          continue;
-        }
-        if (control.id === "tooltip") {
-          for (const item of painted) {
-            await armTip(page, demoTip(module.type), withPreviewSize(item.spec), item.svg);
-            const points = await hoverPoints(page);
-            let shown = "";
-            for (const point of points) {
-              await page.mouse.move(point.x, point.y);
-              shown = await visibleTip(page);
-              if (item.value === "off" && shown) break;
-              if (item.value !== "off" && shown) break;
-            }
-            if (item.value === "off" && shown) failures.push(`${module.type} tooltip off still shows "${shown}"`);
-            if (item.value !== "off" && !shown) failures.push(`${module.type} tooltip on shows no tooltip`);
-            const valueCard = module.type === "gauge" || module.type === "kpi" || module.type === "progress-ring";
-            if (valueCard && item.value !== "off" && shown && !/\d/.test(shown)) {
-              failures.push(`${module.type} tooltip on card has no value ("${shown}")`);
+          if (module.type === "tree" && control.id === "layout") {
+            const tidy = painted.find((item) => item.value === "tidy");
+            const cluster = painted.find((item) => item.value === "cluster");
+            if (tidy && cluster) {
+              const tidyLeaves = treeLeaves(tidy.svg);
+              const clusterLeaves = treeLeaves(cluster.svg);
+              const moved = tidyLeaves.some((leaf) => {
+                const other = clusterLeaves.find((item) => item.id === leaf.id);
+                return other !== undefined && (Math.abs(other.x - leaf.x) > 1 || Math.abs(other.y - leaf.y) > 1);
+              });
+              if (!moved) failures.push("tree layout geometry is the same for tidy and cluster");
+              const xs = clusterLeaves.map((leaf) => leaf.x);
+              const ys = clusterLeaves.map((leaf) => leaf.y);
+              const aligned = xs.length > 1 && (Math.max(...xs) - Math.min(...xs) < 1.5 || Math.max(...ys) - Math.min(...ys) < 1.5);
+              if (!aligned) failures.push("cluster leaves are not aligned at one depth");
             }
           }
-          continue;
-        }
-        if (module.type === "radial-bar") {
-          for (const item of painted) {
-            for (const name of categoryNames(item.spec)) {
-              if (!item.svg.includes(`>${xml(name)}<`) && !item.svg.includes(`>${name}<`)) {
-                failures.push(`radial-bar ${control.id}=${item.value}: label "${name}" was shortened`);
-              }
-            }
-            for (const width of [280, 380, 720, 390]) {
-              const stuck = await labelsOutsidePane(page, item.svg, width);
-              const where = width === 390 ? "phone" : `${width}px`;
-              if (stuck.length) failures.push(`radial-bar ${control.id}=${item.value} at ${where}: ${stuck.slice(0, 3).join("; ")}`);
-            }
+          const distinct = new Set(painted.map((item) => normalize(item.svg)));
+          if (painted.length > 1 && distinct.size < 2) {
+            failures.push(`${module.type} ${example.id} ${control.id} does not change the painted chart`);
           }
-        }
-        if (module.type === "tree" && control.id === "layout") {
-          const tidy = painted.find((item) => item.value === "tidy");
-          const cluster = painted.find((item) => item.value === "cluster");
-          if (tidy && cluster) {
-            const tidyLeaves = treeLeaves(tidy.svg);
-            const clusterLeaves = treeLeaves(cluster.svg);
-            const moved = tidyLeaves.some((leaf) => {
-              const other = clusterLeaves.find((item) => item.id === leaf.id);
-              return other !== undefined && (Math.abs(other.x - leaf.x) > 1 || Math.abs(other.y - leaf.y) > 1);
-            });
-            if (!moved) failures.push("tree layout geometry is the same for tidy and cluster");
-            const xs = clusterLeaves.map((leaf) => leaf.x);
-            const ys = clusterLeaves.map((leaf) => leaf.y);
-            const aligned = xs.length > 1 && (Math.max(...xs) - Math.min(...xs) < 1.5 || Math.max(...ys) - Math.min(...ys) < 1.5);
-            if (!aligned) failures.push("cluster leaves are not aligned at one depth");
-          }
-        }
-        const distinct = new Set(painted.map((item) => normalize(item.svg)));
-        if (painted.length > 1 && distinct.size < 2) {
-          failures.push(`${module.type} ${control.id} does not change the painted chart`);
         }
       }
     }

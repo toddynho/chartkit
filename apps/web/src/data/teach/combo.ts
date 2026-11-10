@@ -253,11 +253,45 @@ export function seriesMarkMode(spec: Record<string, unknown>): "line" | "area" |
   return marks.has("area") ? "area" : "line";
 }
 
-export function applyLineAxis(spec: Record<string, unknown>, value: "y" | "y2"): void {
+function y2InUse(spec: Record<string, unknown>): boolean {
+  return yChannels(spec).some((item) => isRecord(item) && item.axis === "y2");
+}
+
+function y2Configured(value: unknown): boolean {
+  return value === true || isRecord(value);
+}
+
+/** The example's axes.y2, when restore is that example. A bare true is a configured axis. */
+function savedY2(restore: unknown): unknown {
+  if (!isRecord(restore) || !isRecord(restore.axes) || !("y2" in restore.axes)) return undefined;
+  return restore.axes.y2;
+}
+
+/**
+ * CK3002 is an error both ways: a y2 axis with no series, or a y2 series with no axis.
+ * Left drops axes.y2 once nothing uses it. Right puts the example's axis back, or true.
+ */
+function syncY2Axis(spec: Record<string, unknown>, restore?: unknown): void {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  if (!y2InUse(spec)) {
+    if (!axes || !("y2" in axes)) return;
+    delete axes.y2;
+    if (Object.keys(axes).length === 0) delete spec.axes;
+    return;
+  }
+  if (axes && y2Configured(axes.y2)) return;
+  const saved = savedY2(restore);
+  const next = y2Configured(saved) ? structuredClone(saved) : true;
+  if (axes) axes.y2 = next;
+  else spec.axes = { y2: next };
+}
+
+export function applyLineAxis(spec: Record<string, unknown>, value: "y" | "y2", restore?: unknown): void {
   editFlexible(spec, (channel) => {
     if (value === "y") delete channel.axis;
     else channel.axis = "y2";
   });
+  syncY2Axis(spec, restore);
 }
 
 /** Omitted axis is the left axis. Mixed axes press nothing. */
@@ -282,7 +316,7 @@ export function applyComboAction(spec: Record<string, unknown>, action: TeachAct
     return;
   }
   if (id === "lineAxis" && (value === "y" || value === "y2")) {
-    applyLineAxis(spec, value);
+    applyLineAxis(spec, value, action.restore);
     return;
   }
   if (id === "points" && (value === "none" || value === "hover" || value === "always")) {
