@@ -242,18 +242,6 @@ export const CLAIM_ALLOWLIST: ClaimWaiver[] = [
     reason: "Pace draws a diamond from pointShape on every vertex. The points control does not add or remove those markers.",
   },
   {
-    type: "combo",
-    example: "margin",
-    id: "frame",
-    reason: "The y-axis title Revenue extends about 8px past the view. Pulling it in means retuning the shared cartesian gutter.",
-  },
-  {
-    type: "combo",
-    example: "pace",
-    id: "frame",
-    reason: "Kilometres and Minutes per km are axis titles at the ends of the axes. Their rotated boxes pass the view edge. Retuning that gutter is a shared layout change.",
-  },
-  {
     type: "bar",
     example: "signups",
     id: "stack",
@@ -778,6 +766,94 @@ function uniqueFills(svg: string): string {
 
 function decode(text: string): string {
   return text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+}
+
+/**
+ * A painted label must be a whole source string.
+ * An ellipsis, or a proper prefix of a longer data label, is a shortened label.
+ */
+export function truncationProblems(spec: Record<string, unknown>, svg: string): string[] {
+  const sources = sourceLabels(spec);
+  const exact = new Set(sources);
+  const problems: string[] = [];
+  const seen = new Set<string>();
+  for (const text of paintedLabels(svg)) {
+    if (seen.has(text)) continue;
+    seen.add(text);
+    if (exact.has(text)) continue;
+    if (text.endsWith("…") || text.endsWith("...")) {
+      problems.push(`"${text}" is a shortened label`);
+      continue;
+    }
+    if (text.length < 3 || numericLabel(text)) continue;
+    const longer = sources.find((source) => source.length > text.length && source.startsWith(text));
+    if (longer) problems.push(`"${text}" is a prefix of "${longer}"`);
+  }
+  return problems;
+}
+
+function sourceLabels(spec: Record<string, unknown>): string[] {
+  const labels = new Set<string>();
+  const add = (value: unknown) => {
+    if (typeof value !== "string") return;
+    const text = value.replace(/\s+/g, " ").trim();
+    if (text.length < 2 || numericLabel(text)) return;
+    labels.add(text);
+  };
+  const walk = (value: unknown) => {
+    if (typeof value === "string") add(value);
+    else if (Array.isArray(value)) for (const item of value) walk(item);
+    else if (value && typeof value === "object") {
+      for (const item of Object.values(value as Record<string, unknown>)) walk(item);
+    }
+  };
+  /** A title of "Low|High" paints each end as its own full label. */
+  const addTitle = (value: unknown) => {
+    add(value);
+    if (typeof value !== "string" || !value.includes("|")) return;
+    for (const part of value.split("|")) add(part);
+  };
+  walk(spec.data);
+  add(spec.title);
+  add(spec.subtitle);
+  const encoding = spec.encoding;
+  if (encoding && typeof encoding === "object") walkEncoding(encoding, addTitle);
+  const axes = spec.axes;
+  if (axes && typeof axes === "object") {
+    for (const axis of Object.values(axes as Record<string, unknown>)) {
+      if (axis && typeof axis === "object") addTitle((axis as { title?: unknown }).title);
+    }
+  }
+  return [...labels];
+}
+
+function walkEncoding(value: unknown, add: (value: unknown) => void): void {
+  if (Array.isArray(value)) {
+    for (const item of value) walkEncoding(item, add);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  const rec = value as Record<string, unknown>;
+  add(rec.title);
+  add(rec.name);
+  if (rec.y) walkEncoding(rec.y, add);
+  if (rec.color) walkEncoding(rec.color, add);
+  if (rec.x) walkEncoding(rec.x, add);
+}
+
+function paintedLabels(svg: string): string[] {
+  const out: string[] = [];
+  for (const match of svg.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/g)) {
+    const text = decode(match[1].replace(/<[^>]+>/g, ""))
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text) out.push(text);
+  }
+  return out;
+}
+
+function numericLabel(text: string): boolean {
+  return /^[-+]?[$£€¥]?[\d,. ]+%?$/.test(text);
 }
 
 function intersects(a: Box, b: Box): boolean {

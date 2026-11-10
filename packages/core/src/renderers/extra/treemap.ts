@@ -5,7 +5,7 @@ import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, markMix, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, isRecord, n, ch } from "../../svg";
-import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
+import { fill, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
   label: string;
@@ -116,9 +116,9 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       const paint = tint(tile.fill, index, inner.length);
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"${edge(frame)}`, tile.label, index));
       parts.push("</rect>");
-      const name = fit(tile.label, w - 12, 13);
-      if (name && w > 36 && h > 22) {
-        parts.push(inkText(x + 8, y + 18, name, paint, 13));
+      if (w > 36 && h > 22) {
+        const name = fullName(tile.label, w - 12, 13);
+        if (name) parts.push(inkText(x + 8, y + 18, name, paint, 13));
         const value = fmt(tile.value, frame.locale, shown);
         if (h > 40 && fits(value, w - 12, 11)) parts.push(inkText(x + 8, y + 34, value, paint, 11, "500"));
       }
@@ -203,6 +203,13 @@ function fits(value: string, width: number, size: number): boolean {
   return ch(value.length, size * 0.52) <= width;
 }
 
+/** The whole name, or nothing. A tile never shortens a label. */
+function fullName(value: string, width: number, size: number): string {
+  const max = Math.floor(width / (size * 0.52));
+  if (max < 1 || value.length > max) return "";
+  return value;
+}
+
 function inkText(x: number, y: number, value: string, fill: string, size: number, weight = "650"): string {
   return `<text x="${n(x)}" y="${n(y)}" fill="${labelInk(fill)}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }
@@ -249,9 +256,9 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     if (!grouped) {
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="4" fill="${paint}"${edge(frame)}`, branch, index));
       parts.push("</rect>");
-      const name = fit(node.name, w - 12, 12);
-      if (name && w > 36 && h > 20) {
-        parts.push(inkText(x + 6, y + 16, name, paint, 12));
+      if (w > 36 && h > 20) {
+        const name = fullName(node.name, w - 12, 12);
+        if (name) parts.push(inkText(x + 6, y + 16, name, paint, 12));
         const value = fmt(node.value, frame.locale, shown);
         if (h > 40 && fits(value, w - 12, 11)) parts.push(inkText(x + 6, y + 32, value, paint, 11, "500"));
       }
@@ -261,7 +268,7 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     parts.push("</rect>");
     const header = h > 40 && w > 48 ? 16 : 0;
     if (header) {
-      const name = fit(node.name, w - 16, 12);
+      const name = fullName(node.name, w - 16, 12);
       if (name) parts.push(inkText(x + 8, y + 13, name, paint, 12));
     }
     const pad = 3;

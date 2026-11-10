@@ -272,6 +272,7 @@ describe("hierarchy", () => {
       size: { width: 640, height: 420 },
     };
     const flat = render(load("20-treemap.json")) ?? "";
+    expect(flat).not.toContain("…");
     expect(flat).toContain('data-ck-legend="top"');
     expect(flat).toContain(">Wood<");
     expect(flat).toContain(">Metal<");
@@ -281,7 +282,7 @@ describe("hierarchy", () => {
       const svg = render({ ...tree, legend: { position } }) ?? "";
       expect(svg, position).toContain(`data-ck-legend="${position}"`);
       expect(svg, position).toContain(">Hardwood<");
-      expect(svg, position).not.toContain(">Hard…<");
+      expect(svg, position).not.toContain("…");
       assertLegend(svg, position, 640, 420);
     }
     const depth = (cap: number) => render({ ...tree, mark: { depth: cap } }) ?? "";

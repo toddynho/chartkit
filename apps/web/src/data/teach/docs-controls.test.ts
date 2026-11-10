@@ -10,6 +10,9 @@
  * mirror that. The legend also has to sit inside the frame and off the marks.
  * A legend that only exists, or that moves a few pixels, fails.
  * Every painted control state has to validate and draw a chart.
+ * Every text node, including a rotated axis title, has to sit inside the view box.
+ * The box is the painted glyphs, after rotation. A label that ends in an ellipsis,
+ * or that is a prefix of a longer data label, fails.
  * Range sliders are sampled at the minimum, the midpoint, and the maximum.
  */
 import assert from "node:assert/strict";
@@ -21,7 +24,7 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { chromium, type Page } from "playwright";
 import { docsNavLinks } from "../nav.ts";
 import { withPreviewSize } from "../preview-size.ts";
-import { CLAIM_ALLOWLIST, effectProblems, legendProblems, legendWaived, type LegendRead } from "./docs-claims.ts";
+import { CLAIM_ALLOWLIST, effectProblems, legendProblems, legendWaived, truncationProblems, type LegendRead } from "./docs-claims.ts";
 import { demoTip, type DemoTip } from "./demo-tip.ts";
 import { teachModules } from "./registry.ts";
 import type { TeachControl, TeachModule } from "./types.ts";
@@ -222,6 +225,9 @@ async function measure(page: Page, markup: string): Promise<Measure> {
     const svgEl = host.querySelector("svg");
     if (!(svgEl instanceof SVGSVGElement)) throw new Error("missing svg");
     const view = svgEl.viewBox.baseVal;
+    const svgScreen = svgEl.getBoundingClientRect();
+    const sx = view.width > 0 && svgScreen.width > 0 ? view.width / svgScreen.width : 1;
+    const sy = view.height > 0 && svgScreen.height > 0 ? view.height / svgScreen.height : 1;
     const pane = host.getBoundingClientRect();
     const texts = [...svgEl.querySelectorAll("text")]
       .map((node) => {
@@ -236,8 +242,12 @@ async function measure(page: Page, markup: string): Promise<Measure> {
     for (let i = 0; i < texts.length; i++) {
       const item = texts[i];
       if (!item) continue;
-      const slack = 8;
-      const over = Math.max(-item.local.x, -item.local.y, item.local.x + item.local.width - view.width, item.local.y + item.local.height - view.height);
+      const x = (item.box.left - svgScreen.left) * sx;
+      const y = (item.box.top - svgScreen.top) * sy;
+      const w = item.box.width * sx;
+      const h = item.box.height * sy;
+      const slack = 1;
+      const over = Math.max(-x, -y, x + w - view.width, y + h - view.height);
       if (over > slack) outside.push(`"${item.label}" by ${over.toFixed(1)}px`);
       for (let j = i + 1; j < texts.length; j++) {
         const other = texts[j];
@@ -622,6 +632,7 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
         }
         for (const issue of ckErrors("combo", spec)) failures.push(`${where}: ${issue}`);
         if (!svg.includes('data-ck-type="combo"') || emptyChart(svg)) failures.push(`${where}: empty chart`);
+        for (const problem of truncationProblems(spec, svg)) failures.push(`${where}: ${problem}`);
       }
     }
   }
@@ -673,6 +684,9 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
               for (const problem of frameProblems(spec, svg, measured)) {
                 failures.push(`${where}: ${problem}`);
               }
+            }
+            for (const problem of truncationProblems(spec, svg)) {
+              failures.push(`${where}: ${problem}`);
             }
             painted.push({ value, spec, svg, measured });
           }

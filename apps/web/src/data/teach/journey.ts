@@ -93,7 +93,7 @@ export const journeyExamples: TeachExample[] = [
         { section: "Share", step: "See a reply", score: 4, actors: "Writer, Reader" },
       ],
       encoding: { x: "step", y: "score", series: "section", color: "actors" },
-      size: { width: 760, height: 420 },
+      size: { width: 760, height: 440 },
       a11y: { alt: "Naming and the first line score 5. Finding the note again drops to 2, then a reply recovers it." },
     },
   },
