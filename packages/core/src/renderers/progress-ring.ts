@@ -47,11 +47,11 @@ function renderOne(
   );
   if (ratio > 0) {
     parts.push(
-      `<path data-ck-mark="progress" d="${arcStroke(cx, cy, radius, start, start + span * ratio)}" fill="none" stroke="${color}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
+      `<path data-ck-mark="progress" aria-label="${esc(shown)}" d="${arcStroke(cx, cy, radius, start, start + span * ratio)}" fill="none" stroke="${color}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
     );
   }
   parts.push(
-    `<text x="${n(cx)}" y="${n(metric.label ? cy - 2 : cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="${n(Math.max(14, radius * 0.42))}" font-weight="700">${esc(shown)}</text>`,
+    `<text data-ck-mark="progress" aria-label="${esc(shown)}" x="${n(cx)}" y="${n(metric.label ? cy - 2 : cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="${n(Math.max(14, radius * 0.42))}" font-weight="700">${esc(shown)}</text>`,
   );
   if (metric.label) {
     parts.push(

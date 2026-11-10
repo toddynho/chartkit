@@ -89,13 +89,13 @@ export const placeRose: RosePlace = (input) => {
 
 function layout(outer: number, pairs: Pair[], cx: number, cy: number, width: number, minY: number, maxY: number): string | null {
   const boxes: Box[] = [];
-  const base = outer + Math.max(28, outer * 0.2);
+  const base = outer + Math.max(44, outer * 0.36);
   for (const pair of pairs) {
-    const nameAt = seek(pair.name, base, cx, cy, width, minY, maxY, boxes);
+    const nameAt = seek(pair.name, base, cx, cy, outer, width, minY, maxY, boxes);
     if (!nameAt) return null;
     let radius = nameAt.radius + 14;
     for (const value of pair.values) {
-      const placed = seek(value, radius, cx, cy, width, minY, maxY, boxes);
+      const placed = seek(value, radius, cx, cy, outer, width, minY, maxY, boxes);
       if (!placed) return null;
       radius = placed.radius + 14;
     }
@@ -103,7 +103,7 @@ function layout(outer: number, pairs: Pair[], cx: number, cy: number, width: num
   return boxes.map((box) => box.mark).join("");
 }
 
-function seek(spot: Spot, radius: number, cx: number, cy: number, width: number, minY: number, maxY: number, boxes: Box[]): { radius: number } | null {
+function seek(spot: Spot, radius: number, cx: number, cy: number, outer: number, width: number, minY: number, maxY: number, boxes: Box[]): { radius: number } | null {
   const anchor = roseAnchor(spot.angle);
   const shifts = anchor === "middle" ? [0] : [0, 22, -22];
   for (const extra of shifts) {
@@ -113,6 +113,7 @@ function seek(spot: Spot, radius: number, cx: number, cy: number, width: number,
       const box = roseBox(at.x, y, spot.text, spot.size, anchor);
       if (box.x < 2 || box.y < minY || box.x + box.w > width - 2 || box.y + box.h > maxY - 2) continue;
       if (boxes.some((item) => roseHits(box, item))) continue;
+      if (!clearsRing(box, cx, cy, outer)) continue;
       boxes.push({ ...box, mark: text(at.x, y, spot.text, spot.fill, spot.size, spot.weight, anchor) });
       return { radius: radius + step * 4 };
     }
@@ -137,4 +138,14 @@ function roseBox(x: number, y: number, label: string, size: number, anchor: stri
 
 function roseHits(a: Box, b: Box): boolean {
   return a.x < b.x + b.w + 4 && b.x < a.x + a.w + 4 && a.y < b.y + b.h + 4 && b.y < a.y + a.h + 4;
+}
+
+/** The label box stays outside the ring, so a name is not painted on its slice. */
+function clearsRing(box: Box, cx: number, cy: number, outer: number): boolean {
+  const x = Math.max(box.x, Math.min(cx, box.x + box.w));
+  const y = Math.max(box.y, Math.min(cy, box.y + box.h));
+  const dx = x - cx;
+  const dy = y - cy;
+  const limit = outer + 18;
+  return dx * dx + dy * dy >= limit * limit;
 }

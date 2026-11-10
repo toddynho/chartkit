@@ -29,46 +29,6 @@ const css = ["global.css", "docs.css", "teach.css"]
  */
 const CLAIM_ALLOWLIST: { type?: string; id: string; reason: string }[] = [];
 
-/**
- * Painted results that are real and pre-existing. The sweep still runs them.
- * A failure that matches is reported, not treated as a new regression.
- * Map legend placement, geo tooltip off, and the area-range hover card are not in this list.
- */
-const KNOWN_PAINT: { match: RegExp; reason: string }[] = [
-  {
-    match: /^scatter legend=right:/,
-    reason: "Scatter keeps the category row at the top when legend position is right. Bottom does move it.",
-  },
-  {
-    match: /^sunburst legend=(bottom|right):/,
-    reason: "Sunburst draws the same top legend row for top, bottom, and right. Off removes it.",
-  },
-  {
-    match: /^rose legend=/,
-    reason: "These roses are one series of slices. Legend position does not add a separate legend.",
-  },
-  {
-    match: /^strip legend=top:/,
-    reason: "Strip paints the rich legend for bottom and right. Top stays on the plain row and has no swatches.",
-  },
-  {
-    match: /^radial-bar .*: outside the frame:/,
-    reason: "Radial category labels extend past the viewBox by about 9 to 16 pixels.",
-  },
-  {
-    match: /^tree layout does not change/,
-    reason: "The published trees are balanced, so cluster and tidy put the leaves on the same row.",
-  },
-  {
-    match: /^gauge sweep=full:/,
-    reason: "A full dial draws 0 and 100 at the same point, so the two labels overlap.",
-  },
-  {
-    match: /^(gauge|kpi|progress-ring) tooltip on shows no tooltip$/,
-    reason: "Gauge, KPI, and progress ring have no mark hover card. Tooltip off still shows nothing.",
-  },
-];
-
 const EFFECT_IDS = [
   "anchor",
   "area",
@@ -137,6 +97,9 @@ type Measure = {
     insideView: boolean;
     screenInside: boolean;
     plot: { x: number; y: number; w: number; h: number } | null;
+    markBox: { x: number; y: number; w: number; h: number } | null;
+    swatches: number;
+    texts: string[];
   };
 };
 
@@ -361,6 +324,37 @@ async function measure(page: Page, markup: string): Promise<Measure> {
       }
     }
     const slack = 1.5;
+    const legendElNow = svgEl.querySelector("[data-ck-legend]");
+    const swatches = legendElNow
+      ? [...legendElNow.querySelectorAll("rect")].filter((node) => {
+          const w = Number(node.getAttribute("width"));
+          const h = Number(node.getAttribute("height"));
+          return w >= 8 && w <= 14 && h >= 8 && h <= 14;
+        }).length
+      : 0;
+    const legendTexts = legendElNow
+      ? [...legendElNow.querySelectorAll("text")]
+          .map((node) => (node.textContent || "").replace(/\s+/g, " ").trim())
+          .filter(Boolean)
+      : [];
+    let markBox: { x: number; y: number; w: number; h: number } | null = null;
+    const markNodes = [...svgEl.querySelectorAll("[data-ck-mark]")].filter((node) => !node.closest("[data-ck-legend]"));
+    if (markNodes.length) {
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
+      for (const node of markNodes) {
+        if (!(node instanceof SVGGraphicsElement)) continue;
+        const box = node.getBBox();
+        if (box.width < 0.5 && box.height < 0.5) continue;
+        x0 = Math.min(x0, box.x);
+        y0 = Math.min(y0, box.y);
+        x1 = Math.max(x1, box.x + box.width);
+        y1 = Math.max(y1, box.y + box.height);
+      }
+      if (x1 > x0 && y1 > y0) markBox = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    }
     const legend =
       marks > 0
         ? {
@@ -379,6 +373,9 @@ async function measure(page: Page, markup: string): Promise<Measure> {
               screen.right <= pane.right + slack &&
               screen.bottom <= pane.bottom + slack,
             plot,
+            markBox,
+            swatches,
+            texts: legendTexts,
           }
         : null;
     return { overlaps, outside, legend };
@@ -398,7 +395,7 @@ function frameProblems(spec: Record<string, unknown>, svg: string, measured: Mea
   return problems;
 }
 
-function legendProblems(value: string | number, measured: Measure): string[] {
+function legendProblems(value: string | number, measured: Measure, type = ""): string[] {
   const legend = measured.legend;
   if (value === "off") {
     return legend ? [`legend off still paints data-ck-legend="${legend.pos}"`] : [];
@@ -418,6 +415,14 @@ function legendProblems(value: string | number, measured: Measure): string[] {
     if (value === "top" && legend.y + legend.h > plot.y + 16) problems.push("top legend is not above the plot");
     if (value === "right" && midX < plot.x + plot.w - 2) problems.push("right legend is not to the right of the plot");
     if (value === "left" && legend.x + legend.w > plot.x + 16) problems.push("left legend is not left of the plot");
+  }
+  const drawn = legend.markBox;
+  const placed = type === "sunburst" || type === "rose" || type === "strip";
+  if (placed && drawn && drawn.w > 0 && drawn.h > 0) {
+    if (value === "bottom" && legend.y < drawn.y + drawn.h - 8) problems.push("bottom legend is not below the marks");
+    if (value === "top" && legend.y + legend.h > drawn.y + 8) problems.push("top legend is not above the marks");
+    if (value === "right" && legend.x < drawn.x + drawn.w - 4) problems.push("right legend is not to the right of the marks");
+    if (value === "left" && legend.x + legend.w > drawn.x + 8) problems.push("left legend is not left of the marks");
   }
   return problems;
 }
@@ -488,6 +493,59 @@ async function armTip(page: Page, mode: DemoTip, spec: Record<string, unknown>, 
       rt.__stop = () => ctrl.destroy();
     },
     { mode, spec, svg },
+  );
+}
+
+function channelField(channel: unknown): string {
+  if (typeof channel === "string") return channel;
+  if (channel && typeof channel === "object" && "field" in channel) {
+    const field = (channel as { field?: unknown }).field;
+    if (typeof field === "string") return field;
+  }
+  return "";
+}
+
+function categoryNames(spec: Record<string, unknown>): string[] {
+  const encoding = spec.encoding;
+  const field = encoding && typeof encoding === "object" ? channelField((encoding as { x?: unknown }).x) : "";
+  if (!field || !Array.isArray(spec.data)) return [];
+  const names: string[] = [];
+  for (const row of spec.data) {
+    if (!row || typeof row !== "object") continue;
+    const value = (row as Record<string, unknown>)[field];
+    if (typeof value === "string" && value && !names.includes(value)) names.push(value);
+  }
+  return names;
+}
+
+function treeLeaves(svg: string): { id: string; x: number; y: number }[] {
+  const nodes: { id: string; parent: string; x: number; y: number }[] = [];
+  for (const match of svg.matchAll(/data-ck-id="([^"]*)" data-ck-parent="([^"]*)" data-ck-path="[^"]*" cx="([^"]+)" cy="([^"]+)"/g)) {
+    nodes.push({ id: match[1] ?? "", parent: match[2] ?? "", x: Number(match[3]), y: Number(match[4]) });
+  }
+  const parents = new Set(nodes.map((node) => node.parent).filter(Boolean));
+  return nodes.filter((node) => node.id && !parents.has(node.id));
+}
+
+async function labelsOutsidePane(page: Page, svg: string, width: number): Promise<string[]> {
+  return page.evaluate(
+    ({ markup, paneWidth }) => {
+      const host = document.querySelector("#response-chart");
+      if (!(host instanceof HTMLElement)) return ["missing chart"];
+      host.style.width = `${paneWidth}px`;
+      host.innerHTML = markup;
+      const pane = host.getBoundingClientRect();
+      const stuck: string[] = [];
+      for (const node of host.querySelectorAll("text")) {
+        const box = node.getBoundingClientRect();
+        const label = (node.textContent || "").replace(/\s+/g, " ").trim();
+        if (!label || box.width < 1 || box.height < 1) continue;
+        const over = Math.max(pane.left - box.left, pane.top - box.top, box.right - pane.right, box.bottom - pane.bottom);
+        if (over > 1) stuck.push(`"${label}" by ${over.toFixed(1)}px`);
+      }
+      return stuck;
+    },
+    { markup: svg, paneWidth: width },
   );
 }
 
@@ -576,8 +634,18 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
         }
         if (control.id === "legend") {
           for (const item of painted) {
-            for (const problem of legendProblems(item.value, item.measured)) {
+            for (const problem of legendProblems(item.value, item.measured, module.type)) {
               failures.push(`${module.type} legend=${item.value}: ${problem}`);
+            }
+            if ((module.type === "rose" || module.type === "strip") && item.value !== "off" && (item.measured.legend?.swatches ?? 0) < 1) {
+              failures.push(`${module.type} legend=${item.value}: legend has no swatches`);
+            }
+            if (module.type === "rose" && item.value !== "off") {
+              for (const name of categoryNames(item.spec)) {
+                const texts = item.measured.legend?.texts ?? [];
+                const full = texts.some((text) => text === name || text.startsWith(`${name} `));
+                if (!full) failures.push(`${module.type} legend=${item.value}: legend label is not the full name "${name}"`);
+              }
             }
           }
           continue;
@@ -595,8 +663,43 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
             }
             if (item.value === "off" && shown) failures.push(`${module.type} tooltip off still shows "${shown}"`);
             if (item.value !== "off" && !shown) failures.push(`${module.type} tooltip on shows no tooltip`);
+            const valueCard = module.type === "gauge" || module.type === "kpi" || module.type === "progress-ring";
+            if (valueCard && item.value !== "off" && shown && !/\d/.test(shown)) {
+              failures.push(`${module.type} tooltip on card has no value ("${shown}")`);
+            }
           }
           continue;
+        }
+        if (module.type === "radial-bar") {
+          for (const item of painted) {
+            for (const name of categoryNames(item.spec)) {
+              if (!item.svg.includes(`>${xml(name)}<`) && !item.svg.includes(`>${name}<`)) {
+                failures.push(`radial-bar ${control.id}=${item.value}: label "${name}" was shortened`);
+              }
+            }
+            for (const width of [280, 380, 720, 390]) {
+              const stuck = await labelsOutsidePane(page, item.svg, width);
+              const where = width === 390 ? "phone" : `${width}px`;
+              if (stuck.length) failures.push(`radial-bar ${control.id}=${item.value} at ${where}: ${stuck.slice(0, 3).join("; ")}`);
+            }
+          }
+        }
+        if (module.type === "tree" && control.id === "layout") {
+          const tidy = painted.find((item) => item.value === "tidy");
+          const cluster = painted.find((item) => item.value === "cluster");
+          if (tidy && cluster) {
+            const tidyLeaves = treeLeaves(tidy.svg);
+            const clusterLeaves = treeLeaves(cluster.svg);
+            const moved = tidyLeaves.some((leaf) => {
+              const other = clusterLeaves.find((item) => item.id === leaf.id);
+              return other !== undefined && (Math.abs(other.x - leaf.x) > 1 || Math.abs(other.y - leaf.y) > 1);
+            });
+            if (!moved) failures.push("tree layout geometry is the same for tidy and cluster");
+            const xs = clusterLeaves.map((leaf) => leaf.x);
+            const ys = clusterLeaves.map((leaf) => leaf.y);
+            const aligned = xs.length > 1 && (Math.max(...xs) - Math.min(...xs) < 1.5 || Math.max(...ys) - Math.min(...ys) < 1.5);
+            if (!aligned) failures.push("cluster leaves are not aligned at one depth");
+          }
         }
         const distinct = new Set(painted.map((item) => normalize(item.svg)));
         if (painted.length > 1 && distinct.size < 2) {
@@ -611,15 +714,7 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
   assert.ok(claims >= 300, `expected the full control matrix, measured ${claims} claims`);
   const noise = consoleErrors.filter((line) => !/favicon|Failed to load resource/i.test(line));
   if (noise.length) failures.push(`console errors: ${[...new Set(noise)].slice(0, 6).join(" | ")}`);
-  const knownNotes: string[] = [];
-  const fresh = failures.filter((failure) => {
-    const hit = KNOWN_PAINT.find((item) => item.match.test(failure));
-    if (!hit) return true;
-    knownNotes.push(`${hit.reason} — ${failure}`);
-    return false;
-  });
-  if (knownNotes.length) console.log(`known docs paint issues (${knownNotes.length}):\n${knownNotes.join("\n")}`);
-  assert.equal(fresh.length, 0, `${fresh.length} control claims failed:\n${fresh.join("\n")}\n(${claims} type×control claims checked)`);
+  assert.equal(failures.length, 0, `${failures.length} control claims failed:\n${failures.join("\n")}\n(${claims} type×control claims checked)`);
 });
 
 test("docs rail scrolls on its own and the left nav has no Gallery link", { timeout: 60_000 }, async () => {

@@ -1,6 +1,6 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
-import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
+import { legendAt, legendLabel, legendMarkup, legendShownValue, legendSpace, paintLegend } from "../../legend";
 import { axisOn, column, fieldOf, knownField, numericField, scaleTypeOf, textField } from "../../frame";
 import { cssVar, paint } from "../../theme";
 import { ch, esc, hash, isRecord, logNice, logScale, logTicks, n, pointRadius, readAxis, scaleClamp } from "../../svg";
@@ -135,7 +135,16 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   const nameWidth = Math.max(...rows.map((row) => row.name.length), 0) * 7.2;
   const noteWidth = Math.max(...rowNotes.map((note) => note.length), 0) * 6.2;
   const left = vertical ? 56 : Math.max(72, Math.ceil(Math.max(nameWidth, noteWidth)) + 18);
-  const top = frame.title ? 46 : 20;
+  const earlyColors: string[] = [];
+  if (color.field) {
+    for (const row of rows) {
+      for (const dot of row.dots) if (dot.colorKey && !earlyColors.includes(dot.colorKey)) earlyColors.push(dot.colorKey);
+    }
+  }
+  const topLegend = earlyColors.length && frame.legend !== false ? legendAt(spec, "top") : null;
+  const topItems = topLegend?.position === "top" ? earlyColors.map((name, index) => ({ name, color: fill(frame, index) })) : [];
+  const topBand = topLegend?.position === "top" ? legendSpace(topLegend, topItems, Math.max(80, frame.width - left - 24)).band + 8 : 0;
+  const top = (frame.title ? 46 : 20) + topBand;
   const bottom = 40;
   const endLabels = rows.map((row) => endValue(row, valueMode, highlight, summary, drawSummary));
   const endTexts = endLabels.map((value) => (value === undefined ? "" : fmt(value, frame.locale, shown)));
@@ -406,9 +415,12 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
         return swatch + label;
       })
       .join("");
-    parts.push(
-      legendMarkup(spec, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
-    );
+    const placed = legendAt(spec, "top");
+    if (placed?.position === "top") {
+      parts.push(paintLegend(placed, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }));
+    } else {
+      parts.push(legendMarkup(spec, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }, fallback));
+    }
   }
   return view.done();
 }

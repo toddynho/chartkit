@@ -1,7 +1,7 @@
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { readFrame, readMetric } from "../frame";
-import { arcStroke, closeChart, esc, font, n, openChart, polar } from "../svg";
+import { arcStroke, ch, closeChart, esc, font, n, openChart, polar } from "../svg";
 
 /**
  * Semicircular gauge. Scale ticks, the value arc, and the needle share one angle.
@@ -39,7 +39,7 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
   }
 
   parts.push(
-    `<path data-ck-mark="gauge-track"${targetAttr} d="${arcStroke(cx, cy, radius, trackStart, trackEnd)}" fill="none" stroke="${cssVar("track", frame.preset.muted)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
+    `<path data-ck-mark="gauge-track" aria-label="${esc(valueText)}"${targetAttr} d="${arcStroke(cx, cy, radius, trackStart, trackEnd)}" fill="none" stroke="${cssVar("track", frame.preset.muted)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
   );
 
   const bandStroke = Math.max(2.5, Math.min(4, stroke * 0.16));
@@ -79,11 +79,20 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
     const outer = polar(cx, cy, tickOuter, angle);
     const at = polar(cx, cy, labelR, angle);
     const tickValue = metric.min + t * (metric.max - metric.min);
+    const tickText = formatValue(tickValue, metric.format, frame.locale);
+    let labelX = at.x;
+    let labelY = at.y;
+    if (span >= 359 && (i === 0 || i === tickCount - 1)) {
+      const rad = ((angle - 90) * Math.PI) / 180;
+      const shift = (i === 0 ? -1 : 1) * (ch(tickText.length, 6.4) / 2 + 8);
+      labelX += -Math.sin(rad) * shift;
+      labelY += Math.cos(rad) * shift;
+    }
     parts.push(
       `<line data-ck-mark="gauge-tick" x1="${n(inner.x)}" y1="${n(inner.y)}" x2="${n(outer.x)}" y2="${n(outer.y)}" stroke="${cssVar("muted", frame.preset.muted)}" stroke-width="1.25" />`,
     );
     parts.push(
-      text(at.x, at.y, formatValue(tickValue, metric.format, frame.locale), cssVar("muted", frame.preset.muted), 11, "500", "middle", "gauge-tick-label"),
+      text(labelX, labelY, tickText, cssVar("muted", frame.preset.muted), 11, "500", "middle", "gauge-tick-label"),
     );
   }
 
@@ -92,16 +101,19 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
     `<line data-ck-mark="gauge-needle" x1="${n(cx)}" y1="${n(cy)}" x2="${n(tip.x)}" y2="${n(tip.y)}" stroke="${valueColor}" stroke-width="${n(Math.max(2, Math.min(3, stroke * 0.12)))}" stroke-linecap="round" />`,
   );
   parts.push(
-    `<circle data-ck-mark="gauge-hub" cx="${n(cx)}" cy="${n(cy)}" r="${n(readout.hubR)}" fill="${cssVar("muted", frame.preset.muted)}" stroke="${valueColor}" stroke-width="2" />`,
+    `<circle data-ck-mark="gauge-hub" aria-label="${esc(valueText)}" cx="${n(cx)}" cy="${n(cy)}" r="${n(readout.hubR)}" fill="${cssVar("muted", frame.preset.muted)}" stroke="${valueColor}" stroke-width="2" />`,
   );
   parts.push(
-    text(cx, readout.valueY, valueText, valueColor, readout.valueSize, "650", "middle", "gauge-readout"),
+    text(cx, readout.valueY, valueText, valueColor, readout.valueSize, "650", "middle", "gauge-readout", valueText),
   );
   if (metric.label) {
     parts.push(
       text(cx, readout.labelY, metric.label, cssVar("muted", frame.preset.muted), readout.labelSize, "500", "middle", "gauge-caption"),
     );
   }
+  parts.push(
+    `<rect data-ck-mark="gauge" aria-label="${esc(valueText)}" x="0" y="0" width="${n(frame.width)}" height="${n(frame.height)}" fill="transparent" pointer-events="all" />`,
+  );
   parts.push(closeChart());
   return parts.join("");
 }
@@ -229,7 +241,9 @@ function text(
   weight: string,
   anchor = "start",
   mark?: string,
+  label?: string,
 ): string {
   const tagged = mark ? ` data-ck-mark="${mark}"` : "";
-  return `<text${tagged} x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" dominant-baseline="middle" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
+  const named = label ? ` aria-label="${esc(label)}"` : "";
+  return `<text${tagged}${named} x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" dominant-baseline="middle" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }
