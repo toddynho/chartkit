@@ -109,6 +109,9 @@ const tooltipOn = `{
     The Line axis control sets <code>axis</code> on those same channels. Left deletes <code>axis</code>, which means <code>y</code>, the axis the bars use. Right writes <code>axis: "y2"</code>. The other keys on the channel stay, including <code>format</code>, <code>scale</code>, and <code>title</code>.
   </p>
   <p>
+    Left also removes <code>axes.y2</code> when no series still uses that axis. A y2 axis with no series is CK3002, and the chart stays blank. Right puts <code>axes.y2</code> back: the example's axis when it had one, otherwise <code>true</code>.
+  </p>
+  <p>
     Use the right axis when the line's numbers are not in the bar's units. A percent line on the bar axis will look flat, because 0.2 is nothing next to 100.
   </p>
 </TeachConcept>
