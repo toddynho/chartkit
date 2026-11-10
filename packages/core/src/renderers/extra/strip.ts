@@ -1,6 +1,6 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
-import { legendAt, legendLabel, legendMarkup, legendShownValue, legendSpace, paintLegend } from "../../legend";
+import { legendAt, legendLabel, legendMarkup, legendPinned, legendShownValue, legendSpace, paintLegend } from "../../legend";
 import { axisOn, column, fieldOf, knownField, numericField, scaleTypeOf, textField } from "../../frame";
 import { cssVar, paint } from "../../theme";
 import { ch, esc, hash, isRecord, logNice, logScale, logTicks, n, pointRadius, readAxis, scaleClamp } from "../../svg";
@@ -140,12 +140,17 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     for (const row of rows) {
       for (const dot of row.dots) if (dot.colorKey && !earlyColors.includes(dot.colorKey)) earlyColors.push(dot.colorKey);
     }
-  }
-  const topLegend = earlyColors.length && frame.legend !== false ? legendAt(spec, "top") : null;
-  const topItems = topLegend?.position === "top" ? earlyColors.map((name, index) => ({ name, color: fill(frame, index) })) : [];
-  const topBand = topLegend?.position === "top" ? legendSpace(topLegend, topItems, Math.max(80, frame.width - left - 24)).band + 8 : 0;
+  } else if (legendPinned(spec)) earlyColors.push(valueField);
+  const legendPlace = earlyColors.length && frame.legend !== false ? legendAt(spec, "top") : null;
+  const legendItems = legendPlace ? earlyColors.map((name, index) => ({ name, color: fill(frame, index) })) : [];
+  const legendRoom = legendPlace ? legendSpace(legendPlace, legendItems, Math.max(80, frame.width - left - 24)) : null;
+  const topBand = legendPlace?.position === "top" && legendRoom ? legendRoom.band + 8 : 0;
+  const sideWanted = legendPlace?.position === "left" || legendPlace?.position === "right";
+  const sideBand = sideWanted && legendRoom ? legendRoom.side + 12 : 0;
+  const sideFits = !sideWanted || frame.width - left - sideBand > 160;
   const top = (frame.title ? 46 : 20) + topBand;
   const bottom = 40;
+  const plotLeft = left + (legendPlace?.position === "left" && sideFits ? sideBand : 0);
   const endLabels = rows.map((row) => endValue(row, valueMode, highlight, summary, drawSummary));
   const endTexts = endLabels.map((value) => (value === undefined ? "" : fmt(value, frame.locale, shown)));
   const rangeTexts = rows.map((row, index) => (noteMode !== "none" || row.dots.length < 2 || endLabels[index] === undefined ? "" : rangeText(row, frame.locale, shown)));
@@ -156,7 +161,8 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   let rightPad = gutterSpec === null ? measuredGutter : gutterSpec;
   const room = frame.width - left - (gutterSpec === null ? 80 : 40);
   if (room > 24) rightPad = Math.min(rightPad, room);
-  const box = { left, top, right: frame.width - (vertical ? 20 : Math.max(16, rightPad)), bottom: frame.height - bottom };
+  if (legendPlace?.position === "right" && sideFits) rightPad += sideBand;
+  const box = { left: plotLeft, top, right: frame.width - (vertical ? 20 + (legendPlace?.position === "right" && sideFits ? sideBand : 0) : Math.max(16, rightPad)), bottom: frame.height - bottom };
   const rawAt = valueLog && logDomain
     ? vertical
       ? logScale(v0, v1, box.bottom, box.top)
@@ -177,12 +183,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     for (let i = 0; i < index; i++) cursor += lane + (compare && rows[i]?.name === compare.from ? extra : 0);
     return cursor + lane / 2;
   };
-  const colorNames: string[] = [];
-  if (color.field) {
-    for (const row of rows) {
-      for (const dot of row.dots) if (dot.colorKey && !colorNames.includes(dot.colorKey)) colorNames.push(dot.colorKey);
-    }
-  }
+  const colorNames = earlyColors;
   const seriesOf = (key: string) => fill(frame, Math.max(0, colorNames.indexOf(key)));
   const inkOf = (key: string) => seriesInk(frame, Math.max(0, colorNames.indexOf(key)));
   const pointed = (row: Group, dot: Dot) => (highlight && (row.name === highlight || dot.colorKey === highlight));
@@ -416,9 +417,10 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
       })
       .join("");
     const placed = legendAt(spec, "top");
-    if (placed?.position === "top") {
+    const sideSkip = (placed?.position === "left" || placed?.position === "right") && !sideFits;
+    if (!sideSkip && placed?.position === "top") {
       parts.push(paintLegend(placed, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }));
-    } else {
+    } else if (!sideSkip) {
       parts.push(legendMarkup(spec, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }, fallback));
     }
   }

@@ -1,4 +1,4 @@
-import { legendLabel, legendMarkup, legendShownValue, legendSpace, paintLegend, readLegend } from "../../legend";
+import { legendAt, legendLabel, legendPinned, legendShownValue, legendSpace, paintLegend, readLegend } from "../../legend";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -46,7 +46,9 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
 
   const capped = spokeMax(frame.encoding.y);
   const max = capped ?? Math.max(1, ...series.flatMap((item) => item.values));
-  const legendBox = frame.legend !== false && series.length > 1 ? readLegend(spec) : null;
+  const pinned = legendPinned(spec);
+  const showLegend = frame.legend !== false && (series.length > 1 || pinned);
+  const legendBox = showLegend ? readLegend(spec) ?? (pinned ? legendAt(spec, "top") : null) : null;
   const legendItems = series.map((item, index) => ({
     name: item.name,
     color: fill(frame, index),
@@ -85,33 +87,30 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     parts.push("</polygon>");
     for (const point of points) parts.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="3" fill="${color}" />`);
   });
-  if (frame.legend !== false && series.length > 1) {
+  if (showLegend) {
     const items = legendItems;
+    const host = { plot: { left: 16, top: legendTop, right: frame.width - 16, bottom: frame.height - 28 }, width: frame.width, height: frame.height, preset: frame.preset };
     if (legendBox?.position === "inside") {
-      parts.push(
-        paintLegend({ ...legendBox, position: "top" }, items, {
-          plot: { left: 16, top: legendTop, right: frame.width - 16, bottom: frame.height - 28 },
-          width: frame.width,
-          height: frame.height,
-          preset: frame.preset,
-        }),
-      );
+      parts.push(paintLegend({ ...legendBox, position: "top" }, items, host));
       return view.done();
     }
-    let x = 16;
-    const y = frame.height - 18;
-    const fallback = series
-      .map((item, index) => {
-        const name = legendLabel(item.name, legendShownValue(spec, item.values.at(-1)));
-        const mark = `<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`;
-        const label = text(x + 14, y, name, cssVar("text", frame.preset.text), 12, "500");
-        x += 14 + ch(name.length, 7) + 16;
-        return mark + label;
-      })
-      .join("");
-    parts.push(
-      legendMarkup(spec, items, { plot: { left: 16, top: legendTop, right: frame.width - 16, bottom: frame.height - 28 }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
-    );
+    if (legendBox) {
+      parts.push(paintLegend(legendBox, items, host));
+    } else {
+      let x = 16;
+      const y = frame.height - 18;
+      parts.push(
+        series
+          .map((item, index) => {
+            const name = legendLabel(item.name, legendShownValue(spec, item.values.at(-1)));
+            const mark = `<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`;
+            const label = text(x + 14, y, name, cssVar("text", frame.preset.text), 12, "500");
+            x += 14 + ch(name.length, 7) + 16;
+            return mark + label;
+          })
+          .join(""),
+      );
+    }
   }
   return view.done();
 }

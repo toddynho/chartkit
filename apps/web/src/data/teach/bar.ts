@@ -30,14 +30,14 @@ export const smallestBarSpec: Record<string, unknown> = {
 };
 
 /**
- * Gallery bars: one series, a horizontal list, and a stacked wide table,
+ * Gallery bars: signups and invites, a horizontal pair, and a stacked wide table,
  * plus the marathon showcase stack so a long-form series field and a custom tooltip have a home.
  */
 export const barExamples: TeachExample[] = [
   {
     id: "signups",
     title: "Signups by month",
-    blurb: "One series, rounded bars, German grouping on the axis.",
+    blurb: "Signups and invites, rounded bars, German grouping on the axis.",
     meta: "5 months",
     spec: {
       version: "1",
@@ -45,38 +45,50 @@ export const barExamples: TeachExample[] = [
       type: "bar",
       locale: "de-DE",
       data: [
-        { month: "Jan", signups: 8420 },
-        { month: "Feb", signups: 12150 },
-        { month: "Mar", signups: 10980 },
-        { month: "Apr", signups: 14320 },
-        { month: "May", signups: 13840 },
+        { month: "Jan", signups: 8420, invites: 1200 },
+        { month: "Feb", signups: 12150, invites: 900 },
+        { month: "Mar", signups: 10980, invites: 2400 },
+        { month: "Apr", signups: 14320, invites: 1100 },
+        { month: "May", signups: 13840, invites: 3100 },
       ],
-      encoding: { x: "month", y: "signups" },
+      encoding: {
+        x: "month",
+        y: [
+          { field: "signups", title: "Signups" },
+          { field: "invites", title: "Invites" },
+        ],
+      },
       legend: false,
       size: { width: 560, height: 280 },
-      a11y: { alt: "Signups peaked in April at 14,320, after 8,420 in January." },
+      a11y: { alt: "Signups peaked in April at 14,320, after 8,420 in January. Invites are the smaller series and peak in May." },
     },
   },
   {
     id: "regions",
     title: "Revenue by region",
-    blurb: "Horizontal bars for a short list of categories.",
+    blurb: "Horizontal bars for revenue and orders in four regions.",
     meta: "4 regions",
     spec: {
       version: "1",
       id: "regions-bar",
       type: "bar",
       data: [
-        { region: "North", revenue: 82 },
-        { region: "South", revenue: 64 },
-        { region: "East", revenue: 96 },
-        { region: "West", revenue: 71 },
+        { region: "North", revenue: 82, orders: 40 },
+        { region: "South", revenue: 64, orders: 58 },
+        { region: "East", revenue: 96, orders: 22 },
+        { region: "West", revenue: 71, orders: 50 },
       ],
-      encoding: { x: "region", y: "revenue" },
+      encoding: {
+        x: "region",
+        y: [
+          { field: "revenue", title: "Revenue" },
+          { field: "orders", title: "Orders" },
+        ],
+      },
       mark: { orientation: "horizontal" },
       legend: false,
       size: { width: 520, height: 260 },
-      a11y: { alt: "East has the highest revenue at 96. South is lowest at 64." },
+      a11y: { alt: "East has the highest revenue at 96. South is lowest at 64. Orders are highest in the South." },
     },
   },
   {

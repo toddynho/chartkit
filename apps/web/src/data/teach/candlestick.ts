@@ -27,8 +27,8 @@ export const smallestCandlestickSpec: Record<string, unknown> = {
 
 /**
  * Northstar is the gallery candle, with a volume pane.
- * CK / USD is the homepage candle: day names, no volume.
- * A week of prices is five dated sessions and no volume field.
+ * CK / USD is the homepage candle: day names, with a volume pane.
+ * A week of prices is five dated sessions and a volume field.
  * Titles are the chart titles. They are not shortened.
  */
 export const candlestickExamples: TeachExample[] = [
@@ -71,7 +71,7 @@ export const candlestickExamples: TeachExample[] = [
   {
     id: "ck-usd",
     title: "CK / USD",
-    blurb: "Twelve sessions on day names. No volume field, so there is no pane under the price.",
+    blurb: "Twelve sessions on day names, with a volume pane under the price.",
     meta: "12 sessions",
     spec: {
       version: "1",
@@ -79,20 +79,20 @@ export const candlestickExamples: TeachExample[] = [
       title: "CK / USD",
       subtitle: "Daily, 12 sessions",
       data: [
-        { d: "Mon", open: 30, close: 55, low: 20, high: 65 },
-        { d: "Tue", open: 55, close: 48, low: 40, high: 70 },
-        { d: "Wed", open: 48, close: 62, low: 44, high: 68 },
-        { d: "Thu", open: 62, close: 58, low: 50, high: 75 },
-        { d: "Fri", open: 58, close: 72, low: 52, high: 78 },
-        { d: "Sat", open: 72, close: 66, low: 60, high: 80 },
-        { d: "Sun", open: 66, close: 80, low: 62, high: 86 },
-        { d: "Mon 2", open: 80, close: 74, low: 70, high: 90 },
-        { d: "Tue 2", open: 74, close: 70, low: 64, high: 82 },
-        { d: "Wed 2", open: 70, close: 84, low: 66, high: 90 },
-        { d: "Thu 2", open: 84, close: 78, low: 72, high: 92 },
-        { d: "Fri 2", open: 78, close: 88, low: 74, high: 94 },
+        { d: "Mon", open: 30, close: 55, low: 20, high: 65, volume: 120 },
+        { d: "Tue", open: 55, close: 48, low: 40, high: 70, volume: 90 },
+        { d: "Wed", open: 48, close: 62, low: 44, high: 68, volume: 160 },
+        { d: "Thu", open: 62, close: 58, low: 50, high: 75, volume: 80 },
+        { d: "Fri", open: 58, close: 72, low: 52, high: 78, volume: 210 },
+        { d: "Sat", open: 72, close: 66, low: 60, high: 80, volume: 70 },
+        { d: "Sun", open: 66, close: 80, low: 62, high: 86, volume: 140 },
+        { d: "Mon 2", open: 80, close: 74, low: 70, high: 90, volume: 190 },
+        { d: "Tue 2", open: 74, close: 70, low: 64, high: 82, volume: 110 },
+        { d: "Wed 2", open: 70, close: 84, low: 66, high: 90, volume: 230 },
+        { d: "Thu 2", open: 84, close: 78, low: 72, high: 92, volume: 95 },
+        { d: "Fri 2", open: 78, close: 88, low: 74, high: 94, volume: 175 },
       ],
-      encoding: { x: "d", open: "open", close: "close", low: "low", high: "high" },
+      encoding: { x: "d", open: "open", close: "close", low: "low", high: "high", volume: "volume" },
       legend: false,
       size: { width: 520, height: 300 },
       a11y: { alt: "The session closes higher than it opens on most of the twelve days." },
@@ -109,13 +109,13 @@ export const candlestickExamples: TeachExample[] = [
       type: "candlestick",
       title: "A week of prices",
       data: [
-        { day: "2024-06-03T00:00:00Z", open: 101, high: 108, low: 99, close: 106 },
-        { day: "2024-06-04T00:00:00Z", open: 106, high: 112, low: 104, close: 110 },
-        { day: "2024-06-05T00:00:00Z", open: 110, high: 111, low: 102, close: 104 },
-        { day: "2024-06-06T00:00:00Z", open: 104, high: 115, low: 103, close: 113 },
-        { day: "2024-06-07T00:00:00Z", open: 113, high: 118, low: 111, close: 116 },
+        { day: "2024-06-03T00:00:00Z", open: 101, high: 108, low: 99, close: 106, volume: 1400 },
+        { day: "2024-06-04T00:00:00Z", open: 106, high: 112, low: 104, close: 110, volume: 900 },
+        { day: "2024-06-05T00:00:00Z", open: 110, high: 111, low: 102, close: 104, volume: 2200 },
+        { day: "2024-06-06T00:00:00Z", open: 104, high: 115, low: 103, close: 113, volume: 1100 },
+        { day: "2024-06-07T00:00:00Z", open: 113, high: 118, low: 111, close: 116, volume: 1800 },
       ],
-      encoding: { x: "day", open: "open", high: "high", low: "low", close: "close" },
+      encoding: { x: "day", open: "open", high: "high", low: "low", close: "close", volume: "volume" },
       size: { width: 560, height: 300 },
       a11y: { alt: "The week closed at 116 after opening Monday at 101. Wednesday was the only down day." },
     },

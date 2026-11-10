@@ -1,5 +1,5 @@
 import { isPaintColumn, matchRule, readRules, resolveColors, withPalette } from "../color";
-import { paintLegend, readLegend } from "../legend";
+import { legendPinned, paintLegend, readLegend } from "../legend";
 import { legendSpace } from "../legend";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
@@ -234,7 +234,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const leaders = showLabels && !inside;
   const valueFormat = frame.mark.labelFormat ?? channelFormat(frame.encoding.y);
   const legendBox = readLegend(spec);
-  const classicPlace = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 1);
+  const classicPlace = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 0 && (slices.length > 1 || legendPinned(spec)));
   const place = legendBox ? (legendBox.position === "inside" ? false : legendBox.position) : classicPlace;
   const showLegend = place !== false || legendBox?.position === "inside";
   const legendRow = 20;

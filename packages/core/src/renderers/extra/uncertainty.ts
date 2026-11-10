@@ -3,6 +3,7 @@ import { readTimeScale } from "../../time-x";
 import { CHROME_TOP, axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { fieldOf, knownField, numericField } from "../../frame";
+import { legendPinned } from "../../legend";
 import { cssVar, paint } from "../../theme";
 import { esc, font, isRecord, n, pointRadius, ch } from "../../svg";
 import { dataSampling, readSamplingMode, samplingThreshold } from "../../sampling";
@@ -262,7 +263,8 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const legend = byWidth(bands).map((band) => ({ name: band.name, color: band.color, opacity: band.opacity }));
   if (showLine && line) legend.push({ name: line.name, color: line.color, opacity: 1 });
   const legendBelow = frame.legend === "bottom";
-  if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36 + (CHROME_TOP - 14));
+  const named = legend.length > 1 || (legend.length === 1 && legendPinned(spec));
+  if (named && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36 + (CHROME_TOP - 14));
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, count);
   const time = readTimeScale(spec, labelsOf(table, xField));
@@ -285,7 +287,7 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
     : xTickLabels(table, xField, count, xAt);
   parts.push(xLabels(frame, spec, xMarks, box));
   parts.push(axisLine(frame, box, spec));
-  if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
+  if (named && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);

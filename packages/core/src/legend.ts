@@ -26,6 +26,12 @@ export interface LegendBox {
 
 const POS = new Set(["top", "right", "bottom", "left", "inside"]);
 
+/** True when the spec names a legend edge. Omitted and off stay false, so a single series keeps today's blank legend. */
+export function legendPinned(spec: Record<string, unknown>): boolean {
+  const legend = spec.legend;
+  return isRecord(legend) && POS.has(legend.position as string);
+}
+
 /** An edge anchor hangs the legend outside that edge so the plot can reserve the band. Center stays inside. */
 function edgeOf(anchor: string): LegendPos | undefined {
   if (!anchor || anchor === "center") return anchor === "center" ? "inside" : undefined;

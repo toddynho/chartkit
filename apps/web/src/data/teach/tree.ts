@@ -81,7 +81,7 @@ export const treeExamples: TeachExample[] = [
   {
     id: "produce",
     title: "Produce",
-    blurb: "Leaves line up. Fruit has three. Veg has two.",
+    blurb: "Apple has a child, so tidy and cluster place the leaves differently.",
     meta: "cluster",
     spec: {
       version: "1",
@@ -92,6 +92,7 @@ export const treeExamples: TeachExample[] = [
         { id: "Fruit", parent: "Produce" },
         { id: "Veg", parent: "Produce" },
         { id: "Apple", parent: "Fruit" },
+        { id: "Pip", parent: "Apple" },
         { id: "Pear", parent: "Fruit" },
         { id: "Plum", parent: "Fruit" },
         { id: "Kale", parent: "Veg" },
@@ -99,7 +100,7 @@ export const treeExamples: TeachExample[] = [
       ],
       encoding: { id: "id", parent: "parent" },
       mark: { tree: "cluster", orient: "TB" },
-      a11y: { alt: "Leaves line up. Fruit has three. Veg has two." },
+      a11y: { alt: "Fruit has Apple, Pear, and Plum. Apple has a child, Pip. Veg has Kale and Chard." },
     },
   },
 ];

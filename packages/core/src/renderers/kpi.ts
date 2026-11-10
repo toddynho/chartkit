@@ -25,7 +25,7 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
   const surface = step ? paint(step.color, frame.preset, 0) : cssVar("surface", frame.preset.surface);
   const ink = step ? inkFor(surface, cssVar("text", frame.preset.text)) : cssVar("text", frame.preset.text);
   const muted = step ? ink : cssVar("muted", frame.preset.muted);
-  const deltaInk = step ? ink : deltaColor;
+  const deltaInk = deltaColor;
   const sparkColor = step ? ink : series;
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "kpi" }));

@@ -41,7 +41,7 @@ export const scatterExamples: TeachExample[] = [
   {
     id: "seats",
     title: "Seats vs. renewal rate",
-    blurb: "Sixteen accounts. Renewal rate against seats, with one point radius.",
+    blurb: "Sixteen accounts. Renewal rate against seats, with point size following the seat count.",
     meta: "16 points",
     spec: {
       version: "1",
@@ -66,7 +66,7 @@ export const scatterExamples: TeachExample[] = [
         { seats: 60, renewal: 40 },
         { seats: 40, renewal: 72 },
       ],
-      encoding: { x: "seats", y: "renewal" },
+      encoding: { x: "seats", y: "renewal", size: { field: "seats", range: [4, 14] } },
       mark: { pointSize: 5 },
       legend: false,
       size: { width: 520, height: 300 },

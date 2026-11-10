@@ -45,6 +45,78 @@ describe("export", () => {
   });
 });
 
+describe("single-series legends", () => {
+  const one = {
+    version: "1" as const,
+    type: "line",
+    data: [
+      { month: "Jan", revenue: 10 },
+      { month: "Feb", revenue: 30 },
+      { month: "Mar", revenue: 18 },
+    ],
+    encoding: { x: "month", y: "revenue" },
+    a11y: { alt: "Revenue rose, then eased." },
+    size: { width: 420, height: 240 },
+  };
+
+  it("stays hidden until a position is set, then draws one swatch", () => {
+    const plain = render(one) ?? "";
+    expect(plain).not.toContain('data-ck-key="leg:');
+    expect(plain).not.toContain("data-ck-legend=");
+    const top = render({ ...one, legend: { position: "top" } }) ?? "";
+    expect(top).toContain('data-ck-key="leg:revenue"');
+    expect(top).toContain(">revenue<");
+    const bottom = render({ ...one, legend: { position: "bottom" } }) ?? "";
+    expect(bottom).toContain('data-ck-legend="bottom"');
+    expect(bottom).toContain(">revenue<");
+    const right = render({ ...one, legend: { position: "right" } }) ?? "";
+    expect(right).toContain('data-ck-legend="right"');
+    const off = render({ ...one, legend: { show: false, position: "top" } }) ?? "";
+    expect(off).not.toContain('data-ck-key="leg:');
+    expect(off).not.toContain("data-ck-legend=");
+  });
+
+  it("names a scatter that has no color field", () => {
+    const spec = {
+      version: "1" as const,
+      type: "scatter",
+      data: [
+        { seats: 8, renewal: 22 },
+        { seats: 40, renewal: 70 },
+      ],
+      encoding: { x: "seats", y: "renewal" },
+      a11y: { alt: "Renewal rises with seats." },
+      size: { width: 420, height: 280 },
+    };
+    const plain = render(spec) ?? "";
+    expect(plain).not.toContain("data-ck-legend=");
+    const bottom = render({ ...spec, legend: { position: "bottom" } }) ?? "";
+    expect(bottom).toContain('data-ck-legend="bottom"');
+    expect(bottom).toContain(">renewal<");
+    const right = render({ ...spec, legend: { position: "right" } }) ?? "";
+    expect(right).toContain('data-ck-legend="right"');
+  });
+
+  it("draws a radar swatch for one series when the position is set", () => {
+    const spec = {
+      version: "1" as const,
+      type: "radar",
+      data: [
+        { spoke: "Speed", skill: 4 },
+        { spoke: "Cost", skill: 2 },
+        { spoke: "Fun", skill: 5 },
+      ],
+      encoding: { x: "spoke", y: "skill" },
+      a11y: { alt: "One skill polygon." },
+    };
+    const plain = render(spec) ?? "";
+    expect(plain).not.toContain("data-ck-legend=");
+    const right = render({ ...spec, legend: { position: "right" } }) ?? "";
+    expect(right).toContain('data-ck-legend="right"');
+    expect(right).toContain(">skill<");
+  });
+});
+
 describe("legends", () => {
   const base = render(lineSpec);
 

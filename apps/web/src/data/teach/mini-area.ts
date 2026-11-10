@@ -65,8 +65,8 @@ function exampleMark(restore: unknown): Record<string, unknown> | undefined {
 }
 
 /**
- * Off writes mark.gradient false. On puts the example's gradient back.
- * An omitted key is deleted, because omission means the fade is on.
+ * Off writes mark.gradient false. On turns the fade on.
+ * An omitted key is the fade, so a stored false is deleted rather than restored.
  */
 export function applyMiniAreaGradient(spec: Record<string, unknown>, value: "off" | "on", restore?: unknown): void {
   const source = exampleMark(restore);
@@ -75,8 +75,7 @@ export function applyMiniAreaGradient(spec: Record<string, unknown>, value: "off
       mark.gradient = false;
       return;
     }
-    if (source?.gradient === false) mark.gradient = false;
-    else if (source?.gradient === true) mark.gradient = true;
+    if (source?.gradient === true) mark.gradient = true;
     else delete mark.gradient;
   });
 }

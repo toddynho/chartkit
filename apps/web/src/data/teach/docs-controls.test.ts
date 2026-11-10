@@ -4,7 +4,8 @@
  * Combo also applies every combination of its controls to every combo example.
  * Each control id has a claim checker. A new id fails until it is checked.
  * A value that paints the same picture as another fails, unless CLAIM_ALLOWLIST
- * names that value and says why. The checker reads the painted SVG, not the spec.
+ * names that value and says why. A waiver that omits values excuses every value
+ * of a control on the page, and that fails. The checker reads the painted SVG, not the spec.
  * Legend position compares the legend box to the plot or mark box. Top means the
  * legend's bottom edge is at or above the plot's top. Bottom, right, and left
  * mirror that. The legend also has to sit inside the frame and off the marks.
@@ -598,6 +599,21 @@ test("treemap nested shading is not an allowlisted claim", () => {
     CLAIM_ALLOWLIST.some((item) => item.id === "shade" || item.id === "treemap-shade"),
     false,
   );
+});
+
+test("claim allowlist does not excuse a no-op docs control", () => {
+  const hits: string[] = [];
+  for (const item of CLAIM_ALLOWLIST) {
+    if (item.values && item.values.length > 0) continue;
+    const modules = Object.values(teachModules).filter((module) => item.type == null || module.type === item.type);
+    const rendered = modules.some(
+      (module) =>
+        module.controls.some((control) => control.id === item.id) &&
+        module.examples.some((example) => item.example == null || example.id === item.example),
+    );
+    if (rendered) hits.push(`${item.type ?? "*"} ${item.example ?? "*"} ${item.id}`);
+  }
+  assert.deepEqual(hits, []);
 });
 
 test("docs controls paint a claim for every teach control", { timeout: 900_000 }, async () => {

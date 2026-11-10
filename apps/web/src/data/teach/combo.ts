@@ -309,6 +309,31 @@ export function lineAxisMode(spec: Record<string, unknown>): "y" | "y2" | "other
   return "other";
 }
 
+/**
+ * A per-series pointShape or pointSize draws even when mark.points is none or hover.
+ * Drop both unless the control asks for always, then put the example's markers back.
+ */
+function syncPointShape(spec: Record<string, unknown>, value: "none" | "hover" | "always", restore?: unknown): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding || !Array.isArray(encoding.y)) return;
+  const source = isRecord(restore) && isRecord(restore.encoding) && Array.isArray(restore.encoding.y) ? restore.encoding.y : undefined;
+  encoding.y = encoding.y.map((item, index) => {
+    if (!isRecord(item)) return item;
+    const saved = source && isRecord(source[index]) ? source[index] : undefined;
+    const marked = "pointShape" in item || "pointSize" in item || (saved && ("pointShape" in saved || "pointSize" in saved));
+    if (!marked) return item;
+    const next = { ...item };
+    if (value === "always" && saved) {
+      if ("pointShape" in saved) next.pointShape = saved.pointShape;
+      if ("pointSize" in saved) next.pointSize = saved.pointSize;
+    } else {
+      delete next.pointShape;
+      delete next.pointSize;
+    }
+    return next;
+  });
+}
+
 export function applyComboAction(spec: Record<string, unknown>, action: TeachAction): void {
   const { id, value } = action;
   if (id === "seriesMark" && (value === "line" || value === "area")) {
@@ -321,6 +346,7 @@ export function applyComboAction(spec: Record<string, unknown>, action: TeachAct
   }
   if (id === "points" && (value === "none" || value === "hover" || value === "always")) {
     applyPoints(spec, value);
+    syncPointShape(spec, value, action.restore);
     return;
   }
   if (id === "legend" && (value === "off" || value === "top" || value === "bottom" || value === "right")) {

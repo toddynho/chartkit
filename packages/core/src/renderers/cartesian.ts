@@ -11,7 +11,7 @@ import { beginFrame, dataSampling, extentAndMinmax, noteDense, noteLinear, noted
 import type { ColorScale } from "../color-scale";
 import { chartSize, exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
-import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
+import { legendPinned, legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
 import { boxId, brokenScale, ch, clamp, clipPath, domainEnds, esc, font, fontStyle, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, pointRadius, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { bump, revision, slots } from "../feature-hooks";
@@ -726,7 +726,7 @@ function toModel(
     x: type === "bar" || (type === "combo" && series.some((item) => item.mark === "bar")) ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
-    legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
+    legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0 || legendPinned(spec)),
     legendOn: shell.legendOn,
     sampling: dataSampling(spec) ?? shell.sampling,
     canvas: canvasWanted(spec),

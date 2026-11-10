@@ -1,5 +1,5 @@
 import { headingInset } from "../../chrome";
-import { legendAt, legendShownValue, legendSpace, paintLegend } from "../../legend";
+import { legendAt, legendPinned, legendShownValue, legendSpace, paintLegend } from "../../legend";
 import { asNumber, column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -82,14 +82,14 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind, place?: R
 
   const mode = stackMode(frame.mark.stack);
   const scaleMax = radiusMax(frame.encoding.y, series, mode);
-  const roseOn = kind === "rose" && frame.legend !== false && categories.length > 1;
+  const roseOn = kind === "rose" && frame.legend !== false && categories.length > 0 && (categories.length > 1 || legendPinned(spec));
   const roseBox = roseOn ? legendAt(spec, "top") : null;
   const roseItems = roseOn ? categories.map((name, index) => ({ name, color: fill(frame, index) })) : [];
   const roseRoom = roseBox ? legendSpace(roseBox, roseItems, Math.max(80, frame.width - 32)) : null;
   const roseTop = roseBox?.position === "top" && roseRoom ? roseRoom.band + 8 : 0;
   const roseBottom = roseBox?.position === "bottom" && roseRoom ? roseRoom.band + 8 : 0;
   const roseRight = roseBox?.position === "right" && roseRoom ? roseRoom.side + 12 : 0;
-  const showLegend = frame.legend !== false && series.length > 1;
+  const showLegend = frame.legend !== false && (series.length > 1 || (legendPinned(spec) && (kind !== "rose" || categories.length < 2)));
   const legendBox = showLegend ? legendAt(spec, "top") : null;
   const legendItems = series.map((item, index) => ({
     name: item.name,

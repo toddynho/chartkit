@@ -2,7 +2,7 @@ import { axisTitleMarks, chooseTicks, labelStep, lockDomain, placedNotes } from 
 import type { DataTable } from "../../data";
 import { asNumber, column, fieldOf, readColor } from "../../frame";
 import { formatValue } from "../../format";
-import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
+import { legendPinned, legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
 import { cssVar, paint } from "../../theme";
 import { clientIntent, n, readAxis } from "../../svg";
 import {
@@ -48,7 +48,7 @@ export function renderDensity(spec: Record<string, unknown>): string | null {
   const s1 = Math.max(built.max, sampleTicks[sampleTicks.length - 1] ?? built.max);
 
   const names = built.curves.map((curve) => curve.name);
-  const legendOn = frame.legend !== false && built.curves.length > 1;
+  const legendOn = frame.legend !== false && (built.curves.length > 1 || legendPinned(spec));
   const hide = legendHide(spec);
   const colorOf = (name: string) => {
     const color = readColor(frame.encoding.color);
