@@ -94,12 +94,10 @@ test("flat nested treemap fills fail the shade claim, and the allowlist does not
   const green = "var(--ck-series-2, var(--chart-2, light-dark(#2aa148, #30d158)))";
   const flat = `<svg xmlns="http://www.w3.org/2000/svg" data-ck-type="treemap" viewBox="0 0 220 200"><rect x="10" y="10" width="180" height="180" fill="${green}" stroke="var(--ck-background, transparent)" stroke-width="2" data-ck-mark="group" aria-label="Metal: 80"></rect><rect x="16" y="28" width="160" height="150" fill="${green}" stroke="var(--ck-background, transparent)" stroke-width="2" data-ck-mark="group" aria-label="Metal / Nonferrous: 44"></rect><rect x="22" y="34" width="70" height="60" fill="${green}" stroke="var(--ck-background, transparent)" stroke-width="2" data-ck-mark="tile" aria-label="Metal / Nonferrous / Aluminum: 22"></rect><rect x="22" y="100" width="70" height="60" fill="${green}" stroke="var(--ck-background, transparent)" stroke-width="2" data-ck-mark="tile" aria-label="Metal / Nonferrous / Copper: 14"></rect></svg>`;
   const problems = treemapShadeProblems(flat);
-  assert.ok(problems.some((line) => /one fill/.test(line)), problems.join("\n"));
-  assert.ok(problems.some((line) => /not separated/.test(line)), problems.join("\n"));
-  const mix = (pct) => `color-mix(in srgb, ${green} ${pct}%, #000)`;
-  const stroke = "var(--ck-surface, light-dark(#ffffff, #2c2c2e))";
-  const shaded = `<svg xmlns="http://www.w3.org/2000/svg" data-ck-type="treemap" viewBox="0 0 220 200"><rect x="10" y="10" width="180" height="180" fill="${green}" stroke="${stroke}" stroke-width="2" data-ck-mark="group" aria-label="Metal: 80"></rect><rect x="16" y="28" width="160" height="150" fill="${mix(74)}" stroke="${stroke}" stroke-width="2" data-ck-mark="group" aria-label="Metal / Nonferrous: 44"></rect><rect x="22" y="34" width="70" height="60" fill="${mix(58)}" stroke="${stroke}" stroke-width="2" data-ck-mark="tile" aria-label="Metal / Nonferrous / Aluminum: 22"></rect><rect x="98" y="34" width="70" height="60" fill="${mix(46)}" stroke="${stroke}" stroke-width="2" data-ck-mark="tile" aria-label="Metal / Nonferrous / Copper: 14"></rect></svg>`;
-  assert.deepEqual(treemapShadeProblems(shaded), []);
+  assert.ok(problems.some((line) => /L\*/.test(line)), problems.join("\n"));
+  const pale = `color-mix(in srgb, ${green} 42%, light-dark(#000000, #ffffff))`;
+  const shaded = `<svg xmlns="http://www.w3.org/2000/svg" data-ck-type="treemap" viewBox="0 0 220 200"><rect x="10" y="10" width="16" height="80" fill="${green}" data-ck-mark="group" aria-label="Metal / Nonferrous: 44"></rect><rect x="10" y="28" width="70" height="60" fill="${green}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Aluminum: 22"></rect><rect x="82" y="28" width="70" height="60" fill="${pale}" data-ck-mark="tile" aria-label="Metal / Nonferrous / Copper: 14"></rect></svg>`;
+  assert.deepEqual(treemapShadeProblems(shaded), [], treemapShadeProblems(shaded).join("\n"));
   assert.deepEqual(treemapShadeProblems(`<svg data-ck-type="treemap"><rect x="0" y="0" width="40" height="40" fill="${green}" data-ck-mark="tile" aria-label="Wood: 12"></rect></svg>`), []);
   for (const key of readAllowlist()) assert.equal(String(key).includes("treemap-shade"), false, key);
   for (const key of readClaimAllowlist()) assert.equal(String(key).includes("treemap-shade"), false, key);

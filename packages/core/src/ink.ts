@@ -177,7 +177,7 @@ function inkRgb(hex: string): RGB {
   return INKS.find((item) => item[0] === hex)?.[1] ?? INKS[0][1];
 }
 
-function ratio(ink: RGB, bg: RGB): number {
+export function ratio(ink: RGB, bg: RGB): number {
   const a = lum(ink);
   const b = lum(bg);
   const hi = Math.max(a, b);
@@ -193,7 +193,7 @@ function lum(rgb: RGB): number {
   return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
 }
 
-function resolve(fill: string): { light: RGB; dark: RGB } | null {
+export function resolve(fill: string): { light: RGB; dark: RGB } | null {
   const parsed = read(fill.trim(), 0);
   if (!parsed) return null;
   const light = paint(parsed.node, "light");
