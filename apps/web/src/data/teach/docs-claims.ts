@@ -3,6 +3,7 @@
  * A control passes only when the SVG changes in the dimension that control draws.
  * Legend position is the legend box against the plot or mark box, not the data-ck-legend attribute.
  * A value that paints the same picture as another is a failure, unless CLAIM_ALLOWLIST names it and says why.
+ * Nested treemap shading is a separate painted claim (treemapShadeProblems). It is not listed here.
  */
 
 export type Box = { x: number; y: number; w: number; h: number };

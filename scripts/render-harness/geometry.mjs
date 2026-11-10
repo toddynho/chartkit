@@ -5,6 +5,7 @@
  * Labels are never treated as something to shorten. Overlap is a layout bug.
  */
 import { contrast, flatten, hexOf, parseColor, resolvePaint } from "./colors.mjs";
+import { treemapShadeProblems } from "./treemap-shade.mjs";
 import { DARK_PAGE, LIGHT_PAGE, schemeModes } from "./themes.mjs";
 
 export const LABEL_RULE = "ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.";
@@ -28,7 +29,20 @@ export function checkSvg(svg, spec) {
   findings.push(...contrastFindings(texts, scene, spec));
   findings.push(...badNumbers(svg));
   findings.push(...emptyChart(scene, spec));
+  findings.push(...treemapShade(svg, spec));
   return findings;
+}
+
+function treemapShade(svg, spec) {
+  return treemapShadeProblems(svg).map((detail) => ({
+    check: "treemap-shade",
+    severity: "error",
+    detail,
+    elements: [],
+    signature: detail,
+    roles: ["mark"],
+    type: spec?.type,
+  }));
 }
 
 function overlaps(texts) {

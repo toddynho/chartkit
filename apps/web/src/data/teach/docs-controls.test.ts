@@ -13,6 +13,8 @@
  * Every text node, including a rotated axis title, has to sit inside the view box.
  * The box is the painted glyphs, after rotation. A label that ends in an ellipsis,
  * or that is a prefix of a longer data label, fails.
+ * A treemap at depth 2 or greater must paint different fills inside a group and
+ * separate each child from its parent. That claim is not allowlisted.
  * Range sliders are sampled at the minimum, the midpoint, and the maximum.
  */
 import assert from "node:assert/strict";
@@ -25,6 +27,7 @@ import { chromium, type Page } from "playwright";
 import { docsNavLinks } from "../nav.ts";
 import { withPreviewSize } from "../preview-size.ts";
 import { CLAIM_ALLOWLIST, effectProblems, legendProblems, legendWaived, truncationProblems, type LegendRead } from "./docs-claims.ts";
+import { treemapShadeProblems } from "../../../../../scripts/render-harness/treemap-shade.mjs";
 import { demoTip, type DemoTip } from "./demo-tip.ts";
 import { teachModules } from "./registry.ts";
 import type { TeachControl, TeachModule } from "./types.ts";
@@ -590,6 +593,13 @@ function docsNavItems(): { href: string; label: string }[] {
   }));
 }
 
+test("treemap nested shading is not an allowlisted claim", () => {
+  assert.equal(
+    CLAIM_ALLOWLIST.some((item) => item.id === "shade" || item.id === "treemap-shade"),
+    false,
+  );
+});
+
 test("docs controls paint a claim for every teach control", { timeout: 900_000 }, async () => {
   const seen = new Set<string>();
   for (const module of Object.values(teachModules)) {
@@ -687,6 +697,9 @@ Object.assign(globalThis, { renderGeo, attachGeo, attach, attachExtra });`,
             }
             for (const problem of truncationProblems(spec, svg)) {
               failures.push(`${where}: ${problem}`);
+            }
+            if (module.type === "treemap") {
+              for (const problem of treemapShadeProblems(svg)) failures.push(`${where}: ${problem}`);
             }
             painted.push({ value, spec, svg, measured });
           }

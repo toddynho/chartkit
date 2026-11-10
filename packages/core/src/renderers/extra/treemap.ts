@@ -2,7 +2,7 @@ import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale
 import { legendAt, legendShownValue, legendSpace, paintLegend, type LegendBox, type LegendItem } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
-import { headerFill, labelInk, markMix, siblingFill } from "../../ink";
+import { labelInk } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, isRecord, n, ch } from "../../svg";
 import { fill, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
@@ -56,7 +56,7 @@ function reserveLegend(
   return { box, plot };
 }
 
-/** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
+/** Squarified tiles. A label is the whole name or it is omitted. Leaves in a group stay in that group's hue, in darker steps. */
 export function renderTreemap(spec: Record<string, unknown>): string | null {
   const hierarchical = renderLevels(spec);
   if (hierarchical !== undefined) return hierarchical;
@@ -132,11 +132,23 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   return view.done();
 }
 
-/** Same series color, mixed toward the page so leaves in one group are not one flat block. */
+/** Same series hue. Depth and sibling shift the mix so neighbours are not one flat block. */
 function tint(base: string, index: number, count: number): string {
   if (count <= 1) return base;
-  const amount = 62 + Math.round((index / (count - 1)) * 30);
-  return markMix(base, amount);
+  return shade(base, 1, index, count);
+}
+
+/**
+ * Darken the branch colour. A deeper level is darker, and siblings step apart.
+ * Lightening these series colours collapses to one mix. Past 86% the dark text
+ * misses 4.5:1, and below 78% the tile misses 3:1 on a dark page.
+ */
+function shade(base: string, depth: number, index: number, count: number): string {
+  if (depth <= 0) return base;
+  const level = depth % 2 === 1 ? 84 : 80;
+  const shift = count > 1 ? (index - (count - 1) / 2) * 4 : 0;
+  const mix = Math.max(78, Math.min(86, Math.round(level - shift)));
+  return `color-mix(in srgb, ${base} ${mix}%, #000)`;
 }
 
 function groupLeaves(leaves: Leaf[]): Map<string, Leaf[]> {
@@ -195,8 +207,8 @@ function squarify<T extends { value: number }>(items: T[], x: number, y: number,
   return out;
 }
 
-function edge(frame: { preset: { background: string } }): string {
-  return ` stroke="${cssVar("background", frame.preset.background)}" stroke-width="2"`;
+function edge(frame: { preset: { surface: string } }): string {
+  return ` stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="2"`;
 }
 
 function fits(value: string, width: number, size: number): boolean {
@@ -242,14 +254,13 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
   const colors = branches.map((_, index) => fill(frame, index));
   let ordinal = 0;
   const paintNode = (node: HNode, color: string, branch: string, depth: number, x0: number, y0: number, w0: number, h0: number, parent: number, sibling: number, siblings: number) => {
-    const gap = 1.5;
+    const gap = 3;
     const x = x0 + gap;
     const y = y0 + gap;
     const w = Math.max(1, w0 - gap * 2);
     const h = Math.max(1, h0 - gap * 2);
-    const tone = siblingFill(color, depth, sibling, siblings);
     const grouped = node.children.length > 0 && w >= 28 && h >= 22;
-    const paint = grouped ? headerFill(tone) : tone;
+    const paint = shade(color, depth, sibling, siblings);
     const label = tip(node, parent, total, frame.locale, shown);
     const index = ordinal;
     ordinal += 1;

@@ -233,7 +233,8 @@ describe("hierarchy", () => {
     expect(labelContrast(headerFill("#3b82f6"))).toBeGreaterThanOrEqual(4.5);
     expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#1d1d1f, #f5f5f7)");
     const leaf = render({ ...wide, theme: "midnight" }) ?? "";
-    expect(leaf).toContain("light-dark(#ffffff, #f5f5f7)");
+    expect(leaf).toContain("color-mix(in srgb,");
+    expect(leaf).toContain("%, #000)");
     expect(leaf).not.toContain("#1c1c1e");
     expect(sharedInk(["#22c55e", "#3b82f6", "#a855f7"])).toBe("#000000");
     expect(sharedInk(["#111111", "#f5f5f7"])).toBeNull();
