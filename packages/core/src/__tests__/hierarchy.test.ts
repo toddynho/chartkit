@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { line } from "../charts/line";
 import { render } from "../extra";
 import { headerFill, inkContrast, labelContrast, labelInk, sharedInk } from "../ink";
+import { monoInk } from "../renderers/extra/treemap";
 import { createRenderer } from "../render";
 import { repair, validate } from "../validate";
 
@@ -205,7 +206,7 @@ describe("hierarchy", () => {
             if (mark === "arc") {
               expect(ink, `${theme} ${fill}`).toMatch(/#1d1d1f|#f5f5f7|#000000|#ffffff|light-dark/);
             } else {
-              expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
+              expect(ink, `${theme} ${mark}`).toBe(monoInk(fill));
               expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
             }
             expect(labelContrast(fill), `${theme} ${mark} ${fill}`).toBeGreaterThanOrEqual(4.5);
@@ -222,8 +223,9 @@ describe("hierarchy", () => {
         }
         expect(svg, theme).not.toContain('fill="#fff"');
       }
-      const mixes = [...tree.matchAll(/color-mix\(in srgb,[\s\S]*? (\d+)%/g)].map((match) => match[1]);
-      expect(new Set(mixes).size, theme).toBeGreaterThan(1);
+      expect(tree, theme).toContain("color-mix(in srgb,");
+      expect(tree, theme).toContain("64%");
+      expect(tree, theme).not.toContain("42%");
       expect(tree, theme).toContain(">$25<");
     }
     const tight = render({ ...wide, size: { width: 120, height: 80 } }) ?? "";
@@ -233,7 +235,7 @@ describe("hierarchy", () => {
     expect(labelContrast(headerFill("#3b82f6"))).toBeGreaterThanOrEqual(4.5);
     expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#1d1d1f, #f5f5f7)");
     const leaf = render({ ...wide, theme: "midnight" }) ?? "";
-    expect(leaf).toContain("light-dark(#ffffff, #f5f5f7)");
+    expect(leaf).toContain("light-dark(#000000, #ffffff)");
     expect(leaf).not.toContain("#1c1c1e");
     expect(sharedInk(["#22c55e", "#3b82f6", "#a855f7"])).toBe("#000000");
     expect(sharedInk(["#111111", "#f5f5f7"])).toBeNull();
