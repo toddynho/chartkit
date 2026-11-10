@@ -137,7 +137,32 @@ function legendSide(spec: Record<string, unknown>): "bottom" | "right" {
   return isRecord(spec.legend) && spec.legend.position === "bottom" ? "bottom" : "right";
 }
 
-function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string): string {
+function bubble(cx: number, cy: number, radius: number, fill: string, label: string, textX: number): string {
+  return `<circle cx="${round(cx)}" cy="${round(cy)}" r="${round(radius)}" fill="${fill}" stroke="${fill}" stroke-width="1"/><text class="ck-geo-label" x="${round(textX)}" y="${round(cy + 4)}">${esc(label)}</text>`;
+}
+
+function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string, limit: number): string {
+  if (scale.sizes?.length) {
+    const lo = scale.sizes[0]?.value ?? 0;
+    const hi = scale.sizes[scale.sizes.length - 1]?.value ?? lo;
+    const cy = Math.min(y + 16, limit - 14);
+    let cursor = x;
+    let marks = "";
+    if (scale.title) {
+      marks = `<text class="ck-geo-label ck-geo-legend-title" font-weight="650" x="${round(cursor)}" y="${round(cy + 4)}">${esc(scale.title)}</text>`;
+      cursor += measureText(scale.title, 11) + 12;
+    }
+    for (const stop of scale.sizes) {
+      const t = hi === lo ? 1 : (stop.value - lo) / (hi - lo || 1);
+      const radius = 4.5 + Math.sqrt(Math.max(0, t)) * 8;
+      const labelW = measureText(stop.label, 11);
+      if (cursor + radius * 2 + labelW > x + width) break;
+      const fill = scale.fill(stop.value);
+      marks += bubble(cursor + radius, cy, radius, fill, stop.label, cursor + radius * 2 + 4);
+      cursor += radius * 2 + labelW + 16;
+    }
+    return marks;
+  }
   const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-weight="650" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
   const barY = y + (scale.title ? 18 : 2);
   if (scale.swatches?.length) {
@@ -189,7 +214,7 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
         const t = sizeHi === sizeLo ? 1 : (stop.value - sizeLo) / (sizeHi - sizeLo);
         const radius = 4.5 + Math.sqrt(Math.max(0, t)) * 8;
         const cy = top + row * index + row * 0.55;
-        return `<circle cx="${round(x + 12)}" cy="${round(cy)}" r="${round(radius)}" fill="${scale.fill(stop.value)}" stroke="${scale.fill(stop.value)}" stroke-width="1"/><text class="ck-geo-label" x="${round(x + 28)}" y="${round(cy + 4)}">${esc(stop.label)}</text>`;
+        return bubble(x + 12, cy, radius, scale.fill(stop.value), stop.label, x + 28);
       })
       .join("");
     return `${title}${marks}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
@@ -226,13 +251,21 @@ function patternDef(chrome: Chrome, id: string): string {
   return `<pattern id="${id}nd" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="${chrome.nodata}"/><path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="${ink}" stroke-width="0.8"/></pattern>`;
 }
 
+export function tooltipQuiet(spec: Record<string, unknown>): boolean {
+  const tip = spec.tooltip;
+  return tip === false || (isRecord(tip) && tip.show === false);
+}
+
 function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", nodata: "hatch" | "fill" | "off" = "off", labelPx = 11): string {
   const { width, height } = sizeOf(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : typeof spec.title === "string" ? spec.title : "Map";
   const theme = typeof spec.theme === "string" ? spec.theme : isRecord(spec.theme) && typeof spec.theme.preset === "string" ? spec.theme.preset : "soft";
   const family = fontFamilyOf(spec.theme);
   const style = `font-family:var(--ck-font-family, inherit)${family ? `;--ck-font-family:${family}` : ""}${chrome.scheme ? `;color-scheme:${chrome.scheme}` : ""}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}" style="${style}">${styleBlock(chrome, patternId, nodata, labelPx)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+  const quiet = tooltipQuiet(spec);
+  const tipAttr = quiet ? ` data-ck-tooltip="off"` : "";
+  const title = quiet ? "" : `<title>${esc(alt)}</title>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${tipAttr} style="${style}">${styleBlock(chrome, patternId, nodata, labelPx)}${title}<rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
 }
 
 /**
@@ -320,6 +353,7 @@ function regionMarkup(
   rows: Record<string, unknown>[],
   tips: string[],
   skip: Set<string>,
+  titles = true,
 ): string {
   return regions
     .map((region) => {
@@ -332,7 +366,8 @@ function regionMarkup(
       const cls = choropleth && !hit ? "ck-geo-region ck-geo-nodata" : "ck-geo-region";
       const painted = fill ? ` fill="${fill}"` : "";
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
-      const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
+      const titled = titles ? `<title>${esc(label)}</title>` : "";
+      const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}">${titled}`;
       if (region.point && !region.polygons.length) {
         if (!hit) return "";
         const [x, y] = project(region.id, region.point[0], region.point[1]);
@@ -460,7 +495,7 @@ interface TagSpot {
   leader: string;
 }
 
-function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, number], labelCount: number, frame: Box, labelPx: number): string {
+function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, number], labelCount: number, frame: Box, labelPx: number, titles = true): string {
   if (!dots.length) return "";
   const sizes = dots.map((dot) => dot.size);
   const lo = Math.min(...sizes);
@@ -476,7 +511,8 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
     const name = dot.label || `${dot.lat}, ${dot.lon}`;
     const text = [dot.value == null ? name : `${name}, ${dot.value}`, dot.detail].filter(Boolean).join(", ");
     circles.push({ x, y, r: radius, dot });
-    marks += `<circle data-ck-mark="point" class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null || !Number.isFinite(dot.value) ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`;
+    const titled = titles ? `<title>${esc(text)}</title>` : "";
+    marks += `<circle data-ck-mark="point" class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null || !Number.isFinite(dot.value) ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}">${titled}</circle>`;
   }
   const ranked = [...circles].sort((a, b) => b.r - a.r).slice(0, labelCount);
   const placed: { x: number; y: number; w: number; h: number }[] = [];
@@ -582,6 +618,7 @@ export async function render(spec: unknown): Promise<string> {
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
   const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined, kind === "diverging" && chrome.scheme === "" ? SOFT_DIVERGING : undefined) : null;
   const tips = tooltipColumns(spec);
+  const titles = !tooltipQuiet(spec);
   const points = dotsOf(rows, encoding, chrome, tips);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);
@@ -606,14 +643,16 @@ export async function render(spec: unknown): Promise<string> {
   if (drawn) {
     for (const frame of drawn.frames) body += `<rect class="ck-geo-inset" x="${round(frame.x)}" y="${round(frame.y)}" width="${round(frame.w)}" height="${round(frame.h)}"/>`;
     const skip = new Set([regionField, valueField].filter((field): field is string => !!field));
-    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip);
+    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip, titles);
   }
-  if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box, labelPx);
+  if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box, labelPx, titles);
   body += `</g>`;
   if (showLegend && scale) {
-    body += bottomLegend
-      ? horizontalLegend(scale, box.x, box.y + box.h + 6, box.w, id)
+    const side = bottomLegend ? "bottom" : "right";
+    const marks = bottomLegend
+      ? horizontalLegend(scale, box.x, box.y + box.h + 6, box.w, id, height - 2)
       : legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch", labelPx);
+    body += `<g data-ck-legend="${side}">${marks}</g>`;
   }
   return shell(spec, chrome, body, id, nodataMode, labelPx);
 }

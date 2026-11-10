@@ -1,6 +1,7 @@
-import { attach, type Controller } from "@chartkitdev/core/interact";
+import { attach } from "@chartkitdev/core/interact";
 import { paintSpec } from "../lib/chartkit";
 import { withPreviewSize } from "../data/preview-size";
+import { demoTip } from "../data/teach/demo-tip";
 import { teachModule } from "../data/teach/registry";
 import { formatNumber, openTeachExample, playgroundHref, roundStep, specText } from "../data/teach/spec";
 
@@ -47,7 +48,8 @@ export function mountChartDemo(): void {
   let index = Math.max(0, examples.findIndex((example) => example.id === demo.dataset.example));
   let cursor = index;
   let menuOpen = false;
-  let tip: Controller | null = null;
+  let tip: { destroy(): void } | null = null;
+  let paintSeq = 0;
   let geoDetach: (() => void) | null = null;
   let geoDraw = 0;
   let current = openTeachExample(examples[index]!.spec);
@@ -138,6 +140,7 @@ export function mountChartDemo(): void {
   }
 
   function draw(fade = false): void {
+    const seq = ++paintSeq;
     const kind = typeof current.type === "string" ? current.type : "";
     if (kind === "choropleth" || kind === "map-points") {
       drawGeo(kind, fade);
@@ -145,17 +148,26 @@ export function mountChartDemo(): void {
     }
     const painted = paintSpec(withPreviewSize(current));
     const commit = () => {
+      if (seq !== paintSeq) return;
       clearTips();
       chart!.innerHTML = painted.svg;
       if (error) {
         error.hidden = painted.ok;
         error.textContent = painted.ok ? "" : painted.issues.map((issue) => `${issue.code}: ${issue.message}`).join(" ");
       }
-      if (chart!.querySelector("svg")) {
-        tip = attach(chart!, withPreviewSize(current) as never, {
-          render: (value) => paintSpec(withPreviewSize(value as Record<string, unknown>)).svg,
+      if (!chart!.querySelector("svg")) return;
+      const spec = withPreviewSize(current);
+      if (demoTip(kind) === "extra") {
+        void import("@chartkitdev/core/extra-tip").then((mod) => {
+          if (seq !== paintSeq) return;
+          tip?.destroy();
+          tip = mod.attach(chart!, spec);
         });
+        return;
       }
+      tip = attach(chart!, spec as never, {
+        render: (value) => paintSpec(withPreviewSize(value as Record<string, unknown>)).svg,
+      });
     };
     if (fade) {
       chart!.classList.add("is-swap");
@@ -173,10 +185,11 @@ export function mountChartDemo(): void {
   /**
    * Choropleth and map-points render from @chartkitdev/geo.
    * Core render draws an error chart for these types.
-   * Hover uses geo attach, which reads the SVG title and does not read tooltip: false.
+   * Hover uses geo attach. tooltip: false is stamped on the SVG and the card stays hidden.
    */
   function drawGeo(kind: string, fade: boolean): void {
     const seq = ++geoDraw;
+    paintSeq += 1;
     const specNow = current;
     snippet!.textContent = specText(specNow);
     play!.href = playgroundHref(specNow);

@@ -240,6 +240,49 @@ describe("render", () => {
     const svg = await render({ ...world, legend: { position: "bottom" } });
     expect(svg).toContain('x2="1" y2="0"');
     expect(svg).not.toContain('x2="0" y2="0"');
+    expect(svg).toContain('data-ck-legend="bottom"');
+  });
+
+  it("draws the bubble legend inside the frame when a point map legend sits at the bottom", async () => {
+    const svg = await render({
+      type: "map-points",
+      title: "Cities",
+      data: [
+        { name: "Tokyo", lat: 35.7, lon: 139.7, pop: 37 },
+        { name: "London", lat: 51.5, lon: -0.1, pop: 9 },
+        { name: "Sydney", lat: -33.9, lon: 151.2, pop: 5 },
+      ],
+      encoding: {
+        latitude: "lat",
+        longitude: "lon",
+        label: "name",
+        size: { field: "pop", format: { suffix: " million" }, title: "Population" },
+        color: "pop",
+      },
+      legend: { position: "bottom" },
+      size: { width: 880, height: 520 },
+      a11y: { alt: "Cities sized by population." },
+    });
+    const legend = svg.slice(svg.indexOf('data-ck-legend="bottom"'));
+    expect(legend.startsWith('data-ck-legend="bottom"')).toBe(true);
+    expect(legend).toContain(">Population<");
+    expect(legend).toMatch(/>\d+ million</);
+    expect(legend).toContain("<circle");
+    const height = 520;
+    const width = 880;
+    for (const match of legend.matchAll(/\b(cx|cy|x|y)="(-?\d+(?:\.\d+)?)"/g)) {
+      const axis = match[1];
+      const value = Number(match[2]);
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(axis === "cy" || axis === "y" ? height : width);
+    }
+  });
+
+  it("omits hover titles when tooltip is off", async () => {
+    const svg = await render({ ...world, tooltip: false });
+    expect(svg).toContain('data-ck-tooltip="off"');
+    expect(svg).not.toContain("<title>Norway");
+    expect(svg).toContain('aria-label="Norway, 98"');
   });
 
   it("draws a world choropleth with a legend, alias hits, and a no-data country", async () => {

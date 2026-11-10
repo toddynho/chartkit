@@ -35,4 +35,28 @@ describe("attach", () => {
     detach();
     expect(document.querySelector("[data-ck-geo-tip]")).toBeNull();
   });
+
+  it("does not show a tooltip when tooltip is off", async () => {
+    const svgText = await render({
+      type: "choropleth",
+      tooltip: false,
+      data: [{ id: "A", value: 3 }],
+      encoding: { region: "id", color: "value" },
+      mark: {
+        geojson: {
+          type: "FeatureCollection",
+          features: [{ type: "Feature", id: "A", properties: { name: "Alpha" }, geometry: { type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] } }],
+        },
+      },
+      a11y: { alt: "Alpha is 3." },
+    });
+    expect(svgText).toContain('data-ck-tooltip="off"');
+    document.body.innerHTML = svgText;
+    const svg = document.querySelector("svg") as SVGSVGElement;
+    const detach = attach(svg);
+    const path = document.querySelector("[data-ck-name='Alpha']");
+    path?.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: 12, clientY: 14 }));
+    expect(document.querySelector("[data-ck-geo-tip]")).toBeNull();
+    detach();
+  });
 });

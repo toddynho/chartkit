@@ -17,17 +17,20 @@ function hit(event: Event): Element | null {
   return node?.closest("[data-ck-name]") ?? null;
 }
 
-/** Hover, focus, and Enter/Space on regions and points. Returns a detach function. */
-export function attach(svg: SVGSVGElement, options: { onSelect?: (item: GeoSelection) => void } = {}): () => void {
+/** Hover, focus, and Enter/Space on regions and points. Returns a detach function. `tooltip: false` on the spec is stamped `data-ck-tooltip="off"` and skips the hover card. */
+export function attach(svg: SVGSVGElement, options: { onSelect?: (item: GeoSelection) => void; tooltip?: boolean } = {}): () => void {
+  const quiet = options.tooltip === false || svg.getAttribute("data-ck-tooltip") === "off";
   const doc = svg.ownerDocument;
   const tip = doc.createElement("div");
   tip.setAttribute("data-ck-geo-tip", "");
   tip.style.cssText =
     "position:fixed;z-index:40;pointer-events:none;padding:6px 8px;border-radius:8px;background:#111;color:#fff;font:12px/1.35 sans-serif;font-family:var(--ck-font-family, inherit);transform:translate(-50%,calc(-100% - 8px));display:none;max-width:240px";
-  doc.body.appendChild(tip);
+  if (!quiet) doc.body.appendChild(tip);
 
   const show = (el: Element, x: number, y: number) => {
+    if (quiet) return;
     tip.textContent = el.querySelector("title")?.textContent || el.getAttribute("aria-label") || "";
+    if (!tip.textContent) return;
     tip.style.display = "block";
     tip.style.left = `${x}px`;
     tip.style.top = `${y}px`;

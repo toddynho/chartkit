@@ -385,7 +385,6 @@ export const docsNav: NavGroup[] = [
         items: [
           { href: "/docs", label: "Overview" },
           { href: "/playground", label: "Playground" },
-          { href: "/gallery", label: "Gallery" },
           { href: "/docs/markdown", label: "MD fences" },
           { href: "/docs/install", label: "Install notes" },
           { href: "/docs/migrate", label: "Upgrading from v0" },
@@ -398,7 +397,6 @@ export const docsNav: NavGroup[] = [
             href: item.href,
             label: item.label,
           })),
-          { href: "/gallery", label: "Gallery" },
         ],
       },
       {

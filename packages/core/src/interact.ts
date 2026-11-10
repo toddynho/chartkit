@@ -94,7 +94,26 @@ export interface HoverIndex {
   pixel?: (index: number) => number;
 }
 
-const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "waterfall", "sunburst"]);
+const TIP_TYPES = new Set([
+  "line",
+  "bar",
+  "stacked-area",
+  "scatter",
+  "combo",
+  "donut",
+  "pie",
+  "waterfall",
+  "sunburst",
+  "area-range",
+  "bar-range",
+  "errorbar",
+  "sparkline",
+  "mini-area",
+  "spike",
+  "candlestick",
+  "heatmap",
+  "bar-list",
+]);
 
 function arcChart(type: string | undefined): boolean {
   return type === "donut" || type === "pie" || type === "sunburst";
