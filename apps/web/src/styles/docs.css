@@ -3,7 +3,7 @@
   max-width: none;
   margin: 0;
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr) calc(var(--try, 380px) + 24px);
+  grid-template-columns: 264px minmax(0, 1fr) calc(var(--try, 380px) + 36px);
   gap: 0;
   align-items: start;
   padding: 0;
@@ -1004,9 +1004,14 @@ html[data-charts-open="1"] .side-charts__fade,
   position: sticky;
   top: var(--header);
   align-self: start;
+  height: calc(100vh - var(--header));
+  max-height: calc(100vh - var(--header));
   min-height: 0;
   margin: 0;
-  padding: 68px 24px 24px 0;
+  /* 12px on the left keeps the resize grip inside this scrollport. */
+  padding: 68px 24px 24px 12px;
+  overflow: auto;
+  overscroll-behavior: contain;
   background: transparent;
   border: 0;
 }
@@ -1072,7 +1077,8 @@ html.is-rail-drag * {
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: none;
-  overflow: hidden;
+  /* clip keeps the rounded corners. hidden would swallow the wheel and the rail would not scroll. */
+  overflow: clip;
 }
 
 .docs-try .rail-options {
@@ -1099,7 +1105,6 @@ html.is-rail-drag * {
 .docs-try #response-chart {
   height: var(--chart-h, calc(var(--try, 380px) * 0.6));
   overflow: auto;
-  overscroll-behavior: contain;
 }
 
 /* The pane height is 60% of the rail width. height:auto follows the viewBox,
@@ -1271,9 +1276,13 @@ html.is-rail-drag * {
   .docs-rail {
     position: static;
     grid-column: 1 / -1;
+    height: auto;
+    max-height: none;
     min-height: 0;
     margin: 0;
     padding: 0 24px 48px;
+    overflow: visible;
+    overscroll-behavior: auto;
     border: 0;
     background: transparent;
   }

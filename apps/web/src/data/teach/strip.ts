@@ -221,11 +221,49 @@ export function bandMode(spec: Record<string, unknown>): "none" | "range" | "iqr
   return "other";
 }
 
-/** Strip treats an omission as horizontal. Categories run down the y axis. */
+function channelField(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (isRecord(value) && typeof value.field === "string") return value.field;
+  return "";
+}
+
+/** True when the first filled cells in this column are numbers. */
+function numericColumn(spec: Record<string, unknown>, field: string): boolean {
+  if (!field || !Array.isArray(spec.data)) return false;
+  let seen = 0;
+  for (const row of spec.data) {
+    if (!isRecord(row)) continue;
+    const value = row[field];
+    if (value == null || value === "") continue;
+    if (typeof value !== "number") return false;
+    seen += 1;
+    if (seen >= 3) return true;
+  }
+  return seen > 0;
+}
+
+/**
+ * Strip treats an omission as horizontal. Categories run down the y axis.
+ * Vertical reads y as the number and x as the group. The published horizontal
+ * examples keep the number on x, so the toggle swaps the two channels or the
+ * chart has no numeric axis and does not draw.
+ */
 export function applyStripOrientation(spec: Record<string, unknown>, value: "horizontal" | "vertical"): void {
   editMark(spec, (mark) => {
     mark.orientation = value;
   });
+  if (!isRecord(spec.encoding)) return;
+  const encoding = spec.encoding;
+  const xField = channelField(encoding.x);
+  const yField = channelField(encoding.y);
+  const xNumeric = numericColumn(spec, xField);
+  const yNumeric = numericColumn(spec, yField);
+  const vertical = value === "vertical";
+  const swap = (vertical && xNumeric && !yNumeric) || (!vertical && yNumeric && !xNumeric);
+  if (!swap) return;
+  const x = encoding.x;
+  encoding.x = encoding.y;
+  encoding.y = x;
 }
 
 export function stripOrientationMode(spec: Record<string, unknown>): "horizontal" | "vertical" | "other" {

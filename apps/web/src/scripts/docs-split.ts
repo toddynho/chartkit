@@ -92,6 +92,36 @@ export function mountDocsSplit(): void {
     pinHandle();
   };
 
+  const nestedCanScroll = (target: EventTarget | null, delta: number): boolean => {
+    let node = target instanceof Element ? target : null;
+    while (node && node !== rail) {
+      const style = getComputedStyle(node);
+      const axis = style.overflowY;
+      if ((axis === "auto" || axis === "scroll") && node.scrollHeight > node.clientHeight + 1) {
+        const max = node.scrollHeight - node.clientHeight;
+        if (delta > 0 && node.scrollTop < max - 1) return true;
+        if (delta < 0 && node.scrollTop > 1) return true;
+      }
+      node = node.parentElement;
+    }
+    return false;
+  };
+
+  rail.addEventListener(
+    "wheel",
+    (event) => {
+      if (!wide.matches || event.ctrlKey) return;
+      if (nestedCanScroll(event.target, event.deltaY)) return;
+      const max = rail.scrollHeight - rail.clientHeight;
+      if (max <= 1) return;
+      const next = Math.min(max, Math.max(0, rail.scrollTop + event.deltaY));
+      if (next === rail.scrollTop) return;
+      rail.scrollTop = next;
+      event.preventDefault();
+    },
+    { passive: false },
+  );
+
   layout();
   window.requestAnimationFrame(pinHandle);
   wide.addEventListener("change", layout);
