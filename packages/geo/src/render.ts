@@ -167,10 +167,18 @@ function noDataSwatch(x: number, y: number, id: string): string {
   return `<rect x="${round(x)}" y="${round(y)}" width="12" height="12" fill="url(#${id}nd)" stroke="currentColor" stroke-opacity="0.35" rx="2"/><text class="ck-geo-label" x="${round(x + 18)}" y="${round(y + 10)}">No data</text>`;
 }
 
-function legendMarkup(scale: PaintScale, x: number, y: number, height: number, id: string, nodata: boolean): string {
+function legendMarkup(scale: PaintScale, x: number, y: number, height: number, id: string, nodata: boolean, labelPx = 11): string {
   const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-weight="650" x="${round(x)}" y="${round(y + 12)}">${esc(scale.title)}</text>` : "";
-  const top = y + (scale.title ? 20 : 4);
+  // A titled ramp used to start 8px under the title baseline, so "Change" sat on the top tick.
+  // The extra gap is skipped when the column is too short to keep the ticks apart.
   const foot = nodata ? 28 : 8;
+  const stopCount = scale.stops.length;
+  const rows = stopCount || scale.swatches?.length || scale.sizes?.length || 1;
+  const pitch = labelPx + 4;
+  const minBody = (stopCount ? Math.max(0, stopCount - 1) : rows) * pitch + (stopCount ? 8 : 0);
+  const wanted = scale.title ? labelPx + 21 : 4;
+  const topGap = height - foot - wanted >= minBody ? wanted : scale.title ? 20 : 4;
+  const top = y + topGap;
   if (scale.sizes?.length) {
     const room = Math.max(36, height - (top - y) - foot);
     const row = Math.min(36, room / scale.sizes.length);
@@ -605,7 +613,7 @@ export async function render(spec: unknown): Promise<string> {
   if (showLegend && scale) {
     body += bottomLegend
       ? horizontalLegend(scale, box.x, box.y + box.h + 6, box.w, id)
-      : legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch");
+      : legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch", labelPx);
   }
   return shell(spec, chrome, body, id, nodataMode, labelPx);
 }
