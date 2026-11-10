@@ -1,7 +1,8 @@
 /**
  * Teaching copy and curated specs for /docs/charts/treemap.
  * Flat tiles use encoding.color for the group. Nested children, a path, or id and parent
- * draw levels, and mark.depth caps them. Tile labels are drawn when the tile fits.
+ * draw levels, and mark.depth caps them. Every example here is three levels deep, so 1, 2, and 3
+ * each paint a different cut. Tile labels are drawn when the tile fits.
  * There is no mark.labels switch, and mark.palette does not apply, so neither is a control.
  */
 
@@ -87,27 +88,43 @@ export const treemapExamples: TeachExample[] = [
   {
     id: "inventory",
     title: "Inventory by material",
-    blurb: "Wood, metal, and glass. Oak is the largest tile.",
+    blurb: "Wood, metal, and glass, each split into a kind. Oak is the largest tile.",
     meta: "12 tiles",
     spec: {
       version: "1",
       type: "treemap",
       title: "Inventory by material",
       data: [
-        { name: "Oak", size: 42, group: "Wood" },
-        { name: "Pine", size: 28, group: "Wood" },
-        { name: "Maple", size: 18, group: "Wood" },
-        { name: "Walnut", size: 12, group: "Wood" },
-        { name: "Steel", size: 36, group: "Metal" },
-        { name: "Aluminum", size: 22, group: "Metal" },
-        { name: "Copper", size: 14, group: "Metal" },
-        { name: "Tin", size: 8, group: "Metal" },
-        { name: "Clear", size: 24, group: "Glass" },
-        { name: "Tinted", size: 16, group: "Glass" },
-        { name: "Laminated", size: 11, group: "Glass" },
-        { name: "Mirror", size: 7, group: "Glass" },
+        {
+          name: "Wood",
+          children: [
+            { name: "Hardwood", children: [{ name: "Oak", size: 42 }, { name: "Walnut", size: 12 }] },
+            { name: "Softwood", children: [{ name: "Pine", size: 28 }, { name: "Maple", size: 18 }] },
+          ],
+        },
+        {
+          name: "Metal",
+          children: [
+            { name: "Ferrous", children: [{ name: "Steel", size: 36 }] },
+            {
+              name: "Nonferrous",
+              children: [
+                { name: "Aluminum", size: 22 },
+                { name: "Copper", size: 14 },
+                { name: "Tin", size: 8 },
+              ],
+            },
+          ],
+        },
+        {
+          name: "Glass",
+          children: [
+            { name: "Sheet", children: [{ name: "Clear", size: 24 }, { name: "Tinted", size: 16 }] },
+            { name: "Worked", children: [{ name: "Laminated", size: 11 }, { name: "Mirror", size: 7 }] },
+          ],
+        },
       ],
-      encoding: { x: "name", y: "size", color: "group" },
+      encoding: { x: "name", y: "size" },
       a11y: { alt: "Wood, metal, and glass each hold several products, and oak is the largest tile." },
     },
   },

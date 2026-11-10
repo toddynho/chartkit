@@ -928,7 +928,8 @@ test("treemap actions edit levels, legend, and tooltip", () => {
   assert.deepEqual(inventory, untouched);
   applyTreemapAction(inventory, { id: "depth", value: "1" });
   assert.equal((inventory.mark as { depth: number }).depth, 1);
-  assert.equal((inventory.encoding as { color: string }).color, "group");
+  assert.equal((inventory.encoding as { x: string }).x, "name");
+  assert.equal((inventory.encoding as { y: string }).y, "size");
   applyTreemapAction(inventory, { id: "depth", value: "all" });
   assert.equal(inventory.mark, undefined);
   applyTreemapAction(inventory, { id: "legend", value: "off" });
