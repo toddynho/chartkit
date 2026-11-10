@@ -11,6 +11,8 @@ import {
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
 import { previewSize, readExplicitSize, type PreviewPreset } from "../data/preview-size";
+import { readPlaygroundHash } from "../data/teach/spec";
+import { ensurePlayHeading } from "./play-heading";
 import { paintsHeading, stageSpec } from "./stage-spec";
 import { switchChartType } from "../data/type-switch";
 import { menuPosition } from "./menu-place";
@@ -292,34 +294,23 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   function readHash(): void {
-    if (location.hash.length < 2) return;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    } catch {
-      return;
-    }
-    if (!isRecord(parsed)) return;
-    if (isRecord(parsed.spec)) {
-      state.spec = clone(parsed.spec);
-      state.good = clone(parsed.spec);
-      state.baseline = clone(parsed.spec);
-      state.text = pretty(parsed.spec);
-      if (typeof parsed.example === "string") state.slug = parsed.example;
-      if (parsed.size === "card" || parsed.size === "dashboard" || parsed.size === "full") state.size = parsed.size;
-      state.mode = parsed.mode === "light" || parsed.mode === "dark" || parsed.mode === "auto" ? parsed.mode : modeOf(state.spec);
+    const loaded = readPlaygroundHash(location.hash);
+    if (!loaded) return;
+    const spec = loaded.spec;
+    state.spec = clone(spec);
+    state.good = clone(spec);
+    state.baseline = clone(spec);
+    state.text = pretty(spec);
+    if (loaded.wrapped) {
+      if (loaded.example) state.slug = loaded.example;
+      if (loaded.size) state.size = loaded.size;
+      state.mode = loaded.mode ?? modeOf(state.spec);
       const known = examples.find((item) => item.slug === state.slug);
       if (known) state.baseline = clone(known.spec);
       return;
     }
-    if (typeof parsed.type === "string" || parsed.version != null) {
-      state.spec = clone(parsed);
-      state.good = clone(parsed);
-      state.baseline = clone(parsed);
-      state.text = pretty(parsed);
-      state.slug = "";
-      state.mode = modeOf(state.spec);
-    }
+    state.slug = "";
+    state.mode = modeOf(state.spec);
   }
 
   function rowsOf(spec: Record<string, unknown>): Record<string, unknown>[] {
@@ -1141,7 +1132,10 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
         } else if (state.svg.includes("<svg") && kind !== "bar-list") {
           // The client mount registers core and extra charts. Bar list is painted
           // by renderBarList and stays as that SVG, the same as the home carousel.
-          const handle = mount(chart, view as ChartSpec);
+          // The render wrapper keeps a card title the chart renderer does not draw.
+          const handle = mount(chart, view as ChartSpec, {
+            render: (spec) => ensurePlayHeading(drawChart(spec), spec as Record<string, unknown>),
+          });
           if (gen !== paintGen) {
             handle.destroy();
             return;
@@ -1599,11 +1593,11 @@ function toCsv(rows: Record<string, unknown>[]): string {
 
 async function paintSvg(spec: Record<string, unknown>): Promise<string> {
   const type = chartType(spec);
-  if (type === "choropleth" || type === "map-points") {
-    const geo = await import("@chartkitdev/geo");
-    return geo.render(spec);
-  }
-  return drawChart(spec);
+  const svg =
+    type === "choropleth" || type === "map-points"
+      ? await (await import("@chartkitdev/geo")).render(spec)
+      : drawChart(spec);
+  return ensurePlayHeading(svg, spec);
 }
 
 function pngBlob(svg: string, width: number, height: number): Promise<Blob | null> {

@@ -3,7 +3,7 @@ import { paintSpec, type RailResult } from "../lib/chartkit";
 import { isGeoSpec, paintGeo } from "../lib/paint-geo";
 import { withPreviewSize } from "../data/preview-size";
 import { teachModule } from "../data/teach/registry";
-import { formatNumber, playgroundHref, specText } from "../data/teach/spec";
+import { examplePlayHref, formatNumber, specText } from "../data/teach/spec";
 
 interface Props {
   type: string;
@@ -39,7 +39,7 @@ if (!rawSmallest.ok || !rawSmallest.svg.includes(`data-ck-type="${paintType}"`) 
 const state = module.controlState(initial.spec);
 const preview = await paintExample(withPreviewSize(initial.spec));
 const snippet = specText(initial.spec);
-const play = playgroundHref(initial.spec);
+const play = examplePlayHref(initial, initial.spec);
 
 function pressed(current: string | number | undefined, value: string): boolean {
   return current != null && String(current) === value;

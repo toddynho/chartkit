@@ -3,7 +3,7 @@ import { paintSpec } from "../lib/chartkit";
 import { withPreviewSize } from "../data/preview-size";
 import { demoTip } from "../data/teach/demo-tip";
 import { teachModule } from "../data/teach/registry";
-import { formatNumber, openTeachExample, playgroundHref, roundStep, specText } from "../data/teach/spec";
+import { examplePlayHref, formatNumber, openTeachExample, roundStep, specText } from "../data/teach/spec";
 
 function buttons(root: ParentNode, selector: string): HTMLButtonElement[] {
   return [...root.querySelectorAll<HTMLButtonElement>(selector)];
@@ -132,6 +132,11 @@ export function mountChartDemo(): void {
     closeMenu(focusTitle);
   }
 
+  function playHref(): string {
+    const example = examples[index];
+    return example ? examplePlayHref(example, current) : "#";
+  }
+
   function clearTips(): void {
     tip?.destroy();
     tip = null;
@@ -179,7 +184,7 @@ export function mountChartDemo(): void {
       commit();
     }
     snippet!.textContent = specText(current);
-    play!.href = playgroundHref(current);
+    play!.href = playHref();
   }
 
   /**
@@ -192,7 +197,7 @@ export function mountChartDemo(): void {
     paintSeq += 1;
     const specNow = current;
     snippet!.textContent = specText(specNow);
-    play!.href = playgroundHref(specNow);
+    play!.href = playHref();
     const commit = (svg: string, ok: boolean, message: string) => {
       if (seq !== geoDraw) return;
       clearTips();
