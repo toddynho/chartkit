@@ -1,82 +1,272 @@
 ---
-import "../../styles/surfaces.css";
+import "../../styles/ck.css";
+import "../../styles/compare.css";
 import Base from "../../layouts/Base.astro";
-import LibraryLink from "../../components/LibraryLink.astro";
-import { libraryHome } from "../../data/library-homes";
-import { loadCompareIndex, loadWhenToUse } from "../../lib/batch3";
-import { scriptJson } from "../../lib/spec-text";
+import { loadCompareIndex, loadConvert } from "../../lib/batch3";
 
 const page = loadCompareIndex();
-const when = loadWhenToUse();
-const description = "ChartKit against 20 charting libraries. Every feature row is in the table, losses next to wins, with verification and source.";
+const count = page.rivals.length;
+const countWord = count === 20 ? "Twenty" : String(count);
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const upper = sorted[mid];
+  const lower = sorted[mid - 1];
+  if (upper == null || (sorted.length % 2 === 0 && lower == null)) throw new Error("compare median is empty");
+  return sorted.length % 2 === 1 ? upper : (lower + upper) / 2;
+}
+
+function show(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+const ahead = median(page.rivals.map((row) => row.win));
+const same = median(page.rivals.map((row) => row.tie));
+const behind = median(page.rivals.map((row) => row.loss));
+const unknown = median(page.rivals.map((row) => row.unknown));
+const mixTotal = ahead + same + behind + unknown;
+const highcharts = page.rivals.find((row) => row.library.id === "highcharts");
+if (!highcharts) throw new Error("compare index is missing Highcharts");
+const aheadOf = page.rivals.filter((row) => row.win > row.loss).length;
+const scale = 150;
+
+const bench = {
+  lineBytes: 32110,
+  ssrMedianMs: 2.63,
+  hover: [
+    { after: 50, chartkit: 20.8, uplot: 4 },
+    { after: 200, chartkit: 15.9, uplot: 4.6 },
+    { after: 500, chartkit: 16.5, uplot: 4.9 },
+  ],
+  even1k: { chartkit: 1.5, uplot: 1.2 },
+};
+
+const convert = loadConvert();
+const teaser = convert.samples.find((sample) => sample.id === "recharts") ?? convert.samples[0];
+if (!teaser) throw new Error("convert samples missing");
+
+const description = `ChartKit against ${count} libraries. Median per library: ${show(ahead)} features ahead, ${show(same)} the same, ${show(behind)} behind, ${show(unknown)} unknown.`;
 ---
 
 <Base title="Compare" description={description} tone="light">
-  <Fragment slot="head">
-    <script is:inline type="application/ld+json" set:html={scriptJson(when.jsonLd)} />
-  </Fragment>
-  <div class="wrap surface prose">
-    <h1>Compare</h1>
-    <p class="lede">
-      ChartKit against {page.rivals.length} libraries, from the feature matrix. A loss is a feature the other library
-      scores higher on. A win is the reverse. Unknown cells count as neither. Every scored row stays in the table.
-    </p>
-    <p>
-      Other libraries were checked on {page.dateChecked} against types and schemas, not by rendering. A typed option can
-      overstate what draws. ChartKit was rechecked on {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
-      Radar, treemap, sankey, and funnel are native. Tooltip, zoom, and pan are native in the client runtime. The static
-      SVG does not paint them. <a href="/features#method">Method</a>. <a href="/features.json">features.json</a>. Timings,
-      losses included, are on <a href="/benchmarks">Benchmarks</a>. The paste converter covers <LibraryLink id="chartjs">Chart.js</LibraryLink>,
-      <LibraryLink id="recharts">Recharts</LibraryLink>, and <LibraryLink id="echarts">ECharts</LibraryLink>: <a href="/convert">convert a chart</a>.
-    </p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Library</th>
-            <th>Version</th>
-            <th class="num">ChartKit ahead</th>
-            <th class="num">ChartKit behind</th>
-            <th class="num">Same</th>
-            <th class="num">Unknown</th>
-          </tr>
-        </thead>
-        <tbody>
+  <div class="ck ck-wrap">
+    <section class="cmp-hero">
+      <div class="cmp-copy">
+        <p class="ck-eye">Compare</p>
+        <h1 class="ck-h1">{countWord} libraries. One ledger.</h1>
+        <p class="ck-lede">
+          ChartKit scored against the {count} libraries in features.json, on the same feature matrix we use to track our own gaps. Pick yours in the table below for the row-by-row.
+        </p>
+        <div class="cmp-cta">
+          <a class="ck-btn" href="#ledger">Find your library ↓</a>
+          <a class="ck-link" href="/features#method">How it is scored</a>
+        </div>
+        <p class="cmp-fine">
+          Other libraries checked {page.dateChecked} against types and schemas. ChartKit rechecked {page.chartkitRechecked} on {page.chartkitCommit.slice(0, 8)}.
+        </p>
+      </div>
+      <div class="ck-panel cmp-card">
+        <div class="ck-bar ck-bar--light">
+          <span>chartkit vs {count} · median per library</span>
+          <span>features.json · {page.dateChecked}</span>
+        </div>
+        <div class="cmp-cells">
+          <div class="cmp-cell"><span class="cmp-cell__k">Ahead</span><span class="cmp-cell__v is-ahead">{show(ahead)}</span></div>
+          <div class="cmp-cell"><span class="cmp-cell__k">Same</span><span class="cmp-cell__v">{show(same)}</span></div>
+          <div class="cmp-cell"><span class="cmp-cell__k">Behind</span><span class="cmp-cell__v is-behind">{show(behind)}</span></div>
+          <div class="cmp-cell"><span class="cmp-cell__k">Unknown</span><span class="cmp-cell__v is-unknown">{show(unknown)}</span></div>
+        </div>
+        <div class="cmp-mix">
+          <div class="ck-mix" aria-hidden="true">
+            <i class="is-ahead" style={`width:${(ahead / mixTotal) * 100}%`}></i>
+            <i class="is-same" style={`width:${(same / mixTotal) * 100}%`}></i>
+            <i class="is-behind" style={`width:${(behind / mixTotal) * 100}%`}></i>
+            <i class="is-unknown" style={`width:${(unknown / mixTotal) * 100}%`}></i>
+          </div>
+        </div>
+        <div class="ck-foot">
+          <span>
+            ChartKit is ahead on more rows than it is behind against {aheadOf} of the {count}. Highcharts is the exception: {highcharts.win} ahead, {highcharts.loss} behind.
+            <a href="#ledger"> The ledger ↓</a>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ck-section" id="ledger">
+      <div class="ck-head">
+        <p class="ck-eye">Ledger</p>
+        <h2 class="ck-h2">Find the one you use.</h2>
+        <p class="ck-sub">
+          Each row opens the pairwise page: every scored feature, both options, the check and the source. A loss is a feature the other library scores higher on. Unknown counts as neither.
+        </p>
+      </div>
+      <div class="ck-panel" data-ledger>
+        <div class="ck-bar ck-bar--light">
+          <span>features.json · {page.dateChecked} · {count} libraries</span>
+          <span class="cmp-sort" role="group" aria-label="Sort">
+            <button type="button" class="cmp-sort is-on" data-sort="ahead">ahead</button>
+            <button type="button" class="cmp-sort" data-sort="behind">behind</button>
+            <button type="button" class="cmp-sort" data-sort="name">a–z</button>
+          </span>
+        </div>
+        <div class="cmp-cols" aria-hidden="true">
+          <span>Library</span><span>Version</span><span>Ahead / behind</span><span>Ahead</span><span>Behind</span><span>Same</span><span>Unknown</span>
+        </div>
+        <div data-rows>
           {
-            page.rivals.map(({ library, win, loss, tie, unknown }) => (
-              <tr>
-                <th scope="row">
-                  <a class="ext" href={libraryHome(library.id)} target="_blank" rel="noopener noreferrer">{library.name}</a>
-                  <a class="lib-compare" href={`/compare/${library.id}`}>compare</a>
-                </th>
-                <td>{library.version}</td>
-                <td class="num win">{win}</td>
-                <td class="num loss">{loss}</td>
-                <td class="num">{tie}</td>
-                <td class="num">{unknown}</td>
-              </tr>
+            page.rivals.map((row) => (
+              <a
+                class="cmp-row"
+                href={`/compare/${row.library.id}`}
+                data-name={row.library.name}
+                data-ahead={row.win}
+                data-behind={row.loss}
+              >
+                <span><strong>{row.library.name}</strong><span class="arrow">→</span></span>
+                <span class="cmp-ver">{row.library.version}</span>
+                <span class="cmp-div" aria-hidden="true">
+                  <span class="cmp-div__ahead" style={`width:${(row.win / scale) * 50}%`}></span>
+                  <span class="cmp-div__line"></span>
+                  <span class="cmp-div__behind" style={`width:${(row.loss / scale) * 50}%`}></span>
+                </span>
+                <span class="cmp-num is-ahead">{row.win}</span>
+                <span class="cmp-num">{row.loss}</span>
+                <span class="cmp-num">{row.tie}</span>
+                <span class="cmp-num is-unknown">{row.unknown}</span>
+              </a>
             ))
           }
-        </tbody>
-      </table>
-    </div>
-    <section id="when-to-use">
-      <h2>When to use ChartKit</h2>
-      <p>
-        Round 13 browser numbers, losses included. Bundle size and server render are the phase 4 matrices. They match <a href="/benchmarks.json">benchmarks.json</a>.
-      </p>
-      {
-        when.faqs.map((item) => (
-          <section>
-            <h3>{item.question}</h3>
-            <p>{item.answer}</p>
-          </section>
-        ))
-      }
-      <p>
-        Pairwise pages: <a href="/compare/recharts">Recharts</a>, <a href="/compare/chartjs">Chart.js</a>,{" "}
-        <a href="/compare/echarts">ECharts</a>, <a href="/compare/nivo">Nivo</a>.
-      </p>
+        </div>
+        <div class="ck-foot">
+          <span>
+            Checked against types and schemas, not by rendering, so a typed option can overstate what draws.
+            <a href="/features#method"> Method</a> · <a href="/features.json">features.json</a> · <a href="/benchmarks">Benchmarks</a>
+          </span>
+          <span style="font-family:var(--mono);font-size:11.5px;color:#8b8d93">ahead ■ chartkit · behind ■ other</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ck-section">
+      <div class="ck-head">
+        <p class="ck-eye">Call</p>
+        <h2 class="ck-h2">Use it when. Skip it when.</h2>
+        <p class="ck-sub">The feature count tells you breadth. These are the things that decide it, with the measured numbers.</p>
+      </div>
+      <div class="ck-split ck-split--start">
+        <div class="ck-panel cmp-use">
+          <div class="ck-bar ck-bar--light"><span style="color:#1a7f4b">● use chartkit when</span><span>measured</span></div>
+          <div class="cmp-call">
+            <div>
+              <strong>One spec has to run everywhere</strong>
+              <p>React, Vue, Svelte, Solid, Qwik, Angular, Astro, vanilla, and the custom element read the same JSON. The server renders it too.</p>
+            </div>
+            <div class="cmp-call__n"><b>9</b><span>frameworks · 1 spec</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>An agent writes the chart</strong>
+              <p>With llms.txt in the prompt, round 6 was 42/42 on the first try. validate() and repair() do not add a model call.</p>
+            </div>
+            <div class="cmp-call__n"><b>42/42</b><span>first try · round 6</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>You render on the server</strong>
+              <p>A 100,000-point line server-renders in {bench.ssrMedianMs} ms median. Recharts 3 SSR returns no SVG except sunburst.</p>
+            </div>
+            <div class="cmp-call__n"><b>{bench.ssrMedianMs}</b><span>ms · 100k points</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>Bundle size matters</strong>
+              <p>The line chart is {bench.lineBytes.toLocaleString("en-US")} bytes gzip for createRenderer. Bar, mini-area and /all are on Benchmarks.</p>
+            </div>
+            <div class="cmp-call__n"><b>{(bench.lineBytes / 1000).toFixed(1)}</b><span>KB gzip · line</span></div>
+          </div>
+        </div>
+        <div class="ck-panel cmp-skip">
+          <div class="ck-bar ck-bar--light"><span>○ pick something else when</span><span>measured</span></div>
+          <div class="cmp-call">
+            <div>
+              <strong>You need interaction in the static SVG</strong>
+              <p>Tooltip, zoom, pan, brush and animation live in the client runtime. The static SVG does not paint them.</p>
+            </div>
+            <div class="cmp-call__n"><b>runtime</b><span>required</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>First hover must be a few milliseconds</strong>
+              <p>
+                ChartKit paints first hover in {bench.hover.map((row) => row.chartkit).join(", ")} ms. uPlot does it in {bench.hover.map((row) => row.uplot).join(", ")}.
+              </p>
+            </div>
+            <div class="cmp-call__n"><b>{bench.hover[0]?.uplot}</b><span>ms · uPlot, 50 ms after mount</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>Aligned updates at 1,000 points</strong>
+              <p>Even 1,000-point update: ChartKit {bench.even1k.chartkit} ms, uPlot {bench.even1k.uplot} ms. Round 13, ChartKit vs uPlot.</p>
+            </div>
+            <div class="cmp-call__n"><b>{bench.even1k.chartkit} vs {bench.even1k.uplot}</b><span>ms · even 1k</span></div>
+          </div>
+          <div class="cmp-call">
+            <div>
+              <strong>You need a tile map</strong>
+              <p>Choropleth and point maps are in the spec. There is no tile layer, and no pan or zoom on the map.</p>
+            </div>
+            <div class="cmp-call__n"><b>—</b><span>no tiles</span></div>
+          </div>
+          <div class="ck-foot">
+            Timings are round 13, measured 2026-10-18, median of 5 in Playwright Chromium on a 640×360 line. Phase 2 d8dcc5a.
+            <a href="/benchmarks"> How to reproduce →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ck-section cmp-end">
+      <div class="cmp-close">
+        <div>
+          <p class="ck-eye">Convert</p>
+          <h2 class="ck-h2">Bring the chart you already have.</h2>
+          <p class="ck-sub">Paste a Recharts component, a Chart.js config or an ECharts option and get the ChartSpec back. Chart.js, Recharts and ECharts today.</p>
+          <div class="cmp-cta">
+            <a class="ck-btn" href="/convert">Convert a chart</a>
+            <a class="ck-link" href="#ledger">All pairwise pages →</a>
+          </div>
+        </div>
+        <div class="cmp-tease ck-panel" style="overflow:hidden">
+          <div class="ck-panel ck-panel--dark" style="border-radius:0">
+            <div class="ck-bar"><span>paste · recharts</span><span>sample</span></div>
+            <pre>{teaser.source}</pre>
+          </div>
+          <div>
+            <div class="ck-bar ck-bar--light"><span style="color:#1a7f4b">● spec.json</span><span>converted</span></div>
+            <pre style="color:#3a3b40">{teaser.spec ? JSON.stringify(teaser.spec, null, 2) : ""}</pre>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
+  <script>
+    const root = document.querySelector<HTMLElement>("[data-ledger]");
+    const rows = [...(root?.querySelectorAll<HTMLAnchorElement>(".cmp-row") ?? [])];
+    const buttons = [...(root?.querySelectorAll<HTMLButtonElement>("[data-sort]") ?? [])];
+    const order = (mode: string) => {
+      const next = [...rows];
+      next.sort((a, b) => {
+        if (mode === "name") return (a.dataset.name ?? "").localeCompare(b.dataset.name ?? "");
+        if (mode === "behind") return Number(b.dataset.behind) - Number(a.dataset.behind);
+        return Number(b.dataset.ahead) - Number(a.dataset.ahead);
+      });
+      const host = root?.querySelector("[data-rows]");
+      next.forEach((row) => host?.append(row));
+      buttons.forEach((button) => button.classList.toggle("is-on", button.dataset.sort === mode));
+    };
+    buttons.forEach((button) => button.addEventListener("click", () => order(button.dataset.sort ?? "ahead")));
+    order("ahead");
+  </script>
 </Base>

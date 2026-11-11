@@ -102,9 +102,6 @@ p.agents-fine {
   gap: 16px;
   flex-wrap: wrap;
 }
-.agents-page .ck-bar > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.agents-page .ck-bar > :last-child { flex: none; }
-.agents-page .ck-bar { white-space: nowrap; }
 
 .agents-end.ck-section { padding-bottom: 144px; }
 
