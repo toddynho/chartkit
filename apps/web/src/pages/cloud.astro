@@ -1,5 +1,6 @@
 ---
 import "../styles/v2.css";
+import "../styles/ck.css";
 import "../styles/cloud.css";
 import Base from "../layouts/Base.astro";
 import { HERO_TYPE_COUNT } from "../data/hero-catalog";
@@ -86,22 +87,22 @@ const description =
 ---
 
 <Base tone="light" title="Cloud" description={description}>
-  <div class="v2 cloud-page" data-cloud data-origin={origin}>
+  <div class="ck ck-wrap cloud-page" data-cloud data-origin={origin}>
     <section class="cloud-hero" id="try">
       <div class="cloud-copy">
-        <p class="eyebrow eyebrow--blue">ChartKit Cloud</p>
-        <h1>Post a spec.<br />Get the image.</h1>
-        <p class="cloud-lead">
+        <p class="ck-eye">ChartKit Cloud</p>
+        <h1 class="ck-h1">Post a spec.<br />Get the image.</h1>
+        <p class="cloud-lead ck-lede">
           The same ChartSpec, rendered on our servers. Put the URL in an <code>&lt;img&gt;</code>, an email, a README or a PDF. No chart runtime anywhere.
         </p>
         <p class="cloud-help">Edit the spec on the right. The image and its URL update as you type, and that URL already works.</p>
         <div class="cloud-cta">
-          <button type="button" class="cloud-primary" data-copy="url" data-copy-label="long">Copy the image URL</button>
-          <a class="btn-text" href="#pricing">Limits &amp; pricing</a>
+          <button type="button" class="ck-btn" data-copy="url" data-copy-label="long">Copy the image URL</button>
+          <a class="ck-link" href="#pricing">Limits &amp; pricing</a>
         </div>
         <p class="cloud-fine">Free, no key. {perMinute} renders / min. Free images carry a small chartkit.dev mark.</p>
       </div>
-      <div class="cloud-card">
+      <div class="ck-panel cloud-card">
         <div class="cloud-panes">
           <div class="cloud-codepane">
             <div class="cloud-bar">
@@ -137,26 +138,26 @@ const description =
       </div>
     </section>
 
-    <section class="cloud-section" id="send" aria-labelledby="send-title">
-      <div class="cloud-head">
-        <p class="eyebrow eyebrow--blue">Send</p>
-        <h2 id="send-title">One request, from anywhere.</h2>
-        <p>No SDK. GET returns the file. POST returns JSON with the SVG or base64 PNG, plus a url.</p>
+    <section class="ck-section cloud-section" id="send" aria-labelledby="send-title">
+      <div class="ck-head">
+        <p class="ck-eye">Send</p>
+        <h2 class="ck-h2" id="send-title">One request, from anywhere.</h2>
+        <p class="ck-sub">No SDK. GET returns the file. POST returns JSON with the SVG or base64 PNG, plus a url.</p>
       </div>
-      <div class="cloud-split">
-        <div class="cloud-dark">
+      <div class="ck-split">
+        <div class="ck-panel ck-panel--dark cloud-dark">
           <div class="cloud-bar">
             <span data-lang>request · {first.lang}</span>
             <button type="button" class="cloud-copyline" data-copy="snippet">copy</button>
           </div>
           <div class="cloud-tabs" role="tablist" aria-label="Request snippets">
             {snippets.map((tab) => (
-              <button type="button" class:list={["cloud-tab", tab.id === first.id && "is-on"]} role="tab" data-tab={tab.id} aria-selected={tab.id === first.id ? "true" : "false"}>{tab.label}</button>
+              <button type="button" class:list={["ck-chip", "cloud-tab", tab.id === first.id && "is-on"]} role="tab" data-tab={tab.id} aria-selected={tab.id === first.id ? "true" : "false"}>{tab.label}</button>
             ))}
           </div>
-          <pre><code data-code>{first.code}</code></pre>
+          <pre class="ck-code"><code data-code>{first.code}</code></pre>
         </div>
-        <div class="cloud-light">
+        <div class="ck-panel cloud-light">
           <div class="cloud-bar">
             <span class="cloud-status" data-status data-state="ok">200 OK · image/svg+xml</span>
             <span class="cloud-formats">
@@ -174,14 +175,14 @@ const description =
       </div>
     </section>
 
-    <section class="cloud-section" id="place" aria-labelledby="place-title">
-      <div class="cloud-head">
-        <p class="eyebrow eyebrow--blue">Place</p>
-        <h2 id="place-title">Where an image is enough.</h2>
-        <p>The same URL, dropped into four places that cannot run JavaScript. Nothing else changes.</p>
+    <section class="ck-section cloud-section" id="place" aria-labelledby="place-title">
+      <div class="ck-head">
+        <p class="ck-eye">Place</p>
+        <h2 class="ck-h2" id="place-title">Where an image is enough.</h2>
+        <p class="ck-sub">The same URL, dropped into four places that cannot run JavaScript. Nothing else changes.</p>
       </div>
-      <div class="cloud-places">
-        <article class="cloud-place">
+      <div class="ck-split">
+        <article class="ck-panel cloud-place">
           <div class="cloud-bar"><span>Email</span><span>format=png · scale=2</span></div>
           <div class="cloud-place__copy">
             <h3>Charts in the inbox</h3>
@@ -198,7 +199,7 @@ const description =
           </div>
           <div class="cloud-foot cloud-foot--mono" data-place="email">{places.email}</div>
         </article>
-        <article class="cloud-place">
+        <article class="ck-panel cloud-place">
           <div class="cloud-bar"><span>Docs</span><span>format=png</span></div>
           <div class="cloud-place__copy">
             <h3>README and wikis</h3>
@@ -215,7 +216,7 @@ const description =
           </div>
           <div class="cloud-foot cloud-foot--mono" data-place="docs">{places.docs}</div>
         </article>
-        <article class="cloud-place">
+        <article class="ck-panel cloud-place">
           <div class="cloud-bar"><span>Agents</span><span>format=svg</span></div>
           <div class="cloud-place__copy">
             <h3>Agent artifacts</h3>
@@ -236,7 +237,7 @@ const description =
           </div>
           <div class="cloud-foot cloud-foot--mono" data-place="agents">{places.agents}</div>
         </article>
-        <article class="cloud-place">
+        <article class="ck-panel cloud-place">
           <div class="cloud-bar"><span>Reports</span><span>format=svg · w=1200</span></div>
           <div class="cloud-place__copy">
             <h3>Server-side PDFs</h3>
@@ -259,14 +260,14 @@ const description =
       </div>
     </section>
 
-    <section class="cloud-section" id="trust" aria-labelledby="trust-title">
-      <div class="cloud-head">
-        <p class="eyebrow eyebrow--blue">Trust</p>
-        <h2 id="trust-title">Read the response headers.</h2>
-        <p>These are the headers from a repeat GET of the signups spec on cloud.chartkit.dev. The numbers match that response.</p>
+    <section class="ck-section cloud-section" id="trust" aria-labelledby="trust-title">
+      <div class="ck-head">
+        <p class="ck-eye">Trust</p>
+        <h2 class="ck-h2" id="trust-title">Read the response headers.</h2>
+        <p class="ck-sub">These are the headers from a repeat GET of the signups spec on cloud.chartkit.dev. The numbers match that response.</p>
       </div>
-      <div class="cloud-split cloud-trust">
-        <div class="cloud-dark cloud-sticky">
+      <div class="ck-split cloud-trust">
+        <div class="ck-panel ck-panel--dark cloud-dark cloud-sticky">
           <div class="cloud-bar"><span>response · headers</span><span>GET /render</span></div>
           <div class="cloud-headers">
             <div><span class="dim">HTTP/2</span> <span class="ok">200</span></div>
@@ -299,14 +300,14 @@ const description =
       </p>
     </section>
 
-    <section class="cloud-section" id="own" aria-labelledby="own-title">
-      <div class="cloud-head">
-        <p class="eyebrow eyebrow--blue">Own</p>
-        <h2 id="own-title">Same handler, your box.</h2>
-        <p>Cloud runs the MIT renderer that ships in the package. The local server is the same handler, so a GET still includes the mark.</p>
+    <section class="ck-section cloud-section" id="own" aria-labelledby="own-title">
+      <div class="ck-head">
+        <p class="ck-eye">Own</p>
+        <h2 class="ck-h2" id="own-title">Same handler, your box.</h2>
+        <p class="ck-sub">Cloud runs the MIT renderer that ships in the package. The local server is the same handler, so a GET still includes the mark.</p>
       </div>
-      <div class="cloud-split">
-        <div class="cloud-dark">
+      <div class="ck-split">
+        <div class="ck-panel ck-panel--dark cloud-dark">
           <div class="cloud-bar"><span>terminal</span><span>local</span></div>
           <div class="cloud-term">
             <div><span class="dim">$</span> npm run dev:node --workspace=@chartkitdev/cloud</div>
@@ -317,7 +318,7 @@ const description =
             <div>&nbsp;&nbsp;-o chart.svg</div>
           </div>
         </div>
-        <div class="cloud-light">
+        <div class="ck-panel cloud-light">
           <div class="cloud-bar">
             <span class="cloud-status" data-status data-state="ok">200 OK · image/svg+xml</span>
             <span>127.0.0.1</span>
@@ -331,13 +332,13 @@ const description =
       </div>
     </section>
 
-    <section class="cloud-section cloud-section--pay" id="pricing" aria-labelledby="pay-title">
-      <div class="cloud-head">
-        <p class="eyebrow eyebrow--blue">Pay</p>
-        <h2 id="pay-title">Free to use. Pay to drop the mark.</h2>
-        <p>Same spec, same output. A key removes the chartkit.dev mark. The {perMinute}/min ceiling does not change.</p>
+    <section class="ck-section cloud-section cloud-section--pay" id="pricing" aria-labelledby="pay-title">
+      <div class="ck-head">
+        <p class="ck-eye">Pay</p>
+        <h2 class="ck-h2" id="pay-title">Free to use. Pay to drop the mark.</h2>
+        <p class="ck-sub">Same spec, same output. A key removes the chartkit.dev mark. The {perMinute}/min ceiling does not change.</p>
       </div>
-      <div class="cloud-price">
+      <div class="ck-split">
         <article class="cloud-plan">
           <div class="cloud-plan__top"><h3>Free</h3><div class="cloud-plan__meta">no key · no account</div></div>
           <ul>

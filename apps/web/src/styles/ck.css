@@ -1,0 +1,210 @@
+/*
+  Marketing primitives. Import this on a page that uses the classes.
+  Selectors include the element (p.ck-eye, h1.ck-h1, button.ck-btn) so they
+  beat the element rules in global.css. The root reset is first; the
+  component rules below it win on a tie.
+  Docs stays on its own 960px column. Do not load this there.
+*/
+
+.ck {
+  --ck-ink: #17181a;
+  --ck-ink-2: #55575c;
+  --ck-muted: #8b8d93;
+  --ck-line: #e6e6e2;
+  --ck-accent: #0a63e6;
+  --ck-accent-hover: #0957cc;
+  --ck-on-accent: #fff;
+  --ck-code: #1b1c1f;
+  --ck-code-text: #d9dadd;
+  --ck-chip: #34353a;
+  --ck-radius-panel: 20px;
+  --ck-radius-pill: 999px;
+  --ck-radius-chip: 6px;
+  --ck-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  letter-spacing: normal;
+  line-height: normal;
+  color: var(--ck-ink);
+}
+
+.ck h1,
+.ck h2,
+.ck h3,
+.ck p,
+.ck li { margin: 0; }
+
+.ck code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+.ck-wrap {
+  width: min(var(--max), 100%);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+p.ck-eye {
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ck-accent);
+}
+
+h1.ck-h1 {
+  margin: 0 0 22px;
+  font-family: var(--sans);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--ck-ink);
+  text-wrap: balance;
+}
+
+p.ck-lede {
+  margin: 0 0 20px;
+  max-width: 420px;
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: var(--ck-ink-2);
+  text-wrap: pretty;
+}
+
+.ck-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 620px;
+  margin: 0 0 56px;
+}
+
+.ck-head p.ck-eye,
+.ck-head h2.ck-h2,
+.ck-head p.ck-sub { margin: 0; }
+
+h2.ck-h2 {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--ck-ink);
+  text-wrap: balance;
+}
+
+p.ck-sub {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: var(--ck-ink-2);
+  text-wrap: pretty;
+}
+
+.ck-section { padding: 0 0 128px; }
+
+a.ck-btn,
+button.ck-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  background: var(--ck-accent);
+  color: var(--ck-on-accent);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: normal;
+  letter-spacing: normal;
+  padding: 12px 22px;
+  border-radius: var(--ck-radius-pill);
+  text-decoration: none;
+}
+
+a.ck-btn:hover,
+button.ck-btn:hover { background: var(--ck-accent-hover); color: var(--ck-on-accent); text-decoration: none; }
+
+a.ck-link {
+  padding: 11px 14px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: normal;
+  color: var(--ck-ink);
+  text-decoration: none;
+}
+
+a.ck-link:hover { color: var(--ck-ink); text-decoration: none; }
+
+.ck-panel {
+  background: #fff;
+  border: 1px solid var(--ck-line);
+  border-radius: var(--ck-radius-panel);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ck-panel--dark {
+  background: var(--ck-code);
+  border: 0;
+}
+
+pre.ck-code {
+  margin: 0;
+  padding: 16px 18px 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ck-code-text);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: normal;
+  white-space: pre-wrap;
+  word-break: break-all;
+  flex: 1;
+}
+
+button.ck-chip {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: normal;
+  padding: 4px 9px;
+  border-radius: var(--ck-radius-chip);
+  color: var(--ck-muted);
+  background: transparent;
+}
+
+.ck-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 860px) {
+  h1.ck-h1 { font-size: 40px; }
+  .ck-split { grid-template-columns: minmax(0, 1fr); }
+}
