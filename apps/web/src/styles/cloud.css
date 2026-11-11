@@ -447,7 +447,13 @@
   .cloud-panes { grid-template-columns: minmax(0, 1fr); height: auto; }
   .cloud-codepane { border-right: 0; border-bottom: 1px solid #2a2b2f; min-height: 220px; }
   .cloud-copy h1, .cloud-head h2 { font-size: 36px; }
+  .cloud-copy .eyebrow { margin-bottom: 24px; }
+  .cloud-copy h1 { line-height: 1.1; }
+  .cloud-page .cloud-lead { margin: 32px 0 0; }
+  .cloud-page .cloud-help { margin: 24px 0 0; }
+  .cloud-cta { margin-top: 32px; gap: 16px 12px; }
+  .cloud-page .cloud-fine { margin-top: 32px; }
   .cloud-sticky { position: static; }
-  .cloud-hero { gap: 32px; padding: 64px 0 72px; margin-bottom: 72px; }
+  .cloud-hero { gap: 48px; padding: 64px 0 72px; margin-bottom: 72px; }
   .cloud-section { padding-bottom: 88px; }
 }
