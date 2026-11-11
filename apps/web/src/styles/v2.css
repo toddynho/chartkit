@@ -957,51 +957,6 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
 .g-body header span { font-family: var(--mono); font-size: 10px; color: var(--muted); }
 .ck .g-body p { margin: 6px 0 0; color: var(--ink-2); font-size: 13px; line-height: 1.45; }
 
-.compare-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 48px;
-  align-items: start;
-  padding: 64px 0 40px;
-}
-.compare-hero a.ck-btn { display: inline-flex; align-items: center; }
-.ck p.crumb { margin: 0 0 12px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.crumb a { color: var(--muted); text-decoration: none; }
-.facts {
-  padding: 6px 16px;
-  font-size: 13px;
-}
-.ck .facts code {
-  font-family: var(--mono);
-  font-size: 0.86em;
-  background: #ebebed;
-  border-radius: 6px;
-  padding: 0.08em 0.35em;
-}
-.facts div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #f0f0ee; }
-.facts div:first-child { border-top: 0; }
-.facts div span:first-child { color: var(--ink-2); }
-.facts div span:last-child { text-align: right; }
-.facts .win { color: var(--accent); font-weight: 600; }
-.facts figcaption { padding: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
-.tally-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.tally {
-  text-align: left;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 18px 20px;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-.tally strong { display: block; font-family: var(--mono); font-size: 34px; font-weight: 500; letter-spacing: -0.03em; }
-.tally span { font-size: 13px; color: var(--ink-2); }
-.tally.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
-.tally.is-on span { color: rgba(255, 255, 255, 0.75); }
-.mix { display: flex; height: 10px; border-radius: 999px; overflow: hidden; margin: 14px 0 8px; }
-.mix i { display: block; height: 100%; }
-.mix-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; color: var(--ink-2); margin-bottom: 28px; }
 .compare-table-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: auto; }
 .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .compare-table th {
@@ -1031,47 +986,6 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   letter-spacing: 0;
   text-transform: none;
 }
-.clip {
-  font-family: var(--mono);
-  font-size: 12px;
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-}
-.rank {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-.rank-none { background: #fbeaea; color: #b42318; }
-.rank-native { background: #e6f4ea; color: #137333; }
-.rank-manual { background: #e8f0fd; color: #0a63e6; }
-.rank-partial { background: #fff4e0; color: #9a5b00; }
-.rank-plugin { background: #f1f1ee; color: #55575c; }
-.rank-unknown { background: #f3f3f1; color: #8b8d93; }
-.table-more {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  border-top: 1px solid #f0f0ee;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-.table-more button {
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.ck p.compare-foot { margin: 14px 0 0; color: var(--muted); font-size: 13px; max-width: 70ch; }
-.agent-block { padding-bottom: 64px; }
 .scoreboard { min-width: 760px; }
 .scoreboard th.num,
 .scoreboard td.num { text-align: right; }
@@ -1552,7 +1466,7 @@ html[data-stack="element"] .gs .stack-chip[data-stack-chip="element"] {
 
 @media (max-width: 860px) {
   .carousel-stage { height: 760px; }
-  .carousel-slide, .split, .compare-hero, .cta-band, .tally-grid { grid-template-columns: 1fr; }
+  .carousel-slide, .split, .cta-band { grid-template-columns: 1fr; }
   .carousel-slide { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
   .show-tile, .show-tile--short { height: auto; min-height: 380px; }
   .give-row { grid-template-columns: 1fr; }

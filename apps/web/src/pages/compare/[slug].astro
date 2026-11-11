@@ -1,10 +1,10 @@
 ---
-import "../../styles/v2.css";
 import "../../styles/ck.css";
+import "../../styles/compare.css";
+import { validate } from "@chartkitdev/core/validate";
+import { samples } from "@chartkitdev/convert";
 import Base from "../../layouts/Base.astro";
-import LibraryLink from "../../components/LibraryLink.astro";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
-import { chartkitLineBytes, kb, rivalLineBytes } from "../../lib/line-gzip";
 
 export function getStaticPaths() {
   return loadCompareIndex().rivals.map(({ library }) => ({ params: { slug: library.id } }));
@@ -12,168 +12,260 @@ export function getStaticPaths() {
 
 const page = loadCompare(Astro.params.slug ?? "");
 const library = page.library;
-const description = `ChartKit vs ${library.name}. ${page.counts.loss} where ${library.name} ranks higher, ${page.counts.win} where ChartKit ranks higher, ${page.counts.tie} the same, ${page.counts.unknown} unknown.`;
-const ckBytes = chartkitLineBytes();
-const theirBytes = rivalLineBytes(library.id);
-const convert =
-  library.id === "chartjs" || library.id === "recharts" || library.id === "echarts"
-    ? `/convert?source=${library.id}`
-    : "/convert";
+const count = loadCompareIndex().rivals.length;
+const converters = new Set(["chartjs", "recharts", "echarts"]);
+const hasConverter = converters.has(library.id);
+const sample = samples.find((item) => item.id === library.id);
 
-const buckets = [
-  { id: "loss", n: page.counts.loss, label: `${library.name} ahead`, rows: page.loss },
-  { id: "win", n: page.counts.win, label: "ChartKit ahead", rows: page.win },
-  { id: "tie", n: page.counts.tie, label: "Same", rows: page.tie },
-  { id: "unk", n: page.counts.unknown, label: "Unknown", rows: page.unknown },
+const groups = [
+  { id: "win", label: "ChartKit ahead", rows: page.win, note: "ChartKit scores higher." },
+  { id: "tie", label: "Same", rows: page.tie, note: "Both score the same." },
+  { id: "loss", label: `${library.name} ahead`, rows: page.loss, note: "The other library scores higher. Shown in grey, not featured." },
+  { id: "unk", label: "Unknown", rows: page.unknown, note: "Unknown is not a win." },
 ];
-const total = buckets.reduce((sum, bucket) => sum + bucket.n, 0) || 1;
-const colors = ["#17181a", "#0a63e6", "#cfcfcb", "#e6e6e2"];
+const total = page.counts.win + page.counts.tie + page.counts.loss + page.counts.unknown;
 
-function rankClass(rank: string): string {
-  const known = ["none", "native", "manual", "partial", "plugin", "unknown"];
-  return known.includes(rank) ? rank : "unknown";
+function rank(value: string): string {
+  const known = ["native", "partial", "plugin", "manual", "none", "unknown", "warns"];
+  return known.includes(value) ? value : "unknown";
 }
+
+const lineBytes = 32110;
+const theirBytes = library.bundleGzip?.minimalLine ?? null;
+const hoverPainted: Record<string, number> = {
+  uplot: 16.2,
+  chartjs: 20.3,
+  plot: 28.3,
+  recharts: 28.9,
+  echarts: 2881.4,
+};
+const theirHover = hoverPainted[library.id];
+const ssrNote =
+  library.id === "recharts"
+    ? "Recharts 3 SSR returns no SVG except sunburst."
+    : library.id === "chartjs" || library.id === "uplot"
+      ? `${library.name} has no Node SVG path in that run.`
+      : null;
+
+const nine = {
+  version: "1",
+  type: "bar",
+  data: [
+    { region: "North", sales: 40 },
+    { region: "South", sales: 55 },
+    { region: "East", sales: 32 },
+    { region: "West", sales: 48 },
+  ],
+  encoding: { x: "region", y: "sales" },
+  a11y: { alt: "South has the highest sales across all regions." },
+};
+const nineChecked = validate(nine);
+if (nineChecked.errors.length) throw new Error(`nine-line spec failed validate: ${nineChecked.errors.map((error) => error.code).join(", ")}`);
+const nineText = `{
+  "version": "1", "type": "bar",
+  "data": [
+    { "region": "North", "sales": 40 }, { "region": "South", "sales": 55 },
+    { "region": "East", "sales": 32 }, { "region": "West", "sales": 48 }
+  ],
+  "encoding": { "x": "region", "y": "sales" },
+  "a11y": { "alt": "South has the highest sales across all regions." }
+}`;
+if (nineText.split("\n").length !== 9) throw new Error("playground spec is not 9 lines");
+
+const description = `ChartKit vs ${library.name}. ${page.counts.win} ahead, ${page.counts.tie} the same, ${page.counts.loss} behind, ${page.counts.unknown} unknown.`;
 ---
 
 <Base title={`ChartKit vs ${library.name}`} description={description} tone="light">
-  <div class="ck ck-wrap" data-compare data-active="loss">
-    <section class="compare-hero">
-      <div>
-        <p class="crumb"><a href="/compare">Compare</a> / {library.name}</p>
-        <h1 class="ck-h1">ChartKit vs <LibraryLink id={library.id}>{library.name}</LibraryLink></h1>
+  <div class="ck ck-wrap" data-pair data-source={library.id} data-sample={sample?.source ?? ""}>
+    <section class="cmp-hero">
+      <div class="cmp-copy">
+        <p class="cmp-crumb"><a href="/compare">Compare</a> / {library.name}</p>
+        <h1 class="ck-h1">ChartKit vs {library.name}</h1>
         <p class="ck-lede">
-          Feature-by-feature against <LibraryLink id={library.id}>{library.name}</LibraryLink> {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
+          Feature-by-feature against {library.name} {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
         </p>
-        <div class="v2-actions">
-          <a class="ck-btn" href={convert}>Convert from {library.name}</a>
+        <div class="cmp-cta">
+          {
+            hasConverter ? (
+              <a class="ck-btn" href="#convert">Convert from {library.name}</a>
+            ) : (
+              <a class="ck-btn" href={`/playground#${encodeURIComponent(JSON.stringify(nine))}`}>Open in Playground</a>
+            )
+          }
           <a class="ck-link" href="/benchmarks">Full timings →</a>
         </div>
+        <p class="cmp-fine">
+          ChartKit rechecked {page.chartkitRechecked} on {page.chartkitCommit.slice(0, 8)}. Losses stay in the table. They are not the default tab.
+        </p>
       </div>
-      <figure class="ck-panel facts">
-        <div><span>Package</span><span><code>{library.package}</code></span></div>
-        <div><span>Licence</span><span>{library.license}</span></div>
-        <div>
-          <span>Line chart, gzip</span>
-          <span>{theirBytes == null ? "—" : kb(theirBytes)}</span>
+      <div class="ck-panel cmp-card cmp-hero__card">
+        <div class="ck-bar ck-bar--light">
+          <span>chartkit vs {library.id} · {total} rows</span>
+          <span>{library.name} {library.version} · {library.license}</span>
         </div>
-        <div>
-          <span>ChartKit line, gzip</span>
-          <span class="win">{kb(ckBytes)}</span>
+        <div class="cmp-cells">
+          <button type="button" class="cmp-cell is-on" data-jump="win"><span class="cmp-cell__k">Ahead</span><span class="cmp-cell__v is-ahead">{page.counts.win}</span></button>
+          <button type="button" class="cmp-cell" data-jump="tie"><span class="cmp-cell__k">Same</span><span class="cmp-cell__v">{page.counts.tie}</span></button>
+          <button type="button" class="cmp-cell" data-jump="loss"><span class="cmp-cell__k">Behind</span><span class="cmp-cell__v is-behind">{page.counts.loss}</span></button>
+          <button type="button" class="cmp-cell" data-jump="unk"><span class="cmp-cell__k">Unknown</span><span class="cmp-cell__v is-unknown">{page.counts.unknown}</span></button>
         </div>
-        <div><span>Escape hatch</span><span>{library.escapeHatch}</span></div>
-        <figcaption>
-          {library.name} cells are type or schema checks, not render tests. ChartKit rechecked {page.chartkitRechecked} on <code>{page.chartkitCommit}</code>.
-        </figcaption>
-      </figure>
+        <div class="cmp-mix">
+          <div class="ck-mix" aria-hidden="true">
+            <i class="is-ahead" style={`width:${(page.counts.win / total) * 100}%`}></i>
+            <i class="is-same" style={`width:${(page.counts.tie / total) * 100}%`}></i>
+            <i class="is-behind" style={`width:${(page.counts.loss / total) * 100}%`}></i>
+            <i class="is-unknown" style={`width:${(page.counts.unknown / total) * 100}%`}></i>
+          </div>
+        </div>
+        <div class="ck-foot">
+          <span>Line chart · gzip <strong>{(lineBytes / 1000).toFixed(1)} KB</strong>{theirBytes == null ? "" : ` vs ${(theirBytes / 1000).toFixed(1)} KB`}</span>
+          <span>Escape hatch {library.escapeHatch}</span>
+        </div>
+      </div>
     </section>
 
-    <div class="tally-grid" role="tablist" aria-label="Score">
-      {
-        buckets.map((bucket, index) => (
-          <button type="button" class:list={["tally", index === 0 && "is-on"]} data-bucket={bucket.id} role="tab" aria-selected={index === 0 ? "true" : "false"}>
-            <strong>{bucket.n}</strong>
-            <span>{bucket.label}</span>
-          </button>
-        ))
-      }
-    </div>
-    <div class="mix" aria-hidden="true">
-      {buckets.map((bucket, index) => <i style={`width:${(bucket.n / total) * 100}%;background:${colors[index]}`} />)}
-    </div>
-    <div class="mix-legend">
-      {buckets.map((bucket, index) => <span><i class="bench-dot" style={`position:static;display:inline-block;width:8px;height:8px;background:${colors[index]};transform:none;margin-right:6px`}></i>{bucket.label}</span>)}
-    </div>
-
-    <section class="ck-section">
-    <div class="ck-head">
-      <h2 class="ck-h2" data-table-title>{library.name} ahead ({page.counts.loss})</h2>
-      <p class="ck-sub">A warns badge is a none cell that validate() warns about, so it ranks as none.</p>
-    </div>
-    <div class="compare-table-wrap">
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th>ChartKit</th>
-            <th><LibraryLink id={library.id}>{library.name}</LibraryLink></th>
-            <th>Their option</th>
-            <th>Check</th>
-            <th>Source</th>
-          </tr>
-        </thead>
-        <tbody>
+    <section class="ck-section" id="rows">
+      <div class="ck-head">
+        <p class="ck-eye">Rows</p>
+        <h2 class="ck-h2">Every scored feature, both answers.</h2>
+        <p class="ck-sub">ChartKit ahead is the default. Behind is one click away, in grey.</p>
+      </div>
+      <div class="ck-panel">
+        <div class="ck-tabs cmp-tabs">
           {
-            buckets.flatMap((bucket) =>
-              bucket.rows.map((row, index) => (
-                <tr data-row data-bucket={bucket.id} hidden={bucket.id !== "loss" || index >= 10}>
-                  <th scope="row"><a href={`/features/${row.id}`}>{row.label}</a></th>
-                  <td><span class={`rank rank-${rankClass(row.ours)}`}>{row.ours}</span></td>
-                  <td><span class={`rank rank-${rankClass(row.theirs)}`}>{row.theirs}</span></td>
-                  <td><span class="clip" title={row.option}>{row.option}</span></td>
-                  <td>{row.verified} · {row.strength}</td>
-                  <td><span class="clip" title={row.source}>{row.source}</span></td>
-                </tr>
+            groups.map((group) => (
+              <button type="button" class:list={["ck-tab", group.id === "win" && "is-on"]} data-bucket={group.id} role="tab">
+                {group.label} <span class="ck-badge">{group.rows.length}</span>
+              </button>
+            ))
+          }
+          <input class="cmp-filter" type="search" placeholder="Filter features…" aria-label="Filter features" data-filter />
+        </div>
+        <div class="cmp-table">
+          <div class="cmp-grid is-head">
+            <span>Feature</span><span>ChartKit</span><span>{library.name}</span><span>Their option</span><span>Check</span><span>Source</span>
+          </div>
+          {
+            groups.flatMap((group) =>
+              group.rows.map((row) => (
+                <div class="cmp-grid" data-row data-bucket={group.id} data-label={row.label.toLowerCase()} hidden={group.id !== "win"}>
+                  <a class="cmp-feat" href={`/features/${row.id}`}>{row.label}</a>
+                  <span><span class={`ck-rank ck-rank--${rank(row.ours)}`}>{row.ours}</span></span>
+                  <span><span class={`ck-rank ck-rank--${rank(row.theirs)}`}>{row.theirs}</span></span>
+                  <span class="cmp-opt" title={row.option}>{row.option}</span>
+                  <span class:list={["cmp-check", row.strength === "strong" && "is-strong", row.strength === "weak" && "is-weak"]}>{row.verified} · {row.strength}</span>
+                  <span class="cmp-src" title={row.source}>{row.source}</span>
+                </div>
               )),
             )
           }
-        </tbody>
-      </table>
-      <div class="table-more">
-        <span data-showing>Showing 10 of {page.counts.loss}</span>
-        <button type="button" data-expand>Show all {page.counts.loss} →</button>
+          <p class="cmp-empty" data-empty hidden>No features match.</p>
+        </div>
+        <div class="ck-foot">
+          <span data-showing>Showing {page.counts.win} of {total} · {groups[0]?.note}</span>
+          <span>native › partial › plugin › manual › none</span>
+        </div>
       </div>
-    </div>
-    <p class="compare-foot">
-      {page.perf} <a href="/benchmarks">Full timings</a>. {page.size}
-    </p>
     </section>
-  </div>
-</Base>
 
-<script>
-  const root = document.querySelector<HTMLElement>("[data-compare]");
-  if (root) {
-    const rows = [...root.querySelectorAll<HTMLElement>("[data-row]")];
-    const buttons = [...root.querySelectorAll<HTMLButtonElement>("button[data-bucket]")];
-    const title = root.querySelector<HTMLElement>("[data-table-title]");
-    const showing = root.querySelector<HTMLElement>("[data-showing]");
-    const expand = root.querySelector<HTMLButtonElement>("[data-expand]");
-    let active = "loss";
-    let open = false;
+    <section class="ck-section">
+      <div class="ck-head">
+        <p class="ck-eye">Measured</p>
+        <h2 class="ck-h2">Beyond the feature count.</h2>
+        <p class="ck-sub">Only figures this site already publishes. A missing panel means we do not have that number for {library.name}.</p>
+      </div>
+      <div class="cmp-metrics">
+        {
+          theirBytes != null ? (
+            <article class="ck-panel">
+              <div class="ck-bar ck-bar--light"><span>line gzip</span><span>bench bundle</span></div>
+              <div class="cmp-metric__pair">
+                <div class="is-us"><b>{(lineBytes / 1000).toFixed(1)}</b><span>KB · ChartKit</span></div>
+                <div><b>{(theirBytes / 1000).toFixed(1)}</b><span>KB · {library.name}</span></div>
+              </div>
+              <p>ChartKit is {lineBytes.toLocaleString("en-US")} bytes, measured 2026-10-29. {library.name} minimal line is {theirBytes.toLocaleString("en-US")} bytes{library.bundleGzip?.measured ? `, ${library.bundleGzip.measured}` : ""}.</p>
+            </article>
+          ) : null
+        }
+        {
+          theirHover != null ? (
+            <article class="ck-panel">
+              <div class="ck-bar ck-bar--light"><span>steady hover · 100k</span><span>round 13</span></div>
+              <div class="cmp-metric__pair">
+                <div class="is-us"><b>16.5</b><span>ms · ChartKit</span></div>
+                <div><b>{theirHover}</b><span>ms · {library.name}</span></div>
+              </div>
+              <p>Painted median. Round 13, 2026-10-18, phase 2 d8dcc5a.</p>
+            </article>
+          ) : null
+        }
+        {
+          ssrNote ? (
+            <article class="ck-panel">
+              <div class="ck-bar ck-bar--light"><span>SSR · 100k line</span><span>phase 4</span></div>
+              <div class="cmp-metric__pair">
+                <div class="is-us"><b>2.63</b><span>ms · ChartKit</span></div>
+                <div><b>—</b><span>{library.name}</span></div>
+              </div>
+              <p>{ssrNote} ChartKit median is 2.63 ms. The mean on the same run is 2.7 ms.</p>
+            </article>
+          ) : null
+        }
+      </div>
+      <p class="cmp-note">{page.perf} {page.size}</p>
+    </section>
 
-    const labelFor = (id: string) => buttons.find((button) => button.dataset.bucket === id)?.querySelector("span")?.textContent ?? id;
-
-    function paint(): void {
-      const matching = rows.filter((row) => row.dataset.bucket === active);
-      rows.forEach((row) => {
-        const mine = row.dataset.bucket === active;
-        const index = matching.indexOf(row);
-        row.hidden = !mine || (!open && index >= 10);
-      });
-      const shown = Math.min(matching.length, open ? matching.length : 10);
-      if (title) title.textContent = `${labelFor(active)} (${matching.length})`;
-      if (showing) showing.textContent = matching.length > 10 && !open ? `Showing ${shown} of ${matching.length}` : `Showing ${matching.length}`;
-      if (expand) {
-        expand.hidden = matching.length <= 10;
-        expand.textContent = open ? "Show less" : `Show all ${matching.length} →`;
-      }
+    {
+      hasConverter && sample ? (
+        <section class="ck-section cmp-end" id="convert">
+          <div class="ck-head">
+            <p class="ck-eye">Convert</p>
+            <h2 class="ck-h2">Bring the {library.name} chart you already have.</h2>
+            <p class="ck-sub">The paste stays in the browser. Copy the spec, or open the full result on /convert.</p>
+          </div>
+          <div class="ck-split ck-split--start" data-mini>
+            <div class="ck-panel ck-panel--dark cmp-paste">
+              <div class="ck-bar"><span>paste · {library.id}</span><span data-lines>{sample.source.split("\n").length} lines</span></div>
+              <textarea spellcheck="false" aria-label={`${library.name} sample`} data-paste>{sample.source}</textarea>
+              <div class="ck-foot"><span>Nothing is uploaded.</span><button type="button" class="cmp-load" data-load>Load sample</button></div>
+            </div>
+            <div class="ck-panel">
+              <div class="ck-bar ck-bar--light">
+                <span data-state style="color:#1a7f4b">● valid</span>
+                <span data-warns>0 warnings</span>
+              </div>
+              <pre class="cmp-spec" data-spec></pre>
+              <ul class="cmp-warns" data-warn-list></ul>
+              <div class="ck-foot">
+                <button type="button" class="ck-btn" data-copy>Copy spec</button>
+                <a class="ck-link" data-open href={`/convert?source=${library.id}`}>Open full result →</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section class="ck-section cmp-end">
+          <div class="cmp-close">
+            <div>
+              <p class="ck-eye">Switch</p>
+              <h2 class="ck-h2">No {library.name} converter yet. The spec is nine lines.</h2>
+              <p class="ck-sub">There is no paste converter for {library.name}. This bar spec passes validate(). Open it in the playground, or pick a library that does convert.</p>
+              <div class="cmp-cta">
+                <a class="ck-btn" href={`/playground#${encodeURIComponent(JSON.stringify(nine))}`}>Open in Playground</a>
+                <a class="ck-link" href="/compare">All {count} libraries →</a>
+              </div>
+            </div>
+            <div class="ck-panel">
+              <div class="ck-bar ck-bar--light"><span style="color:#1a7f4b">● spec.json · 9 lines</span><span>validate() ok</span></div>
+              <pre class="cmp-spec">{nineText}</pre>
+            </div>
+          </div>
+        </section>
+      )
     }
-
-    buttons.forEach((button) => {
-      button.addEventListener("click", () => {
-        active = button.dataset.bucket ?? "loss";
-        open = false;
-        buttons.forEach((item) => {
-          const on = item === button;
-          item.classList.toggle("is-on", on);
-          item.setAttribute("aria-selected", on ? "true" : "false");
-        });
-        paint();
-      });
-    });
-    expand?.addEventListener("click", () => {
-      open = !open;
-      paint();
-    });
-  }
-</script>
+  </div>
+  <script>
+    import { mountComparePair } from "../../scripts/compare-pair";
+    mountComparePair();
+  </script>
+</Base>

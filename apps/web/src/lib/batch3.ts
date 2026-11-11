@@ -31,6 +31,7 @@ export interface CompareLibrary {
   docs: string;
   escapeHatch: string;
   license: string;
+  bundleGzip?: { minimalLine?: number; measured?: string };
 }
 
 export interface CompareIndex {
