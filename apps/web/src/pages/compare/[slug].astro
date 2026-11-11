@@ -1,5 +1,6 @@
 ---
 import "../../styles/v2.css";
+import "../../styles/ck.css";
 import Base from "../../layouts/Base.astro";
 import LibraryLink from "../../components/LibraryLink.astro";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
@@ -35,20 +36,20 @@ function rankClass(rank: string): string {
 ---
 
 <Base title={`ChartKit vs ${library.name}`} description={description} tone="light">
-  <div class="v2" data-compare data-active="loss">
+  <div class="ck ck-wrap" data-compare data-active="loss">
     <section class="compare-hero">
       <div>
         <p class="crumb"><a href="/compare">Compare</a> / {library.name}</p>
-        <h1 class="v2-h1 v2-h1--50">ChartKit vs <LibraryLink id={library.id}>{library.name}</LibraryLink></h1>
-        <p class="v2-lead v2-lead--left">
+        <h1 class="ck-h1">ChartKit vs <LibraryLink id={library.id}>{library.name}</LibraryLink></h1>
+        <p class="ck-lede">
           Feature-by-feature against <LibraryLink id={library.id}>{library.name}</LibraryLink> {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
         </p>
         <div class="v2-actions">
-          <a class="btn-lg" href={convert}>Convert from {library.name}</a>
-          <a class="btn-text" href="/benchmarks">Full timings →</a>
+          <a class="ck-btn" href={convert}>Convert from {library.name}</a>
+          <a class="ck-link" href="/benchmarks">Full timings →</a>
         </div>
       </div>
-      <figure class="facts">
+      <figure class="ck-panel facts">
         <div><span>Package</span><span><code>{library.package}</code></span></div>
         <div><span>Licence</span><span>{library.license}</span></div>
         <div>
@@ -83,9 +84,10 @@ function rankClass(rank: string): string {
       {buckets.map((bucket, index) => <span><i class="bench-dot" style={`position:static;display:inline-block;width:8px;height:8px;background:${colors[index]};transform:none;margin-right:6px`}></i>{bucket.label}</span>)}
     </div>
 
-    <div class="table-head">
-      <h2 data-table-title>{library.name} ahead ({page.counts.loss})</h2>
-      <p>A warns badge is a none cell that validate() warns about, so it ranks as none.</p>
+    <section class="ck-section">
+    <div class="ck-head">
+      <h2 class="ck-h2" data-table-title>{library.name} ahead ({page.counts.loss})</h2>
+      <p class="ck-sub">A warns badge is a none cell that validate() warns about, so it ranks as none.</p>
     </div>
     <div class="compare-table-wrap">
       <table class="compare-table">
@@ -124,6 +126,7 @@ function rankClass(rank: string): string {
     <p class="compare-foot">
       {page.perf} <a href="/benchmarks">Full timings</a>. {page.size}
     </p>
+    </section>
   </div>
 </Base>
 
