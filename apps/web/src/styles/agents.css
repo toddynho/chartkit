@@ -1,11 +1,5 @@
 /* /agents v3. Scoped so the rest of the marketing pages stay put. */
 
-.agents-page h1,
-.agents-page h2,
-.agents-page h3,
-.agents-page p { margin: 0; }
-.agents-page button { font: inherit; }
-
 .agents-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
@@ -22,24 +16,7 @@
   min-width: 0;
 }
 
-.agents-copy .eyebrow { margin-bottom: 16px; }
-
-.agents-copy h1 {
-  font-size: 50px;
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-}
-
-.agents-lead {
-  margin-top: 18px;
-  max-width: 420px;
-  font-size: 18px;
-  line-height: 1.45;
-  color: #55575c;
-  text-wrap: pretty;
-}
+.agents-copy p.ck-lede { margin-bottom: 0; }
 
 .agents-prompt {
   margin-top: 24px;
@@ -87,23 +64,7 @@
   margin-top: 18px;
 }
 
-.agents-primary {
-  appearance: none;
-  border: 0;
-  cursor: pointer;
-  background: #0a63e6;
-  color: #fff;
-  font-weight: 600;
-  font-size: 15px;
-  padding: 12px 22px;
-  border-radius: 999px;
-}
-
-.agents-primary:hover { background: #0957cc; color: #fff; }
-
-.agents-page .btn-text { padding: 11px 14px; }
-
-.agents-fine {
+p.agents-fine {
   margin-top: 16px;
   font-size: 13px;
   color: #8b8d93;
@@ -299,17 +260,15 @@
 .agents-calls b.is-on { background: #17181a; color: #fff; }
 .agents-calls span { color: #c9c9c5; font-size: 9px; }
 
-.agents-section { padding: 0 0 80px; }
 .agents-intro {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
+  gap: 14px;
   margin-bottom: 24px;
 }
-.agents-intro h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
-.agents-intro p { color: #55575c; font-size: 16px; line-height: 1.45; max-width: 520px; text-wrap: pretty; }
+.agents-intro p { max-width: 520px; }
 
 .agents-card {
   background: #fff;
@@ -686,8 +645,11 @@
   cursor: pointer;
   background: #fff;
   color: #17181a;
+  font-family: var(--sans);
   font-weight: 600;
   font-size: 14px;
+  line-height: normal;
+  letter-spacing: normal;
   padding: 11px 20px;
   border-radius: 999px;
 }
@@ -710,14 +672,13 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 999px) {
+@media (max-width: 860px) {
   .agents-hero,
   .agents-loop,
   .agents-close { grid-template-columns: minmax(0, 1fr); }
   .agents-stats { grid-template-columns: minmax(0, 1fr); }
   .agents-stat + .agents-stat { border-left: 0; border-top: 1px solid #eeeeea; }
   .agents-kit__row { grid-template-columns: minmax(0, 1fr); }
-  .agents-copy h1 { font-size: 40px; }
 }
 
 @media (max-width: 720px) {

@@ -1,5 +1,6 @@
 ---
 import "../styles/v2.css";
+import "../styles/ck.css";
 import "../styles/agents.css";
 import { validate, repair } from "@chartkitdev/core/validate";
 import Base from "../layouts/Base.astro";
@@ -177,14 +178,14 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
 ---
 
 <Base tone="light" title="Agents" description={description}>
-  <div class="v2 agents-page">
+  <div class="ck ck-wrap agents-page">
     <p class="sr" data-agent-prompt>{agentsPrompt}</p>
 
     <section class="agents-hero" id="wrote">
       <div class="agents-copy">
-        <p class="eyebrow eyebrow--blue">Agents</p>
-        <h1>If your agent draws charts, point it here.</h1>
-        <p class="agents-lead">
+        <p class="ck-eye">Agents</p>
+        <h1 class="ck-h1">If your agent draws charts, point it here.</h1>
+        <p class="ck-lede">
           Set ChartKit as the default in your harness. The model writes a spec. Validate, repair and render need no model at all.
         </p>
         <div class="agents-prompt">
@@ -195,10 +196,10 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
           <div class="agents-prompt__body">{agentsPrompt}</div>
         </div>
         <div class="agents-cta">
-          <button type="button" class="agents-primary" data-copy-prompt data-idle="Copy the prompt" data-done="Copied the prompt ✓">
+          <button type="button" class="ck-btn" data-copy-prompt data-idle="Copy the prompt" data-done="Copied the prompt ✓">
             Copy the prompt
           </button>
-          <a class="btn-text" href="#default">llms.txt, schema, MCP ↓</a>
+          <a class="ck-link" href="#default">llms.txt, schema, MCP ↓</a>
         </div>
         <p class="agents-fine">Works in a system prompt, CLAUDE.md, .cursorrules or an MCP config.</p>
       </div>
@@ -288,10 +289,10 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
       </div>
     </section>
 
-    <section class="agents-section" id="tokens" aria-labelledby="tokens-title">
+    <section class="ck-section agents-section" id="tokens" aria-labelledby="tokens-title">
       <div class="agents-intro">
-        <h2 id="tokens-title">Output tokens per working chart</h2>
-        <p>Median across {spread.tasks} tasks, {spread.modelWord} models, docs in context. Each dot is one model.</p>
+        <h2 class="ck-h2" id="tokens-title">Output tokens per working chart</h2>
+        <p class="ck-sub">Median across {spread.tasks} tasks, {spread.modelWord} models, docs in context. Each dot is one model.</p>
       </div>
       <div class="agents-card">
         <div class="agents-strip">
@@ -380,10 +381,10 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
       </div>
     </section>
 
-    <section class="agents-section" id="loop" aria-labelledby="loop-title">
+    <section class="ck-section agents-section" id="loop" aria-labelledby="loop-title">
       <div class="agents-intro">
-        <h2 id="loop-title">The loop</h2>
-        <p>Four calls. The model is only in the first one.</p>
+        <h2 class="ck-h2" id="loop-title">The loop</h2>
+        <p class="ck-sub">Four calls. The model is only in the first one.</p>
       </div>
       <div class="agents-loop">
         <div class="agents-steps">
@@ -416,10 +417,10 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
       </div>
     </section>
 
-    <section class="agents-section" id="default" aria-labelledby="default-title">
+    <section class="ck-section agents-section" id="default" aria-labelledby="default-title">
       <div class="agents-intro">
-        <h2 id="default-title">Make ChartKit the default</h2>
-        <p>Everything the harness needs, each one copyable.</p>
+        <h2 class="ck-h2" id="default-title">Make ChartKit the default</h2>
+        <p class="ck-sub">Everything the harness needs, each one copyable.</p>
       </div>
       <div class="agents-kit">
         {kit.map((row) => (
