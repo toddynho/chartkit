@@ -1,9 +1,10 @@
 ---
 import "../styles/v2.css";
+import "../styles/ck.css";
 import Base from "../layouts/Base.astro";
 import { chartByType } from "../data/chart-types";
 import { chartPage, galleryChartCount, sidebarChartGroups } from "../data/docs-catalog";
-import { heroTypes } from "../data/hero-catalog";
+import { HERO_TYPE_COUNT, heroTypes } from "../data/hero-catalog";
 import { docsSpecForType } from "../data/live-specs";
 import { galleryThumb } from "../data/marketing-charts";
 import { loadMaps } from "../lib/batch3";
@@ -44,19 +45,21 @@ const groups = sidebarChartGroups.map((group) => ({
 }));
 
 const count = groups.reduce((total, group) => total + group.charts.length, 0);
-if (count !== galleryChartCount) {
-  throw new Error(`Gallery shows ${count} cards; the chart registry has ${galleryChartCount}.`);
+if (count !== galleryChartCount || count !== HERO_TYPE_COUNT) {
+  throw new Error(
+    `Gallery shows ${count} cards; the chart registry has ${galleryChartCount}; the hero catalog has ${HERO_TYPE_COUNT}.`,
+  );
 }
 const description = `${count} ChartKit charts. Open a card for the docs.`;
 const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) => ({ id: group.id, label: group.family, n: group.charts.length }))];
 ---
 
 <Base tone="light" title="Gallery" description={description}>
-  <div class="v2" data-gallery>
+  <div class="ck ck-wrap" data-gallery>
     <section class="gallery-hero">
-      <p class="eyebrow">Gallery · {count} charts</p>
-      <h1 class="v2-h1 v2-h1--50">Every chart. One spec shape.</h1>
-      <p class="v2-lead">
+      <p class="ck-eye">Gallery · {count} charts</p>
+      <h1 class="ck-h1">Every chart. One spec shape.</h1>
+      <p class="ck-lede">
         One card per chart type in the registry. Open a card for the docs, or open the same spec in the playground.
       </p>
       <div class="filter-track" role="tablist" aria-label="Chart groups">
@@ -71,15 +74,15 @@ const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) =>
     </section>
     {
       groups.map((group) => (
-        <section class="gallery-block" id={group.id} data-group={group.id} aria-labelledby={`gallery-${group.id}`}>
+        <section class="ck-section gallery-block" id={group.id} data-group={group.id} aria-labelledby={`gallery-${group.id}`}>
           <div class="gallery-block__head">
-            <h2 id={`gallery-${group.id}`}>{group.family}</h2>
+            <h2 class="ck-h2" id={`gallery-${group.id}`}>{group.family}</h2>
             <span>{group.charts.length}</span>
           </div>
-          {group.note ? <p class="gallery-note">{group.note}</p> : null}
+          {group.note ? <p class="gallery-note ck-sub">{group.note}</p> : null}
           <div class="g-grid">
             {group.charts.map((chart) => (
-              <article class="g-card">
+              <article class="ck-panel g-card">
                 <a class="g-card__open" href={chart.href}>
                   <div class="g-thumb" set:html={chart.svg} />
                   <div class="g-body">
