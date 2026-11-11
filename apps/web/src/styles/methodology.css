@@ -1,0 +1,41 @@
+/*
+  /methodology/agent-eval. Hero type comes from ck.css.
+  .method in v2.css still sets the reading size. These rules put back the
+  paragraph margins, code chips, and list spacing that .ck clears, and they
+  do not match the eyebrow, the title, or the lede.
+*/
+
+.method { max-width: none; }
+
+.method > p:not(.ck-eye):not(.ck-lede):not(.method-meta),
+.method section > p {
+  margin: 0 0 14px;
+}
+
+p.method-meta {
+  margin: 22px 0 28px;
+  max-width: 68ch;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.method p.ck-lede { max-width: 68ch; }
+
+.method h2.ck-h2 { margin: 48px 0 12px; }
+.caveat h2.ck-h2 { margin-top: 0; }
+
+.method code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  background: #ededeb;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.method-docs li { margin: 0 0 8px; }
+
+.caveat-list h3 { margin: 0 0 4px; }

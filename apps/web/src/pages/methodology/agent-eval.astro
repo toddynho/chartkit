@@ -1,5 +1,7 @@
 ---
 import "../../styles/v2.css";
+import "../../styles/ck.css";
+import "../../styles/methodology.css";
 import Base from "../../layouts/Base.astro";
 import { paintSpec } from "../../lib/chartkit";
 import { brandTheme } from "../../data/marketing-theme";
@@ -52,11 +54,11 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
 ---
 
 <Base tone="light" title="Agent token test" description={description}>
-  <div class="v2">
+  <div class="ck ck-wrap">
     <article class="method">
-      <p class="eyebrow eyebrow--blue">Methodology</p>
-      <h1>How the agent token test was run</h1>
-      <p class="method-lead">
+      <p class="ck-eye">Methodology</p>
+      <h1 class="ck-h1">How the agent token test was run</h1>
+      <p class="ck-lede">
         The homepage chart is this test. A model is asked for the same {TOKEN_EVAL.tasks} charts in five libraries, with a
         capped copy of that library's docs in the prompt. The number is the median output tokens until the checker accepts
         a drawing.
@@ -70,7 +72,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </p>
 
       <section class="caveat" id="caveats" aria-labelledby="caveats-title">
-        <h2 id="caveats-title">Caveats</h2>
+        <h2 class="ck-h2" id="caveats-title">Caveats</h2>
         <p class="caveat-lead">Read these before treating the chart as a ranking of libraries.</p>
         <div class="caveat-list">
           <div>
@@ -174,7 +176,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="results" aria-labelledby="results-title">
-        <h2 id="results-title">Results</h2>
+        <h2 class="ck-h2" id="results-title">Results</h2>
         <p>
           With docs. Each cell is the median output tokens for that model and library, counting only charts the checker
           accepted. Across the {spread.modelCount} models, the median of ChartKit's medians is {chartkitMedian.medianText} tokens.
@@ -245,7 +247,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="what" aria-labelledby="what-title">
-        <h2 id="what-title">What we tested, and why</h2>
+        <h2 class="ck-h2" id="what-title">What we tested, and why</h2>
         <p>
           The question was how many output tokens a model spends to get a chart the checker will accept, when the answer
           is a ChartKit spec, and when the answer is code for another library. The homepage uses that comparison. The
@@ -259,7 +261,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="models" aria-labelledby="models-title">
-        <h2 id="models-title">Models and tasks</h2>
+        <h2 class="ck-h2" id="models-title">Models and tasks</h2>
         <p>
           {finished.length} models finished. Temperature {run.temperature}. Maximum output tokens per response{" "}
           {formatTokens(run.maxOutputTokens)}. One pass through the task list per model. The registry id is the id the
@@ -295,7 +297,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="docs" aria-labelledby="docs-title">
-        <h2 id="docs-title">With docs and without</h2>
+        <h2 class="ck-h2" id="docs-title">With docs and without</h2>
         <p>
           Without docs, every library gets one short paragraph: how to produce a drawing, and where the fields go. The
           paragraphs do the same job at a similar length. ChartKit's paragraph does not add channel shapes the others
@@ -325,7 +327,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="tokens" aria-labelledby="tokens-title">
-        <h2 id="tokens-title">How the tokens were counted</h2>
+        <h2 class="ck-h2" id="tokens-title">How the tokens were counted</h2>
         <p>
           The harness does not tokenize the text itself. It stores the count on the provider's response. When the
           response has <code>output_tokens</code>, that field is used. Otherwise <code>completion_tokens</code> is used.
@@ -343,7 +345,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="correct" aria-labelledby="correct-title">
-        <h2 id="correct-title">How a chart counted as correct</h2>
+        <h2 class="ck-h2" id="correct-title">How a chart counted as correct</h2>
         <p>
           A ChartKit answer has to validate, render as the chart type the task asked for, use the expected fields, and
           carry the task's numbers. The drawing is checked too: bars sit inside the plot, a line chart has a line, a
@@ -374,7 +376,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="retries" aria-labelledby="retries-title">
-        <h2 id="retries-title">Retries</h2>
+        <h2 class="ck-h2" id="retries-title">Retries</h2>
         <p>
           ChartKit <code>repair()</code> runs locally on a failed answer. If the repaired spec passes, the model is not
           called again. That repair adds no call and no tokens.
@@ -395,7 +397,7 @@ const description = `How the agent token test was run. ChartKit ${run.chartkitVe
       </section>
 
       <section id="version" aria-labelledby="version-title">
-        <h2 id="version-title">ChartKit version and the day of the run</h2>
+        <h2 class="ck-h2" id="version-title">ChartKit version and the day of the run</h2>
         <p>
           {versionLine} {run.publishNote}{" "}
           {run.resultsPublished
