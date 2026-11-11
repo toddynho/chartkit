@@ -1,4 +1,5 @@
 ---
+import "../../styles/ck.css";
 import "../../styles/dashboard-index.css";
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
@@ -9,11 +10,11 @@ const description =
 ---
 
 <Base title="Dashboards" description={description} tone="light" footer="compact">
-  <div class="dash-index">
+  <div class="ck ck-wrap">
     <section class="dash-hero">
-      <p class="dash-hero__eye">Dashboard Inspiration</p>
-      <h1>Any look. Same spec.</h1>
-      <p class="dash-hero__lead">
+      <p class="ck-eye">Dashboard Inspiration</p>
+      <h1 class="ck-h1">Any look. Same spec.</h1>
+      <p class="ck-lede">
         Ten example dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy, just proof that the default ChartKit theme is only a starting point. Click through the examples below.
       </p>
     </section>

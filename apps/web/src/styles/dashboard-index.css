@@ -1,9 +1,3 @@
-.dash-index {
-  width: min(1160px, 100%);
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
 .dash-hero {
   padding: 64px 0 36px;
   display: flex;
@@ -12,32 +6,7 @@
   text-align: center;
 }
 
-.dash-hero p.dash-hero__eye {
-  margin: 0 0 24px;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.dash-hero h1 {
-  margin: 0 0 24px;
-  font-size: 50px;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-weight: 600;
-}
-
-.dash-hero__lead {
-  margin: 0;
-  max-width: 560px;
-  font-size: 17px;
-  line-height: 1.5;
-  color: var(--ink-2);
-  text-wrap: pretty;
-}
+.dash-hero p.ck-lede { max-width: 560px; }
 
 .dash-cards {
   padding: 0 0 96px;
@@ -115,7 +84,6 @@
   text-wrap: pretty;
 }
 
-@media (max-width: 720px) {
-  .dash-hero h1 { font-size: 40px; }
+@media (max-width: 860px) {
   .dash-cards { grid-template-columns: 1fr; }
 }
