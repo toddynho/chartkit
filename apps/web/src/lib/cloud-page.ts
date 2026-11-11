@@ -72,6 +72,18 @@ export function renderUrl(origin: string, specJson: string, format: CloudFormat)
   return `${origin}/render?spec=${encodeURIComponent(specJson)}&format=${format}`;
 }
 
+/** Place-section footers. Email and docs ask for PNG. Reports use `w`, not `width`. */
+export function placeLines(origin: string, specJson: string): Record<"email" | "docs" | "agents" | "reports", string> {
+  const png = renderUrl(origin, specJson, "png");
+  const svg = renderUrl(origin, specJson, "svg");
+  return {
+    email: `<img src="${png}&scale=2">`,
+    docs: `![signups](${png})`,
+    agents: svg,
+    reports: `fetch("${svg}&w=1200")`,
+  };
+}
+
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'\\''`)}'`;
 }

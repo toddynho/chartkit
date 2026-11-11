@@ -6,11 +6,12 @@ import {
   altOf,
   cloudPresets,
   cloudSnippets,
+  placeLines,
   renderUrl,
   tabId,
 } from "../lib/cloud-page";
 
-const COPY_MS = 1400;
+const COPY_MS = 1200;
 const DEBOUNCE_MS = 150;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -55,19 +56,16 @@ export function mountCloudPage(root: HTMLElement): void {
 
   const origin = root.dataset.origin || "https://cloud.chartkit.dev";
   const specInput = root.querySelector<HTMLTextAreaElement>("[data-spec]");
-  const statusEl = root.querySelector<HTMLElement>("[data-status]");
-  const chartEl = root.querySelector<HTMLElement>("[data-chart]");
-  const titleEl = root.querySelector<HTMLElement>("[data-title]");
   const urlNode = root.querySelector<HTMLElement>("[data-url]");
   const codeNode = root.querySelector<HTMLElement>("[data-code]");
   const langNode = root.querySelector<HTMLElement>("[data-lang]");
   const noteNode = root.querySelector<HTMLElement>("[data-note]");
   const snippetButton = root.querySelector<HTMLButtonElement>("[data-copy='snippet']");
-  if (!specInput || !statusEl || !chartEl || !titleEl || !urlNode || !codeNode || !langNode || !noteNode || !snippetButton) return;
+  const charts = [...root.querySelectorAll<HTMLElement>("[data-chart]")];
+  const titles = [...root.querySelectorAll<HTMLElement>("[data-title]")];
+  const statuses = [...root.querySelectorAll<HTMLElement>("[data-status]")];
+  if (!specInput || !urlNode || !codeNode || !langNode || !noteNode || !snippetButton || charts.length === 0 || statuses.length === 0) return;
   const input = specInput;
-  const status = statusEl;
-  const chart = chartEl;
-  const title = titleEl;
   const urlEl = urlNode;
   const codeEl = codeNode;
   const langEl = langNode;
@@ -85,7 +83,6 @@ export function mountCloudPage(root: HTMLElement): void {
   let tab: CloudTabId = "curl";
   let lastSpecJson = "";
   let lastAlt = "Chart";
-  let lastMs: number | null = null;
   let liveUrl = urlEl.textContent?.trim() || "";
   let snippet = "";
   let timer = 0;
@@ -99,14 +96,12 @@ export function mountCloudPage(root: HTMLElement): void {
   }
 
   function paintStatus(ok: boolean): void {
-    status.dataset.state = ok ? "ok" : "bad";
-    if (!ok) {
-      status.textContent = "400 Bad Request";
-      return;
-    }
     const kind = format === "png" ? "png" : "svg+xml";
-    const ms = lastMs === null ? "" : lastMs < 1 ? " · <1 ms" : ` · ${lastMs} ms`;
-    status.textContent = `200 OK · image/${kind}${ms}`;
+    const text = ok ? `200 OK · image/${kind}` : "400 Bad Request";
+    for (const status of statuses) {
+      status.dataset.state = ok ? "ok" : "bad";
+      status.textContent = text;
+    }
   }
 
   function showCopied(which: "url" | "snippet"): void {
@@ -145,8 +140,13 @@ export function mountCloudPage(root: HTMLElement): void {
     if (!current) return;
     snippet = current.code;
     codeEl.textContent = current.code;
-    langEl.textContent = current.lang;
+    langEl.textContent = `request · ${current.lang}`;
     noteEl.textContent = current.note;
+    const lines = placeLines(origin, lastSpecJson);
+    for (const el of root.querySelectorAll<HTMLElement>("[data-place]")) {
+      const id = el.dataset.place;
+      if (id === "email" || id === "docs" || id === "agents" || id === "reports") el.textContent = lines[id];
+    }
     for (const button of tabButtons) {
       const on = button.dataset.tab === current.id;
       button.classList.toggle("is-on", on);
@@ -163,9 +163,11 @@ export function mountCloudPage(root: HTMLElement): void {
   }
 
   function fail(message: string): void {
-    chart.classList.add("is-error");
-    chart.textContent = message;
-    title.hidden = true;
+    for (const chart of charts) {
+      chart.classList.add("is-error");
+      chart.textContent = message;
+    }
+    for (const title of titles) title.hidden = true;
     paintStatus(false);
     applyPresets("");
   }
@@ -180,9 +182,7 @@ export function mountCloudPage(root: HTMLElement): void {
       fail(`400 · ${message}`);
       return;
     }
-    const started = performance.now();
     const result = paintSpec(parsed);
-    const elapsed = performance.now() - started;
     if (!result.ok || !result.svg.includes("<svg")) {
       const issue = result.issues[0];
       const detail = issue ? `${issue.code} · ${issue.message}` : "Spec is not drawable";
@@ -191,12 +191,15 @@ export function mountCloudPage(root: HTMLElement): void {
     }
     const preview = paintSpec(chartPreview(parsed));
     const svg = preview.ok && preview.svg.includes("<svg") ? preview.svg : result.svg;
-    lastMs = elapsed < 1 ? 0 : Math.round(elapsed);
-    chart.classList.remove("is-error");
-    chart.innerHTML = svg;
     const heading = specTitle(parsed);
-    title.hidden = heading.length === 0;
-    title.textContent = heading;
+    for (const chart of charts) {
+      chart.classList.remove("is-error");
+      chart.innerHTML = svg;
+    }
+    for (const title of titles) {
+      title.hidden = heading.length === 0;
+      title.textContent = heading;
+    }
     publish(JSON.stringify(parsed), altOf(parsed));
     applyPresets(specType(parsed));
     paintStatus(true);
@@ -226,7 +229,7 @@ export function mountCloudPage(root: HTMLElement): void {
       format = next;
       applyFormat();
       if (lastSpecJson) publish(lastSpecJson, lastAlt);
-      paintStatus(chart.classList.contains("is-error") ? false : true);
+      paintStatus(charts.some((chart) => chart.classList.contains("is-error")) ? false : true);
     });
   }
 
