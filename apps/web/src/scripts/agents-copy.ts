@@ -50,6 +50,6 @@ export function mountAgentsPage(): void {
     const open = table.hasAttribute("hidden");
     table.toggleAttribute("hidden", !open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    toggle.textContent = open ? "Hide the numbers" : "Show all numbers";
+    toggle.textContent = open ? (toggle.dataset.open ?? "Hide numbers") : (toggle.dataset.idle ?? "Show all numbers");
   });
 }

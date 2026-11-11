@@ -8,7 +8,14 @@ import { agentWrote } from "../data/agent-wrote";
 import { agentsPrompt } from "../data/agent-prompt";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { proofFigures } from "../data/home-bench";
-import { TOKEN_EVAL, formatEvalDate, tokenScoreboard, tokenSpread } from "../data/token-eval";
+import {
+  TOKEN_EVAL,
+  TOKEN_LIBRARIES,
+  formatEvalDate,
+  formatTokens,
+  tokenScoreboard,
+  tokenSpread,
+} from "../data/token-eval";
 import { paintSpec } from "../lib/chartkit";
 import { kb } from "../lib/line-gzip";
 import { countO200k } from "../lib/o200k";
@@ -18,7 +25,10 @@ const proof = proofFigures();
 const spread = tokenSpread();
 const board = tokenScoreboard();
 const promptTokens = countO200k(agentsPrompt);
-const measured = formatEvalDate(wrote.measured);
+const runDate = formatEvalDate(wrote.measured);
+const chartkitRow = spread.rows.find((row) => row.us);
+const nextRow = spread.rows.find((row) => !row.us);
+if (!chartkitRow || !nextRow || !spread.annotation) throw new Error("agents spread is missing a row");
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -37,7 +47,15 @@ function displaySpec(code: string): { text: string; alt: string; title: string; 
     paired.push(next ? `    ${rows[i]}, ${next}` : `    ${rows[i]}`);
   }
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
-  const title = typeof spec.title === "string" ? spec.title : "";
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const y = typeof encoding.y === "string" ? encoding.y : "";
+  const x = typeof encoding.x === "string" ? encoding.x : "";
+  const title =
+    typeof spec.title === "string" && spec.title
+      ? spec.title
+      : y && x
+        ? `${y.charAt(0).toUpperCase()}${y.slice(1)} by ${x}`
+        : "Rendered chart";
   const text = `{
   "version": ${JSON.stringify(spec.version)}, "type": ${JSON.stringify(spec.type)},
   "data": [
@@ -56,6 +74,9 @@ if (!painted.ok || !painted.svg.includes("<svg")) {
 }
 const svgBytes = new TextEncoder().encode(painted.svg).length;
 const svgLabel = `svg · ${kb(svgBytes)}`;
+const callsLabel = `${wrote.chartkit.tokens.toLocaleString("en-US")} tok · ${wrote.chartkit.calls} ${wrote.chartkit.calls === 1 ? "call" : "calls"}`;
+const bothFirst = wrote.chartkit.firstTry && wrote.recharts.firstTry;
+const barMax = Math.max(wrote.chartkit.tokens, wrote.recharts.tokens);
 
 const example = {
   version: "1",
@@ -73,7 +94,6 @@ if (!examplePaint.ok || !examplePaint.svg.includes("<svg")) {
   throw new Error("Example repair did not render");
 }
 const exampleSvg = kb(new TextEncoder().encode(examplePaint.svg).length);
-
 type Patch = { op: string; path: string; value?: unknown };
 const patches = (exampleFixed.applied as Patch[]).slice(0, 4);
 
@@ -132,49 +152,68 @@ if (!result.ok) spec = repair(spec).spec;`,
   body: JSON.stringify({ spec, format: "svg" }),
 });
 const body = await res.json(); // body.svg, or base64 body.png; body.url`,
+    span: true,
   },
 ];
 
 const steps = [
   {
-    n: "01 · model",
+    n: "01",
     tag: "1 call",
     title: "The agent writes a spec",
     body: 'version is "1". data is an array of rows. a11y.alt is one factual sentence. Gauge, kpi and progress-ring put the number in metric.',
-    code: "spec.json",
-    ink: true,
+    code: "spec.json · model",
+    on: true,
   },
   {
-    n: "02 · local",
+    n: "02",
     tag: "0 calls",
     title: "validate()",
     body: "Checks the schema and the data. Every CK code comes back in one pass: CK1001 is invalid JSON, CK1004 a missing required field.",
-    code: "validate(spec)",
-    ink: false,
+    code: "validate(spec) · local",
+    on: false,
   },
   {
-    n: "03 · local",
+    n: "03",
     tag: "0 calls",
     title: "repair()",
     body: "Returns a spec and the JSON Patch it applied. Never invents a data value. A missing or unknown type is reported first.",
-    code: "repair(spec)",
-    ink: false,
+    code: "repair(spec) · local",
+    on: false,
   },
   {
-    n: "04 · local or cloud",
+    n: "04",
     tag: "0 calls",
     title: "render()",
     body: "Core charts come from @chartkitdev/core/all. Histogram through the planning charts come from @chartkitdev/core/extra. render() does not validate and does not throw. No host? POST the spec to Cloud.",
-    code: "render(spec)",
-    ink: false,
+    code: "render(spec) · local or cloud",
+    on: false,
   },
 ];
 
-const callsLabel = `${wrote.chartkit.calls} ${wrote.chartkit.calls === 1 ? "call" : "calls"}`;
-const bothFirst = wrote.chartkit.firstTry && wrote.recharts.firstTry;
-const barMax = Math.max(wrote.chartkit.tokens, wrote.recharts.tokens);
-const rawByName = new Map(TOKEN_EVAL.models.map((model) => [model.name, model.tokens]));
-const description = `Point an agent at ChartKit. On the published with-docs run, median output tokens are ${spread.rows[0]?.range ?? ""} by model, ${spread.headline}× fewer than the next library, in ${spread.calls} model calls.`;
+const tableRows = TOKEN_EVAL.models.flatMap((model) => {
+  if (!model.tokens) return [];
+  const tokens = model.tokens;
+  const nums = TOKEN_LIBRARIES.map((library) => tokens[library]);
+  const rowMax = Math.max(...nums);
+  return [
+    {
+      name: model.group === "Claude" ? `Claude ${model.name}` : model.name,
+      cells: TOKEN_LIBRARIES.map((library) => ({
+        text: formatTokens(tokens[library]),
+        us: library === "ChartKit",
+        width: `${((tokens[library] / rowMax) * 100).toFixed(1)}%`,
+      })),
+      notes: model.coverage ?? [],
+    },
+  ];
+});
+const versusFor = new Map(board.rows.map((row) => [row.name, row.versus]));
+
+const description = `Point an agent at ChartKit. On the published with-docs run, median output tokens are ${chartkitRow.range} by model, ${spread.headline}× fewer than ${nextRow.name}, in ${spread.calls} model calls.`;
+const taskLine = bothFirst
+  ? `The recorded ${wrote.task} answer from ${wrote.model} on ${runDate}. Both libraries rendered on the first call.`
+  : `The recorded ${wrote.task} answer from ${wrote.model} on ${runDate}.`;
 ---
 
 <Base tone="light" title="Agents" description={description}>
@@ -186,13 +225,10 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
         <p class="ck-eye">Agents</p>
         <h1 class="ck-h1">If your agent draws charts, point it here.</h1>
         <p class="ck-lede">
-          Set ChartKit as the default in your harness. The model writes a spec. Validate, repair and render need no model at all.
+          Set ChartKit as the default in your harness. The model writes a short spec. Validate, repair and render need no model at all.
         </p>
-        <div class="agents-prompt">
-          <div class="agents-prompt__bar">
-            <span class="agents-prompt__k">The prompt</span>
-            <span class="agents-prompt__tok">{promptTokens} tok</span>
-          </div>
+        <div class="ck-panel agents-prompt">
+          <div class="ck-bar ck-bar--light"><span>the prompt</span><span>{promptTokens} tok</span></div>
           <div class="agents-prompt__body">{agentsPrompt}</div>
         </div>
         <div class="agents-cta">
@@ -204,255 +240,251 @@ const description = `Point an agent at ChartKit. On the published with-docs run,
         <p class="agents-fine">Works in a system prompt, CLAUDE.md, .cursorrules or an MCP config.</p>
       </div>
 
-      <div class="agents-result">
+      <div class="ck-panel agents-result agents-hero__card">
         <div class="agents-result__wrote">
-          <div class="agents-kicker">
-            <span>What the agent wrote</span>
-            <span class="agents-pill" title="Harness output_tokens for this recorded answer">{wrote.chartkit.tokens.toLocaleString("en-US")} tok · {callsLabel}</span>
+          <div class="ck-bar">
+            <span>request · what the agent wrote</span>
+            <span class="agents-pill">{callsLabel}</span>
           </div>
           <pre>{shown.text}</pre>
         </div>
-        <div class="agents-result__drew">
-          <div class="agents-kicker">
-            <span class="agents-kicker__left">
-              <span class="agents-dot"></span>
-              {wrote.chartkit.firstTry ? "What rendered · first try" : "What rendered"}
-            </span>
-            <span class="agents-kicker__meta" title={`${svgBytes.toLocaleString("en-US")} bytes`}>{svgLabel}</span>
+        <div class="ck-bar ck-bar--light">
+          <span class="agents-ok">● response · {wrote.chartkit.firstTry ? "rendered first try" : "rendered"}</span>
+          <span>{svgLabel}</span>
+        </div>
+        <div class="agents-drew">
+          <div>
+            <div class="agents-chart__title">{shown.title}</div>
+            <div class="agents-chart__svg" set:html={painted.svg} />
           </div>
-          <div class="agents-drew">
-            <div class="agents-chart">
-              {shown.title ? <div class="agents-chart__title">{shown.title}</div> : null}
-              <div class="agents-chart__svg" set:html={painted.svg} />
-            </div>
-            <div class="agents-alt">
-              <div class="agents-alt__k">a11y.alt</div>
-              {shown.alt}
-            </div>
+          <div class="agents-alt">
+            <div class="agents-alt__k">a11y.alt</div>
+            {shown.alt}
           </div>
         </div>
       </div>
     </section>
 
-    <section class="agents-stats-wrap" id="stats" aria-label="Measured figures">
-      <div class="agents-stats">
-        <article class="agents-stat">
-          <div class="agents-stat__k">Output tokens, this task</div>
-          <div class="agents-stat__v is-blue">
-            <strong>{wrote.chartkit.tokens.toLocaleString("en-US")}</strong>
-            <span>vs {wrote.recharts.tokens.toLocaleString("en-US")}</span>
-          </div>
-          <div class="agents-viz">
-            <div class="agents-bars">
-              <div class="agents-bar">
-                <i style={`width:${((wrote.chartkit.tokens / barMax) * 70).toFixed(1)}%`}></i>
-                <span>ChartKit</span>
-              </div>
-              <div class="agents-bar">
-                <i class="is-other" style={`width:${((wrote.recharts.tokens / barMax) * 70).toFixed(1)}%`}></i>
-                <span>Recharts</span>
-              </div>
-            </div>
-          </div>
-          <p>
-            Round 6, {wrote.model}, {measured}, task {wrote.task}. Harness output tokens for the two recorded answers.{bothFirst ? " Both rendered on the first call." : ""}
-          </p>
-        </article>
-        <article class="agents-stat">
-          <div class="agents-stat__k">First-try validity</div>
-          <div class="agents-stat__v">
-            <strong>{proof.first}</strong>
-            <span>/ {proof.tasks}</span>
-          </div>
-          <div class="agents-viz">
-            <div class="agents-cells" aria-hidden="true">
-              {Array.from({ length: proof.tasks }, (_, index) => <i class:list={[index < proof.first && "is-on"]} />)}
-            </div>
-          </div>
-          <p>Tasks that rendered on the first call with docs in the prompt. Round 6, {wrote.model}, {measured}.</p>
-        </article>
-        <article class="agents-stat">
-          <div class="agents-stat__k">Model calls per chart</div>
-          <div class="agents-stat__v">
-            <strong>{spread.calls}</strong>
-            <span>median</span>
-          </div>
-          <div class="agents-viz">
-            <div class="agents-calls">
-              <b class="is-on">model</b><span>›</span><b>validate</b><span>›</span><b>repair</b><span>›</span><b>render</b>
-            </div>
-          </div>
-          <p>
-            Median on a working chart across {spread.modelWord} models, docs in context. validate, repair and render do not add a model call.
-          </p>
-        </article>
+    <section class="ck-section" id="proof">
+      <div class="ck-head">
+        <p class="ck-eye">Proof</p>
+        <h2 class="ck-h2">Fewest tokens per working chart.</h2>
+        <p class="ck-sub">
+          Median across {spread.tasks} tasks and {spread.modelWord} models, docs in context. Each dot is one model; the tick is the median.
+        </p>
       </div>
-    </section>
 
-    <section class="ck-section agents-section" id="tokens" aria-labelledby="tokens-title">
-      <div class="agents-intro">
-        <h2 class="ck-h2" id="tokens-title">Output tokens per working chart</h2>
-        <p class="ck-sub">Median across {spread.tasks} tasks, {spread.modelWord} models, docs in context. Each dot is one model.</p>
-      </div>
-      <div class="agents-card">
-        <div class="agents-strip">
-          {
-            spread.rows.map((row) => (
-              <div class:list={["agents-strip__row", row.us && "is-us", row.us && "is-first"]}>
-                <div class="agents-strip__name">{row.name}</div>
-                <div class="agents-plot">
-                  <div class="agents-rail"></div>
-                  <div class="agents-band" style={`left:${row.minPct};width:${row.spanPct}`}></div>
-                  {row.dots.map((dot) => <span class="agents-dotplot" title={dot.title} style={`left:${dot.left}`}></span>)}
-                  <div class="agents-med" style={`left:${row.medPct}`}></div>
-                  {row.us && spread.annotation ? (
-                    <>
-                      <div class="agents-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}><span></span></div>
-                      <div class="agents-anno" style={`left:${spread.annotation.labelLeft}`}>{spread.annotation.text}</div>
-                    </>
-                  ) : null}
+      <div class="ck-panel" style="margin-bottom:20px">
+        <div class="ck-bar ck-bar--light">
+          <span>benchmark · round 6 · {runDate}</span>
+          <span>{TOKEN_EVAL.tasks} tasks · {spread.modelCount} models</span>
+        </div>
+        <div class="agents-stats">
+          <article class="agents-stat">
+            <div class="agents-stat__k">Output tokens, this task</div>
+            <div class="agents-stat__v" style="color:#0a63e6">
+              <strong>{wrote.chartkit.tokens.toLocaleString("en-US")}</strong>
+              <span>vs {wrote.recharts.tokens.toLocaleString("en-US")}</span>
+            </div>
+            <div class="agents-stat__viz">
+              <div class="agents-pair">
+                <div>
+                  <i style={`width:${((wrote.chartkit.tokens / barMax) * 70).toFixed(1)}%;background:#0a63e6`}></i>
+                  <span>ChartKit</span>
                 </div>
-                <div class="agents-strip__val">
-                  <strong>{row.medianText}</strong>
-                  <em>{row.range}</em>
+                <div>
+                  <i style={`width:${((wrote.recharts.tokens / barMax) * 70).toFixed(1)}%;background:#c9c9c5`}></i>
+                  <span>Recharts</span>
                 </div>
               </div>
-            ))
-          }
+            </div>
+            <p>{taskLine}</p>
+          </article>
+          <article class="agents-stat">
+            <div class="agents-stat__k">First-try validity</div>
+            <div class="agents-stat__v">
+              <strong>{proof.officialFirst}</strong><span>/ {proof.tasks}</span>
+            </div>
+            <div class="agents-stat__viz" aria-hidden="true">
+              <div class="agents-cells">
+                {Array.from({ length: proof.tasks }, (_, index) => (
+                  <i class:list={[index < proof.officialFirst && "is-on"]} />
+                ))}
+              </div>
+            </div>
+            <p>First call with the library docs in the prompt. {wrote.model}, {runDate}.</p>
+          </article>
+          <article class="agents-stat">
+            <div class="agents-stat__k">Model calls per chart</div>
+            <div class="agents-stat__v">
+              <strong>{spread.calls}</strong><span>median</span>
+            </div>
+            <div class="agents-stat__viz" aria-hidden="true">
+              <div class="agents-calls">
+                <b class="is-on">model</b><span>›</span><b>validate</b><span>›</span><b>repair</b><span>›</span><b>render</b>
+              </div>
+            </div>
+            <p>ChartKit's median on a working chart, across {spread.modelCount} models. validate, repair and render do not add a call.</p>
+          </article>
         </div>
-        <div class="agents-axis" aria-hidden="true">
-          <div></div>
-          <div><span>0</span><span>500</span><span>1,000</span><span>1,500</span><span>2,000 tok</span></div>
-          <div></div>
+      </div>
+
+      <div class="ck-panel">
+        <div class="ck-bar ck-bar--light">
+          <span>output tokens per working chart</span>
+          <span>median · range</span>
         </div>
-        <div class="agents-strip__foot">
-          <p>
-            ChartKit was the cheapest library on {spread.cheapest} of {spread.cheapestTotal} models. Its median model calls on a working chart are {spread.calls}.
-          </p>
-          <button type="button" class="agents-toggle" data-table-toggle aria-expanded="false" aria-controls="token-table">
+        <div class="agents-plot-pad">
+          <div class="agents-strip">
+            {
+              spread.rows.map((row) => (
+                <div class:list={["agents-strip__row", row.us && "is-us", row.us && "is-first"]}>
+                  <div class="agents-strip__name">{row.name}</div>
+                  <div class="agents-plot">
+                    <div class="agents-rail"></div>
+                    <div class="agents-band" style={`left:${row.minPct};width:${row.spanPct}`}></div>
+                    {row.dots.map((dot) => <span class="agents-dotplot" title={dot.title} style={`left:${dot.left}`}></span>)}
+                    <div class="agents-med" style={`left:${row.medPct}`}></div>
+                    {row.us && spread.annotation ? (
+                      <>
+                        <div class="agents-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}><span></span></div>
+                        <div class="agents-anno" style={`left:${spread.annotation.labelLeft}`}>{spread.annotation.text}</div>
+                      </>
+                    ) : null}
+                  </div>
+                  <div class="agents-strip__val">
+                    <strong>{row.medianText}</strong><em>{row.range}</em>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+          <div class="agents-axis" aria-hidden="true">
+            <div></div>
+            <div><span>0</span><span>500</span><span>1,000</span><span>1,500</span><span>2,000 tok</span></div>
+            <div></div>
+          </div>
+          <div class="agents-table-wrap" id="token-table" data-token-table hidden>
+            <table class="agents-table">
+              <caption class="sr">Median output tokens per working chart by model. Every cell is a published figure.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Model</th>
+                  {TOKEN_LIBRARIES.map((library) => <th class:list={[library === "ChartKit" && "is-us"]} scope="col">{library}</th>)}
+                  <th scope="col">vs next best</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableRows.map((row) => (
+                  <tr>
+                    <th scope="row">{row.name}</th>
+                    {row.cells.map((cell) => (
+                      <td class:list={[cell.us && "is-us"]}>
+                        {cell.text}
+                        <span class="track"></span>
+                        <span class="bar" style={`width:calc((100% - 20px) * ${parseFloat(cell.width) / 100})`}></span>
+                      </td>
+                    ))}
+                    <td>{versusFor.get(row.name)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div class="agents-notes">
+              {tableRows.flatMap((row) => row.notes.map((note) => <p><strong>{row.name}.</strong> {note.text}</p>))}
+            </div>
+          </div>
+        </div>
+        <div class="ck-foot">
+          <span>
+            ChartKit is cheapest on {spread.cheapest} of {spread.cheapestTotal} models. Its median is {chartkitRow.medianText} tokens, {spread.headline}× below {nextRow.name} at {nextRow.medianText}. Docs capped to the length of llms.txt; did-not-finish runs excluded.
+            <a href="/methodology/agent-eval"> Methodology →</a>
+          </span>
+          <button type="button" class="agents-toggle" data-table-toggle data-idle="Show all numbers" data-open="Hide numbers" aria-expanded="false" aria-controls="token-table">
             Show all numbers
           </button>
         </div>
-        <div class="agents-table-wrap" id="token-table" data-token-table hidden>
-          <table class="agents-table">
-            <caption class="sr">Median output tokens per working chart by model.</caption>
-            <thead>
-              <tr>
-                <th scope="col">Model</th>
-                {board.libraries.map((library) => (
-                  <th class:list={[library === "ChartKit" && "is-us"]} scope="col">{library}</th>
-                ))}
-                <th scope="col">vs next best</th>
-              </tr>
-            </thead>
-            <tbody>
-              {board.rows.map((row) => {
-                const tokens = rawByName.get(row.name);
-                const values = tokens ? board.libraries.map((library) => tokens[library]) : [];
-                const rowMax = values.length ? Math.max(...values) : 0;
-                return (
-                  <tr>
-                    <th scope="row">{row.name}</th>
-                    {row.cells.map((cell, index) => {
-                      const library = board.libraries[index];
-                      const value = tokens && library ? tokens[library] : null;
-                      return (
-                        <td class:list={[cell.us && "is-us", value != null && "has-num"]}>
-                          {value != null && rowMax > 0 ? (
-                            <>
-                              <span class="track"></span>
-                              <span class="bar" style={`width:calc((100% - 20px) * ${value / rowMax})`}></span>
-                            </>
-                          ) : null}
-                          {cell.text}
-                        </td>
-                      );
-                    })}
-                    <td>{row.versus}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p class="agents-note">
-          Docs capped to the length of ChartKit llms.txt; output tokens summed until a chart renders; did-not-finish runs excluded. <a href="/methodology/agent-eval">Full methodology →</a>
-        </p>
       </div>
     </section>
 
-    <section class="ck-section agents-section" id="loop" aria-labelledby="loop-title">
-      <div class="agents-intro">
-        <h2 class="ck-h2" id="loop-title">The loop</h2>
-        <p class="ck-sub">Four calls. The model is only in the first one.</p>
+    <section class="ck-section" id="loop">
+      <div class="ck-head">
+        <p class="ck-eye">Loop</p>
+        <h2 class="ck-h2">Four calls. The model is in one.</h2>
+        <p class="ck-sub">The agent writes the spec once. Everything after that is a local function with a deterministic answer.</p>
       </div>
-      <div class="agents-loop">
-        <div class="agents-steps">
+      <div class="ck-split agents-loop">
+        <div class="ck-panel">
+          <div class="ck-bar ck-bar--light"><span>the loop</span><span>model calls</span></div>
           {steps.map((step) => (
-            <article class:list={["agents-step", step.ink && "is-ink"]}>
-              <div class="agents-step__top">
-                <span class="agents-step__n">{step.n}</span>
-                <span class="agents-step__tag">{step.tag}</span>
+            <div class="agents-step">
+              <span class:list={["agents-step__n", step.on && "is-on"]}>{step.n}</span>
+              <div>
+                <div>
+                  <span class="agents-step__title">{step.title}</span>
+                  {" "}
+                  <code>{step.code}</code>
+                </div>
+                <p>{step.body}</p>
               </div>
-              <h3>{step.title}</h3>
-              <p>{step.body}</p>
-              <code>{step.code}</code>
-            </article>
+              <span class:list={["agents-tag", step.on && "is-on"]}>{step.tag}</span>
+            </div>
           ))}
         </div>
-        <div class="agents-term">
-          <div class="agents-term__k">example session · not a recorded answer</div>
-          <div class="dim">&gt; validate(spec)</div>
-          {exampleErrors.map((error) => <div class="bad">✕ {error.code} {error.message}</div>)}
-          <div class="dim">&gt; repair(spec)</div>
-          {patches.map((patch) => (
-            <div class="ok">✓ {patch.op} {patch.path}{patch.value !== undefined ? ` ${JSON.stringify(patch.value)}` : ""}</div>
-          ))}
-          <div class="dim">&gt; render(spec)</div>
-          <div>&lt;svg&gt; · {exampleSvg}</div>
-          <p class="agents-term__foot">
+        <div class="ck-panel ck-panel--dark agents-session">
+          <div class="ck-bar">
+            <span>agent session · task bar-region</span>
+            <span>example · not a recorded answer</span>
+          </div>
+          <div class="agents-term">
+            <div class="dim">&gt; model → spec.json</div>
+            <div class="dim">&gt; validate(spec)</div>
+            {exampleErrors.map((error) => <div class="bad">✕ {error.code} {error.message}</div>)}
+            <div class="dim">&gt; repair(spec)</div>
+            {patches.map((patch) => (
+              <div class="ok">✓ {patch.op} {patch.path}{patch.value !== undefined ? ` ${JSON.stringify(patch.value)}` : ""}</div>
+            ))}
+            <div class="dim">&gt; render(spec)</div>
+            <div>&lt;svg&gt; · {exampleSvg}</div>
+          </div>
+          <div class="ck-foot">
             0 model calls after the first. Without docs in the prompt, repair() took first-try validity from {proof.repairFrom}/{proof.tasks} to {proof.repairTo}/{proof.tasks}.
-          </p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="ck-section agents-section" id="default" aria-labelledby="default-title">
-      <div class="agents-intro">
-        <h2 class="ck-h2" id="default-title">Make ChartKit the default</h2>
-        <p class="ck-sub">Everything the harness needs, each one copyable.</p>
+    <section class="ck-section" id="default">
+      <div class="ck-head">
+        <p class="ck-eye">Default</p>
+        <h2 class="ck-h2">Make ChartKit the default.</h2>
+        <p class="ck-sub">Five things the harness can hold. Each is the whole block, in the place it goes.</p>
       </div>
-      <div class="agents-kit">
+      <div class="ck-split">
         {kit.map((row) => (
-          <div class="agents-kit__row">
-            <div>
-              <div class="agents-kit__name">{row.name}</div>
-              <div class="agents-kit__where">{row.where}</div>
-            </div>
-            <p class="agents-kit__body">{row.body}</p>
-            <div class="agents-kit__snip">
+          <article class:list={["ck-panel", row.span && "agents-span"]}>
+            <div class="ck-bar ck-bar--light"><span>{row.name}</span><span>{row.where}</span></div>
+            <div class="agents-kit__body">{row.body}</div>
+            <div class="agents-kit__code">
               <pre>{row.snippet}</pre>
-              <button type="button" class="agents-kit__copy" data-copy-kit={row.snippet} data-idle="Copy" data-done="Copied ✓">Copy</button>
+              <button type="button" class="agents-kit__copy" data-copy-kit={row.snippet} data-idle="copy" data-done="copied ✓">copy</button>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </section>
 
-    <section class="agents-close-wrap" id="switch">
+    <section class="ck-section agents-end">
       <div class="agents-close">
         <div>
-          <h2>One paragraph switches your agent to ChartKit.</h2>
-          <p class="agents-close__lead">
+          <h2 class="ck-h2">One paragraph switches your agent to ChartKit.</h2>
+          <p class="ck-sub">
             Drop it in the system prompt, CLAUDE.md, .cursorrules or your MCP config. The app stays JavaScript; the agent writes specs, not chart code.
           </p>
-          <button type="button" class="agents-close__btn" data-copy-prompt data-idle="Copy prompt" data-done="Copied ✓">Copy prompt</button>
+          <button type="button" class="ck-btn" data-copy-prompt data-idle="Copy prompt" data-done="Copied ✓">Copy prompt</button>
         </div>
-        <div class="agents-close__panel">
-          <div class="agents-close__bar">
-            <span class="agents-prompt__k">system prompt · addition</span>
-            <span class="agents-prompt__tok">{promptTokens} tok</span>
-          </div>
+        <div class="ck-panel ck-panel--dark agents-close__panel">
+          <div class="ck-bar"><span>system prompt · addition</span><span>{promptTokens} tok</span></div>
           <div class="agents-close__body">{agentsPrompt}</div>
         </div>
       </div>

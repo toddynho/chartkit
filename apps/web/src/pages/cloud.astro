@@ -105,7 +105,7 @@ const description =
       <div class="ck-panel cloud-card">
         <div class="cloud-panes">
           <div class="cloud-codepane">
-            <div class="cloud-bar">
+            <div class="ck-bar cloud-bar">
               <span>spec.json</span>
               <span class="cloud-presets">
                 <button type="button" class="cloud-chip is-on" data-preset="bar" aria-pressed="true">bar</button>
@@ -116,7 +116,7 @@ const description =
             <textarea data-spec spellcheck="false" aria-label="Chart spec JSON">{initialText}</textarea>
           </div>
           <div class="cloud-preview">
-            <div class="cloud-bar">
+            <div class="ck-bar cloud-bar">
               <span class="cloud-status" data-status data-state="ok">200 OK · image/svg+xml</span>
               <span class="cloud-formats">
                 <button type="button" class="cloud-chip is-on" data-format="svg" aria-pressed="true">svg</button>
@@ -146,7 +146,7 @@ const description =
       </div>
       <div class="ck-split">
         <div class="ck-panel ck-panel--dark cloud-dark">
-          <div class="cloud-bar">
+          <div class="ck-bar cloud-bar">
             <span data-lang>request · {first.lang}</span>
             <button type="button" class="cloud-copyline" data-copy="snippet">copy</button>
           </div>
@@ -158,7 +158,7 @@ const description =
           <pre class="ck-code"><code data-code>{first.code}</code></pre>
         </div>
         <div class="ck-panel cloud-light">
-          <div class="cloud-bar">
+          <div class="ck-bar cloud-bar">
             <span class="cloud-status" data-status data-state="ok">200 OK · image/svg+xml</span>
             <span class="cloud-formats">
               <button type="button" class="cloud-chip is-on" data-format="svg" aria-pressed="true">svg</button>
@@ -170,7 +170,7 @@ const description =
             <div class="cloud-stage__chart" data-chart set:html={preview.svg} />
             <div class="cloud-stage__mark">chartkit.dev</div>
           </div>
-          <div class="cloud-foot"><span data-note>{first.note}</span> <a href="/docs/cloud">Render reference →</a></div>
+          <div class="ck-foot cloud-foot"><span data-note>{first.note}</span> <a href="/docs/cloud">Render reference →</a></div>
         </div>
       </div>
     </section>
@@ -183,7 +183,7 @@ const description =
       </div>
       <div class="ck-split">
         <article class="ck-panel cloud-place">
-          <div class="cloud-bar"><span>Email</span><span>format=png · scale=2</span></div>
+          <div class="ck-bar cloud-bar"><span>Email</span><span>format=png · scale=2</span></div>
           <div class="cloud-place__copy">
             <h3>Charts in the inbox</h3>
             <p>Mail clients run no JavaScript. A PNG renders in every client, Outlook included.</p>
@@ -197,10 +197,10 @@ const description =
               <span class="skel" style="width:45%"></span>
             </div>
           </div>
-          <div class="cloud-foot cloud-foot--mono" data-place="email">{places.email}</div>
+          <div class="ck-foot cloud-foot cloud-foot--mono" data-place="email">{places.email}</div>
         </article>
         <article class="ck-panel cloud-place">
-          <div class="cloud-bar"><span>Docs</span><span>format=png</span></div>
+          <div class="ck-bar cloud-bar"><span>Docs</span><span>format=png</span></div>
           <div class="cloud-place__copy">
             <h3>README and wikis</h3>
             <p>Point the image at the render URL. Change the spec and the doc updates. No committed PNGs.</p>
@@ -214,10 +214,10 @@ const description =
               <span class="skel" style="width:80%"></span>
             </div>
           </div>
-          <div class="cloud-foot cloud-foot--mono" data-place="docs">{places.docs}</div>
+          <div class="ck-foot cloud-foot cloud-foot--mono" data-place="docs">{places.docs}</div>
         </article>
         <article class="ck-panel cloud-place">
-          <div class="cloud-bar"><span>Agents</span><span>format=svg</span></div>
+          <div class="ck-bar cloud-bar"><span>Agents</span><span>format=svg</span></div>
           <div class="cloud-place__copy">
             <h3>Agent artifacts</h3>
             <p>The agent writes the spec and hands back a URL. Nothing to render on its side.</p>
@@ -235,10 +235,10 @@ const description =
               </div>
             </div>
           </div>
-          <div class="cloud-foot cloud-foot--mono" data-place="agents">{places.agents}</div>
+          <div class="ck-foot cloud-foot cloud-foot--mono" data-place="agents">{places.agents}</div>
         </article>
         <article class="ck-panel cloud-place">
-          <div class="cloud-bar"><span>Reports</span><span>format=svg · w=1200</span></div>
+          <div class="ck-bar cloud-bar"><span>Reports</span><span>format=svg · w=1200</span></div>
           <div class="cloud-place__copy">
             <h3>Server-side PDFs</h3>
             <p>Your report builder fetches the SVG and drops it on the page. Vector, so it prints clean.</p>
@@ -255,7 +255,7 @@ const description =
               </div>
             </div>
           </div>
-          <div class="cloud-foot cloud-foot--mono" data-place="reports">{places.reports}</div>
+          <div class="ck-foot cloud-foot cloud-foot--mono" data-place="reports">{places.reports}</div>
         </article>
       </div>
     </section>
@@ -268,7 +268,7 @@ const description =
       </div>
       <div class="ck-split cloud-trust">
         <div class="ck-panel ck-panel--dark cloud-dark cloud-sticky">
-          <div class="cloud-bar"><span>response · headers</span><span>GET /render</span></div>
+          <div class="ck-bar cloud-bar"><span>response · headers</span><span>GET /render</span></div>
           <div class="cloud-headers">
             <div><span class="dim">HTTP/2</span> <span class="ok">200</span></div>
             {headers.map((row) => (
@@ -308,7 +308,7 @@ const description =
       </div>
       <div class="ck-split">
         <div class="ck-panel ck-panel--dark cloud-dark">
-          <div class="cloud-bar"><span>terminal</span><span>local</span></div>
+          <div class="ck-bar cloud-bar"><span>terminal</span><span>local</span></div>
           <div class="cloud-term">
             <div><span class="dim">$</span> npm run dev:node --workspace=@chartkitdev/cloud</div>
             <div class="dim">→ listening on <span class="key">http://127.0.0.1:8787</span></div>
@@ -319,7 +319,7 @@ const description =
           </div>
         </div>
         <div class="ck-panel cloud-light">
-          <div class="cloud-bar">
+          <div class="ck-bar cloud-bar">
             <span class="cloud-status" data-status data-state="ok">200 OK · image/svg+xml</span>
             <span>127.0.0.1</span>
           </div>
