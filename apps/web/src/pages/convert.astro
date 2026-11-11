@@ -1,146 +1,139 @@
 ---
-import "../styles/surfaces.css";
+import "../styles/ck.css";
+import "../styles/convert.css";
 import Base from "../layouts/Base.astro";
 import { loadConvert } from "../lib/batch3";
-import { lineDiff } from "../lib/line-diff";
 import { scriptJson } from "../lib/spec-text";
 
 const page = loadConvert();
-const starter = page.samples[0];
+const starter = page.samples.find((item) => item.id === "recharts") ?? page.samples[0];
 if (!starter) throw new Error("convert samples missing");
-const specText = starter.spec ? JSON.stringify(starter.spec, null, 2) : "";
-const diff = lineDiff(starter.source, specText || "(no spec)");
 const guides = [
-  { href: "/docs/migrate/chartjs", label: "Chart.js" },
-  { href: "/docs/migrate/recharts", label: "Recharts" },
-  { href: "/docs/migrate/echarts", label: "ECharts" },
-];
-const coverage = [
-  ["chartjs", "Chart.js"],
-  ["recharts", "Recharts"],
-  ["echarts", "ECharts"],
+  { id: "chartjs", href: "/docs/migrate/chartjs", label: "Chart.js" },
+  { id: "recharts", href: "/docs/migrate/recharts", label: "Recharts" },
+  { id: "echarts", href: "/docs/migrate/echarts", label: "ECharts" },
 ] as const;
-const description = "Paste a Chart.js, Recharts, or ECharts config and compare it with the ChartKit spec, warnings, and chart.";
-const labels: Record<string, string> = { chartjs: "Chart.js", recharts: "Recharts", echarts: "ECharts" };
+const description = "Paste a Chart.js config, Recharts JSX, or an ECharts option. The spec, warnings, and both charts stay in the browser.";
 ---
 
 <Base title="Convert a chart" description={description} tone="light">
-  <div class="wrap surface">
-    <h1>Convert a chart</h1>
-    <p class="lede">
-      Paste a Chart.js config, Recharts JSX, or an ECharts option. The result is a ChartKit spec after <code>validate()</code> and <code>repair()</code>, plus a warning for each unmapped key. Chart.js, Recharts, and ECharts load on this page only. <code>@chartkitdev/convert</code> is unpublished.
-    </p>
-    <div class="convert" data-convert-demo>
-      <div class="convert-toolbar">
-        {
-          page.samples.map((item) => (
-            <button
-              type="button"
-              class={item.id === starter.id ? "btn btn-primary" : "btn btn-secondary"}
-              aria-pressed={item.id === starter.id ? "true" : "false"}
-              data-sample={item.id}
-            >
-              {item.label} sample
-            </button>
-          ))
-        }
-      </div>
-      <label class="convert-label" for="convert-source">Chart.js config, Recharts JSX, or an ECharts option</label>
-      <textarea id="convert-source" class="convert-source" spellcheck="false">{starter.source}</textarea>
-      <p class="convert-meta" data-convert-meta>
-        Detected source: {starter.detected ? labels[starter.detected] : "none"}.
+  <div class="ck ck-wrap" data-convert-demo>
+    <div class="cvt-copy">
+      <p class="cvt-crumb"><a href="/compare">Compare</a> / Convert</p>
+      <h1 class="ck-h1">Paste a chart. Get the spec.</h1>
+      <p class="ck-lede">
+        Chart.js, Recharts, or ECharts. The result is a ChartKit spec after validate() and repair(), plus a warning for each unmapped key. Those three libraries load on this page only. @chartkitdev/convert is unpublished.
       </p>
-      <div class="convert-grid">
-        <figure class="convert-pane">
-          <figcaption>Original{starter.detected ? `, ${labels[starter.detected]}` : ""}</figcaption>
-          <div class="convert-original" data-original-host="1"></div>
-          <p role="alert" data-original-error hidden> </p>
-        </figure>
-        <figure class="convert-pane">
-          <figcaption>ChartKit</figcaption>
-          <div class="ck-frame" data-convert-chart set:html={starter.svg} />
-        </figure>
+    </div>
+
+    <div class="ck-split cvt-tool">
+      <div class="ck-panel ck-panel--dark cvt-paste">
+        <div class="ck-tabs ck-tabs--dark" role="tablist" aria-label="Source library">
+          {
+            page.samples.map((item) => (
+              <button type="button" class:list={["ck-tab", item.id === starter.id && "is-on"]} data-sample={item.id} role="tab">
+                {item.label}
+              </button>
+            ))
+          }
+          <span data-detected style="margin-left:auto;align-self:center;font-family:var(--mono);font-size:11px;color:#8b8d93">detected · {starter.label}</span>
+        </div>
+        <textarea id="convert-source" spellcheck="false" aria-label="Chart to convert">{starter.source}</textarea>
+        <div class="ck-foot">
+          <span data-paste-meta>{starter.source.split("\n").length} lines · runs in your browser, nothing is uploaded</span>
+          <button type="button" class="cmp-load" data-load style="color:#d9dadd;border-color:#3a3b40">Load sample</button>
+        </div>
       </div>
-      <section aria-labelledby="convert-warnings">
-        <h2 id="convert-warnings">Warnings</h2>
-        <div data-convert-warnings>
+      <div class="ck-panel">
+        <div class="ck-tabs" role="tablist" aria-label="Result">
+          <button type="button" class="ck-tab is-on" data-view="chart">Chart</button>
+          <button type="button" class="ck-tab" data-view="spec">Spec</button>
+          <button type="button" class="ck-tab" data-view="warnings">Warnings <span class="ck-badge" data-warn-count>{starter.warnings.length}</span></button>
+          <span data-state style="margin-left:auto;align-self:center;font-family:var(--mono);font-size:11px;color:#1a7f4b">● valid</span>
+        </div>
+        <div data-panel="chart" class="cvt-chart">
+          <div data-convert-chart set:html={starter.svg}></div>
+          <p class="cvt-alt" data-alt></p>
+        </div>
+        <pre class="cvt-spec" data-panel="spec" data-convert-spec hidden>{starter.spec ? JSON.stringify(starter.spec, null, 2) : ""}</pre>
+        <div data-panel="warnings" data-convert-warnings hidden>
           {
             starter.warnings.length === 0 ? (
-              <p>No warnings. Every key the converter read was mapped.</p>
+              <p class="cvt-alt">No warnings. Every key the converter read was mapped.</p>
             ) : (
-              <ul class="convert-warnings">
+              <ul class="cvt-warns">
                 {starter.warnings.map((warning) => (
-                  <li>
-                    <code>{warning.code}</code> {warning.path ? <code>{warning.path}</code> : null} {warning.message}
-                  </li>
+                  <li><code>{warning.code}</code> {warning.path} {warning.message}</li>
                 ))}
               </ul>
             )
           }
         </div>
-      </section>
-      <section aria-labelledby="convert-spec">
-        <h2 id="convert-spec">Spec</h2>
-        <pre class="convert-pre"><code data-convert-spec>{specText || "null"}</code></pre>
-      </section>
-      <section aria-labelledby="convert-diff">
-        <h2 id="convert-diff">Source → ChartKit spec</h2>
-        <pre class="convert-pre convert-diff" aria-label="Line diff from source to ChartKit spec" data-convert-diff>
-          {
-            diff.map((row) => (
-              <div class={row.op === "+" ? "diff-add" : row.op === "-" ? "diff-del" : "diff-same"}>
-                {row.op === " " ? " " : row.op}
-                {row.text}
-              </div>
-            ))
-          }
-        </pre>
-      </section>
-      <script is:inline id="convert-samples" type="application/json" set:html={scriptJson(page.samples.map((item) => ({ id: item.id, label: item.label, source: item.source })))} />
+        <div class="ck-foot">
+          <span data-summary></span>
+          <span>
+            <button type="button" class="ck-btn" data-copy>Copy spec</button>
+            <a class="ck-link" data-play href="/playground">Open in Playground</a>
+          </span>
+        </div>
+      </div>
     </div>
-    <section class="section" aria-labelledby="coverage">
-      <h2 id="coverage">Conversion coverage</h2>
-      <p>Mapped keys land in the spec. Unsupported keys come back as warnings.</p>
-      <div class="convert-coverage">
+
+    <section class="ck-section" id="both">
+      <div class="ck-head">
+        <p class="ck-eye">Both</p>
+        <h2 class="ck-h2">Same data, both renderers.</h2>
+        <p class="ck-sub">The vendor library draws the paste. ChartKit draws the converted spec. Vendor code loads on this page only.</p>
+      </div>
+      <div class="ck-split cvt-side">
+        <figure class="ck-panel">
+          <div class="ck-bar ck-bar--light"><span data-original-label>original · {starter.label}</span><span>{starter.id}</span></div>
+          <div class="cvt-original" data-original-host></div>
+          <p class="cvt-caption" data-original-error hidden></p>
+          <figcaption class="cvt-caption">Rendered by the vendor library from the paste.</figcaption>
+        </figure>
+        <figure class="ck-panel">
+          <div class="ck-bar ck-bar--light"><span>chartkit · converted spec</span><span data-svg-size>static svg</span></div>
+          <div class="cvt-kit" data-kit-host set:html={starter.svg}></div>
+          <figcaption class="cvt-caption">Static SVG from the spec. No vendor runtime.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="ck-section cvt-end" id="coverage">
+      <div class="ck-head">
+        <p class="ck-eye">Coverage</p>
+        <h2 class="ck-h2">What maps, what warns.</h2>
+        <p class="ck-sub">These lists are what @chartkitdev/convert actually maps. A warning code is CK81xx, not a draft CV code.</p>
+      </div>
+      <div class="cvt-metrics">
         {
-          coverage.map(([id, label]) => {
-            const table = page.coverage[id];
+          guides.map((guide) => {
+            const table = page.coverage[guide.id];
             if (!table) return null;
             return (
-              <article class="card">
-                <h3>{label}</h3>
-                <h4>Mapped</h4>
-                <ul>
-                  {table.mapped.map((item) => (
-                    <li>{item}</li>
-                  ))}
-                </ul>
-                <h4>Unsupported</h4>
-                <ul>
-                  {table.unsupported.map((item) => (
-                    <li>{item}</li>
-                  ))}
-                </ul>
+              <article class="ck-panel">
+                <div class="ck-bar ck-bar--light">
+                  <span>{guide.label}</span>
+                  <span>{table.mapped.length} mapped · {table.unsupported.length} warn</span>
+                </div>
+                <div class="cvt-chips">
+                  {table.mapped.map((item) => <span class="cvt-chip">{item}</span>)}
+                  {table.unsupported.map((item) => <span class="cvt-chip is-warn">{item}</span>)}
+                </div>
+                <div class="ck-foot">
+                  <a href={guide.href}>{guide.label} guide →</a>
+                  <a href={`/compare/${guide.id}`}>ChartKit vs {guide.label}</a>
+                </div>
               </article>
             );
           })
         }
       </div>
-      <p>
-        Guides:{" "}
-        {
-          guides.map((guide, index) => (
-            <span>
-              {index > 0 ? ", " : null}
-              <a href={guide.href}>{guide.label}</a>
-            </span>
-          ))
-        }.
-      </p>
     </section>
+    <script is:inline id="convert-samples" type="application/json" set:html={scriptJson(page.samples.map((item) => ({ id: item.id, label: item.label, source: item.source })))} />
   </div>
+  <script>
+    import "../scripts/convert-demo.ts";
+  </script>
 </Base>
-
-<script>
-  import "../scripts/convert-demo.ts";
-</script>

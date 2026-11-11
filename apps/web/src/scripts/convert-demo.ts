@@ -2,9 +2,9 @@ import { render } from "@chartkitdev/core/all";
 import { convert, parseJsx, parseLiteral, type JsxNode } from "@chartkitdev/convert";
 import { createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { lineDiff } from "../lib/line-diff";
 
 const LABELS: Record<string, string> = { chartjs: "Chart.js", recharts: "Recharts", echarts: "ECharts" };
+const STORE = "chartkit-convert";
 
 interface Sample {
   id: string;
@@ -14,82 +14,74 @@ interface Sample {
 
 const root = document.querySelector<HTMLElement>("[data-convert-demo]");
 const sourceEl = document.querySelector<HTMLTextAreaElement>("#convert-source");
-const meta = document.querySelector<HTMLElement>("[data-convert-meta]");
 const original = document.querySelector<HTMLElement>("[data-original-host]");
 const originalError = document.querySelector<HTMLElement>("[data-original-error]");
 const chartHost = document.querySelector<HTMLElement>("[data-convert-chart]");
+const kitHost = document.querySelector<HTMLElement>("[data-kit-host]");
 const warningsEl = document.querySelector<HTMLElement>("[data-convert-warnings]");
 const specEl = document.querySelector<HTMLElement>("[data-convert-spec]");
-const diffEl = document.querySelector<HTMLElement>("[data-convert-diff]");
 const sampleNode = document.querySelector<HTMLScriptElement>("#convert-samples");
 
-if (root && sourceEl && meta && original && chartHost && warningsEl && specEl && diffEl && sampleNode?.textContent) {
+if (root && sourceEl && original && chartHost && kitHost && warningsEl && specEl && sampleNode?.textContent) {
   const samples = JSON.parse(sampleNode.textContent) as Sample[];
-  let sourceId = new URLSearchParams(location.search).get("source") ?? "chartjs";
+  const params = new URLSearchParams(location.search);
+  let sourceId = params.get("source") ?? "recharts";
+  if (!samples.some((item) => item.id === sourceId)) sourceId = samples[0]?.id ?? "recharts";
+  const hash = location.hash.startsWith("#code=") ? decodeURIComponent(location.hash.slice("#code=".length)) : "";
+  const stored = hash ? "" : sessionStorage.getItem(STORE) ?? "";
   const starter = samples.find((item) => item.id === sourceId) ?? samples[0];
-  if (starter && sourceEl.value !== starter.source && sourceId !== "custom") sourceEl.value = starter.source;
+  if (hash) sourceEl.value = hash;
+  else if (stored) sourceEl.value = stored;
+  else if (starter) sourceEl.value = starter.source;
+
   let frame = { width: 640, height: 320 };
   let reactRoot: Root | null = null;
   let destroyOriginal = () => {};
   let paintToken = 0;
+  let timer = 0;
+  let latestSpec = "";
 
-  const setPressed = () => {
+  const setTabs = () => {
     root.querySelectorAll<HTMLButtonElement>("[data-sample]").forEach((button) => {
-      const on = button.dataset.sample === sourceId;
-      button.classList.toggle("btn-primary", on);
-      button.classList.toggle("btn-secondary", !on);
-      button.setAttribute("aria-pressed", on ? "true" : "false");
+      button.classList.toggle("is-on", button.dataset.sample === sourceId);
     });
   };
 
-  const paintChart = (spec: Record<string, unknown> | null) => {
+  const paintChart = (spec: Record<string, unknown> | null, host: HTMLElement) => {
     if (!spec) {
-      chartHost.replaceChildren();
+      host.replaceChildren();
       const note = document.createElement("p");
       note.textContent = "No ChartKit spec for this input.";
-      chartHost.append(note);
+      host.append(note);
       return;
     }
     const size = spec.size;
     const previous = size && typeof size === "object" && !Array.isArray(size) ? (size as Record<string, unknown>) : {};
     const preview = { ...spec, size: { ...previous, width: frame.width, height: frame.height } };
-    chartHost.innerHTML = render(preview);
+    host.innerHTML = render(preview);
   };
 
   const paintWarnings = (warnings: { code: string; path: string; message: string }[]) => {
     warningsEl.replaceChildren();
+    const count = root.querySelector("[data-warn-count]");
+    if (count) count.textContent = String(warnings.length);
     if (warnings.length === 0) {
       const p = document.createElement("p");
+      p.className = "cvt-alt";
       p.textContent = "No warnings. Every key the converter read was mapped.";
       warningsEl.append(p);
       return;
     }
     const list = document.createElement("ul");
-    list.className = "convert-warnings";
+    list.className = "cvt-warns";
     for (const warning of warnings) {
       const item = document.createElement("li");
       const code = document.createElement("code");
       code.textContent = warning.code;
-      item.append(code, " ");
-      if (warning.path) {
-        const path = document.createElement("code");
-        path.textContent = warning.path;
-        item.append(path, " ");
-      }
-      item.append(warning.message);
+      item.append(code, " ", warning.path ? `${warning.path} ` : "", warning.message);
       list.append(item);
     }
     warningsEl.append(list);
-  };
-
-  const paintDiff = (before: string, after: string) => {
-    diffEl.replaceChildren();
-    for (const row of lineDiff(before, after)) {
-      const line = document.createElement("div");
-      line.className = row.op === "+" ? "diff-add" : row.op === "-" ? "diff-del" : "diff-same";
-      line.textContent = `${row.op === " " ? " " : row.op}${row.text}`;
-      diffEl.append(line);
-    }
   };
 
   async function paintOriginal(host: HTMLElement, source: string | null, text: string, token: number) {
@@ -98,7 +90,6 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
     reactRoot?.unmount();
     reactRoot = null;
     host.replaceChildren();
-    host.removeAttribute("data-original-ready");
     if (originalError) originalError.hidden = true;
     const fail = (message: string) => {
       if (token !== paintToken || !originalError) return;
@@ -111,14 +102,9 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
         if (token !== paintToken) return;
         const parsed = parseJsx(text);
         if (!parsed.root) throw new Error("No Recharts chart tag in this snippet.");
-        const ResponsiveContainer = lib.ResponsiveContainer as (props: {
-          width: string;
-          height: number;
-          children?: ReactNode;
-        }) => ReactNode;
+        const ResponsiveContainer = lib.ResponsiveContainer as (props: { width: string; height: number; children?: ReactNode }) => ReactNode;
         reactRoot = createRoot(host);
         reactRoot.render(createElement(ResponsiveContainer, { width: "100%", height: 320 }, jsxToElement(parsed.root, lib)));
-        host.setAttribute("data-original-ready", "1");
         return;
       }
       if (source === "chartjs") {
@@ -132,7 +118,6 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
         config.options = { ...(config.options ?? {}), responsive: true, maintainAspectRatio: false };
         const chart = new mod.default(canvas, config as never);
         destroyOriginal = () => chart.destroy();
-        host.setAttribute("data-original-ready", "1");
         return;
       }
       if (source === "echarts") {
@@ -147,7 +132,6 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
           window.removeEventListener("resize", onResize);
           chart.dispose();
         };
-        host.setAttribute("data-original-ready", "1");
         return;
       }
       fail("Paste a Chart.js config, Recharts JSX, or an ECharts option.");
@@ -158,14 +142,32 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
 
   const draw = () => {
     const text = sourceEl.value;
+    sessionStorage.setItem(STORE, text);
     const result = convert(text);
     const token = ++paintToken;
-    meta.textContent = `Detected source: ${result.source ? LABELS[result.source] : "none"}. Chart.js, Recharts, and ECharts load on this page only.`;
-    const specText = result.spec ? JSON.stringify(result.spec, null, 2) : "";
-    specEl.textContent = specText || "null";
-    paintChart(result.spec as Record<string, unknown> | null);
+    const detected = root.querySelector("[data-detected]");
+    if (detected) detected.textContent = `detected · ${result.source ? LABELS[result.source] : "none"}`;
+    const label = root.querySelector("[data-original-label]");
+    if (label) label.textContent = `original · ${result.source ? LABELS[result.source] : "unrecognized"}`;
+    latestSpec = result.spec ? JSON.stringify(result.spec, null, 2) : "";
+    specEl.textContent = latestSpec || "No spec.";
+    const bytes = new TextEncoder().encode(latestSpec).length;
+    const size = root.querySelector("[data-svg-size]");
+    if (size) size.textContent = result.spec ? `spec · ${(bytes / 1000).toFixed(1)} KB` : "no spec";
+    paintChart(result.spec as Record<string, unknown> | null, chartHost);
+    paintChart(result.spec as Record<string, unknown> | null, kitHost);
     paintWarnings(result.warnings);
-    paintDiff(text, specText || "(no spec)");
+    const state = root.querySelector<HTMLElement>("[data-state]");
+    if (state) {
+      state.textContent = result.spec ? `● valid · ${latestSpec.split("\n").length} lines` : "● no spec";
+      state.style.color = result.spec ? "#1a7f4b" : "#9a5b00";
+    }
+    const meta = root.querySelector("[data-paste-meta]");
+    if (meta) meta.textContent = `${text.split("\n").length} lines · runs in your browser, nothing is uploaded`;
+    const summary = root.querySelector("[data-summary]");
+    if (summary) summary.textContent = result.spec ? `${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"}` : "No spec";
+    const play = root.querySelector<HTMLAnchorElement>("[data-play]");
+    if (play && result.spec) play.href = `/playground#${encodeURIComponent(JSON.stringify(result.spec))}`;
     void paintOriginal(original, result.source, text, token);
   };
 
@@ -175,37 +177,42 @@ if (root && sourceEl && meta && original && chartHost && warningsEl && specEl &&
       if (!sample) return;
       sourceId = sample.id;
       sourceEl.value = sample.source;
-      setPressed();
+      setTabs();
       draw();
     });
   });
+  root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const view = button.dataset.view;
+      root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((item) => item.classList.toggle("is-on", item === button));
+      root.querySelectorAll<HTMLElement>("[data-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== view;
+      });
+    });
+  });
   sourceEl.addEventListener("input", () => {
-    sourceId = "custom";
-    setPressed();
+    window.clearTimeout(timer);
+    timer = window.setTimeout(draw, 200);
+  });
+  root.querySelector("[data-load]")?.addEventListener("click", () => {
+    const sample = samples.find((item) => item.id === sourceId) ?? samples[0];
+    if (!sample) return;
+    sourceEl.value = sample.source;
     draw();
   });
-  const measure = () => {
-    const width = Math.max(280, Math.round(original.clientWidth));
-    if (width !== frame.width) {
-      frame = { width, height: 320 };
-      draw();
-    }
-  };
-  if (starter && sourceId !== "custom") {
-    sourceId = starter.id;
-    sourceEl.value = starter.source;
-  }
-  setPressed();
-  draw();
-  const observer = new ResizeObserver(() => {
-    const width = Math.max(280, Math.round(original.clientWidth));
-    if (width !== frame.width) {
-      frame = { width, height: 320 };
-      draw();
-    }
+  root.querySelector("[data-copy]")?.addEventListener("click", () => {
+    if (!latestSpec) return;
+    const button = root.querySelector<HTMLButtonElement>("[data-copy]");
+    void navigator.clipboard.writeText(latestSpec).then(() => {
+      if (!button) return;
+      button.textContent = "Copied ✓";
+      window.setTimeout(() => {
+        button.textContent = "Copy spec";
+      }, 1300);
+    });
   });
-  observer.observe(original);
-  measure();
+  setTabs();
+  draw();
 }
 
 function jsxToElement(node: JsxNode, lib: Record<string, unknown>): ReactNode {
