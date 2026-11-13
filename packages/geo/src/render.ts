@@ -353,6 +353,7 @@ function regionMarkup(
   rows: Record<string, unknown>[],
   tips: string[],
   skip: Set<string>,
+  border: string,
   titles = true,
 ): string {
   return regions
@@ -365,9 +366,10 @@ function regionMarkup(
       const label = extra ? `${base}, ${extra}` : base;
       const cls = choropleth && !hit ? "ck-geo-region ck-geo-nodata" : "ck-geo-region";
       const painted = fill ? ` fill="${fill}"` : "";
+      const edge = ` stroke="${border}" stroke-width="0.75"`;
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
       const titled = titles ? `<title>${esc(label)}</title>` : "";
-      const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}">${titled}`;
+      const tail = `${painted}${edge}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}">${titled}`;
       if (region.point && !region.polygons.length) {
         if (!hit) return "";
         const [x, y] = project(region.id, region.point[0], region.point[1]);
@@ -643,7 +645,7 @@ export async function render(spec: unknown): Promise<string> {
   if (drawn) {
     for (const frame of drawn.frames) body += `<rect class="ck-geo-inset" x="${round(frame.x)}" y="${round(frame.y)}" width="${round(frame.w)}" height="${round(frame.h)}"/>`;
     const skip = new Set([regionField, valueField].filter((field): field is string => !!field));
-    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip, titles);
+    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip, chrome.border, titles);
   }
   if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box, labelPx, titles);
   body += `</g>`;

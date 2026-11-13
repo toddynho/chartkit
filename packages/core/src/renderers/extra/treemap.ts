@@ -47,8 +47,25 @@ function reserveLegend(
   if (!on) return { box: null, plot };
   const box = legendAt(spec, "top");
   if (!box || box.position === "inside") return { box, plot };
-  const room = legendSpace(box, items, Math.max(80, frame.width - 24));
+  const width = Math.max(80, frame.width - 24);
   const gap = 8;
+  const minPlot = 48;
+  const vertical = box.position === "top" || box.position === "bottom";
+  let room = legendSpace(box, items, width);
+  if (vertical) {
+    const available = plot.bottom - plot.top;
+    if (room.band + gap > available - minPlot) {
+      let rows = box.maxRows ?? Math.max(1, items.length);
+      while (rows > 1 && room.band + gap > available - minPlot) {
+        rows -= 1;
+        box.maxRows = rows;
+        room = legendSpace(box, items, width);
+      }
+      if (room.band + gap > available - minPlot) return { box: null, plot };
+    }
+  } else if (room.side + gap > plot.right - plot.left - minPlot) {
+    return { box: null, plot };
+  }
   if (box.position === "top") plot.top += room.band + gap;
   else if (box.position === "bottom") plot.bottom -= room.band + gap;
   else if (box.position === "right") plot.right -= room.side + gap;

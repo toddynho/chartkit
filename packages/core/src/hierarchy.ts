@@ -95,13 +95,46 @@ export function readHierarchy(spec: Record<string, unknown>, options?: { keepZer
   const path = Array.isArray(encoding.path) && encoding.path.length > 0 && encoding.path.every((item) => typeof item === "string") ? (encoding.path as string[]) : null;
   const id = typeof encoding.id === "string" ? encoding.id : "";
   const parent = typeof encoding.parent === "string" ? encoding.parent : "";
-  if (!nested && !path && !(id && parent)) return null;
   const valueField = fieldOf(encoding.y);
   const issues: Diagnostic[] = [];
   const keepZero = options?.keepZero === true;
+  if (!nested && !path && !(id && parent)) {
+    const encodedTreemap = spec.type === "treemap" && !!fieldOf(encoding.x) && !!fieldOf(encoding.y);
+    if (!encodedTreemap && !rowsHaveParent(data)) {
+      const flat = fromFlat(data, valueField, issues, keepZero);
+      if (flat) return { root: flat, issues };
+    }
+    return null;
+  }
   if (nested) return { root: fromNested(data as unknown[], valueField, issues, keepZero), issues };
   if (path) return { root: fromPath(data, path, valueField, issues), issues };
   return { root: fromParents(data, id, parent, fieldOf(encoding.x) || id, valueField, issues), issues };
+}
+
+function rowsHaveParent(data: unknown): boolean {
+  if (!Array.isArray(data)) return false;
+  return data.some((row) => isRecord(row) && (Array.isArray(row.children) || "parent" in row));
+}
+
+/** A list of `{name, value}` rows is one ring. Rows that already name a parent stay unresolved. */
+function fromFlat(data: unknown, valueField: string | undefined, issues: Diagnostic[], keepZero: boolean): HNode | null {
+  if (!Array.isArray(data) || data.length === 0) return null;
+  const children: HNode[] = [];
+  let labeled = 0;
+  for (let index = 0; index < data.length; index++) {
+    const row = data[index];
+    if (!isRecord(row)) return null;
+    const name = typeof row.name === "string" && row.name ? row.name : typeof row.label === "string" && row.label ? row.label : "";
+    if (!name) return null;
+    labeled += 1;
+    const stated = statedOf(row, valueField);
+    const valuePath = `/data/${index}/${valueField && row[valueField] !== undefined ? valueField : row.value !== undefined ? "value" : "size"}`;
+    if (stated !== undefined && stated < 0) issues.push(negative(name, valuePath));
+    const node = finish(name, [name], stated, [], valuePath, issues, keepZero);
+    if (node) children.push(node);
+  }
+  if (!labeled || !children.length) return null;
+  return wrap(children);
 }
 
 function fromNested(data: unknown[], valueField: string | undefined, issues: Diagnostic[], keepZero = false): HNode {

@@ -703,4 +703,45 @@ describe("render", () => {
     expect(base).toContain('font-size="16"');
     expect(base).not.toContain("--ck-font-family:");
   });
+
+  it("keeps a near-zero country visible on white and stroked in both themes", async () => {
+    const spec = {
+      type: "choropleth",
+      title: "Renewable share",
+      data: [
+        { country: "NOR", share: 98 },
+        { country: "DZA", share: 1 },
+        { country: "SAU", share: 1 },
+        { country: "BGD", share: 2 },
+      ],
+      encoding: { region: "country", color: { field: "share", format: "%" } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+      a11y: { alt: "Algeria and Saudi Arabia are near zero." },
+    };
+    const light = await render({ ...spec, theme: "soft" });
+    const dark = await render({ ...spec, theme: "midnight" });
+    const tag = (svg: string) => new RegExp(`<path\\b[^>]*data-ck-id="DZA"[^>]*>`).exec(svg)?.[0] ?? "";
+    const fillOf = (attrs: string) => /fill="(#[0-9a-fA-F]{6})"/.exec(attrs)?.[1] ?? "";
+    const rgb = (hex: string): [number, number, number] => [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16)) as [number, number, number];
+    const lum = (color: [number, number, number]) => {
+      const f = (channel: number) => {
+        const s = channel / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * f(color[0]) + 0.7152 * f(color[1]) + 0.0722 * f(color[2]);
+    };
+    const contrast = (a: [number, number, number], b: [number, number, number]) => {
+      const left = lum(a);
+      const right = lum(b);
+      return (Math.max(left, right) + 0.05) / (Math.min(left, right) + 0.05);
+    };
+    const lightTag = tag(light);
+    const darkTag = tag(dark);
+    expect(lightTag).toMatch(/stroke="light-dark\(#8e8e93, #636366\)"/);
+    expect(darkTag).toMatch(/stroke="#[0-9a-fA-F]{6}"/);
+    expect(lightTag).not.toContain("ck-geo-nodata");
+    const low = fillOf(lightTag);
+    expect(contrast(rgb(low), [255, 255, 255])).toBeGreaterThan(3);
+    expect(contrast(rgb(fillOf(darkTag)), [0x0c, 0x0c, 0x0c])).toBeGreaterThan(3);
+  });
 });

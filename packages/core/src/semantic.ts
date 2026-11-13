@@ -147,6 +147,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type === "strip") stripChecks(spec, view, diagnostics);
+  if (type === "scatter") scatterPoints(spec, view, diagnostics);
   if (type === "radar") radarSpokes(spec, view, diagnostics);
   if (type === "pie" || type === "donut" || type === "treemap" || type === "sankey") positiveMeasure(type, spec, view, diagnostics);
   if (type === "streamgraph") streamChecks(spec, view, diagnostics);
@@ -189,7 +190,21 @@ function checkHierarchy(spec: Record<string, unknown>, diagnostics: Diagnostic[]
   const type = typeof spec.type === "string" ? spec.type : "";
   if (type !== "treemap" && type !== "sunburst" && type !== "tree") return;
   const read = readHierarchy(spec, type === "tree" ? { keepZero: true } : undefined);
-  if (!read) return;
+  if (!read) {
+    const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+    const flatTreemap = type === "treemap" && !!fieldName(encoding.x) && !!fieldName(encoding.y);
+    if (flatTreemap) return;
+    if (Array.isArray(spec.data) && spec.data.length > 0) {
+      diagnostics.push({
+        code: "CK3140",
+        severity: "error",
+        message: `${type} needs a hierarchy or a list of names and values`,
+        path: "/data",
+        hint: "Use nested children, encoding.path, or encoding.id and encoding.parent. A sunburst or treemap also accepts rows with name and value.",
+      });
+    }
+    return;
+  }
   const sized = type === "tree" && isRecord(spec.encoding) && spec.encoding.y !== undefined;
   for (const item of read.issues) {
     if (item.code === "CK3030" && type === "tree" && !sized) continue;
@@ -1891,6 +1906,42 @@ function densityForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]
       fix: [{ op: "remove", path: "/mark/steps" }],
     });
   }
+}
+
+function categorical(value: unknown): boolean {
+  if (value == null || value === "") return false;
+  return pointNumber(value) === undefined;
+}
+
+function pointNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  return quotedNumber(value);
+}
+
+function scatterPoints(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  const xField = fieldName(encoding.x);
+  const yField = fieldName(encoding.y);
+  if (!xField || !yField) return;
+  const xs = table.columns[xField];
+  const ys = table.columns[yField];
+  if (!xs || !ys) return;
+  const count = Math.max(xs.length, ys.length);
+  if (!count) return;
+  for (let i = 0; i < count; i++) {
+    const x = pointNumber(xs[i]);
+    const y = pointNumber(ys[i]);
+    if (x !== undefined && y !== undefined) return;
+    if (categorical(xs[i]) || categorical(ys[i])) return;
+  }
+  diagnostics.push({
+    code: "CK3139",
+    severity: "error",
+    message: "scatter has no point to draw",
+    path: "/data",
+    hint: "Every row is missing x or y. Add a row with both numbers.",
+  });
 }
 
 function radarSpokes(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {

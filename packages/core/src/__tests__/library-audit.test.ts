@@ -1,5 +1,11 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { bar } from "../charts/bar";
+import { scatter } from "../charts/scatter";
+import { stackedArea } from "../charts/stacked-area";
+import { sparkline } from "../charts/sparkline";
 import { boxplot } from "../charts/boxplot";
 import { donut } from "../charts/donut";
 import { pie } from "../charts/pie";
@@ -12,7 +18,10 @@ import { sankey } from "../charts/sankey";
 import { streamgraph } from "../charts/streamgraph";
 import { treemap } from "../charts/treemap";
 import { renderBarList } from "../charts/bar-list";
+import { renderSunburst } from "../renderers/extra/sunburst";
+import { renderTimeline } from "../renderers/extra/timeline";
 import { renderTree } from "../renderers/extra/tree";
+import { renderTreemap } from "../renderers/extra/treemap";
 import { ratio } from "../ink";
 import { repair, validate } from "../validate";
 
@@ -258,5 +267,140 @@ describe("bar-list contrast", () => {
       color.map((channel, index) => channel * alpha + under[index] * (1 - alpha)) as [number, number, number];
     const painted = mix(series, 0.42, mix(series, 0.14, page));
     expect(ratio([245, 245, 247], painted)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("scatter with no finite point", () => {
+  const spec = {
+    version: "1",
+    type: "scatter",
+    data: [{ x: null, y: 2 }, { x: 3, y: null }, { x: null, y: null }, {}],
+    encoding: { x: { field: "x", type: "quantitative" }, y: { field: "y", type: "quantitative" } },
+    a11y: { alt: "All points are null." },
+  };
+
+  it("fails validate instead of rendering a generic error", () => {
+    const result = validate(spec);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((item) => item.code === "CK3139")).toBe(true);
+    expect(result.errors.some((item) => item.code === "CK1006")).toBe(false);
+    expect(() => scatter.render(spec)).not.toThrow();
+  });
+
+  it("still draws a line, bar, area, and combo when every value is null", () => {
+    const rows = [{ x: null, y: null }, { x: null, y: null }];
+    for (const chart of [line, bar, stackedArea, combo, sparkline]) {
+      const drawn = chart.render({
+        version: "1",
+        type: chart.types[0],
+        data: rows,
+        encoding: { x: "x", y: "y" },
+        a11y: { alt },
+      }) ?? "";
+      expect(drawn, chart.types[0]).not.toContain("could not draw");
+      expect(drawn, chart.types[0]).not.toContain("run validate");
+    }
+  });
+});
+
+describe("flat hierarchy rows", () => {
+  const rows = [
+    { name: "A", value: 10 },
+    { name: "B", value: 20 },
+    { name: "C", value: 30 },
+  ];
+
+  it("draws a sunburst ring from name and value", () => {
+    const spec = { version: "1", type: "sunburst", data: rows, a11y: { alt: "three slices" } };
+    const result = validate(spec);
+    expect(result.ok, JSON.stringify(result.errors)).toBe(true);
+    const svg = renderSunburst(spec) ?? "";
+    expect(svg).toContain('data-ck-mark="arc"');
+    expect(svg).toContain(">A<");
+    expect(svg).not.toContain("could not draw");
+  });
+
+  it("draws a treemap from name and value without turning it into an error svg", () => {
+    const spec = { version: "1", type: "treemap", data: rows, a11y: { alt: "three slices" } };
+    const svg = renderTreemap(spec) ?? "";
+    expect(svg).toContain('data-ck-mark="tile"');
+    expect(svg).toContain(">A<");
+    expect(svg).not.toContain("could not draw");
+    const encoded = renderTreemap({ ...spec, encoding: { x: "name", y: "value" } }) ?? "";
+    expect(encoded).toContain('data-ck-mark="tile"');
+    expect(validate({ ...spec, encoding: { x: "name", y: "value" } }).ok).toBe(true);
+  });
+
+  it("tells a tree that a flat list is not one root", () => {
+    const spec = { version: "1", type: "tree", data: rows, a11y: { alt: "three slices" } };
+    const result = validate(spec);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((item) => item.code === "CK3115")).toBe(true);
+    expect(renderTree(spec)).toBeNull();
+  });
+});
+
+describe("timeline inside an explicit size", () => {
+  const example = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../examples/25-timeline.json"), "utf8")) as Record<string, unknown>;
+
+  function textYs(svg: string): number[] {
+    return [...svg.matchAll(/<text\b[^>]*\by="([0-9.]+)"/g)].map((match) => Number(match[1]));
+  }
+
+  it("keeps the shipped timeline inside 140 by 90 and 280 by 180", () => {
+    for (const [width, height] of [[140, 90], [280, 180]] as const) {
+      const svg = renderTimeline({ ...example, size: { width, height } }) ?? "";
+      const ys = textYs(svg);
+      expect(ys.length, `${width}x${height}`).toBeGreaterThan(0);
+      expect(Math.max(...ys), `${width}x${height}`).toBeLessThanOrEqual(height);
+      expect(svg).toContain('data-ck-mark="event"');
+      expect(svg).not.toContain("could not draw");
+    }
+  });
+
+  it("keeps forty events inside 280 by 180", () => {
+    const data = Array.from({ length: 40 }, (_, index) => ({
+      label: `Event ${index + 1}`,
+      date: `2020-01-${String((index % 28) + 1).padStart(2, "0")}`,
+      kind: "event",
+    }));
+    const svg = renderTimeline({
+      version: "1",
+      type: "timeline",
+      title: "Forty events",
+      data,
+      encoding: { x: "label" },
+      size: { width: 280, height: 180 },
+      a11y: { alt: "Forty events in one year." },
+    }) ?? "";
+    const ys = [...svg.matchAll(/\b[cy]="([0-9.]+)"/g)].map((match) => Number(match[1]));
+    expect(Math.max(...ys)).toBeLessThanOrEqual(180);
+    expect(svg.match(/data-ck-mark="event"/g)?.length).toBe(40);
+  });
+});
+
+describe("treemap legend leaves room for tiles", () => {
+  it("gives 32 groups a plot inside 280 by 180", () => {
+    const svg = renderTreemap({
+      version: "1",
+      type: "treemap",
+      title: "Thirty-two groups",
+      theme: "neon",
+      data: Array.from({ length: 32 }, (_, index) => ({ name: `Tile ${index + 1}`, size: 32 - index, group: `Group ${index + 1}` })),
+      encoding: { x: "name", y: "size", color: "group" },
+      size: { width: 280, height: 180 },
+      a11y: { alt: "Thirty-two groups share one small treemap." },
+    }) ?? "";
+    const tiles = [...svg.matchAll(/<rect\b[^>]*data-ck-mark="tile"[^>]*>/g)].map((match) => {
+      const y = Number(/ y="([0-9.]+)"/.exec(match[0])?.[1]);
+      const h = Number(/ height="([0-9.]+)"/.exec(match[0])?.[1]);
+      return { y, h, bottom: y + h };
+    });
+    expect(tiles.length).toBe(32);
+    expect(Math.max(...tiles.map((tile) => tile.bottom))).toBeLessThanOrEqual(180);
+    expect(Math.max(...tiles.map((tile) => tile.h))).toBeGreaterThan(12);
+    const plot = /<rect x="10" y="([0-9.]+)" width="260" height="([0-9.]+)" fill="var\(--ck-surface/.exec(svg);
+    expect(plot).toBeTruthy();
+    expect(Number(plot?.[2])).toBeGreaterThanOrEqual(48);
   });
 });
