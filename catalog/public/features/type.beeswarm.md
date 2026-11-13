@@ -1,13 +1,16 @@
 # Beeswarm / strip plot
 
-ChartKit: **none**
+ChartKit: **native**
 
 Jittered or packed 1D points
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Strip plot. mark.jitter auto packs dots that would overlap. There is no separate beeswarm type.
 
+Source: packages/core/src/charts/strip.ts
+
+No spec snippet. This row is not a single option that `validate()` can show.
 ## Other libraries
 
 | Library | Status | Option | Verification | Source |

@@ -1,13 +1,16 @@
 # Density (KDE)
 
-ChartKit: **none**
+ChartKit: **native**
 
 Kernel density estimate curve
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+1D Gaussian KDE. Groups overlay. 2D is CK3109.
 
+Source: chartkit:packages/core/src/charts/density.ts
+
+No spec snippet. This row is not a single option that `validate()` can show.
 ## Other libraries
 
 | Library | Status | Option | Verification | Source |

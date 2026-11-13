@@ -83,6 +83,8 @@ html.code-theme {
 
 * { box-sizing: border-box; }
 
+html { overflow-x: clip; }
+
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
@@ -101,7 +103,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-img, svg { max-width: 100%; }
+img, svg, canvas { max-width: 100%; }
 
 button, input, textarea { font: inherit; color: inherit; }
 
@@ -154,6 +156,7 @@ code {
   border: 0;
   border-radius: 6px;
   padding: 0.08em 0.35em;
+  overflow-wrap: anywhere;
 }
 
 .sr {
@@ -541,8 +544,10 @@ html[data-stack="element"] .fw-tabs:not(.is-ready) [data-fw-panel="element"] {
 
 .wrap {
   width: min(var(--max), 100%);
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 var(--gutter);
+  min-width: 0;
 }
 
 .hero { padding: 3.2rem 0 2.4rem; }
@@ -842,6 +847,8 @@ pre {
 }
 
 pre code {
+  overflow-wrap: normal;
+  white-space: pre;
   background: none;
   border: 0;
   padding: 0;

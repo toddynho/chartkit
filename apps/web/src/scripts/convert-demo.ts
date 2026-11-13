@@ -102,9 +102,13 @@ if (root && sourceEl && original && chartHost && kitHost && warningsEl && specEl
         if (token !== paintToken) return;
         const parsed = parseJsx(text);
         if (!parsed.root) throw new Error("No Recharts chart tag in this snippet.");
-        const ResponsiveContainer = lib.ResponsiveContainer as (props: { width: string; height: number; children?: ReactNode }) => ReactNode;
+        const bound = parsed.root.props.data;
+        const missing = bound == null || (typeof bound === "object" && "__dropped" in bound);
+        if (missing && Array.isArray(parsed.bindings.data)) parsed.root.props.data = parsed.bindings.data;
+        const width = Math.max(280, host.clientWidth || 320);
+        const height = 300;
         reactRoot = createRoot(host);
-        reactRoot.render(createElement(ResponsiveContainer, { width: "100%", height: 320 }, jsxToElement(parsed.root, lib)));
+        reactRoot.render(jsxToElement(parsed.root, lib, { width, height }));
         return;
       }
       if (source === "chartjs") {
@@ -215,14 +219,17 @@ if (root && sourceEl && original && chartHost && kitHost && warningsEl && specEl
   draw();
 }
 
-function jsxToElement(node: JsxNode, lib: Record<string, unknown>): ReactNode {
+function jsxToElement(node: JsxNode, lib: Record<string, unknown>, size?: { width: number; height: number }): ReactNode {
   const Comp = lib[node.name];
   if (typeof Comp !== "function" && (typeof Comp !== "object" || Comp === null)) return null;
   const props: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(node.props)) {
     if (value && typeof value === "object" && "__dropped" in value) continue;
-    if (key === "width" || key === "height") continue;
     props[key] = value;
+  }
+  if (size) {
+    props.width = size.width;
+    props.height = size.height;
   }
   return createElement(Comp as never, props, ...node.children.map((child) => jsxToElement(child, lib)));
 }

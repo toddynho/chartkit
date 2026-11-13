@@ -222,6 +222,14 @@ export function galleryThumb(type: string): string {
   const spec = docsSpecForType(type);
   delete spec.title;
   delete spec.subtitle;
+  if (type === "area-range" && spec.encoding && typeof spec.encoding === "object" && !Array.isArray(spec.encoding)) {
+    const encoding = { ...(spec.encoding as Record<string, unknown>) };
+    spec.encoding = encoding;
+    const y = encoding.y;
+    if (y && typeof y === "object" && !Array.isArray(y) && "title" in y) {
+      encoding.y = { ...(y as Record<string, unknown>), title: "Revenue" };
+    }
+  }
   spec.theme = galleryTheme;
   spec.legend = false;
   if (type === "bar-list" || type === "strip") spec.size = { width: 480, height: type === "strip" ? 240 : 200 };

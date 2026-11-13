@@ -42,6 +42,8 @@
 
 .ck-wrap {
   width: min(var(--max), 100%);
+  max-width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }

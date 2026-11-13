@@ -1,13 +1,16 @@
 # Streamgraph
 
-ChartKit: **none**
+ChartKit: **native**
 
 Stacked areas around a central baseline
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Wiggle, center (silhouette), zero, and expand. Inside-out order. Not in the line bundle.
 
+Source: chartkit:packages/core/src/charts/streamgraph.ts
+
+No spec snippet. This row is not a single option that `validate()` can show.
 ## Other libraries
 
 | Library | Status | Option | Verification | Source |

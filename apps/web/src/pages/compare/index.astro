@@ -2,9 +2,14 @@
 import "../../styles/ck.css";
 import "../../styles/compare.css";
 import Base from "../../layouts/Base.astro";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { loadCompareIndex, loadConvert } from "../../lib/batch3";
+import { repoRoot } from "../../lib/repo-root";
 
 const page = loadCompareIndex();
+const featureFile = JSON.parse(readFileSync(join(repoRoot(), "catalog/public/features.json"), "utf8")) as { generated: string };
+const generated = featureFile.generated;
 const count = page.rivals.length;
 const countWord = count === 20 ? "Twenty" : String(count);
 
@@ -63,7 +68,7 @@ const description = `ChartKit against ${count} libraries. Median per library: ${
           <a class="ck-link" href="/features#method">How it is scored</a>
         </div>
         <p class="cmp-fine">
-          Other libraries checked {page.dateChecked} against types and schemas. ChartKit rechecked {page.chartkitRechecked} on {page.chartkitCommit.slice(0, 8)}.
+          features.json generated {generated}. Other libraries checked {page.dateChecked} against types and schemas. ChartKit rechecked {page.chartkitRechecked} on {page.chartkitCommit.slice(0, 8)}.
         </p>
       </div>
       <div class="ck-panel cmp-card">

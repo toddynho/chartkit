@@ -1,15 +1,16 @@
 # Tree / org chart / dendrogram
 
-ChartKit: **none**
+ChartKit: **native**
 
 Hierarchical node-link layout
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-probe hit reviewed: match marks.ts:93 is the word "treemap"
+Tidy and cluster. Dots, not boxes.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/charts/tree.ts
 
+No spec snippet. This row is not a single option that `validate()` can show.
 ## Other libraries
 
 | Library | Status | Option | Verification | Source |

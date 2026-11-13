@@ -7,7 +7,7 @@ import { applyHeroColor, heroPaints } from "./hero-accent";
  * Geo contributes choropleth and map-points only. Atlases are not types.
  */
 
-export const HERO_TYPE_COUNT = 41;
+/** Set after heroTypes. The registry length, not a handwritten total. */
 
 const SIZE = { width: 520, height: 300 };
 
@@ -123,9 +123,7 @@ export const heroGroups: { id: HeroGroupId; label: string; kicker: string; types
 
 export const heroTypes: HeroTypeMeta[] = heroGroups.flatMap((group) => group.types);
 
-if (heroTypes.length !== HERO_TYPE_COUNT) {
-  throw new Error(`hero catalog has ${heroTypes.length} types, expected ${HERO_TYPE_COUNT}`);
-}
+export const HERO_TYPE_COUNT = heroTypes.length;
 
 const seen = new Set<string>();
 for (const type of heroTypes) {

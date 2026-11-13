@@ -1,7 +1,7 @@
 ---
 import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
-import { optionText, pretty } from "../../lib/spec-text";
+import { optionText, pretty, readableCheck } from "../../lib/spec-text";
 import { loadFeature, loadFeatureIndex } from "../../lib/surfaces";
 
 export function getStaticPaths() {
@@ -33,8 +33,7 @@ function emptyNote(badge: string): string {
     <p class="lede">{feature.desc}</p>
     <p>
       Matrix status <code>{chartkit.status}</code>
-      {chartkit.tier ? ` (${chartkit.tier})` : ""}. Verification <code>{chartkit.verified}</code> ({chartkit.strength}
-      ).
+      {chartkit.tier ? ` (${chartkit.tier})` : ""}. Verification {readableCheck(chartkit.verified, chartkit.strength)}.
       {chartkit.apiPaths.length ? (
         <>
           {" "}
@@ -104,7 +103,7 @@ function emptyNote(badge: string): string {
                     {cell?.note ? <span class="cell-note">{cell.note}</span> : null}
                   </td>
                   <td>
-                    {cell?.verified ?? "—"} ({cell?.strength ?? "unknown"})
+                    {readableCheck(cell?.verified ?? "—", cell?.strength ?? "unknown")}
                   </td>
                   <td>
                     <code>{cell?.source[0] ?? "—"}</code>

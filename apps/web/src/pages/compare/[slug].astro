@@ -5,6 +5,7 @@ import { validate } from "@chartkitdev/core/validate";
 import { samples } from "@chartkitdev/convert";
 import Base from "../../layouts/Base.astro";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
+import { readableCheck, readableOption } from "../../lib/spec-text";
 
 export function getStaticPaths() {
   return loadCompareIndex().rivals.map(({ library }) => ({ params: { slug: library.id } }));
@@ -152,8 +153,8 @@ const description = `ChartKit vs ${library.name}. ${page.counts.win} ahead, ${pa
                   <a class="cmp-feat" href={`/features/${row.id}`}>{row.label}</a>
                   <span><span class={`ck-rank ck-rank--${rank(row.ours)}`}>{row.ours}</span></span>
                   <span><span class={`ck-rank ck-rank--${rank(row.theirs)}`}>{row.theirs}</span></span>
-                  <span class="cmp-opt" title={row.option}>{row.option}</span>
-                  <span class:list={["cmp-check", row.strength === "strong" && "is-strong", row.strength === "weak" && "is-weak"]}>{row.verified} · {row.strength}</span>
+                  <span class="cmp-opt" title={readableOption(row.option)}>{readableOption(row.option)}</span>
+                  <span class:list={["cmp-check", row.strength === "strong" && "is-strong", row.strength === "weak" && "is-weak"]}>{readableCheck(row.verified, row.strength)}</span>
                   <span class="cmp-src" title={row.source}>{row.source}</span>
                 </div>
               )),

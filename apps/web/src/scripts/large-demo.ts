@@ -35,7 +35,12 @@ function sensor(n: number, origin: number): { x: Float64Array; y: Float64Array }
   return { x, y };
 }
 
-function lineSpec(x: Float64Array, y: Float64Array, mode: Mode, title: string, alt: string): ChartSpec {
+function frameWidth(host: HTMLElement): number {
+  const width = Math.round(host.clientWidth);
+  return Math.max(280, width || 320);
+}
+
+function lineSpec(x: Float64Array, y: Float64Array, mode: Mode, title: string, alt: string, width: number): ChartSpec {
   const sampling = mode === "none" ? "none" : "lttb";
   return {
     version: "1",
@@ -47,7 +52,7 @@ function lineSpec(x: Float64Array, y: Float64Array, mode: Mode, title: string, a
     mark: { curve: "linear", points: "none" },
     legend: false,
     axes: { x: { title: "Sample" }, y: { title: "Reading" } },
-    size: { width: 720, height: 320 },
+    size: { width, height: 320 },
     a11y: { alt },
   } as unknown as ChartSpec;
 }
@@ -73,9 +78,10 @@ function draw(): void {
   stream = null;
   const big = sensor(MILLION, 0);
   const started = performance.now();
+  const width = frameWidth(millionHost);
   million = mount(
     millionHost,
-    lineSpec(big.x, big.y, mode, "Sensor reading, 1,000,000 samples", "A million-point sensor line. Spikes and short gaps stay visible after downsampling."),
+    lineSpec(big.x, big.y, mode, "Sensor reading, 1,000,000 samples", "A million-point sensor line. Spikes and short gaps stay visible after downsampling.", width),
   );
   const painter = mode === "canvas" ? "Canvas marks, SVG axes" : mode === "svg" ? "SVG with LTTB" : "SVG, every point";
   const reportMount = () => {
@@ -92,7 +98,7 @@ function draw(): void {
   const streamStarted = performance.now();
   stream = mount(
     streamHost,
-    lineSpec(open.x, open.y, mode, "Live window", "A 100,000-point sensor window that appends and keeps the latest samples."),
+    lineSpec(open.x, open.y, mode, "Live window", "A 100,000-point sensor window that appends and keeps the latest samples.", frameWidth(streamHost)),
   );
   let streamMounted = 0;
   const reportStream = () => {

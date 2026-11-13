@@ -27432,20 +27432,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:swarm)['\"`]|(?:^|[\\s{,;])\\w*(?:swarm)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:swarm)"
+            "ChartKitChartSpecV1.type=strip",
+            "mark.jitter"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:swarm)['\"`]|(?:^|[\\s{,;])\\w*(?:swarm)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:swarm)"
+              "kind": "dts-path",
+              "path": "packages/core/src/charts/strip.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Strip plot. mark.jitter auto packs dots that would overlap. There is no separate beeswarm type.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -83493,20 +83494,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:angular)['\"`]|(?:^|[\\s{,;])\\w*(?:angular)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:angular)"
+            "@chartkitdev/angular"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:angular)['\"`]|(?:^|[\\s{,;])\\w*(?:angular)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:angular)"
+              "kind": "source-review",
+              "path": "packages/angular/package.json"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Standalone Angular component in @chartkitdev/angular. Not part of the core schema grep.",
+          "verified": "source-review",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -95831,29 +95832,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1912,
+    "strong": 1917,
     "weak": 1730,
-    "absence": 1438,
+    "absence": 1433,
     "unknown": 443,
     "byStatus": {
-      "native": 2754,
+      "native": 2759,
       "unknown": 443,
       "manual": 425,
-      "none": 1481,
+      "none": 1476,
       "partial": 282,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 197,
+        "strong": 202,
         "weak": 31,
-        "absence": 33,
+        "absence": 28,
         "unknown": 4,
-        "native": 207,
+        "native": 212,
         "partial": 11,
         "plugin": 0,
         "manual": 0,
-        "none": 43
+        "none": 38
       },
       "chartjs": {
         "strong": 44,

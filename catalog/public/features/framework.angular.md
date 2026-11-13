@@ -1,13 +1,16 @@
 # Angular
 
-ChartKit: **none**
+ChartKit: **native**
 
 Angular integration
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `source-review` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Standalone Angular component in @chartkitdev/angular. Not part of the core schema grep.
 
+Source: packages/angular/package.json
+
+No spec snippet. This row is not a single option that `validate()` can show.
 ## Other libraries
 
 | Library | Status | Option | Verification | Source |

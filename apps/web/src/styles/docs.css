@@ -617,7 +617,10 @@ html[data-charts-open="1"] .side-charts__fade,
 .docs-frame .breadcrumb__current { color: #17181a; }
 
 .docs-frame .docs-main img { max-width: 100%; height: auto; border-radius: 12px; }
-.docs-frame .docs-main pre { overflow-x: auto; }
+.docs-frame .docs-main { min-width: 0; max-width: 100%; }
+.docs-frame .docs-main pre,
+.docs-frame .docs-main figure.code,
+.docs-frame .docs-main .code { max-width: 100%; overflow-x: auto; }
 
 .docs-frame code {
   font-family: var(--mono);

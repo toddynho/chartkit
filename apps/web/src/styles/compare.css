@@ -147,7 +147,7 @@ button.cmp-sort.is-on { background: #17181a; color: #fff; }
   background: #fff;
 }
 .cmp-tabs { gap: 8px; }
-.cmp-table { overflow-x: auto; }
+.cmp-table { max-width: 100%; overflow-x: auto; }
 .cmp-grid {
   min-width: 900px;
   display: grid;

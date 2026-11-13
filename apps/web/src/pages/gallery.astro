@@ -3,7 +3,7 @@ import "../styles/v2.css";
 import "../styles/ck.css";
 import Base from "../layouts/Base.astro";
 import { chartByType } from "../data/chart-types";
-import { chartPage, galleryChartCount, sidebarChartGroups } from "../data/docs-catalog";
+import { chartPage, coreRegistryCount, galleryChartCount, geoRegistryTypes, sidebarChartGroups } from "../data/docs-catalog";
 import { HERO_TYPE_COUNT, heroTypes } from "../data/hero-catalog";
 import { docsSpecForType } from "../data/live-specs";
 import { galleryThumb } from "../data/marketing-charts";
@@ -60,7 +60,7 @@ const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) =>
       <p class="ck-eye">Gallery · {count} charts</p>
       <h1 class="ck-h1">Every chart. One spec shape.</h1>
       <p class="ck-lede">
-        One card per chart type in the registry. Open a card for the docs, or open the same spec in the playground.
+        One card per chart type in the registry: {coreRegistryCount} in core, {geoRegistryTypes.length} in geo. Open a card for the docs, or open the same spec in the playground.
       </p>
       <div class="filter-track" role="tablist" aria-label="Chart groups">
         {

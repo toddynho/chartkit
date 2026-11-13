@@ -333,6 +333,10 @@ if (heroIds.join() !== registryIds.join()) {
 /** One card per registry type. This is the gallery count. */
 export const galleryChartCount = registryChartTypes.length;
 
+/** Core is the schema enum plus the deferred planning types. Geo is choropleth and map-points. */
+export const geoRegistryTypes = registryChartTypes.filter((type) => type === "choropleth" || type === "map-points");
+export const coreRegistryCount = registryChartTypes.length - geoRegistryTypes.length;
+
 /** Docs chart pages: registry types, plus the filled-line note at `/docs/charts/area`. */
 export const chartPageTypes = [...new Set([...chartTypes.map((chart) => chart.type), ...chartDocs.map((chart) => chart.type), ...registryChartTypes])];
 

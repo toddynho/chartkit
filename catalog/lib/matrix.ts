@@ -125,9 +125,12 @@ export function librariesExceptChartkit(): MatrixLibrary[] {
 
 export function optionText(cell: MatrixCell | undefined): string {
   const paths = cell?.apiPaths ?? [];
-  const concrete = paths.filter((path) => !path.startsWith("~"));
-  const shown = (concrete.length ? concrete : paths).slice(0, 2);
-  return shown.length ? shown.join(", ") : "—";
+  const concrete = paths.filter((path) => !path.startsWith("~") && !path.includes("|") && !path.includes("\\"));
+  if (concrete.length) return concrete.slice(0, 2).join(", ");
+  const probe = paths[0] ?? "";
+  if (!probe) return "—";
+  const token = probe.replace(/^~/, "").split("|")[0]?.replace(/[^\w./-]/g, "") ?? "";
+  return token ? `grep: ${token}` : "grep only";
 }
 
 export type Call = "loss" | "win" | "tie" | "unknown";

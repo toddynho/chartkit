@@ -9,6 +9,19 @@ import { loadPublishedBundle, loadPublishedSsr } from "../data/published-size";
 import { repoRoot } from "../lib/repo-root";
 
 const page = loadBenchmarksPage();
+const publishedBench = JSON.parse(readFileSync(join(repoRoot(), "catalog/public/benchmarks.json"), "utf8")) as {
+  browserMs: { shape: string; points: number; chartkit: { initial: number; update: number }; uplot: { initial: number; update: number } }[];
+  headline: { lineGzipBytes: number };
+};
+publishedBench.browserMs.forEach((row, index) => {
+  const shown = page.browserRows[index];
+  if (!shown || Number(shown.ckI) !== row.chartkit.initial || Number(shown.upI) !== row.uplot.initial || Number(shown.ckU) !== row.chartkit.update || Number(shown.upU) !== row.uplot.update) {
+    throw new Error(`benchmarks page browser row ${row.shape} ${row.points} does not match benchmarks.json`);
+  }
+});
+if (Number(page.headline.lineGzipBytes.replace(/,/g, "")) !== publishedBench.headline.lineGzipBytes) {
+  throw new Error("benchmarks page line gzip does not match benchmarks.json");
+}
 const paint = loadPublishedPaint();
 const bundle = loadPublishedBundle();
 const ssr = loadPublishedSsr();

@@ -31,6 +31,8 @@
 .ck-frame {
   position: relative;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   --ck-background: transparent;
   --ck-surface: transparent;
   --ck-text: var(--ink);
@@ -63,7 +65,8 @@
 }
 
 .cover-frame,
-.ck-frame svg { width: 100%; height: auto; display: block; }
+.ck-frame svg,
+.ck-frame canvas { width: 100%; max-width: 100%; min-width: 0; height: auto; display: block; }
 
 .gallery-index .cover-frame,
 .example-grid .cover-frame {
@@ -267,7 +270,7 @@
 .counts { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; list-style: none; }
 .counts b { font-variant-numeric: tabular-nums; }
 
-.table-wrap { overflow-x: auto; margin: 0 0 1rem; }
+.table-wrap { display: block; width: 100%; max-width: 100%; overflow-x: auto; margin: 0 0 1rem; }
 .paint-matrix, .size-matrix { font-size: 12px; border-collapse: separate; }
 .paint-matrix th, .paint-matrix td, .size-matrix th, .size-matrix td { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .paint-matrix th:first-child, .paint-matrix td:first-child,
