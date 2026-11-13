@@ -197,6 +197,12 @@ function placeReadout(
   hasLabel: boolean,
 ): { valueY: number; labelY: number; valueSize: number; labelSize: number; hubR: number } {
   const hubR = Math.min(6.5, Math.max(4.5, stroke * 0.24));
+  if (radius < 78) {
+    const valueSize = Math.round(Math.min(26, Math.max(16, radius * 0.4)));
+    const valueY = cy - Math.max(12, radius * 0.22);
+    const labelY = valueY + valueSize * 0.65 + 10;
+    return { valueY, labelY, valueSize, labelSize: 11, hubR };
+  }
   const labelSize = 12;
   const gap = 10;
   let valueSize = Math.round(Math.min(52, Math.max(28, radius * 0.48)));

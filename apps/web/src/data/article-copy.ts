@@ -141,7 +141,7 @@ export const articleSections: Record<string, DocSection[]> = {
   ],
   errors: [
     section("Ranges", [
-      "CK1xxx is structure, CK2xxx is data, CK3xxx is semantics, CK4xxx is design. `CK1001` is invalid JSON. `CK1004` is a missing required field. This rail shows the code and does not draw a chart when `validate()` fails.",
+      "`CK1004` is a missing required field.",
     ]),
   ],
   themes: [
@@ -173,11 +173,7 @@ export const articleSections: Record<string, DocSection[]> = {
       "The response rail validates first. When there are errors it shows the CK codes and skips `render()`. Warnings still draw the chart.",
     ]),
   ],
-  "llms-txt": [
-    section("Where it lives", [
-      "`/llms.txt` is the short agent index: the rules, the repair loop, and one spec per chart type. `/llms-full.txt` is the long file. This site serves both.",
-    ]),
-  ],
+  "llms-txt": [],
   mcp: [
     section("Install", [
       "`npx -y @chartkitdev/mcp` starts the server. It speaks stdio and calls `validate`, `repair`, and `render` in-process. `render_chart` is the tool that calls Cloud.",

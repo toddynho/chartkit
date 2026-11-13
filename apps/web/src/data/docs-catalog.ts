@@ -508,7 +508,7 @@ export function crumbsFor(href: string): Crumb[] {
       if (!item) continue;
       const trail: Crumb[] = [{ href: "/docs", label: "Docs" }];
       if (!(group.label === "Start" && item.href === "/docs")) trail.push({ href: "", label: group.label });
-      if (block.label) trail.push({ href: "", label: block.label });
+      if (block.label && block.label !== group.label) trail.push({ href: "", label: block.label });
       trail.push({ href: canonical, label: item.label });
       return trail;
     }

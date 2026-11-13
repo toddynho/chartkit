@@ -633,13 +633,26 @@ body:has(.play) main {
 
 .play-swatches { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
-.play-swatches button {
+.play-swatches button:not(.play-add) {
   all: unset;
   cursor: pointer;
   width: 22px;
   height: 22px;
   border-radius: 6px;
   box-shadow: 0 0 0 2px #fff, 0 0 0 1px #e6e6e2;
+}
+
+.play-swatches button.play-add {
+  all: unset;
+  cursor: pointer;
+  width: auto;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px #e6e6e2;
+  font-size: 12px;
+  line-height: 22px;
+  color: #17181a;
 }
 
 .play-swatches button.is-on { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #17181a; }

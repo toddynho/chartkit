@@ -1297,7 +1297,23 @@ html.is-rail-drag * {
 @media (max-width: 760px) {
   .docs-frame,
   .docs-frame:not(:has(.rail-stack)) { grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .docs-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 16px 0;
+    padding: 8px 12px;
+    border: 1px solid #e6e6e2;
+    border-radius: 999px;
+    background: #fff;
+    color: #17181a;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
   .docs-sidebar {
+    display: none;
     position: static;
     width: auto;
     height: auto;
@@ -1308,13 +1324,15 @@ html.is-rail-drag * {
     border-right: none;
     border-bottom: 1px solid #e6e6e2;
   }
+  .docs-sidebar.is-open { display: block; }
   .docs-sidebar__sticky {
     position: static;
     height: auto;
-    overflow: visible;
+    max-height: 70vh;
+    overflow: auto;
   }
-  .docs-menu,
-  .docs-backdrop { display: none; }
+  .docs-backdrop.is-open { display: block; position: fixed; inset: 0; background: rgba(23, 24, 26, 0.28); z-index: 20; }
+  .docs-sidebar.is-open { position: relative; z-index: 21; background: var(--bg); }
   .page-nav { grid-template-columns: 1fr; }
 }
 

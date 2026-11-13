@@ -201,7 +201,7 @@ export const heroCharts: HeroChart[] = [
     })),
     encoding: { x: "week", y: ["p50", "p95"] },
     mark: { points: "none" },
-    legend: false,
+    legend: { position: "bottom" },
     size: SIZE,
     a11y: { alt: "p50 stays near 50 milliseconds while p95 climbs from 62 to 92." },
   }),

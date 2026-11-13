@@ -183,7 +183,7 @@ body {
 .dash-summary span.is-down { color: var(--d-down); }
 .dash-chart { flex: 1; min-height: 0; min-width: 0; max-width: 100%; position: relative; overflow: hidden; }
 .dash-chart svg, .dash-chart canvas { width: 100%; max-width: 100%; min-width: 0; height: 100%; display: block; }
-.dash-spacer { height: 96px; }
+.dash-spacer { height: 148px; }
 
 /* Floating bar */
 .dash-float {
@@ -480,7 +480,9 @@ html.is-bare .dash-top { display: none !important; }
   .dash-side .dash-k { display: none; }
   .dash-top { overflow: auto; }
   .dash-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .dash-panel { grid-column: 1 / -1; }
+  .dash-panel { grid-column: 1 / -1; min-height: 96px; }
+  .dash-panel:has(.dash-chart) { min-height: 220px; }
+  .dash-top { overflow-x: auto; max-width: 100%; }
   .dash-desk { display: none; }
   .dash-pop__extra { display: block; }
   .dash-name em { max-width: 28vw; }
