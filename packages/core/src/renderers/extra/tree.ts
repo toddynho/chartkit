@@ -85,7 +85,19 @@ export function renderTree(spec: Record<string, unknown>): string | null {
     top: topPad + (legend?.position === "top" ? legendH : 0),
     bottom: frame.height - bottomPad - (legend && legend.position !== "top" ? legendH : 0),
   };
-  if (box.right - box.left < 40 || box.bottom - box.top < 40) return null;
+  if (box.right - box.left < 40 || box.bottom - box.top < 40) {
+    const minW = Math.min(40, Math.max(16, frame.width - 8));
+    const minH = Math.min(40, Math.max(16, frame.height - 8));
+    if (box.right - box.left < minW) {
+      box.left = 4;
+      box.right = Math.min(frame.width - 4, box.left + minW);
+    }
+    if (box.bottom - box.top < minH) {
+      box.top = 4;
+      box.bottom = Math.min(frame.height - 4, box.top + minH);
+    }
+    if (box.right - box.left < 16 || box.bottom - box.top < 16) return null;
+  }
 
   const placed = new Map<LNode, { x: number; y: number; r: number }>();
   const radius = radiusScale(depths);

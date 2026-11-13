@@ -9,7 +9,7 @@ import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { canvasWanted } from "../render-mode";
 import { beginFrame, dataSampling, extentAndMinmax, noteDense, noteLinear, notedLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
-import { chartSize, exportList, readColor } from "../frame";
+import { asNumber, chartSize, exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
 import { legendPinned, legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
@@ -1259,8 +1259,9 @@ function bars(
   const slot = model.barSlot[index] ?? (stacked ? 0 : barIndex);
   const slots = model.barSlots || (stacked ? 1 : Math.max(1, barCount));
   for (let i = 0; i < series.values.length; i++) {
-    const value = stacked ? layers!.top[index][i] : series.values[i];
-    if (value === null && !stacked) continue;
+    const raw = series.values[i];
+    if (raw === null) continue;
+    const value = stacked ? layers!.top[index][i] : raw;
     const baseline = stacked ? layers!.bottom[index][i] : 0;
     const band = xScale.band(i);
     const inner = band.size * (1 - gap);
@@ -1272,7 +1273,6 @@ function bars(
     const fill = series.colors?.[i] ?? series.color;
     const caption = series.ruleLabels?.[i] ?? "";
     const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
-    const raw = series.values[i];
     const valueAttr = typeof raw === "number" && Number.isFinite(raw) ? ` data-ck-value="${numKey(raw)}"` : "";
     const orient = horizontal ? ` data-ck-orient="h"` : "";
     const extra =
@@ -1297,6 +1297,7 @@ function bars(
           width = Math.max(0, width - split);
         }
       }
+      if (stacked && width === 0) continue;
       const edge = b >= a ? "right" : "left";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width);
@@ -1309,6 +1310,7 @@ function bars(
         if (b <= a) y += split;
         height = Math.max(0, height - split);
       }
+      if (stacked && height === 0) continue;
       const edge = b <= a ? "top" : "bottom";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width);
@@ -3964,7 +3966,7 @@ function toNumber(value: unknown): number | null {
 }
 
 function toNullableNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
+  return asNumber(value);
 }
 
 function num(value: number | null): number {

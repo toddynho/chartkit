@@ -1,6 +1,6 @@
 import { asNumber, column, fieldOf, knownField, readFrame, readTable } from "../frame";
 import { formatValue } from "../format";
-import { labelInk } from "../ink";
+import { labelInkAlpha } from "../ink";
 import { cssVar } from "../theme";
 import { closeChart, esc, font, n, openChart } from "../svg";
 
@@ -38,7 +38,9 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
   const ink = cssVar("text", frame.preset.text);
   const muted = cssVar("muted", frame.preset.muted);
   const fill = cssVar("series-1", frame.preset.series[0] ?? "#1f6b45");
-  const onFill = labelInk(fill);
+  const background = cssVar("background", frame.preset.background);
+  const onFill = labelInkAlpha(fill, 0.42, background, 0.14);
+  const rowFill = labelInkAlpha(fill, 0.72, background);
   const valueCol = 64;
   const trackRight = width - valueCol;
   const parts = [openChart({ ...frame, height, renderer: "bar-list" })];
@@ -48,7 +50,7 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
     if (rowMode) {
       const span = Math.max(0, width - 8);
       const filled = Math.max(12, (row.value / max) * span);
-      const rowInk = filled < row.label.length * 6.6 + 16 ? ink : onFill;
+      const rowInk = filled < row.label.length * 6.6 + 16 ? ink : rowFill;
       parts.push(
         `<rect data-ck-mark="bar" data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.72" />` +
           `<text x="8" y="${n(y + 18)}" fill="${rowInk}" font-size="12" font-weight="560">${esc(row.label)}</text>` +

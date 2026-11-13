@@ -147,6 +147,8 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type === "strip") stripChecks(spec, view, diagnostics);
+  if (type === "radar") radarSpokes(spec, view, diagnostics);
+  if (type === "pie" || type === "donut" || type === "treemap" || type === "sankey") positiveMeasure(type, spec, view, diagnostics);
   if (type === "streamgraph") streamChecks(spec, view, diagnostics);
   else streamForeign(spec, diagnostics);
   if (type === "density") densityChecks(spec, view, diagnostics);
@@ -348,23 +350,35 @@ function checkColumn(
 ): void {
   const declared = channel.type;
   const quantitative = declared === "quantitative" || (declared === undefined && inferType(values) === "quantitative");
-  if (declared === "quantitative" || (declared === undefined && hasMixedNumbers(values))) {
-    const bad: { index: number; value: unknown }[] = [];
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i];
-      if (value === null || value === undefined) continue;
-      if (typeof value !== "number" || !Number.isFinite(value)) bad.push({ index: i, value });
-    }
-    if (bad.length > 0 && (declared === "quantitative" || quantitative || hasMixedNumbers(values))) {
-      const first = bad[0];
-      diagnostics.push({
-        code: "CK2002",
-        severity: "error",
-        message: `field ${JSON.stringify(field)} has non-numeric values (${bad.length} of ${values.length} rows, first at row ${first.index}: ${JSON.stringify(first.value)})`,
-        path: channel.path,
-        hint: 'quantitative channels need numbers; strip units like "$" or "%", or set type: "nominal"',
-      });
-    }
+  const measure = declared === "quantitative" || /^\/encoding\/(?:y(?:\/|$)|size(?:\/|$)|low(?:\/|$)|high(?:\/|$)|open(?:\/|$)|close(?:\/|$)|volume(?:\/|$)|error(?:\/|$))/.test(channel.path);
+  const bad: { index: number; value: unknown }[] = [];
+  let present = 0;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value === null || value === undefined) continue;
+    present += 1;
+    if (typeof value !== "number" || !Number.isFinite(value)) bad.push({ index: i, value });
+  }
+  const quoted = bad.length > 0 && bad.every((item) => quotedNumber(item.value) !== undefined);
+  const checkNumbers = declared === "quantitative" || (declared === undefined && hasMixedNumbers(values)) || (measure && quoted && bad.length === present);
+  if (checkNumbers && bad.length > 0 && (declared === "quantitative" || quantitative || hasMixedNumbers(values) || quoted)) {
+    const first = bad[0];
+    diagnostics.push({
+      code: "CK2002",
+      severity: "error",
+      message: `field ${JSON.stringify(field)} has non-numeric values (${bad.length} of ${values.length} rows, first at row ${first.index}: ${JSON.stringify(first.value)})`,
+      path: channel.path,
+      hint: quoted
+        ? "These are numeric strings. repair() writes them as numbers."
+        : 'quantitative channels need numbers; strip units like "$" or "%", or set type: "nominal"',
+      fix: quoted
+        ? bad.map((item) => ({
+            op: "replace" as const,
+            path: cellPointer(table, field, item.index),
+            value: quotedNumber(item.value),
+          }))
+        : undefined,
+    });
   }
 
   const missing: number[] = [];
@@ -1652,6 +1666,22 @@ function temporalFix(x: unknown): JsonPatchOperation[] {
   return [{ op: "add", path: "/encoding/x/type", value: "temporal" }];
 }
 
+const QUOTED_NUMBER = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+function quotedNumber(value: unknown): number | undefined {
+  if (typeof value !== "string") return undefined;
+  const text = value.trim();
+  if (!QUOTED_NUMBER.test(text)) return undefined;
+  const number = Number(text);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function cellPointer(table: DataTable, field: string, index: number): string {
+  if (table.kind === "numbers") return `/data/${index}`;
+  if (table.kind === "columns") return `/data/columns/${field}/${index}`;
+  return `/data/${index}/${field}`;
+}
+
 function inferType(values: ArrayLike<unknown>): "quantitative" | "temporal" | "nominal" {
   let present = 0;
   let numeric = 0;
@@ -1863,6 +1893,51 @@ function densityForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]
   }
 }
 
+function radarSpokes(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  const xField = typeof encoding.x === "string" ? encoding.x : isRecord(encoding.x) && typeof encoding.x.field === "string" ? encoding.x.field : "";
+  const column = xField ? table.columns[xField] : undefined;
+  if (!column) return;
+  const spokes = new Set<string>();
+  for (const value of column) if (value != null && value !== "") spokes.add(String(value));
+  if (spokes.size > 0 && spokes.size < 3) {
+    diagnostics.push({
+      code: "CK3137",
+      severity: "error",
+      message: "radar needs at least 3 spokes",
+      path: "/encoding/x",
+      hint: "A radar polygon needs three or more categories.",
+    });
+  }
+}
+
+function positiveMeasure(type: string, spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  const y = encoding.y;
+  const field = typeof y === "string" ? y : isRecord(y) && typeof y.field === "string" ? y.field : "";
+  const column = field ? table.columns[field] : undefined;
+  if (!column) return;
+  let seen = 0;
+  let positive = 0;
+  for (const value of column) {
+    const number = typeof value === "number" && Number.isFinite(value) ? value : quotedNumber(value);
+    if (number === undefined) continue;
+    seen += 1;
+    if (number > 0) positive += 1;
+  }
+  if (seen > 0 && positive === 0) {
+    diagnostics.push({
+      code: "CK3138",
+      severity: "error",
+      message: `${type} has no positive value to draw`,
+      path: "/encoding/y",
+      hint: "Every value is zero or negative. Use a positive number.",
+    });
+  }
+}
+
 function streamChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
   const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
   if (!encoding) return;
@@ -1911,6 +1986,20 @@ function streamChecks(spec: Record<string, unknown>, table: DataTable, diagnosti
       hint: 'set mark.streamOffset to "zero". The baseline is not zero unless you ask for it',
       fix: [{ op: mark ? "replace" : "add", path: "/mark", value: next }],
     });
+  }
+  const xField = typeof encoding.x === "string" ? encoding.x : isRecord(encoding.x) && typeof encoding.x.field === "string" ? encoding.x.field : "";
+  if (xField && table.columns[xField]) {
+    const positions = new Set<string>();
+    for (const value of table.columns[xField]) if (value != null && value !== "") positions.add(String(value));
+    if (positions.size > 0 && positions.size < 2) {
+      diagnostics.push({
+        code: "CK3136",
+        severity: "error",
+        message: "streamgraph needs at least 2 positions",
+        path: "/encoding/x",
+        hint: "One x value has nothing to connect. Add another row.",
+      });
+    }
   }
   if (seriesCount > 12) {
     diagnostics.push({

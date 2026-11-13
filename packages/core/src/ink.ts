@@ -146,6 +146,36 @@ export function labelInk(fill: string): string {
   return light === dark ? light : `light-dark(${light}, ${dark})`;
 }
 
+/**
+ * Ink for text sitting on a translucent bar. `barAlpha` is the bar's opacity
+ * over a track of `trackAlpha` (0 when there is no track), both over `background`.
+ */
+export function labelInkAlpha(fill: string, barAlpha: number, background: string, trackAlpha = 0): string {
+  const fg = resolve(fill);
+  const bg = resolve(pageUnder(background));
+  if (!fg || !bg) return labelInk(fill);
+  const layer = (color: RGB, page: RGB) => {
+    const track = trackAlpha > 0 ? over(color, trackAlpha, page) : page;
+    return over(color, barAlpha, track);
+  };
+  const light = choose(layer(fg.light, bg.light));
+  const dark = choose(layer(fg.dark, bg.dark));
+  return light === dark ? light : `light-dark(${light}, ${dark})`;
+}
+
+/** A transparent chart shows the page. Light pages are white; dark pages are near-black. */
+function pageUnder(background: string): string {
+  return background.replaceAll("transparent", "light-dark(#ffffff, #0c0c0c)");
+}
+
+function over(color: RGB, alpha: number, page: RGB): RGB {
+  return [
+    color[0] * alpha + page[0] * (1 - alpha),
+    color[1] * alpha + page[1] * (1 - alpha),
+    color[2] * alpha + page[2] * (1 - alpha),
+  ];
+}
+
 /** Lower of the light-scheme and dark-scheme contrast ratios for labelInk(fill). */
 export function labelContrast(fill: string): number {
   return inkContrast(labelInk(fill), fill);

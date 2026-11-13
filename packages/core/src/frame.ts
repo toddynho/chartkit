@@ -255,8 +255,16 @@ export function column(table: DataTable, field: string | undefined): unknown[] {
   return Array.isArray(values) ? values : Array.from(values);
 }
 
+const NUMERIC_STRING = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+/** A finite number, or a string that is only that number. Units such as "10%" stay null. */
 export function asNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  if (!NUMERIC_STRING.test(text)) return null;
+  const number = Number(text);
+  return Number.isFinite(number) ? number : null;
 }
 
 export interface ColorEncoding {
