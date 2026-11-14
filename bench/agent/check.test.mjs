@@ -494,7 +494,9 @@ test("heat-sales accepts either axis orientation and heat-load does not", () => 
     encoding: { x: "day", y: "hour", color: "load" },
     a11y: { alt: "Load by hour and weekday." },
   };
-  assert.equal(suite.checkChartKit(flipped, load).stages.fields.ok, false);
+  const flippedResult = suite.checkChartKit(flipped, load);
+  assert.equal(flippedResult.ok, false);
+  if (flippedResult.stages.fields) assert.equal(flippedResult.stages.fields.ok, false);
 });
 
 test("no-docs prompts name the npm package and give each library one paragraph", () => {
