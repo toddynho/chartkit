@@ -29,7 +29,7 @@ if (!painted.ok || !painted.svg.includes("<svg")) {
         ))
       }
     </div>
-    <div class="qs-split">
+    <div class="qs-stack">
       <div class="qs-code">
         {
           quickStacks.map((stack) => (
@@ -56,7 +56,7 @@ if (!painted.ok || !painted.svg.includes("<svg")) {
   <div role="tabpanel" id="qs-panel-agent" aria-labelledby="qs-tab-agent" data-qs-panel="agent" hidden>
     <p class="qs-label">Paste this into Cursor, Claude, or ChatGPT.</p>
     <figure class="code">
-      <figcaption>prompt</figcaption>
+      <figcaption>text</figcaption>
       <pre><code>{agentPrompt}</code></pre>
     </figure>
     <p>
@@ -69,7 +69,7 @@ if (!painted.ok || !painted.svg.includes("<svg")) {
     <p class="qs-more">
       <a href="/docs/mcp">MCP server</a>
       <span aria-hidden="true"> · </span>
-      <a href="/docs/agents">Agents</a>
+      <a href="/docs/validate">Validate</a>
     </p>
     <p class="qs-outcome">You should now see a chart.</p>
     <div class="qs-chart" set:html={painted.svg} />

@@ -286,6 +286,7 @@ function normalize(lang: string): string {
 
 export function highlightSource(source: string, lang: string): string {
   const kind = normalize(lang);
+  if (kind === "text" || kind === "plain" || kind === "txt") return escapeHtml(source);
   if (kind === "json") return highlightJson(source);
   if (kind === "shell") return highlightShell(source);
   if (kind === "css") return highlightCss(source);

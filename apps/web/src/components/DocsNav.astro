@@ -51,7 +51,7 @@ function selected(href: string): boolean {
         ))
       }
     </div>
-    <FrameworkMenu />
+    {path === "/docs" ? null : <FrameworkMenu />}
     {
       docsNav.map((group) => (
         <div

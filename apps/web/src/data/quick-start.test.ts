@@ -156,11 +156,23 @@ test("quick start covers every framework and each snippet differs", () => {
   assert.equal(quickStacks.find((stack) => stack.id === "element")?.label, "Web component");
 });
 
-test("agent prompt names llms.txt, validate, repair, and render", () => {
+test("agent prompt names llms.txt, validate, repair, and a framework render", async () => {
   assert.match(agentPrompt, /https:\/\/chartkit\.dev\/llms\.txt/);
   assert.match(agentPrompt, /validate\(\)/);
   assert.match(agentPrompt, /repair\(\)/);
-  assert.match(agentPrompt, /render/);
+  assert.match(agentPrompt, /ChartKit package for my framework/);
+  assert.match(agentPrompt, /rendered SVG/);
+  assert.equal(agentPrompt.includes("Do not write chart code."), false);
+  const { highlightSource } = await import("../scripts/color-code.ts");
+  const painted = highlightSource(agentPrompt, "text");
+  assert.equal(painted.includes("tok-cm"), false);
+  assert.match(painted, /https:\/\/chartkit\.dev\/llms\.txt/);
+  const page = read("apps/web/src/components/QuickStart.astro");
+  assert.match(page, /<figcaption>text<\/figcaption>/);
+  assert.equal(page.includes('href="/docs/agents"'), false);
+  assert.match(page, /href="\/docs\/validate"/);
+  const nav = read("apps/web/src/components/DocsNav.astro");
+  assert.match(nav, /path === "\/docs" \? null : <FrameworkMenu \/>/);
 });
 
 test("MCP block matches the docs MCP page config", () => {

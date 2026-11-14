@@ -1435,11 +1435,10 @@ html[data-stack="element"] .qs [data-stack-panel="element"] {
   display: block;
 }
 
-.qs-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
-  gap: 20px;
-  align-items: start;
+.qs-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .docs-frame .docs-main .qs figure.code {
@@ -1481,10 +1480,6 @@ html[data-stack="element"] .qs [data-stack-panel="element"] {
 .qs-next { margin-top: 8px; }
 .qs-next li { margin: 0 0 8px; }
 .qs-next a { font-weight: 600; }
-
-@media (max-width: 760px) {
-  .qs-split { grid-template-columns: minmax(0, 1fr); }
-}
 .example-preview {
   margin: 0 0 12px;
   padding: 12px;

@@ -34,9 +34,9 @@ const specBlock = `const spec = {
  * Points at llms.txt, then validate(), repair(), and render().
  */
 export const agentPrompt = `Read https://chartkit.dev/llms.txt.
-Write one ChartKit spec (JSON, version "1") for the chart I describe.
-Run validate() on that spec. If validate() reports errors, run repair(), then render the repaired spec.
-Do not write chart code.`;
+Write a ChartKit spec (JSON, version "1") for this chart.
+Run validate() on the spec. If validate() reports errors, run repair().
+Render it with the ChartKit package for my framework, or show the rendered SVG.`;
 
 export type QuickStack = {
   id: StackId;
