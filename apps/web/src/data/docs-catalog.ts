@@ -1,4 +1,3 @@
-import { SITE } from "./site";
 import articlesJson from "./mock-articles.json";
 import chartsJson from "./mock-charts.json";
 import { articleSections } from "./article-copy";
@@ -120,7 +119,7 @@ const extras: DocArticle[] = [
 ];
 
 const honestLedes: Record<string, string> = {
-  "": `ChartKit ${SITE.version} is a JSON spec plus @chartkitdev/core. Core has zero dependencies. It validates the spec and renders SVG. Adapters pass that spec through. They do not add chart logic.`,
+  "": "Get a working chart by hand, or paste one prompt and let an agent render one.",
   react: "Pass spec to Chart. The same JSON renders in the other adapters. LineChart, KpiCard, and the other dashboard components still exist. Their props are not spec keys.",
   vue: "Vue 3 binds the spec with :spec. Server rendering uses renderToString from @chartkitdev/vue/ssr.",
   svelte: "The component uses export let, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.",
