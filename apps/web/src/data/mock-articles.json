@@ -3,36 +3,22 @@
     "slug": "",
     "group": "Start",
     "title": "Overview",
-    "lede": "A JSON spec any agent \u2014 or your backend \u2014 can write. Edit it below; the render panel updates immediately.",
-    "description": "A JSON spec any agent \u2014 or your backend \u2014 can write. Edit it below; the render panel updates immediately.",
-    "tryIntro": "Charts become data. Edit the JSON, or use the options rail beside it \u2014 Soft / Midnight, area / line / bar. The far-right column is the live response.",
+    "lede": "Get a working chart by hand, or paste one prompt and let an agent render one.",
+    "description": "Get a working chart by hand, or paste one prompt and let an agent render one.",
+    "tryIntro": "",
     "sections": [
       {
-        "title": "Install",
+        "title": "Next steps",
         "paragraphs": [
-          "Add the core package. Framework adapters are optional; the same spec works in React, Vue, Svelte, vanilla, or as server SVG."
+          "The quick start on this page renders a chart. These pages go further."
         ],
-        "list": [],
-        "code": [
-          "`npm i @chartkitdev/core`"
-        ]
-      },
-      {
-        "title": "Validate",
-        "paragraphs": [
-          "Before you render, `validate()` returns structured CK codes with JSON Pointers. Agents loop locally \u2014 no model round-trip required for most fixes.",
-          "For agents",
-          "Point at `llms.txt`, emit a spec, then `validate()`. On failure, `repair()` applies JSON Patch locally \u2014 lifting first-try failures without another model call. Then `render()` (or SSR `renderToString`)."
+        "list": [
+          "Concepts. The spec, data, and encoding.",
+          "Validate. Check a spec, then repair it.",
+          "Theming. Theme, tokens, and presets.",
+          "Gallery. Every chart type.",
+          "Playground. Edit a spec and render it."
         ],
-        "list": [],
-        "code": []
-      },
-      {
-        "title": "Next",
-        "paragraphs": [
-          "Pick your runtime, or jump into concepts if you already have a spec. Every page has a `.md` twin and machine indexes for agents."
-        ],
-        "list": [],
         "code": []
       }
     ],

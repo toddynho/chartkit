@@ -6,8 +6,6 @@ import OptionReference from "./OptionReference.astro";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
-import HostNotes from "./HostNotes.astro";
-import StackSample from "./StackSample.astro";
 
 interface Props {
   article: DocArticle;
@@ -26,12 +24,7 @@ const canonical = articleHref(article);
   ) : null
 }
 {
-  article.slug === "" ? (
-    <>
-      <h2>Try it</h2>
-      <p>Edit the spec. The panel on the right validates and renders on every keystroke.</p>
-    </>
-  ) : article.tryIntro ? (
+  article.tryIntro ? (
     <p>
       <Prose text={article.tryIntro} />
     </p>
@@ -41,10 +34,8 @@ const canonical = articleHref(article);
 <p>
   <a href="/playground">Open the playground</a> to edit a spec with validate, repair, and export.
 </p>
-{article.slug === "" ? <StackSample heading pill oneLine /> : null}
-{article.slug === "" ? <HostNotes /> : null}
 {
-  article.sections.filter((section) => !(article.slug === "" && section.title === "Install")).map((section) => (
+  article.sections.map((section) => (
     <section>
       <h2>{section.title}</h2>
       {section.paragraphs.map((paragraph) => (

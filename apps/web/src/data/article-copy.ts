@@ -8,27 +8,14 @@ function section(title: string, paragraphs: string[], list: string[] = [], code:
 export const articleSections: Record<string, DocSection[]> = {
   "": [
     section(
-      "Install",
+      "Next steps",
+      ["The quick start on Overview renders a chart. These pages go further."],
       [
-        "Install core, then the adapter for the framework you render in. `@chartkitdev/astro` prints static SVG. Solid, Qwik, and Angular are the same spec. `@chartkitdev/element`, `@chartkitdev/markdown`, `@chartkitdev/geo`, and `@chartkitdev/mcp` use the same scope.",
-      ],
-      [],
-      ["npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/astro\nnpm install @chartkitdev/element\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp"],
-    ),
-    section(
-      "A valid spec",
-      [
-        '`version` is `"1"`. `a11y.alt` is one sentence and is required. `data` is an array of row objects. Sparkline, mini-area, and spike may use a number array. The chart type goes in `type`. `mark` is an options object. Gauge, kpi, and progress-ring put the number in `metric`.',
-      ],
-    ),
-    section(
-      "Render",
-      [
-        "`render` from `@chartkitdev/core/all` registers the core charts and the named theme presets. Histogram through rose, and the planning charts, render from `@chartkitdev/core/extra`. `render()` does not validate. This docs site runs `validate()` first and does not call Cloud.",
-      ],
-      [],
-      [
-        'import { render } from "@chartkitdev/core/all";\nimport { validate, repair } from "@chartkitdev/core/validate";\n\nconst result = validate(spec);\nconst svg = render(result.ok ? spec : repair(spec).spec);',
+        "Concepts. The spec, data, and encoding.",
+        "Validate. Check a spec, then repair it.",
+        "Theming. Theme, tokens, and presets.",
+        "Gallery. Every chart type.",
+        "Playground. Edit a spec and render it.",
       ],
     ),
   ],

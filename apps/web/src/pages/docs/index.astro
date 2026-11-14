@@ -1,7 +1,7 @@
 ---
-import DocArticle from "../../components/DocArticle.astro";
-import ResponseRail from "../../components/ResponseRail.astro";
-import { articleBySlug, articleChips, articleSpec } from "../../data/docs-catalog";
+import PageNav from "../../components/PageNav.astro";
+import QuickStart from "../../components/QuickStart.astro";
+import { articleBySlug } from "../../data/docs-catalog";
 import Docs from "../../layouts/Docs.astro";
 
 const article = articleBySlug("");
@@ -9,13 +9,16 @@ if (!article) throw new Error("Docs overview is missing from the catalog.");
 ---
 
 <Docs title={article.title} description={article.description} lede={article.lede} href="/docs">
-  <ol class="start-path">
-    <li><a href="/docs/install">Install</a> — core, then the adapter for your framework.</li>
-    <li><a href="/playground">First chart</a> — edit a spec and render it.</li>
-    <li><a href="/gallery">Pick a type</a> — the gallery is the catalog of chart types.</li>
-    <li><a href="/docs/theming">Customize</a> — theme, tokens, and presets.</li>
-    <li><a href="/docs/validate">Ship</a> — validate, repair, and hand the spec to an agent.</li>
-  </ol>
-  <DocArticle article={article} here="/docs" />
-  <ResponseRail slot="rail" spec={articleSpec} chips={articleChips} />
+  <QuickStart />
+  <section class="qs-next">
+    <h2>Next steps</h2>
+    <ul>
+      <li><a href="/docs/concepts/spec">Concepts</a>. The spec, data, and encoding.</li>
+      <li><a href="/docs/validate">Validate</a>. Check a spec, then repair it.</li>
+      <li><a href="/docs/theming">Theming</a>. Theme, tokens, and presets.</li>
+      <li><a href="/gallery">Gallery</a>. Every chart type.</li>
+      <li><a href="/playground">Playground</a>. Edit a spec and render it.</li>
+    </ul>
+  </section>
+  <PageNav href="/docs" />
 </Docs>

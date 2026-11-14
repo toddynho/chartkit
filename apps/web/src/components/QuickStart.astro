@@ -1,0 +1,96 @@
+---
+import { paintSpec } from "../lib/chartkit";
+import { agentPrompt, mcpConfig, quickSpec, quickStacks } from "../data/quick-start";
+
+const painted = paintSpec(quickSpec);
+if (!painted.ok || !painted.svg.includes("<svg")) {
+  throw new Error(`Quick start spec did not render: ${painted.footer}`);
+}
+---
+
+<section class="qs" data-quick-start aria-label="Quick start">
+  <div class="qs-tabs" role="tablist" aria-label="Quick start">
+    <button type="button" role="tab" id="qs-tab-hand" aria-controls="qs-panel-hand" aria-selected="true" data-qs-tab="hand">
+      By hand
+    </button>
+    <button type="button" role="tab" id="qs-tab-agent" aria-controls="qs-panel-agent" aria-selected="false" data-qs-tab="agent">
+      With an agent
+    </button>
+  </div>
+
+  <div role="tabpanel" id="qs-panel-hand" aria-labelledby="qs-tab-hand" data-qs-panel="hand">
+    <p class="qs-label" id="qs-fw-label">Show code for</p>
+    <div class="qs-fw" role="group" aria-labelledby="qs-fw-label">
+      {
+        quickStacks.map((stack) => (
+          <button type="button" data-stack-chip={stack.id} aria-pressed="false">
+            {stack.label}
+          </button>
+        ))
+      }
+    </div>
+    <div class="qs-stack">
+      <div class="qs-code">
+        {
+          quickStacks.map((stack) => (
+            <div data-stack-panel={stack.id}>
+              <figure class="code">
+                <figcaption>shell</figcaption>
+                <pre><code>{stack.install}</code></pre>
+              </figure>
+              <figure class="code">
+                <figcaption>{stack.caption}</figcaption>
+                <pre><code>{stack.snippet}</code></pre>
+              </figure>
+            </div>
+          ))
+        }
+      </div>
+      <div class="qs-result">
+        <p class="qs-outcome">You should now see a chart.</p>
+        <div class="qs-chart" set:html={painted.svg} />
+      </div>
+    </div>
+  </div>
+
+  <div role="tabpanel" id="qs-panel-agent" aria-labelledby="qs-tab-agent" data-qs-panel="agent" hidden>
+    <p class="qs-label">Paste this into Cursor, Claude, or ChatGPT.</p>
+    <figure class="code">
+      <figcaption>text</figcaption>
+      <pre><code>{agentPrompt}</code></pre>
+    </figure>
+    <p>
+      Put this block in <code>.cursor/mcp.json</code> and in Claude Desktop's <code>claude_desktop_config.json</code>.
+    </p>
+    <figure class="code">
+      <figcaption>json</figcaption>
+      <pre><code>{mcpConfig}</code></pre>
+    </figure>
+    <p class="qs-more">
+      <a href="/docs/mcp">MCP server</a>
+      <span aria-hidden="true"> · </span>
+      <a href="/docs/validate">Validate</a>
+    </p>
+    <p class="qs-outcome">You should now see a chart.</p>
+    <div class="qs-chart" set:html={painted.svg} />
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-quick-start]");
+  if (root && root.dataset.ready !== "1") {
+    root.dataset.ready = "1";
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-qs-tab]")];
+    const panels = [...root.querySelectorAll<HTMLElement>("[data-qs-panel]")];
+    const show = (id: string) => {
+      for (const tab of tabs) {
+        const on = tab.dataset.qsTab === id;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+      }
+      for (const panel of panels) panel.hidden = panel.dataset.qsPanel !== id;
+    };
+    for (const tab of tabs) {
+      tab.addEventListener("click", () => show(tab.dataset.qsTab ?? "hand"));
+    }
+  }
+</script>
