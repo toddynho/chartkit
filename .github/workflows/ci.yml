@@ -26,7 +26,10 @@ jobs:
       - run: npm test
       - run: npm run build:lib
       - run: npm run showcase:check -- --check
+      # Cap raises are compared against main. A raise needs scripts/size-exceptions.json.
+      - run: git fetch --no-tags --depth=1 origin main
       - run: npm run size
+      - run: npm run size:contributors
 
   web:
     name: Astro site

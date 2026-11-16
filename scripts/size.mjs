@@ -2,7 +2,8 @@
  * Gzip budgets for the headline bundles and the framework adapters.
  * esbuild --bundle --minify, gzip -9, platform node, same method as npm run bench.
  * Core bundles have zero externals. Adapter bundles externalize @chartkitdev/core and the framework.
- * Budgets live in scripts/size-budget.json. Exceeding one fails CI.
+ * Budgets live in scripts/size-budget.json (measured + 1%, min 256 B). Exceeding one fails CI.
+ * Raising a cap vs the base ref (SIZE_BASE_REF, default origin/main) needs an entry in scripts/size-exceptions.json.
  */
 import { gzipSync } from "node:zlib";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -13,6 +14,7 @@ import { build } from "esbuild";
 import { compile } from "svelte/compiler";
 import { stubDynamicCharts } from "./stub-dynamic-charts.mjs";
 import { lineEntrySource, measureLineGzip } from "./line-bundle.mjs";
+import { baseBudget, evaluate, formatTable } from "./size-gate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "packages/core/src");
@@ -313,11 +315,16 @@ const measured = {
 };
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
-const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "astro", "solid", "qwik", "angular", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "strip", "streamgraph", "density", "tree", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
-  if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
-  else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
-}
+const exceptions = JSON.parse(readFileSync(join(root, "scripts/size-exceptions.json"), "utf8"));
+const base = baseBudget();
+if (!base) console.error("size: no base ref (set SIZE_BASE_REF or fetch origin/main); skipping the cap-raise check.");
+const { rows, failures } = evaluate({
+  keys: ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "astro", "solid", "qwik", "angular", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "strip", "streamgraph", "density", "tree", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"],
+  measured,
+  budget,
+  base,
+  exceptions,
+});
 for (const [key, ok] of Object.entries(isolation)) {
   if (!ok) failures.push(`isolation ${key} failed`);
 }
@@ -360,6 +367,7 @@ console.log(JSON.stringify({
   },
   isolation,
 }, null, 2));
+console.error(`\nsize budgets vs ${base ? base.ref : "no base"} (changed rows${process.env.SIZE_ALL_ROWS ? ", all" : ""}):\n\n${formatTable(rows, { onlyChanged: !process.env.SIZE_ALL_ROWS && !!base })}\n`);
 if (failures.length > 0) {
   console.error(failures.join("\n"));
   process.exit(1);
