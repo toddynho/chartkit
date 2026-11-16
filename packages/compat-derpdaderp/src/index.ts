@@ -4,4 +4,4 @@ import { notifyOnce } from "./notice";
 
 notifyOnce();
 
-export * from "@chartkitdev/react";
+export * from "@chartkitdev/react/legacy";

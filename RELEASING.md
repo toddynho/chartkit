@@ -6,6 +6,30 @@ Steady state uses GitHub OIDC. A token exists only for the one-time bootstrap, t
 
 `npm stage publish` packs the package directory it is run in. It does not understand npm workspaces, so the workflow runs it inside each package directory. Order is `scripts/public-packages.txt`: `@chartkitdev/core` and `@chartkitdev/geo` first, then the adapters, `@chartkitdev/mcp`, and `@derpdaderp/chartkit` last.
 
+The exact launch-day commands, in order, with a check after each, are in [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md).
+
+## Version and dist-tag (recommendation)
+
+**Launch as `0.5.0` on `latest`. All 14 public packages share one version and move together. Go to `1.0.0` later, as a deliberate release.**
+
+Why `0.5.0` on `latest`:
+
+- Everything already assumes it. Every package is `0.5.0`, and every internal range is `^0.5.0`. The shim is `@derpdaderp/chartkit@0.5.0`, so the deprecate command below targets `<0.5.0`. `publish.yml` passes no `--tag`.
+- `npm install @chartkitdev/react` works with no tag. That is the line in every README, in `llms.txt`, and on the site.
+- With `0.x`, a caret range pins the minor: `^0.5.0` never resolves to `0.6.0`. A breaking change in the next weeks can ship as `0.6.0` without breaking anyone who installed at launch.
+- The spec's `"version": "1"` and `/schema/v1.json` are the schema version, not the package version. A `0.5.0` package that reads v1 specs is consistent. Say "the v1 spec" in posts, not "ChartKit 1.0".
+
+When to cut `1.0.0`: once the spec, `validate()`/`repair()` and the adapter props are frozen, and a few weeks of real installs have produced no breaking fixes. Bump every package and every internal `^0.x` range in one PR. `npm` then needs nothing special, since `1.0.0` is not a prerelease.
+
+If you want a prerelease soak instead (`1.0.0-beta.N` on `next`), it is not free:
+
+1. **The workflow must pass `--tag next`.** npm refuses to publish a prerelease version without an explicit `--tag`. Add a `tag` input to `publish.yml` and pass it in every branch: bootstrap `npm publish`, `stage publish`, and both dry-runs. Check that `npm stage publish` accepts `--tag` before relying on it.
+2. **Bump all 14 versions and rewrite every internal range.** `^0.5.0` does not match `1.0.0-beta.0`, and a caret range only matches prereleases of the same `major.minor.patch`. Use exact pins (`"@chartkitdev/core": "1.0.0-beta.0"`) or `^1.0.0-beta.0`.
+3. **Decide the shim's version.** `@derpdaderp/chartkit` already has `latest = 0.4.1`. Publish it as a normal `0.5.0` on `latest`, depending on the beta range, so v0 users get the shim with a plain install.
+4. **A brand-new package has no `latest`.** On a first publish under a custom tag, expect the registry to point `latest` at that version too, so `npm install @chartkitdev/core` would install the beta anyway. This is not verified here (it needs a real publish), so confirm it with `npm view @chartkitdev/core dist-tags` right after the first publish. Either way, `latest` must exist before the site says `npm install`.
+
+Whichever you choose, keep every public package on the same version so `^` ranges between them always resolve.
+
 ## One-time setup
 
 1. Turn on npm 2FA for Todd's account with a **security key** (WebAuthn). Do not use SMS.
@@ -43,6 +67,7 @@ Do this only when the website is ready to tell people to `npm install` the packa
    ```
 
    `--allow-stage-publish` does not grant direct `npm publish`. Preview the commands with `scripts/npm-trust.sh --dry-run` (it does not call npm).
+   **Timing:** step 5 has to publish a version that is not on npm yet, and the bootstrap already published `0.5.0`. So run steps 4 and 5 together at the next release (for example `0.5.1`), not right after the bootstrap. Do steps 7 and 8 on launch day. LAUNCH_CHECKLIST.md uses that order.
 5. Within **2 days**, run **Publish** again from main: bootstrap **false**, mode **`stage`**. This run must not have `NPM_TOKEN` set. It is the first OIDC publish and it binds each trusted publisher. If it does not succeed in time, delete the expired config and run `scripts/npm-trust.sh` again.
 6. Approve the staged versions (below). Confirm each version is public and the provenance is present.
 7. On npmjs.com, for every package, set Publishing access to **Require two-factor authentication and disallow tokens**.

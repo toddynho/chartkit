@@ -1,5 +1,4 @@
 {
-  "$schema": "https://chartkit.dev/llms-schema.json",
   "name": "@chartkitdev/react",
   "version": "0.5.0",
   "packages": {
@@ -32,6 +31,7 @@
   "core": {
     "quickStart": "import { render } from \"@chartkitdev/core/all\"",
     "validate": "import { validate } from \"@chartkitdev/core/validate\"",
+    "repair": "import { repair } from \"@chartkitdev/core/validate\"; const { spec, ok, errors, applied } = repair(input). Applies every JSON Patch fix from validate(). repairAsync(input) from \"@chartkitdev/core/validate/convert\" also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs and fixes misplaced keys. Render spec when ok.",
     "optIn": "import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; const render = createRenderer([line]);",
     "themes": "@chartkitdev/core/themes/<name> (midnight is built in)",
     "schema": "@chartkitdev/core/schema.json",

@@ -9,8 +9,8 @@ export function notifyOnce(): void {
   if (nodeEnv === "production") return;
   console.warn(
     "[@derpdaderp/chartkit] This package has moved to @chartkitdev/react. " +
-      "This compatibility shim re-exports that package and logs this notice once in development. " +
-      "Install @chartkitdev/react (and @chartkitdev/core for the JSON spec). " +
-      "See catalog/migrate.md for the rename and the npm deprecate command.",
+      "This compatibility shim re-exports @chartkitdev/react/legacy and logs this notice once in development. " +
+      "Install @chartkitdev/react and import the v0 components from @chartkitdev/react/legacy. " +
+      "Upgrade guide: https://chartkit.dev/docs/migrate",
   );
 }

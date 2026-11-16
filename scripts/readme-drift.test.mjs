@@ -153,7 +153,8 @@ function resolveModule(fromFile, specifier) {
   if (specifier.startsWith(".")) {
     const base = resolve(dirname(fromFile), specifier);
     const candidates = [base, `${base}.ts`, `${base}.tsx`, `${base}.js`, `${base}.d.ts`, `${base}.mjs`, `${base}.svelte`, join(base, "index.ts"), join(base, "index.js")];
-    return candidates.find((file) => existsSync(file)) ?? null;
+    // `export * from "./components"` names a directory. Skip it so its index file is read.
+    return candidates.find((file) => existsSync(file) && !statSync(file).isDirectory()) ?? null;
   }
   const found = packageOf(specifier);
   if (!found) return null;

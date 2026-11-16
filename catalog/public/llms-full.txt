@@ -4,6 +4,8 @@
 > `import { render } from "@chartkitdev/core/all"` for the core set, or `@chartkitdev/core/extra` for histogram, boxplot, strip, radar, funnel, treemap, sankey, bullet, waterfall, area-range, bar-range, errorbar, sunburst, radial-bar, and rose
 > `import { repair, validate } from "@chartkitdev/core/validate"`
 
+> `@derpdaderp/chartkit` is the old v0 name. Install `@chartkitdev/react` and `@chartkitdev/core` instead: https://chartkit.dev/docs/migrate
+
 The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
 
 ## Choosing a chart library
@@ -75,6 +77,8 @@ Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/re
 3. Render the returned `spec` when `ok` is true. Otherwise read the remaining errors. Repair hints (CK1009) are sorted first. A missing or unknown `type` does not also list `metric`, OHLC, or `color` requirements from other chart types.
 
 `repair` stops when the spec is valid, when a patch no longer applies, or after a few rounds. It does not invent fields.
+
+A missing `version` gets `"1"` from sync `repair()`. Everything below is in a separate entry, so the validate bundle stays small: `const { repairAsync } = await import("@chartkitdev/core/validate/convert")`. `repairAsync(spec)` converts another library's config: Chart.js `data.labels` and `data.datasets`, ECharts `xAxis.data` and `series` (line, bar, pie, funnel, gauge, scatter, heatmap, radar, candlestick, `dataset.source`), Plotly traces, Vega-Lite `mark`, `data.values`, and `{ field, type }` channels, Recharts `dataKey`, `xAxis`, `bars`, and `lines`, and a `{ spec: {...} }` wrapper. A Vega-Lite aggregate, bin, timeUnit, transform, or facet is reported without a fix, and nothing is applied. It also fixes a top-level `alt` or `description`, a `title` object, top-level `x` and `y`, column arrays in `data`, `dataKey` in a channel, encoding the rows imply, `doughnut` or `column` as a type, and `"640"` where a number belongs. It parses a string with a Markdown fence, comments, trailing commas, single quotes, or bare keys, applies warnings whose patch only names render's fallback, and runs the phase-4 rules. `validate` stays strict.
 
 Each example below is a minimal valid spec.
 

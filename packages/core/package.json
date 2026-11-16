@@ -144,6 +144,16 @@
         "default": "./dist/validate.cjs"
       }
     },
+    "./validate/convert": {
+      "import": {
+        "types": "./dist/validate-convert.d.ts",
+        "default": "./dist/validate-convert.js"
+      },
+      "require": {
+        "types": "./dist/validate-convert.d.cts",
+        "default": "./dist/validate-convert.cjs"
+      }
+    },
     "./validate/phase4": {
       "import": {
         "types": "./dist/validate-phase4.d.ts",
@@ -248,6 +258,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "schema/chartkit.schema.json",
     "README.md",
     "LICENSE"

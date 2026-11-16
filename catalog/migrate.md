@@ -1,12 +1,15 @@
 # Migrate to @chartkitdev
 
-ChartKit v1 keeps the React component API and adds a declarative JSON spec. Package names move off `@derpdaderp`.
+Published at https://chartkit.dev/docs/migrate.
+
+ChartKit v1 is a declarative JSON spec, rendered in React by `<Chart spec={...} />`. The v0 React components keep working: they are frozen and live at `@chartkitdev/react/legacy`. Package names move off `@derpdaderp`.
 
 | Before | After |
 |---|---|
-| `@derpdaderp/chartkit` | `@chartkitdev/react` (components, hooks, themes) |
+| `@derpdaderp/chartkit` | `@chartkitdev/react/legacy` (the v0 components, hooks, themes, scale and path helpers) |
+| — | `@chartkitdev/react` (`<Chart spec={...} />`) |
 | — | `@chartkitdev/core` (schema, `validate`, `render`) |
-| later | `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/mcp` |
+| — | `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/vanilla`, `@chartkitdev/mcp`, and the other adapters |
 
 The schema URL is `https://chartkit.dev/schema/v1.json`.
 
@@ -26,7 +29,8 @@ npm install @chartkitdev/core
 Update imports:
 
 ```ts
-import { LineChart, Chart } from "@chartkitdev/react";
+import { LineChart, KpiCard, useAutoTheme } from "@chartkitdev/react/legacy";
+import { Chart } from "@chartkitdev/react";
 import { render } from "@chartkitdev/core/all";
 import { validate } from "@chartkitdev/core/validate";
 ```
@@ -41,6 +45,14 @@ const render = createRenderer([line]);
 ```
 
 `<Chart spec={...} />` renders a v1 spec. The existing components (`LineChart`, `BarChart`, and the rest) keep their props. `theme` stays required on those components. On a spec it is optional and defaults to `auto`.
+
+### The legacy entry
+
+Everything `@derpdaderp/chartkit` exported is at `@chartkitdev/react/legacy`, under the same names: the 14 components, `Legend`, `Annotations`, `ResponsiveChart`, the hooks (`useAutoTheme` and the rest), `themes`, `getTheme` and the scale and path helpers. That entry is frozen. It gets fixes, not features.
+
+During 0.x the main entry, `@chartkitdev/react`, still exports those names so an import you have not changed keeps working. They are marked `@deprecated` there, so your editor strikes them through, and they are removed from the main entry in `@chartkitdev/react@1.0.0`. That is the package version, not the v1 spec: the launch release is 0.5.0 and keeps them. `@chartkitdev/react/legacy` stays.
+
+An app that imports only `Chart` from `@chartkitdev/react` does not bundle the legacy components.
 
 A minimal spec:
 
@@ -61,7 +73,7 @@ A minimal spec:
 
 ## Compatibility shim
 
-`packages/compat-derpdaderp` is `@derpdaderp/chartkit`. It re-exports `@chartkitdev/react` and logs this once, in development only:
+`packages/compat-derpdaderp` is `@derpdaderp/chartkit`. It re-exports `@chartkitdev/react/legacy`, which is the v0 API and nothing else, and logs this once, in development only:
 
 `This package has moved to @chartkitdev/react.`
 

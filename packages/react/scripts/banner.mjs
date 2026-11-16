@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const dist = join(dirname(fileURLToPath(import.meta.url)), "../dist");
 const directive = '"use client";\n';
 
-for (const name of ["index.js", "index.cjs"]) {
+for (const name of ["index.js", "index.cjs", "legacy.js", "legacy.cjs"]) {
   const path = join(dist, name);
   const source = readFileSync(path, "utf8");
   const stripped = source.replace(/^(?:"use client";\s*)+/, "");

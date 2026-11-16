@@ -1510,7 +1510,7 @@
           "Agents get one of three files. The short index is the with-docs prompt in the agent eval. Full text adds field rules; JSON is structured for tooling.",
           "Rules, repair loop pointers, Mermaid note, and one fenced JSON spec per chart type (27 types). Cap enforced in `mermaid.test.ts`.",
           "Longer rules (encoding repairs, Phase 4, combo, sampling), same drawable examples, plus choosing-a-library context from benchmarks.",
-          "`$schema` \u2192 `llms-schema.json`. Packages, exports, themes, hooks, `resources.llmsTxt` / `llmsFullTxt` / `llmsJson`."
+          "Packages, exports, themes, hooks, `resources.llmsTxt` / `llmsFullTxt` / `llmsJson`."
         ],
         "list": [],
         "code": []

@@ -111,8 +111,11 @@ npm run bench
 # Internal core size and validate throughput
 npm run bench:core
 
-# Fail if line, all-charts, or validate gzip exceeds the budget
+# Fail if any bundle exceeds its cap, or a cap rose vs origin/main without scripts/size-exceptions.json
 npm run size
+
+# Top 10 source files by minified bytes in the line and all bundles
+npm run size:contributors
 ```
 
 ## Resources

@@ -31,7 +31,7 @@ export function createServer(): McpServer {
       instructions: [
         "ChartKit MCP server. Tools call @chartkitdev/core on the spec you pass.",
         "validate returns that function's diagnostics, including JSON Patch fixes.",
-        "repair applies those fixes and returns the repaired spec plus whatever diagnostics remain.",
+        "repair applies those fixes and returns the repaired spec plus whatever diagnostics remain. It also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs, and accepts a fenced or JSON5-style string. Call repair on any failing spec before rewriting it by hand.",
         "render returns SVG from @chartkitdev/core/extra (every chart type, including the extra types). PNG is not available from that local tool.",
         "render_chart calls ChartKit Cloud and returns the image URL plus repairs and warnings. Omit format, or pass svg. Pass png only when the host cannot display SVG, and set scale to 2 or higher for that PNG. The chart background defaults to #ffffff. Pass background to override it, or theme midnight when the host is dark. Free images include a chartkit.dev mark. CHARTKIT_CLOUD_KEY or the key argument is sent as Authorization: Bearer and is not part of the returned URL. A valid key returns a stored chart with the mark removed. The other tools do not use the network.",
         "lookup_feature reads the bundled copy of features.json. Statuses are that file's cells. partial is not native. Every other library is listed, including none.",
@@ -58,11 +58,11 @@ export function createServer(): McpServer {
     {
       title: "Repair a ChartKit spec",
       description:
-        "Apply the safe JSON Patch fixes from @chartkitdev/core repair() and revalidate. Returns that function's result: spec, ok, diagnostics, errors, warnings, and applied. The input spec is not mutated. Fixes that the validator did not provide are not invented.",
+        "Apply the safe JSON Patch fixes from @chartkitdev/core/validate/convert repairAsync() and revalidate. Returns that function's result: spec, ok, diagnostics, errors, warnings, and applied. The input spec is not mutated. Fixes that the validator did not provide are not invented. Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs are converted, and a string may carry a Markdown fence, comments, or trailing commas.",
       inputSchema: { spec: specField },
       annotations: READ_ONLY,
     },
-    async ({ spec }) => text(repairSpec(spec)),
+    async ({ spec }) => text(await repairSpec(spec)),
   );
 
   server.registerTool(

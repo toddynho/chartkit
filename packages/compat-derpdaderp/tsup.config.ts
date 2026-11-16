@@ -7,5 +7,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  external: ["@chartkitdev/react", "react", "react-dom"],
+  external: [/^@chartkitdev\/react(\/.*)?$/, "react", "react-dom"],
 });

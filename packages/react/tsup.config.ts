@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     ssr: 'src/ssr.ts',
+    legacy: 'src/legacy.ts',
     'themes/index': 'src/themes/index.ts',
   },
   format: ['cjs', 'esm'],
