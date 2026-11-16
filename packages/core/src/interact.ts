@@ -991,7 +991,8 @@ function materialize(data: unknown): unknown[] | null {
 function drawnData(spec: InteractSpec): unknown {
   const sort = spec.sort;
   const field = sortField(spec);
-  if (!field || !isRecord(sort) || (sort.by ?? "value") !== "value" || !["ascending", "descending", undefined].includes(sort.order as string)) return spec.data;
+  // The cases `sortIssue` rejects draw unsorted, so they read unsorted.
+  if (!field || !isRecord(sort) || (sort.by ?? "value") !== "value" || !["ascending", "descending", undefined].includes(sort.order as string) || !(sort.field || sort.by || sort.order)) return spec.data;
   const rows = materialize(spec.data);
   if (!rows || !isRecord(rows[0])) return spec.data;
   const dir = sort.order === "descending" ? -1 : 1;
@@ -1070,6 +1071,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   /** Long rows repeat a category once per series. `slotRow` is the first row of each slot, `rowSlot` the slot of each row, both from `lo`. */
   let slotRow: number[] | null = null;
   let rowSlot: number[] = [];
+  /** The hover index counts slots, not rows. False for long rows on a numeric x, which keep one pixel per row. */
+  let bySlot = false;
   const horizontal = () => base.type === "bar" && isRecord(base.mark) && base.mark.orientation === "horizontal";
   let box: Box = { l: 0, t: 0, w: 1, h: 1 };
   let colors = new Map<string, string>();
@@ -1882,7 +1885,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
     }
     if (hit && hit.kind !== "scatter") {
-      if (slotRow?.length !== hit.count) slotRow = null;
+      bySlot = slotRow?.length === hit.count;
       box = plotBox(svg);
       hover = {
         xs: NO_PIXELS,
@@ -1901,17 +1904,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     box = plotBox(svg);
     const values = numericValues(base, table, data);
     const slice = values && viewN ? (lo === 0 && values.length === viewN ? values : values.subarray(lo, hi + 1)) : null;
-    if (slice) slotRow = null;
+    bySlot = !slice && !!slotRow;
     // Categories run down the plot on horizontal bars, and take one slot each however many rows they span.
     const flat = horizontal();
-    hover = buildHoverIndex(slotRow ? slotRow.length : viewN, flat ? box.t : box.l, flat ? box.h : box.w, slice);
+    hover = buildHoverIndex(bySlot ? slotRow!.length : viewN, flat ? box.t : box.l, flat ? box.h : box.w, slice);
     refreshColors();
   }
 
   /** Row offset from `lo` under a pixel along the category axis. */
   function rowOf(px: number): number {
     const slot = lookupIndex(hover, px);
-    return slotRow ? slotRow[slot] ?? 0 : slot;
+    return bySlot ? slotRow![slot] ?? 0 : slot;
   }
 
   function rowAtPoint(point: { x: number; y: number }): number {
@@ -1933,7 +1936,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   /** Pixel centre of a row offset along the category axis: x, or y on horizontal bars. */
   function crossX(local: number): number {
     arm(1);
-    if (slotRow) local = rowSlot[local] ?? 0;
+    if (bySlot) local = rowSlot[local] ?? 0;
     if (hover.pixel) return hover.pixel(local);
     return hover.pixels[local] ?? box.l;
   }
@@ -2543,6 +2546,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           (start, end) => {
             lo = start;
             hi = end;
+            // A window that ends inside a category keeps that category's other series rows.
+            if (series[0]?.match) while (hi < n - 1 && xKey(hi + 1) === xKey(hi)) hi++;
             publishRange();
           },
           showAt,
@@ -2563,6 +2568,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           (name) => {
             lit = name;
             paintPick();
+          },
+          (row, by) => {
+            arm(1);
+            const next = slotRow ? slotRow[rowSlot[row - lo] + by] : row - lo + by;
+            return next === undefined ? -1 : lo + next;
           },
         ]);
       })

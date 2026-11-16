@@ -1698,6 +1698,46 @@ describe("pointer and keyboard name the drawn row", () => {
   const longSpec = (extra: Record<string, unknown> = {}): InteractSpec =>
     barSpec({ data: long, encoding: { x: "region", y: "signups", series: "plan" }, a11y: { alt: "Signups by region and plan." }, ...extra });
 
+  it("walks each category once when a sort splits its rows, and brushes whole categories", async () => {
+    const spec = longSpec({ sort: { by: "value", order: "descending" }, interaction: { brush: "x" } });
+    const chart = mount(spec);
+    await chart.ctl.ready;
+    // Drawn rows: NA Free 820, EU Free 640, APAC Free 300, NA Pro 260, EU Pro 210, APAC Pro 90.
+    const read: string[] = [];
+    for (const key of ["Home", "ArrowRight", "ArrowRight"]) {
+      chart.press(key);
+      read.push(chart.live());
+      expect(chart.lit()).toEqual([chart.live().split(":")[0]]);
+    }
+    expect(read).toEqual(["NA: Free 820, Pro 260", "EU: Free 640, Pro 210", "APAC: Free 300, Pro 90"]);
+    const end = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true });
+    chart.host.querySelector("svg")!.dispatchEvent(end);
+    expect(end.defaultPrevented).toBe(false);
+    expect(chart.live()).toBe(read[2]);
+    chart.press("ArrowLeft");
+    expect(chart.live()).toBe(read[1]);
+    chart.press("End");
+    chart.press("ArrowLeft");
+    expect(chart.live()).toBe(read[1]);
+    chart.ctl.destroy();
+
+    const plain = longSpec({ interaction: { brush: "x" } });
+    const wide = mount(plain);
+    await wide.ctl.ready;
+    const svg = wide.host.querySelector("svg")!;
+    const mid = (name: string) => {
+      const bar = wide.bars().find((node) => categoryOf(node) === name)!;
+      return Number(bar.getAttribute("x")) + Number(bar.getAttribute("width")) / 2;
+    };
+    svg.dispatchEvent(new PointerEvent("pointerdown", { clientX: mid("EU"), clientY: 120, bubbles: true, button: 0 }));
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: mid("APAC"), clientY: 120, bubbles: true }));
+    svg.dispatchEvent(new PointerEvent("pointerup", { clientX: mid("APAC"), clientY: 120, bubbles: true }));
+    wide.fit();
+    expect(drawn(wide.bars(), "x")).toEqual(["EU", "APAC"]);
+    expect(wide.bars().length).toBe(4);
+    wide.ctl.destroy();
+  });
+
   it.each([
     ["vertical", {}, "x"],
     ["horizontal", { mark: { orientation: "horizontal" } }, "y"],

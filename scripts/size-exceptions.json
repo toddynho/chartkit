@@ -301,14 +301,14 @@
   },
   {
     "key": "interact",
-    "cap": 24831,
-    "reason": "Pointer hover, the highlight and the keyboard now read rows in drawn order: interact applies the top-level sort (shared comparator from sort.ts), indexes horizontal bars down the plot and gives long-format rows one slot per category, and the keyboard shades the category band when there is no bar rect to light (canvas bars, zero-length bars). Measured 24575 + 256.",
+    "cap": 24916,
+    "reason": "Pointer hover, the highlight and the keyboard now read rows in drawn order: interact applies the top-level sort (shared comparator from sort.ts), indexes horizontal bars down the plot and gives long-format rows one slot per category, and the keyboard shades the category band when there is no bar rect to light (canvas bars, zero-length bars) and steps one category at a time on long rows. Measured 24660 + 256.",
     "pr": "#178"
   },
   {
     "key": "globalAuto",
-    "cap": 126198,
-    "reason": "Carries the interact change above (sorted, horizontal and long-format hover fixes). Measured 124949 + 1%.",
+    "cap": 126225,
+    "reason": "Carries the interact change above (sorted, horizontal and long-format hover fixes). Measured 124975 + 1%.",
     "pr": "#178"
   }
 ]
