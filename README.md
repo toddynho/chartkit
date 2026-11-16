@@ -263,7 +263,7 @@ For a brand colour, `paletteFromBrand("#635bff")` from `@chartkitdev/core/themes
 
 ## Coming from v0
 
-The older prop-based React components (`LineChart`, `KpiCard` and the rest) and the `@derpdaderp/chartkit` package are frozen. See [Upgrading from v0](catalog/migrate.md).
+The older prop-based React components (`LineChart`, `KpiCard` and the rest) are frozen and live at `@chartkitdev/react/legacy`. See [Upgrading from v0](catalog/migrate.md).
 
 ## Benchmarks
 

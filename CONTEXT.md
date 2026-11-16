@@ -37,7 +37,7 @@ const svg = render(spec);
 
 Adapters take the spec and nothing else: `<Chart spec={spec} />` in React, Vue, Svelte, Astro, Solid and Qwik, `<ck-chart [spec]="spec" />` in Angular, `mount(el, spec)` and `renderToString(spec)` in vanilla, and `<chart-kit>` as a custom element. Each one prints the SVG during server rendering.
 
-The older prop-based React components (`LineChart`, `KpiCard`, `dataKey`, `theme="midnight"` and so on) are a frozen v0 API. They are being moved to `@chartkitdev/react/legacy`. Do not use them in new code, and do not copy their props into a spec. The migration guide is `catalog/migrate.md`.
+The older prop-based React components (`LineChart`, `KpiCard`, `dataKey`, `theme="midnight"` and so on) are a frozen v0 API. They live at `@chartkitdev/react/legacy`. Do not use them in new code, and do not copy their props into a spec. The migration guide is `catalog/migrate.md`.
 
 ## Repository layout
 
