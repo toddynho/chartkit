@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { bar } from "../charts/bar";
 import { line } from "../charts/line";
 import { createRenderer } from "../render";
@@ -42,6 +42,12 @@ describe("export", () => {
     const source = readFileSync(new URL("../charts/line.ts", import.meta.url), "utf8");
     expect(source).not.toContain("toPNG");
     expect(readFileSync(new URL("../renderers/cartesian.ts", import.meta.url), "utf8")).not.toContain("toDataURL");
+    const cartesianDir = new URL("../cartesian/", import.meta.url);
+    const parts = readdirSync(cartesianDir).filter((name) => name.endsWith(".ts"));
+    expect(parts.length).toBeGreaterThan(0);
+    for (const name of parts) {
+      expect(readFileSync(new URL(name, cartesianDir), "utf8"), name).not.toContain("toDataURL");
+    }
   });
 });
 
