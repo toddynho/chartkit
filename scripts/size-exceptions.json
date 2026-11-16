@@ -3,294 +3,294 @@
     "key": "all",
     "cap": 93314,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "validate",
     "cap": 51412,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "vue",
     "cap": 1058,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "svelte",
     "cap": 1218,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "vanilla",
     "cap": 1827,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "element",
     "cap": 2097,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "astro",
     "cap": 522,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "solid",
     "cap": 992,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "qwik",
     "cap": 361,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "angular",
     "cap": 1349,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "interact",
     "cap": 24302,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "interactExtra",
     "cap": 4049,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "extra",
     "cap": 143650,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "canvas",
     "cap": 73026,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "mermaid",
     "cap": 56515,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "vanillaAuto",
     "cap": 2159,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "markdown",
     "cap": 919,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "global",
     "cap": 179217,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "globalAuto",
     "cap": 124775,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "globalMermaid",
     "cap": 57315,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "histogram",
     "cap": 20239,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "boxplot",
     "cap": 20334,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "radar",
     "cap": 11049,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "funnel",
     "cap": 10445,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "treemap",
     "cap": 19225,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "sankey",
     "cap": 10472,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "bullet",
     "cap": 9710,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "waterfall",
     "cap": 19880,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "gantt",
     "cap": 10397,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "timeline",
     "cap": 10589,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "quadrant",
     "cap": 8818,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "venn",
     "cap": 10828,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "journey",
     "cap": 8707,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "area-range",
     "cap": 23219,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "bar-range",
     "cap": 19802,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "errorbar",
     "cap": 20140,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "sunburst",
     "cap": 16393,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "bar-list",
     "cap": 9874,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "radial-bar",
     "cap": 14228,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "rose",
     "cap": 15047,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "strip",
     "cap": 20276,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "geo",
     "cap": 21495,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "geoWorld",
     "cap": 24958,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "geoUs",
     "cap": 12143,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "geoCanada",
     "cap": 3899,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "geoEu",
     "cap": 3263,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "density",
     "cap": 22359,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "streamgraph",
     "cap": 24993,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   },
   {
     "key": "tree",
     "cap": 13959,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
-    "pr": "PR_NUMBER"
+    "pr": "#168"
   }
 ]
