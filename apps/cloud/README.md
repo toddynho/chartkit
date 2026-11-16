@@ -102,6 +102,8 @@ Keys and stored charts use the first store that is configured: the `CHARTKIT_KV`
 
 `storage` is `kv-binding`, `kv-rest`, or `memory`. `rateLimit` is `binding` or `memory`.
 
+Workers KV is eventually consistent. A chart written in one Cloudflare location can take up to about a minute to be readable in another, and a lookup that missed is cached for about as long. So a `/c/<id>` URL fetched at once from a far location (an image proxy, say) can 404 for that minute and then work. A key written with `wrangler kv key put` has the same delay. Each new stored chart is one KV write, so watch the plan's daily write quota. A failed write fails that `POST /render` or `POST /charts`.
+
 Both durable stores use the same layout: `ck:key:<key>` = `1`, `ck:session:<stripe session>` = `<key>`, `ck:chart:<id>` = the stored spec. Moving from REST to the binding means copying those keys. Nothing else changes.
 
 ### Issue a key by hand
@@ -179,7 +181,7 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    npx wrangler secret put CHARTKIT_DEV_KEYS
    ```
 
-   Do not set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, or `STRIPE_WEBHOOK_SECRET`. Checkout stays off (503) without them. Do not set `CHARTKIT_ALLOW_MEMORY`. Skip `KV_REST_API_URL`/`KV_REST_API_TOKEN` when `CHARTKIT_KV` is bound.
+   Do not set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, or `STRIPE_WEBHOOK_SECRET`. Checkout stays off (503) without them. Until KV is bound, `/health` answers 503. That is intended. Do not set `CHARTKIT_ALLOW_MEMORY`. Skip `KV_REST_API_URL`/`KV_REST_API_TOKEN` when `CHARTKIT_KV` is bound.
 
 4. **Put the chartkit.dev zone on the account.** Add `chartkit.dev` in the Cloudflare dashboard on the same account as the worker, and point the registrar's nameservers at Cloudflare. Wait until the zone is Active.
 
@@ -199,7 +201,9 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    npm run deploy
    ```
 
-7. **Check it.** Set `HOST=https://cloud.chartkit.dev` (or the workers.dev URL wrangler printed).
+7. **Issue a first key** for the checks below, the way [Issue a key by hand](#issue-a-key-by-hand) shows, and keep it in `KEY`.
+
+8. **Check it.** Set `HOST=https://cloud.chartkit.dev` (or the workers.dev URL wrangler printed).
 
    ```bash
    HOST=https://cloud.chartkit.dev
@@ -231,8 +235,13 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
      -d "{\"spec\":$SPEC}" | node -pe 'JSON.parse(require("fs").readFileSync(0)).watermark'   # false
    ```
 
-   Run the `/c/<id>` check again a few minutes later, after other isolates have spun up, to confirm the chart came from KV and not from memory.
+   A repeat GET of `/c/<id>` can be answered by the Workers cache, so it does not prove the chart is in KV. Read KV directly:
 
-8. **Point the site at it.** Build `apps/web` with `PUBLIC_CHARTKIT_CLOUD_URL=https://cloud.chartkit.dev` (the default when unset).
+   ```bash
+   npx wrangler kv key list --binding=CHARTKIT_KV --remote --prefix=ck:chart:   # includes "ck:chart:<ID>"
+   npx wrangler kv key list --binding=CHARTKIT_KV --remote --prefix=ck:key:     # includes the key from step 7
+   ```
+
+9. **Point the site at it.** Build `apps/web` with `PUBLIC_CHARTKIT_CLOUD_URL=https://cloud.chartkit.dev` (the default when unset).
 
 Later, not at launch: R2 for hashed image bytes, and Stripe once a price exists.
