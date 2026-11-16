@@ -1,6 +1,6 @@
 # ChartKit positioning memo
 
-Status: draft for the owner's decision. Written 2026-11-16. Wave 2 (the README and docs rewrite, and the narrower API) is waiting on it.
+Status: decisions D1–D7 recorded on 2026-11-16 (section 6). Written 2026-11-16. Wave 2 (the README and docs rewrite, and the narrower API) is waiting on it.
 
 This memo does three things. It recommends one position, with the README's first screen drafted from it. It lists the claims to stop making. It lists the decisions only the owner can make, each with a recommended default.
 
@@ -87,6 +87,9 @@ plain DOM, or Node.
 
 A line chart is 32 KB gzip (uPlot: 24 KB). We publish our losses: [benchmarks].
 
+Nothing to install: put a spec in a URL and get an SVG or PNG back from
+https://cloud.chartkit.dev/render. Agents can use the remote MCP at /mcp.
+
 npm install @chartkitdev/core
 ```
 
@@ -168,36 +171,54 @@ The scan of `apps/web/src`, `llms.txt` and the README found no "10M points" or "
 
 ---
 
-## 6. Open decisions for the owner
+## 6. Owner decisions
 
-Each decision has a recommended default. A "yes" adopts it.
+The owner answered D1–D7 on 2026-11-16. Each entry gives the decision, then the reasoning behind it.
 
-**D1. WebGL stance.**
-Recommend: **keep "not planned", and say so on the homepage as a choice.** Above roughly 1M raw points, link to SciChart, LightningChart or uPlot. GPU rendering conflicts with SSR, zero dependencies and SVG accessibility, which are the things ChartKit is selling. Revisit only if dashboard users regularly hit the sampled ceiling.
+**D1. WebGL: stay out. Decided.**
+"Not planned" stays, and the homepage says so as a choice. For more than about 1M raw points, the docs link to SciChart, LightningChart or uPlot. The reasons:
+- **It breaks the server story.** WebGL needs a GPU context in a browser. A WebGL chart can't be printed as SVG in Node, by an adapter during SSR, or by Cloud, which is the headline proof point. Every WebGL library falls back to a separate renderer or a headless browser on the server.
+- **It breaks the accessible output.** An SVG chart has real elements that screen readers, `a11y.alt`, the data table and CSS can address. A GPU canvas is one opaque bitmap, the same accessibility problem Chart.js has. Highcharts Boost gives up stacking, dash styles and most animation to draw on the GPU.
+- **It breaks "one spec draws the same everywhere".** Two renderers with different feature sets mean every option has to warn per renderer. That is the "honest" cost the canvas path already shows in `BENCHMARKS.md`.
+- **The paid leaders are years ahead.** SciChart (WebGPU plus WASM, "hundreds of millions of points") and LightningChart ("10M points per second") have built their companies on GPU rendering. Matching them would take a team-year and win nothing in the lane ChartKit is choosing.
+- **Dashboards don't need it.** Sampling to the pixel width already draws a 1M-point line in about 24 ms, and a 640-px chart can't show more than about 1,300 distinct x positions anyway.
 
-**D2. The legacy React prop components** (`LineChart`, `KpiCard` and the other 14).
-Recommend: **freeze them, move them to `@chartkitdev/react/legacy`, and remove them from the README and the first docs screen.** Two APIs in one package contradict "one spec". The migration page (`catalog/migrate.md`) already exists. Remove them in v2 unless download data says otherwise.
+What would reopen it: users who need raw, unsampled interaction with millions of points, such as scientific scatter plots or brushing individual ticks. That is a different product.
 
-**D3. Which adapters rank first.**
-Recommend: **React, then vanilla/Node (`renderToString`), then Vue, then Svelte.** Astro, Solid, Qwik, Angular and `<chart-kit>` go behind a "more frameworks" fold. React is where the users are. Node/vanilla is the SSR and agent story. Vue and Svelte are the stacks that Recharts, Tremor and shadcn leave unserved. Keep all nine; ranking them is about the docs.
+**D2. Legacy React prop components: freeze them and move them to `@chartkitdev/react/legacy`. Decided.**
+Remove them from the README and the first docs screen. The migration page (`catalog/migrate.md`) stays.
 
-**D4. Accept Vega-Lite-shaped input.**
-In the Sonnet 4.5 no-docs run, 41 of 42 failures were Vega-Lite-shaped specs (`BENCHMARKS.md`, "Supplementary runs"). Models already guess that shape.
-Recommend: **have `repair()` translate the common Vega-Lite shapes** (`data.values`, a string `mark`, `encoding.x.field`), and score the no-docs eval after repair. This narrows the API (the spec stays the same) while forgiving the most common agent mistake. It is cheaper than teaching every model a new grammar. The agent-cold-start workstream may already cover this; check its result first.
+**D3. Adapter order: React, then vanilla/Node (`renderToString`), then Vue, then Svelte. Decided.**
+Astro, Solid, Qwik, Angular and `<chart-kit>` go behind a "more frameworks" fold. All nine stay.
 
-**D5. Accessibility defaults.**
-Recommend: **turn keyboard navigation and the hidden data table on by default for interactive (client) renders.** Recharts 3 did the same. It costs bytes only in `core/interact`, not in SSR output. It is the cheapest way to make "accessible" claimable.
+**D4. Forgive Vega-Lite-shaped input in `repair()`. Decided, and largely built.**
+[toddynho/chartkit#171](https://github.com/toddynho/chartkit/pull/171) makes `repair()` convert Chart.js, ECharts, Plotly, Vega-Lite and Recharts configs, and apply every mechanical fix. Re-score the no-docs eval after it merges, and use that number in place of round 6's 21/42.
 
-**D6. A commercial or cloud tier (`apps/cloud`).**
-`apps/cloud` already renders SVG and PNG from a spec, with a watermark removed by an API key. It is not deployed; `cloud.chartkit.dev` is commented out in `wrangler.toml`.
-Recommend: **yes, but as the hosted twin of the open library, not a gated feature.**
-- Hosted `render` (SVG and PNG) plus `validate`/`repair` as a remote MCP endpoint, for agents that cannot run Node: chat clients, Slack bots, email and PDF reports.
-- That is exactly the niche Highcharts' Render and Dev Assist MCPs fill. ChartKit's version would be on an MIT core, with metered pricing and a free tier.
-- Keep everything in the npm packages MIT. A paid tier that withholds library features would undercut "honest".
-- Launch it after v1 is on npm, not before.
+**D5. Keyboard navigation and the hidden data table on by default for client renders. Decided.**
+SSR output is unchanged. Once this ships, "accessible by default" can come off the stop-claiming list in this narrower form: required alt text, plus keyboard and data table by default.
 
-**D7. What "#1" means.**
-Recommend: **define it as "most-used chart library in agent-generated and server-rendered output"**, measured by MCP installs, cloud render volume and npm downloads of core plus the adapters. "#1 overall" against Chart.js (7M per week) and Recharts (34M per week) is not a 2027 goal. "Better than the paid alternatives" holds for agent and SSR workflows only, and the copy should say so.
+**D6. Cloud launches with v1, not after it. Decided (this overrides the earlier recommendation).**
+The owner's reason: a URL that returns a chart, with nothing to install, is the easiest way to start. It is also the "server can render" claim made tangible. Cloud becomes part of the first screen (see the README draft in section 2), and the free tier, watermark plus API key model stays.
+
+`apps/cloud` is already built for Cloudflare Workers:
+- the `chartkit-cloud` worker and `wrangler.toml`;
+- `GET` and `POST /render`, returning SVG, or PNG through resvg-wasm;
+- stored charts at `/c/<id>.svg|.png`;
+- `POST /validate`;
+- a remote MCP at `POST /mcp` with the `render_chart` tool;
+- API keys that remove the mark, and Stripe checkout that stays off until its secrets exist.
+
+Gaps to close before launch day, from the code as it stands:
+1. **Deploy it, and attach `cloud.chartkit.dev`.** The route is commented out in `wrangler.toml` until the chartkit.dev zone is on the Cloudflare account. The site build reads `PUBLIC_CHARTKIT_CLOUD_URL`, per the [toddynho/chartkit#169](https://github.com/toddynho/chartkit/pull/169) launch checklist.
+2. **Add durable storage.** Without `KV_REST_API_URL`/`KV_REST_API_TOKEN` (Upstash or similar), keys and stored charts live in isolate memory. On Workers that means `/c/<id>` links and paid keys can disappear. The native `CHARTKIT_KV` binding is stubbed but not read yet.
+3. **Make the rate limit real.** `memoryLimiter` (`apps/cloud/src/limit.ts`, 120 per minute per IP) is a per-isolate map, so on Workers it doesn't hold across isolates. Use a Cloudflare rate-limiting rule or the Workers rate-limiting binding.
+4. **Decide whether checkout is live at launch.** Keeping Stripe off and handing out keys manually is fine for day one.
+5. **Add `validate` and `repair` as MCP tools.** Today the remote MCP has only `render_chart`. Validate and repair are the agent differentiator and cost nothing extra to serve.
+
+The pricing principle is unchanged: everything in the npm packages stays MIT. Cloud sells convenience (hosting, no watermark, volume), never library features.
+
+**D7. "#1" means the most-used chart library in agent-generated and server-rendered output. Decided.**
+It is measured by MCP installs, Cloud render volume and npm downloads of core plus the adapters. "Better than the paid alternatives" is claimed for agent and SSR workflows only.
 
 ---
 
@@ -206,5 +227,5 @@ Recommend: **define it as "most-used chart library in agent-generated and server
 1. Rewrite the README's first screen to the draft in section 2. Move the benchmark tables into `BENCHMARKS.md`.
 2. Rewrite the homepage hero to the one-line position. Make the three proof-point sections SSR, agents and every stack. Paint speed is demoted.
 3. Remove or reword every row in section 4.
-4. Act on D1–D7 once the owner has answered.
+4. Carry out D1–D7 as decided in section 6. Close the Cloud launch gaps (D6) on the same timeline as the npm publish.
 5. Out of scope for this memo, but blocking: npm publish, committed token-matrix raw results, and corrected `framework.mcp` and `validate.agentdocs` cells in `features.json`.
