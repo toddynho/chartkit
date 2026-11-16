@@ -1,12 +1,14 @@
 # Migrate to @chartkitdev
 
+Published at https://chartkit.dev/docs/migrate.
+
 ChartKit v1 keeps the React component API and adds a declarative JSON spec. Package names move off `@derpdaderp`.
 
 | Before | After |
 |---|---|
 | `@derpdaderp/chartkit` | `@chartkitdev/react` (components, hooks, themes) |
 | — | `@chartkitdev/core` (schema, `validate`, `render`) |
-| later | `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/mcp` |
+| — | `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/vanilla`, `@chartkitdev/mcp`, and the other adapters |
 
 The schema URL is `https://chartkit.dev/schema/v1.json`.
 

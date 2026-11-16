@@ -69,7 +69,7 @@ Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-ba
 
 TypeScript types in `src/generated/schema.ts` are generated from the schema (`npm run generate:types`). Do not edit that file by hand.
 
-Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
+Upgrading from `@derpdaderp/chartkit`: [chartkit.dev/docs/migrate](https://chartkit.dev/docs/migrate).
 
 ## Rules
 

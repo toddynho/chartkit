@@ -4,6 +4,8 @@
 > `import { render } from "@chartkitdev/core/all"` for the core set, or `@chartkitdev/core/extra` for histogram, boxplot, strip, radar, funnel, treemap, sankey, bullet, waterfall, area-range, bar-range, errorbar, sunburst, radial-bar, and rose
 > `import { repair, validate } from "@chartkitdev/core/validate"`
 
+> `@derpdaderp/chartkit` is the old v0 name. Install `@chartkitdev/react` and `@chartkitdev/core` instead: https://chartkit.dev/docs/migrate
+
 The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
 
 ## Choosing a chart library
