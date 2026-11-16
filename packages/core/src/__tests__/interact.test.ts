@@ -346,7 +346,7 @@ describe("attach", () => {
       expect(revenue).not.toContain("transparent");
       expect(row("region")?.textContent).toMatch(/NA|EU/);
       if (theme === "midnight") expect(revenue).toContain("#22c55e");
-      if (theme === "soft") expect(revenue).toContain("#007aff");
+      if (theme === "soft") expect(revenue).toContain("#2f6fe4");
       if (theme === "refined") expect(revenue).toContain("#3b82f6");
       if (theme === "editorial") expect(revenue).toContain("#4f46e5");
       ctl.destroy();
@@ -762,7 +762,8 @@ describe("attach", () => {
     svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
     const dot = svg.querySelector("[data-ck-dot]");
     const ticks = Array.from(svg.querySelectorAll("text"))
-      .filter((node) => node.getAttribute("text-anchor") === "end")
+      // The y ticks sit left of the plot. The last x label is end-anchored too, at the right edge.
+      .filter((node) => node.getAttribute("text-anchor") === "end" && Number(node.getAttribute("x")) < Number(clip.getAttribute("x")))
       .map((node) => ({ y: Number(node.getAttribute("y")) - 4, label: node.textContent ?? "" }))
       .filter((tick) => /^-?\d/.test(tick.label));
     const parse = (label: string) => Number(label.replace(/,/g, ""));
@@ -930,7 +931,7 @@ describe("attach", () => {
 
     svg.dispatchEvent(new PointerEvent("pointerdown", { clientX: 120, clientY: 100, bubbles: true, button: 0, shiftKey: true }));
     svg.dispatchEvent(new PointerEvent("pointermove", { clientX: 420, clientY: 100, bubbles: true, shiftKey: true }));
-    expect(svg.querySelector("[data-ck-brush]")?.getAttribute("fill")).toBe("rgba(0, 122, 255, 0.16)");
+    expect(svg.querySelector("[data-ck-brush]")?.getAttribute("fill")).toBe("rgba(47, 111, 228, 0.16)");
     svg.dispatchEvent(new PointerEvent("pointerup", { clientX: 420, clientY: 100, bubbles: true, button: 0 }));
     expect(ranges.length).toBeGreaterThan(1);
 

@@ -59,7 +59,7 @@ const SOFT: Chrome = {
   border: "light-dark(#8e8e93, #636366)",
   text: "light-dark(#050507, #f5f5f7)",
   muted: "light-dark(#6e6e73, #98989d)",
-  accent: "light-dark(#007aff, #0a84ff)",
+  accent: "light-dark(#2f6fe4, #4a8ff0)",
   scheme: "",
 };
 

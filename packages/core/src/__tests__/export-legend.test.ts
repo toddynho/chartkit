@@ -176,7 +176,7 @@ describe("colour scales", () => {
     const svg = render(heat);
     expect(svg).toContain('data-ck-scale="sequential"');
     expect(contrast(firstStop(svg), "#ffffff")).toBeGreaterThanOrEqual(3);
-    expect(svg).toContain("#007aff");
+    expect(svg).toContain("#2f6fe4");
     expect(svg).not.toContain("#1e3a8a");
     const constant = render({ ...heat, encoding: { x: "month", y: "region", color: { field: "revenue", value: "#c45c26" } } });
     expect(constant).not.toContain('data-ck-scale="sequential"');
@@ -187,7 +187,7 @@ describe("colour scales", () => {
     const soft = render({ ...heat, encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
     const night = render({ ...heat, theme: "midnight", encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
     expect(contrast(firstStop(soft), "#ffffff")).toBeGreaterThanOrEqual(3);
-    expect(soft).toContain("#007aff");
+    expect(soft).toContain("#2f6fe4");
     expect(soft).not.toContain("#1e3a8a");
     expect(night).toContain("#e0f2fe");
     expect(night).not.toContain("#007aff");
@@ -271,7 +271,7 @@ describe("colour scales", () => {
     expect(softId).not.toBe(nightId);
     expect(svg).toContain(`fill="url(#${softId})"`);
     expect(night).toContain(`fill="url(#${nightId})"`);
-    expect(patternFill(svg, softId)).toBe("var(--ck-background, #f5f5f7)");
+    expect(patternFill(svg, softId)).toBe("var(--ck-background, light-dark(#f5f5f7, #2c2c2e))");
     expect(patternFill(night, nightId)).toBe("var(--ck-background, #0c0c0c)");
     const filled = render({
       ...heat,

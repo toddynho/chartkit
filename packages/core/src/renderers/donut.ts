@@ -388,7 +388,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     const totalLabel = formatValue(total, valueFormat, frame.locale);
     const unit = centreUnit(frame.encoding.y);
     const fill = cssVar("text", frame.preset.text);
-    const label = unit ? `Total ${totalLabel} ${unit}` : `Total ${totalLabel}`;
+    const label = unit === "Total" ? `Total ${totalLabel}` : `Total ${totalLabel} ${unit}`;
     // Bold tabular digits run about 0.62em. Keep the figure inside the hole.
     const big = Math.max(11, Math.min(28, Math.round(inner * 0.5), Math.floor((inner * 2 - 16) / (totalLabel.length * 0.62))));
     if (unit) {

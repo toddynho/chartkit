@@ -698,7 +698,7 @@ function sharedLegend(names: string[], inks: string[], x: number, y: number, wid
   const bits: string[] = [];
   for (let i = 0; i < names.length; i++) {
     const name = names[i] ?? "";
-    const ink = inks[i] || `var(--ck-series-${i + 1}, #007aff)`;
+    const ink = inks[i] || `var(--ck-series-${i + 1}, #2f6fe4)`;
     const need = 22 + ch(name.length, 6.6);
     if (cx > x && cx + need > x + width) {
       cx = x;

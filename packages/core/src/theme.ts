@@ -72,7 +72,7 @@ export const auto: PresetTokens = {
   grid: ld("rgba(0, 0, 0, 0.09)", "rgba(245, 245, 247, 0.12)"),
   axis: ld("rgba(0, 0, 0, 0.2)", "rgba(245, 245, 247, 0.24)"),
   track: ld("rgba(0, 0, 0, 0.10)", "rgba(245, 245, 247, 0.16)"),
-  accent: ld("#0071ec", "#0a84ff"),
+  accent: ld("#2f6fe4", "#4a8ff0"),
   positive: ld("#15803d", "#30d158"),
   negative: ld("#be123c", "#ff453a"),
   positiveFill: "#007437",

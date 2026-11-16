@@ -281,7 +281,7 @@ describe("line swatch and points", () => {
     const swatch = svg.match(/<circle\b[^>]*fill="([^"]+)"[^>]*\/>\s*<text[^>]*>Three<\/text>/)?.[1] ?? "";
     const circles = [...svg.matchAll(/<circle\b[^>]*fill="([^"]+)"/g)].map((match) => match[1] ?? "");
     expect(third).toContain("--ck-line-3");
-    expect(third).toContain("#c93400");
+    expect(third).toContain("#0f9d83");
     expect(swatch).toBe(third);
     expect(circles.filter((fill) => fill === third).length).toBeGreaterThanOrEqual(4);
     const visible = svg.replace(/<defs>[\s\S]*?<\/defs>/, "");
