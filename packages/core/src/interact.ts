@@ -11,7 +11,7 @@ import { formatInstant, instantOf, namedZone } from "./timezone";
 import { motionMs, playMotion, type MotionFlight } from "./motion";
 import { readTooltip, type TooltipDetail, type TooltipRender } from "./tooltip-slot";
 import { arcChart, axisFormat, barChart, breakKey, copySelection, crosshairOn, drawnData, drillOf, durationMs, easeOf, exportFormats, fieldOf, hitPx, isRecord, KEY_TYPES, materialize, navigatorOn, numericValues, openTable, reducedMotion, seriesOf, syncIdOf, tipFields, tipSide, tipTemplate, titleOf, tooltipOn, zoomMode, type AttachOptions, type ClickDetail, type Controller, type InteractSpec, type PatchHost, type Selection } from "./interact/spec";
-import { applyTipChrome, ensureCss, esc, parkTip, plotBox, sitTip, tipObstacles, tipOverlap, viewPoint, type Box } from "./interact/tip";
+import { applyTipChrome, ensureCss, esc, parkTip, plotBox, scanMarks, sitTip, tipObstacles, tipOverlap, viewBox, viewPoint, type Box, type Marks } from "./interact/tip";
 import { buildHoverIndex, fade, fmt, legendItems, lookupIndex, NO_PIXELS, paint, patchRoot, turnLegendPage, useTheme } from "./interact/patch";
 
 export type { InteractSpec, ClickDetail, PointRef, Selection, AttachOptions, Controller, PatchHost, HoverIndex } from "./interact/spec";
@@ -104,6 +104,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     table = openTable(data);
     series = seriesOf(next, table);
     n = table.n;
+    owners.clear();
   };
   let lo = 0;
   let hi = Math.max(0, n - 1);
@@ -120,6 +121,15 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let bySlot = false;
   const horizontal = () => base.type === "bar" && isRecord(base.mark) && base.mark.orientation === "horizontal";
   let box: Box = { l: 0, t: 0, w: 1, h: 1 };
+  /** What the hover reads from the drawn SVG, kept from one redraw to the next: tooltip obstacles, and the marks that carry a row index. */
+  let seen: Marks | undefined;
+  let inked = new Map<string, Element[]>();
+  let stale = false;
+  let fresh = false;
+  /** A path's `d` split into tokens, kept while the string is the same. */
+  const cuts = new WeakMap<Element, { d: string; t: string[] }>();
+  /** Series name for a paint, until the legend colours or the series change. */
+  const owners = new Map<string, string>();
   let colors = new Map<string, string>();
   const locale = () => (typeof base.locale === "string" ? base.locale : "en-US");
   const xField = () => fieldOf(isRecord(base.encoding) ? base.encoding.x : undefined);
@@ -185,13 +195,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return raw == null ? String(index) : String(raw);
   }
 
+  /** Marks drawn for one row of one series, in document order. */
+  function marksAt(name: string, index: number): Element[] {
+    peek();
+    return (inked.get(String(index)) || []).filter((node) => node.getAttribute("data-ck-name") === name || owner(node) === name);
+  }
+
   function inkAt(name: string, index: number): string | null {
-    const nodes = svg.querySelectorAll("[data-ck-i]");
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (!node || node.getAttribute("data-ck-i") !== String(index)) continue;
-      const called = node.getAttribute("data-ck-name");
-      if (called !== name && owner(node) !== name) continue;
+    for (const node of marksAt(name, index)) {
       const fill = node.getAttribute("fill");
       const stroke = node.getAttribute("stroke");
       const ink = fill && fill !== "none" ? fill : stroke && stroke !== "none" ? stroke : "";
@@ -286,14 +297,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function captionAt(name: string, index: number): string {
-    const nodes = svg.querySelectorAll("[data-ck-rule]");
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (!node || node.getAttribute("data-ck-i") !== String(index)) continue;
-      const called = node.getAttribute("data-ck-name");
-      if (called !== name && owner(node) !== name) continue;
-      return node.getAttribute("data-ck-rule") || "";
-    }
+    for (const node of marksAt(name, index)) if (node.hasAttribute("data-ck-rule")) return node.getAttribute("data-ck-rule") || "";
     return "";
   }
 
@@ -347,12 +351,21 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function refreshColors(): void {
+    owners.clear();
     colors = new Map();
     for (const item of legendItems(svg)) {
       const fill = item.swatch?.getAttribute("fill");
       const ink = fill && fill !== "none" ? fill : item.swatch?.getAttribute("stroke");
       if (ink) colors.set(item.name, ink);
     }
+  }
+
+  /** Host and svg boxes, and the scale from viewBox units to host pixels. */
+  function frame(): { bounds: DOMRect; rect: DOMRect; sx: number; sy: number } {
+    const bounds = host.getBoundingClientRect();
+    const rect = svg.getBoundingClientRect();
+    const vb = viewBox(svg);
+    return { bounds, rect, sx: (rect.width || vb[2] || 1) / (vb[2] || rect.width || 1), sy: (rect.height || vb[3] || 1) / (vb[3] || rect.height || 1) };
   }
 
   /** Snap on show and while the tip follows the pointer. Ease when the hovered datum changes. */
@@ -434,11 +447,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     tip.hidden = false;
     if (!commit) return;
-    const bounds = host.getBoundingClientRect();
-    const rect = svg.getBoundingClientRect();
-    const vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
-    const sx = (rect.width || vb[2] || 1) / (vb[2] || rect.width || 1);
-    const sy = (rect.height || vb[3] || 1) / (vb[3] || rect.height || 1);
+    const { bounds, rect, sx, sy } = frame();
     const cluster = marks.length > 0 ? marks : [viewPoint(svg, clientX, clientY)];
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (let i = 0; i < cluster.length; i++) {
@@ -458,7 +467,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const plot = plotBox(svg);
     const plotLeft = rect.left + plot.l * sx - bounds.left;
     const plotRight = rect.left + (plot.l + plot.w) * sx - bounds.left;
-    const obstacles = tipObstacles(svg, rect, bounds, sx, sy, plot);
+    const obstacles = obstaclesAt(bounds, rect, sx, sy, plot);
     const anchor = { l: minX - 10, t: minY - 10, r: maxX + 10, b: maxY + 10 };
     const parked = parkTip(place, bounds.width, bounds.height, width, height, midX, midY, minX, minY, maxX, maxY, anchor, obstacles);
     let top = parked ? parked.top : minY - height - gap;
@@ -535,9 +544,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function hideHover(): void {
     dropTip();
-    svg.querySelector("[data-ck-crosshair]")?.remove();
-    svg.querySelector("[data-ck-xlabel]")?.remove();
-    clearDots();
+    drop("[data-ck-crosshair],[data-ck-xlabel],[data-ck-dot]");
     clearBars();
     publishHide();
   }
@@ -557,37 +564,24 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return w > 8 && h > 4 && w < box.w * 0.9;
   }
 
+  /** Light the bars at a category and dim the rest. Returns the lit ones. */
   function barsNear(snapped: number, horizontal: boolean): Element[] {
     const tol = Math.max(hitPx(base), (hover.width / Math.max(1, hover.count)) * 0.49);
     const hits: Element[] = [];
     const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
       const rect = rects[i];
-      if (!rect || !isBar(rect)) continue;
+      if (!isBar(rect)) continue;
       const x = +(rect.getAttribute("x") || 0);
       const y = +(rect.getAttribute("y") || 0);
       const w = +(rect.getAttribute("width") || 0);
       const h = +(rect.getAttribute("height") || 0);
-      const center = horizontal ? y + h / 2 : x + w / 2;
-      if (Math.abs(center - snapped) <= tol) hits.push(rect);
+      const hot = Math.abs((horizontal ? y + h / 2 : x + w / 2) - snapped) <= tol;
+      if (hot) hits.push(rect);
+      rect.classList.toggle("ck-bar-on", hot);
+      rect.toggleAttribute("data-ck-bar-dim", !hot);
     }
     return hits;
-  }
-
-  function paintBars(hits: Element[]): void {
-    const hot = new Set(hits);
-    const rects = svg.querySelectorAll("rect");
-    for (let i = 0; i < rects.length; i++) {
-      const rect = rects[i];
-      if (!rect || !isBar(rect)) continue;
-      if (hot.has(rect)) {
-        rect.classList.add("ck-bar-on");
-        rect.removeAttribute("data-ck-bar-dim");
-      } else {
-        rect.classList.remove("ck-bar-on");
-        rect.setAttribute("data-ck-bar-dim", "");
-      }
-    }
   }
 
   function placeBarTip(
@@ -619,11 +613,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (x + w > x1) x1 = x + w;
       if (y + h > y1) y1 = y + h;
     }
-    const bounds = host.getBoundingClientRect();
-    const rect = svg.getBoundingClientRect();
-    const vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
-    const sx = (rect.width || vb[2] || 1) / (vb[2] || rect.width || 1);
-    const sy = (rect.height || vb[3] || 1) / (vb[3] || rect.height || 1);
+    const { bounds, rect, sx, sy } = frame();
     const width = tip.offsetWidth || 160;
     const height = tip.offsetHeight || 48;
     const cx = rect.left + ((x0 + x1) / 2) * sx - bounds.left;
@@ -712,9 +702,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const hits = bars ? barsNear(px, flat) : [];
     let marks: { x: number; y: number }[] = [];
     if (bars) {
-      paintBars(hits);
-      clearDots();
-      svg.querySelector("[data-ck-crosshair]")?.remove();
+      drop("[data-ck-dot],[data-ck-crosshair]");
       // No rect to light (canvas bars, a bar of zero length): the keyboard shades the category band instead.
       if (keyed && !hits.length) {
         const slot = hover.width / Math.max(1, hover.count);
@@ -730,7 +718,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     if (!showTip) return;
     const rect = svg.getBoundingClientRect();
-    const vw = +(svg.getAttribute("viewBox") || "").split(/[\s,]+/)[2] || rect.width || 1;
+    const vw = viewBox(svg)[2] || rect.width || 1;
     const clientX = rect.left + (px / vw) * (rect.width || vw);
     const clientY = rect.top + (rect.height || 1) / 2;
     if (bars) placeBarTip(clientX, clientY, xText(index), entriesAt(index, null), hits, index);
@@ -794,10 +782,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     syncRange(id, member, xKey(lo), xKey(hi));
   }
 
-  function clearDots(): void {
-    const nodes = svg.querySelectorAll("[data-ck-dot]");
-    for (let i = 0; i < nodes.length; i++) nodes[i].remove();
+  /** Remove the hover's own nodes that match. */
+  function drop(selector: string): void {
+    svg.querySelectorAll(selector).forEach((node) => node.remove());
   }
+
 
   function addDot(x: number, y: number, fill: string): { x: number; y: number } {
     const cx = String(Math.round(x * 100) / 100);
@@ -806,8 +795,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return { x, y };
   }
 
-  function yOnPath(d: string, x: number): number | null {
-    const t = d.split(/[\s,]+/);
+  function yOnPath(path: Element, x: number): number | null {
+    const d = path.getAttribute("d") || "";
+    let kept = cuts.get(path);
+    if (!kept || kept.d !== d) cuts.set(path, (kept = { d, t: d.split(/[\s,]+/) }));
+    const t = kept.t;
     let c = "", x0 = 0, y0 = 0;
     for (let i = 0; i < t.length; i++) {
       const p = t[i];
@@ -840,7 +832,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function placeDots(snapped: number, horizontal: boolean, index: number): { x: number; y: number }[] {
-    clearDots();
+    drop("[data-ck-dot]");
     const hit = dataHit(svg);
     if (hit && hit.kind !== "scatter") {
       const dots = hit.dots?.(index) ?? [];
@@ -860,7 +852,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         if (!stroke || stroke === "none") continue;
         const d = path.getAttribute("d");
         if (!d) continue;
-        const y = dataDotY(path, index) ?? yOnPath(d, snapped);
+        const y = dataDotY(path, index) ?? yOnPath(path, snapped);
         if (y == null) continue;
         marks.push(addDot(snapped, y, legendPaint(stroke, seen)));
         seen += 1;
@@ -929,9 +921,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         rowSlot[i] = slots.get(key)!;
       }
     }
+    box = plotBox(svg);
+    stale = true;
     if (hit && hit.kind !== "scatter") {
       bySlot = slotRow?.length === hit.count;
-      box = plotBox(svg);
       hover = {
         xs: NO_PIXELS,
         order: null,
@@ -946,7 +939,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       refreshColors();
       return;
     }
-    box = plotBox(svg);
     const values = numericValues(base, table, data);
     const slice = values && viewN ? (lo === 0 && values.length === viewN ? values : values.subarray(lo, hi + 1)) : null;
     bySlot = !slice && !!slotRow;
@@ -954,6 +946,40 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const flat = horizontal();
     hover = buildHoverIndex(bySlot ? slotRow!.length : viewN, flat ? box.t : box.l, flat ? box.h : box.w, slice);
     refreshColors();
+  }
+
+  /** Read the drawn marks. A motion flight rewrites the SVG every frame, so nothing is kept while one runs. */
+  function look(): void {
+    stale = !!flight;
+    seen = scanMarks(svg, plotBox(svg), stale);
+    inked = new Map();
+    svg.querySelectorAll("[data-ck-i]").forEach((mark) => {
+      const key = mark.getAttribute("data-ck-i")!;
+      (inked.get(key) || inked.set(key, []).get(key)!).push(mark);
+    });
+  }
+
+  /** Make the read current. Mid-flight it is read again for each event, and again for the obstacles (`force`), which must see the dots just placed. */
+  function peek(force?: 1): void {
+    arm(1);
+    if ((flight || stale) && (force || !fresh)) {
+      look();
+      if ((fresh = stale)) queueMicrotask(() => (fresh = false));
+    }
+  }
+
+  function obstaclesAt(bounds: DOMRect, rect: DOMRect, sx: number, sy: number, plot: Box) {
+    peek(1);
+    return tipObstacles(svg, rect, bounds, sx, sy, plot, seen!);
+  }
+
+  /** Idle work after a draw, so the first hover does not pay for it: read the marks, place the obstacles, split the line paths. */
+  function prime(): void {
+    if (!showTip) return;
+    const { bounds, rect, sx, sy } = frame();
+    obstaclesAt(bounds, rect, sx, sy, plotBox(svg));
+    if (!showCross) return;
+    svg.querySelectorAll("path[stroke]").forEach((path) => yOnPath(path, NaN));
   }
 
   /** Row offset from `lo` under a pixel along the category axis. */
@@ -967,13 +993,18 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return Math.min(n - 1, Math.max(0, lo + rowOf(horizontal() ? point.y : point.x)));
   }
   function arm(now?: 1): void {
-    const mine = ++ticket;
     if (now) {
       if (dirty) rebuild();
       return;
     }
+    const mine = ++ticket;
     dirty = true;
-    const go = () => mine === ticket && dirty && rebuild();
+    const go = () => {
+      if (mine !== ticket) return;
+      if (dirty) rebuild();
+      // The first read is now. A later draw is read once it has stood for a moment, so a chart that keeps updating is not read on every frame.
+      setTimeout(() => mine === ticket && prime(), seen ? 200 : 0);
+    };
     const ric = globalThis.requestIdleCallback;
     ric ? ric(go, { timeout: 400 }) : setTimeout(go);
   }
@@ -988,7 +1019,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function dim(): void {
     if (!legend) return;
-    svg.querySelectorAll("[data-ck-hidden-key]").forEach((node) => node.remove());
+    drop("[data-ck-hidden-key]");
     const items = legendItems(svg);
     for (const item of items) {
       const off = hidden.has(item.name);
@@ -1177,6 +1208,12 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const stroke = node.getAttribute("stroke");
     const paint = stroke && stroke !== "none" ? stroke : node.getAttribute("fill");
     if (!paint || paint === "none") return "";
+    let name = owners.get(paint);
+    if (name === undefined) owners.set(paint, (name = paintOwner(paint)));
+    return name;
+  }
+
+  function paintOwner(paint: string): string {
     for (const [name, fill] of colors) if (fill === paint) return name;
     const id = /--ck-(line|series)-(\d+)/.exec(paint);
     if (!id) return "";
@@ -1271,12 +1308,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         item.swatch?.removeAttribute("data-ck-dim");
       }
     }
-    svg.querySelectorAll("[data-ck-pick]").forEach((node) => node.remove());
+    drop("[data-ck-pick]");
     svg.querySelectorAll(".ck-pick").forEach((node) => node.classList.remove("ck-pick"));
     if (picking !== "point") {
       queueCanvas(host);
       return;
     }
+    // This runs right after a redraw, before the redraw is read, so the ring's ink is read from the new marks.
+    stale = true;
     for (let i = 0; i < picked.points.length; i++) {
       const point = picked.points[i];
       const x = hover.pixels[point.index - lo] ?? box.l;
@@ -1313,24 +1352,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       const paths = svg.querySelectorAll("path");
       for (let p = 0; p < paths.length; p++) {
         if (owner(paths[p]) !== point.series) continue;
-        const d = paths[p].getAttribute("d");
-        const found = d ? yOnPath(d, x) : null;
+        const found = yOnPath(paths[p], x);
         if (found != null) {
           y = found;
           break;
         }
       }
-      let ink = "";
-      const marks = svg.querySelectorAll("[data-ck-i]");
-      for (let m = 0; m < marks.length; m++) {
-        const mark = marks[m];
-        if (!mark || mark.getAttribute("data-ck-i") !== String(point.index)) continue;
-        if (owner(mark) !== point.series && mark.getAttribute("data-ck-name") !== point.series) continue;
-        const fill = mark.getAttribute("fill");
-        if (fill && fill !== "none") ink = fill;
-        break;
-      }
-      const ring = ink ? ` style="stroke:${ink}"` : "";
+      const ink = marksAt(point.series, point.index)[0]?.getAttribute("fill");
+      const ring = ink && ink !== "none" ? ` style="stroke:${ink}"` : "";
       svg.insertAdjacentHTML("beforeend", `<circle data-ck-pick class="ck-pick"${ring} cx="${Math.round(x)}" cy="${Math.round(y)}" r="5" fill="none" pointer-events="none"/>`);
     }
     queueCanvas(host);
@@ -1422,10 +1451,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       const index = rowAtPoint(point);
       focus = index;
       const hits = barsNear(crossX(index - lo), flat);
-      paintBars(hits);
-      clearDots();
-      svg.querySelector("[data-ck-crosshair]")?.remove();
-      svg.querySelector("[data-ck-xlabel]")?.remove();
+      drop("[data-ck-dot],[data-ck-crosshair],[data-ck-xlabel]");
       if (showTip) placeBarTip(event.clientX, event.clientY, xText(index), entriesAt(index, point.y), hits, index);
       publishHover();
       return;
@@ -1441,7 +1467,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
       focus = nearest.index;
       moveCross(nearest.x, xText(nearest.index));
-      clearDots();
+      drop("[data-ck-dot]");
       const marks = [addDot(nearest.x, nearest.y, legendPaint(nearest.color, 0))];
       if (showTip) placeTip(event.clientX, event.clientY, nearest.name || xText(nearest.index), entriesAt(nearest.index, nearest.y), marks, nearest.index);
       return;
