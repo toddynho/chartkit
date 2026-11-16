@@ -55,6 +55,15 @@ export interface PresetGeometry {
  * The #f5f5f7 / #1c1c1e card is optional: set --ck-background, or use the stylesheet.
  * Colour fallbacks use light-dark() so the page color-scheme wins. --ck-* still wins over these.
  */
+/**
+ * One list for fills and strokes, so a series keeps its colour across chart types.
+ * Each step clears 3:1 on its page, and neighbours stay apart under protan and deutan simulation.
+ */
+const softSeries = ldList(
+  ["#2f6fe4", "#e2622a", "#0f9d83", "#b7791f", "#d9488f", "#3f8f2f", "#8b5cf6", "#d14343"],
+  ["#4a8ff0", "#e06a35", "#1aa37e", "#c08318", "#dd5f97", "#4aa040", "#9180ea", "#e66767"],
+);
+
 export const auto: PresetTokens = {
   background: "transparent",
   surface: ld("#ffffff", "#2c2c2e"),
@@ -68,14 +77,8 @@ export const auto: PresetTokens = {
   negative: ld("#be123c", "#ff453a"),
   positiveFill: "#007437",
   negativeFill: "#c80046",
-  series: ldList(
-    ["#007aff", "#2aa148", "#ca7600", "#af52de", "#ff2d55", "#1996d0", "#5f9a0c", "#fc4e00"],
-    ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
-  ),
-  lines: ldList(
-    ["#007aff", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
-    ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
-  ),
+  series: softSeries,
+  lines: softSeries,
 };
 
 /** Same tokens as auto. Named so `theme: "soft"` does not fall through to midnight. */
