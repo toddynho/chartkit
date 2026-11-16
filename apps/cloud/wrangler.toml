@@ -17,15 +17,28 @@ workers_dev = true
 # pattern = "cloud.chartkit.dev"
 # custom_domain = true
 
-# Optional REST secrets, set with `wrangler secret put`, not in this file:
-# KV_REST_API_URL, KV_REST_API_TOKEN (Vercel KV or Upstash; keys and stored charts)
-# CHARTKIT_DEV_KEYS (comma-separated test keys that remove the mark)
+# Runtime secrets, set with `wrangler secret put`, never in this file:
+# KV_REST_API_URL, KV_REST_API_TOKEN (Vercel KV or Upstash). Only needed when CHARTKIT_KV is not bound.
+# CHARTKIT_DEV_KEYS (comma-separated keys that remove the mark; works alongside KV)
 # STRIPE_SECRET_KEY, STRIPE_PRICE_ID, STRIPE_WEBHOOK_SECRET (checkout stays off until these exist)
+# CHARTKIT_ALLOW_MEMORY=1 lets /health pass with no durable store. Smoke tests only.
 
-# Native Cloudflare KV. Not read by the worker yet. In-memory, or the REST vars above, is enough to test.
+# Durable store for API keys and stored charts (/c/<id>). Read before the REST vars above.
+# Without it (or the REST vars), /health answers 503 on Workers: keys and /c/<id> links would vanish with the isolate.
+# Create it with `npx wrangler kv namespace create CHARTKIT_KV`, paste the id, and uncomment.
+# A placeholder id makes deploy fail, so this stays commented until the namespace exists.
 # [[kv_namespaces]]
 # binding = "CHARTKIT_KV"
 # id = "00000000000000000000000000000000"
+
+# Rate limit: 120 requests a minute per client IP, on every route but /health and checkout.
+# Counters are shared by the isolates in one Cloudflare location, not exact across the globe.
+# namespace_id is any positive integer that is unique within the account. Nothing has to be created first.
+# Without this binding the worker falls back to a per-isolate memory counter.
+[[ratelimits]]
+name = "CHARTKIT_RATE_LIMIT"
+namespace_id = "1201"
+simple = { limit = 120, period = 60 }
 
 # Hashed image bytes. Not read by the worker yet.
 # Repeats use the content hash, Cache-Control, and the Workers Cache API.

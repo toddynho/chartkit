@@ -10,6 +10,8 @@ export interface EdgeOptions {
   env?: Record<string, unknown>;
   cache?: EdgeCache;
   waitUntil?: (promise: Promise<unknown>) => void;
+  /** Set by worker.ts. Turns on the durable-store check on /health. */
+  workers?: boolean;
 }
 
 let shared: CloudApp | undefined;
@@ -21,7 +23,7 @@ export function resetEdgeApp(): void {
 
 export async function handleFetch(request: Request, options: EdgeOptions = {}): Promise<Response> {
   if (options.env) applyStringEnv(options.env);
-  const app = options.app ?? sharedApp();
+  const app = options.app ?? sharedApp(options);
   if (request.method === "GET" && options.cache) {
     const hit = await options.cache.match(request);
     if (hit) {
@@ -39,8 +41,13 @@ export async function handleFetch(request: Request, options: EdgeOptions = {}): 
   return response;
 }
 
-function sharedApp(): CloudApp {
-  if (!shared) shared = createApp();
+function sharedApp(options: EdgeOptions): CloudApp {
+  if (!shared) {
+    shared = createApp({
+      bindings: { kv: options.env?.CHARTKIT_KV, rateLimit: options.env?.CHARTKIT_RATE_LIMIT },
+      workers: options.workers,
+    });
+  }
   return shared;
 }
 

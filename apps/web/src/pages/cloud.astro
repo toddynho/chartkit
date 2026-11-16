@@ -296,7 +296,7 @@ const description =
         </div>
       </div>
       <p class="cloud-aside">
-        This 200 does not include a rate-limit header. Over {perMinute} renders a minute from one IP, inside an isolate, the response is 429 with Retry-After, X-RateLimit-Limit, and X-RateLimit-Remaining: 0. The ceiling is the same with or without a key. There is no public status page.
+        This 200 does not include a rate-limit header. Over {perMinute} renders a minute from one IP, counted per Cloudflare location, the response is 429 with Retry-After, X-RateLimit-Limit, and X-RateLimit-Remaining: 0. The ceiling is the same with or without a key. There is no public status page.
       </p>
     </section>
 

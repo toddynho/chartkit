@@ -33,14 +33,14 @@ function rpc(method: string, params?: unknown, id: number | null = 1, accept = "
 }
 
 describe("POST /mcp", () => {
-  it("lists render_chart and renders through the same path", async () => {
+  it("lists render_chart, validate_chart, and repair_chart, and renders through the same path", async () => {
     const app = appFor();
     const listed = await app.handle(rpc("tools/list"));
     const tools = (await listed.json()) as {
       result: { tools: { name: string; description: string; inputSchema: { properties: { format: { default?: string; description?: string; enum?: string[] }; scale: { description?: string } } } }[] };
     };
     expect(listed.headers.get("content-type")).toContain("application/json");
-    expect(tools.result.tools.map((tool) => tool.name)).toEqual(["render_chart"]);
+    expect(tools.result.tools.map((tool) => tool.name)).toEqual(["render_chart", "validate_chart", "repair_chart"]);
     const tool = tools.result.tools[0];
     expect(tool?.description).toMatch(/Omit format, or pass svg/);
     expect(tool?.description).toMatch(/GitHub README image/);
@@ -91,5 +91,49 @@ describe("POST /mcp", () => {
 
     const get = await app.handle(new Request("http://cloud.local/mcp"));
     expect(get.status).toBe(405);
+  });
+
+  it("validate_chart reports diagnostics without changing the spec", async () => {
+    const app = appFor();
+    const good = await app.handle(rpc("tools/call", { name: "validate_chart", arguments: { spec: bar } }));
+    const goodBody = (await good.json()) as { result: { isError: boolean; content: { text: string }[] } };
+    expect(goodBody.result.isError).toBe(false);
+    expect(JSON.parse(goodBody.result.content[0]?.text ?? "")).toMatchObject({ ok: true, errors: [] });
+
+    const broken = { version: "1", type: "bar", data: [{ lane: "A", stops: 12 }], encoding: { x: "lane", y: "stops" } };
+    const bad = await app.handle(rpc("tools/call", { name: "validate_chart", arguments: { spec: JSON.stringify(broken) } }));
+    const badBody = (await bad.json()) as { result: { isError: boolean; content: { text: string }[] } };
+    expect(badBody.result.isError).toBe(false);
+    const report = JSON.parse(badBody.result.content[0]?.text ?? "") as { ok: boolean; errors: { code: string; path: string }[]; spec?: unknown };
+    expect(report.ok).toBe(false);
+    expect(report.errors.length).toBeGreaterThan(0);
+    expect(report.errors[0]?.code).toMatch(/^CK\d{4}$/);
+    expect(report.spec).toBeUndefined();
+
+    const notJson = await app.handle(rpc("tools/call", { name: "validate_chart", arguments: { spec: "{nope" } }));
+    const notJsonBody = (await notJson.json()) as { result: { isError: boolean } };
+    expect(notJsonBody.result.isError).toBe(true);
+  });
+
+  it("repair_chart returns the patched spec and the patches", async () => {
+    const app = appFor();
+    const broken = { version: "1", type: "bar", data: [{ lane: "A", stops: 12 }], encoding: { x: "lane", y: "stops" } };
+    const called = await app.handle(rpc("tools/call", { name: "repair_chart", arguments: { spec: broken, theme: "midnight" } }));
+    const body = (await called.json()) as { result: { isError: boolean; content: { text: string }[] } };
+    expect(body.result.isError).toBe(false);
+    const repaired = JSON.parse(body.result.content[0]?.text ?? "") as { ok: boolean; applied: unknown[]; spec: { theme?: string; a11y?: { alt?: string } } };
+    expect(repaired.ok).toBe(true);
+    expect(repaired.applied.length).toBeGreaterThan(0);
+    expect(repaired.spec.a11y?.alt).toBeTruthy();
+    expect(repaired.spec.theme).toBe("midnight");
+
+    const badFrame = await app.handle(rpc("tools/call", { name: "repair_chart", arguments: { spec: broken, w: 999999 } }));
+    const badFrameBody = (await badFrame.json()) as { result: { isError: boolean } };
+    expect(badFrameBody.result.isError).toBe(true);
+
+    const unknown = await app.handle(rpc("tools/call", { name: "draw_chart", arguments: { spec: bar } }));
+    const unknownBody = (await unknown.json()) as { result: { isError: boolean; content: { text: string }[] } };
+    expect(unknownBody.result.isError).toBe(true);
+    expect(unknownBody.result.content[0]?.text).toContain("validate_chart");
   });
 });

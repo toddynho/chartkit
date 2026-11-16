@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { KvConfig } from "./keys.ts";
+import { backendFromEnv, bindingBackend, restBackend, type KvBackend, type KvConfig, type KvNamespaceLike, type StoreBindings } from "./keys.ts";
 
 export interface StoredChart {
   id: string;
@@ -33,45 +33,41 @@ export function memoryCharts(): ChartStore {
 }
 
 export function kvCharts(config: KvConfig): ChartStore {
-  const endpoint = config.url.replace(/\/$/, "");
-  const fetcher = config.fetch ?? fetch;
-  const call = async (command: unknown[]) => {
-    const response = await fetcher(endpoint, {
-      method: "POST",
-      headers: { authorization: `Bearer ${config.token}`, "content-type": "application/json" },
-      body: JSON.stringify(command),
-    });
-    if (!response.ok) throw new Error(`chart store HTTP ${response.status}`);
-    const body = (await response.json()) as { result?: unknown };
-    return body.result;
-  };
+  return backendCharts(restBackend(config, "chart store"));
+}
+
+/** Native Workers KV. */
+export function bindingCharts(namespace: KvNamespaceLike): ChartStore {
+  return backendCharts(bindingBackend(namespace));
+}
+
+/** ck:chart:<id> = {"v":1,"spec":...,"clean":...}. Ids are content hashes, so a write never changes a link. */
+export function backendCharts(backend: KvBackend): ChartStore {
   return {
     async put(spec, clean = false) {
       const id = chartId(spec, clean);
-      const existing = await call(["GET", `ck:chart:${id}`]);
-      if (typeof existing === "string" && existing) {
+      const existing = await backend.get(`ck:chart:${id}`);
+      if (existing) {
         const stored = decodeChart(id, existing);
         if (stored) return stored;
       }
       const row: StoredChart = { id, spec, clean };
-      await call(["SET", `ck:chart:${id}`, JSON.stringify({ v: 1, spec, clean })]);
+      await backend.set(`ck:chart:${id}`, JSON.stringify({ v: 1, spec, clean }));
       return row;
     },
     async get(id) {
       if (!/^[A-Za-z0-9_-]{8,32}$/.test(id)) return null;
-      const value = await call(["GET", `ck:chart:${id}`]);
-      if (typeof value !== "string" || !value) return null;
+      const value = await backend.get(`ck:chart:${id}`);
+      if (!value) return null;
       return decodeChart(id, value);
     },
   };
 }
 
-/** Uses the same KV as the key store when it is configured. A local process keeps charts in memory. */
-export function chartStoreFromEnv(env: NodeJS.ProcessEnv = process.env): ChartStore {
-  const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
-  const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) return kvCharts({ url, token });
-  return memoryCharts();
+/** Uses the same store as the keys: the CHARTKIT_KV binding, then REST, then memory. */
+export function chartStoreFromEnv(env: NodeJS.ProcessEnv = process.env, bindings: StoreBindings = {}): ChartStore {
+  const backend = backendFromEnv(env, bindings, "chart store");
+  return backend ? backendCharts(backend) : memoryCharts();
 }
 
 export function canonical(value: unknown): string {
