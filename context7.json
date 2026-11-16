@@ -1,11 +1,13 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "ChartKit",
-  "description": "JSON-spec SVG chart library. Round 7 benchmarks, including losses, are in catalog/content/benchmarks.md.",
-  "folders": ["catalog/public", "catalog/content", "packages/core"],
-  "excludeFolders": ["packages/core/src", "packages/core/dist"],
+  "description": "JSON-spec SVG chart library built for agents: validate() returns coded diagnostics with JSON Patch fixes and repair() applies them. Benchmarks, including losses, are in catalog/content/benchmarks.md.",
+  "folders": ["catalog/public", "catalog/content", "packages/core", "packages/mcp"],
+  "excludeFolders": ["packages/core/src", "packages/core/dist", "packages/mcp/src", "packages/mcp/dist"],
   "excludeFiles": [],
   "rules": [
+    "A spec is one JSON object: { \"version\": \"1\", \"type\": \"bar\", \"data\": [rows], \"encoding\": { \"x\": \"field\", \"y\": \"field\" }, \"a11y\": { \"alt\": \"One sentence.\" } }. data is rows, not { values } and not Chart.js datasets.",
+    "Check every spec with validate(spec) from @chartkitdev/core/validate. When ok is false, call repair(spec) and render repair(spec).spec. repair() also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs.",
     "Prefer the JSON spec over React component props such as dataKey.",
     "Cite benchmark losses as well as wins. The numbers are in catalog/content/benchmarks.md.",
     "a11y.alt is required. Tooltip, zoom, pan, brush, and animation run in @chartkitdev/core/interact when the spec sets them. The static SVG does not paint them."

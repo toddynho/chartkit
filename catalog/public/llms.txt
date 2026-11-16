@@ -1,7 +1,7 @@
 # ChartKit JSON spec
 ## Rules
 
-- version "1". a11y.alt required. data is rows, not {"values":[...]}.
+- version "1". a11y.alt required. data is rows. repair(spec) applies validate fixes.
 - Maps: npm install @chartkitdev/geo. choropleth|map-points. atlas world|us|canada|eu.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Options: interaction.navigator, interaction.drilldown, layout.breakpoints, mark.sampling lttb. 100000.
@@ -11,10 +11,10 @@
 - Dashboards: /dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md
 
 ```json
-{"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
+{"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Rose in Q2."}}
 ```
 ```json
-{"version":"1","type":"bar","data":[{"lane":"A","stops":12},{"lane":"C","stops":15}],"encoding":{"x":"lane","y":"stops"},"a11y":{"alt":"Lane C has more."}}
+{"version":"1","type":"bar","data":[{"lane":"A","stops":12},{"lane":"C","stops":15}],"encoding":{"x":"lane","y":"stops"},"a11y":{"alt":"C has more."}}
 ```
 ```json
 {"version":"1","type":"donut","data":[{"x":"Oak","y":8},{"x":"Pine","y":5}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Oak is larger."}}
@@ -59,7 +59,7 @@
 {"version":"1","type":"boxplot","data":[{"x":"A","y":1},{"x":"A","y":9},{"x":"B","y":2},{"x":"B","y":4}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"A is wider."}}
 ```
 ```json
-{"version":"1","type":"strip","data":[{"g":"A","v":1},{"g":"A","v":4},{"g":"B","v":2},{"g":"B","v":3}],"encoding":{"x":"v","y":"g"},"a11y":{"alt":"A spreads wider."}}
+{"version":"1","type":"strip","data":[{"g":"A","v":1},{"g":"A","v":4},{"g":"B","v":2},{"g":"B","v":3}],"encoding":{"x":"v","y":"g"},"a11y":{"alt":"A is spread."}}
 ```
 ```json
 {"version":"1","type":"streamgraph","data":[{"x":"20","a":2,"b":1},{"x":"22","a":2,"b":3}],"encoding":{"x":"x","y":["a","b"]},"a11y":{"alt":"B grew later."}}

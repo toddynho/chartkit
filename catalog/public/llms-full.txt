@@ -76,6 +76,8 @@ Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/re
 
 `repair` stops when the spec is valid, when a patch no longer applies, or after a few rounds. It does not invent fields.
 
+A config written for another library is one CK1009 at the root whose fix converts it: Chart.js `data.labels` and `data.datasets`, ECharts `xAxis.data` and `series` (line, bar, pie, funnel, gauge, scatter, heatmap, radar, candlestick, `dataset.source`), Plotly traces, Vega-Lite `mark`, `data.values`, and `{ field, type }` channels, and Recharts `dataKey`, `xAxis`, `bars`, and `lines`. A Vega-Lite aggregate, bin, timeUnit, transform, or facet is reported without a fix. A missing `version`, a top-level `alt` or `description`, a `title` object, top-level `x` and `y`, column arrays in `data`, and `doughnut` or `column` as a type are also fixes. `repair` accepts a string with a Markdown fence, comments, trailing commas, single quotes, or bare keys. `validate` stays strict.
+
 Each example below is a minimal valid spec.
 
 ## line

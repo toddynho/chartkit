@@ -6,7 +6,7 @@ import { readQuadrant, quadrantRow } from "./renderers/extra/quadrant";
 import { readTimeline, timelineRow } from "./renderers/extra/timeline";
 import { readVenn, vennRow } from "./renderers/extra/venn";
 import { DAY } from "./renderers/extra/time";
-import { applyPatch } from "./repair";
+import { applyPatch, parseLoose } from "./repair";
 import { isRecord } from "./svg";
 import { validate } from "./validate";
 
@@ -62,11 +62,9 @@ const MAX_REPAIR_ROUNDS = 8;
 /** Apply phase-4 JSON Patch fixes, then the same fixes `repair()` would apply to what remains. */
 export function repairPhase4(spec: unknown, data?: unknown): RepairResult {
   if (typeof spec === "string") {
-    try {
-      spec = JSON.parse(spec) as unknown;
-    } catch {
-      return { spec, ...validatePhase4(spec, data), applied: [] };
-    }
+    const parsed = parseLoose(spec);
+    if (parsed === undefined) return { spec, ...validatePhase4(spec, data), applied: [] };
+    spec = parsed;
   }
   let current = structuredClone(spec);
   const applied: JsonPatchOperation[] = [];
