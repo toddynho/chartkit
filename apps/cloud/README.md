@@ -22,7 +22,7 @@ https://chartkit-cloud.<account-subdomain>.workers.dev
 
 Wrangler prints the exact URL. The account subdomain is not in the repo. `cloud.chartkit.dev` stays commented in `wrangler.toml` until that zone is on the account.
 
-`nodejs_compat` is on so `node:crypto` and `Buffer` match the Node handler. The bundle is ChartKit source plus the resvg wasm and the Inter and Roboto files in `fonts/`. A local bundle of the script plus wasm is about 1.2 MB gzipped, inside the Workers script limit.
+`nodejs_compat` is on so `node:crypto` and `Buffer` match the Node handler. The bundle is ChartKit source plus the resvg wasm and the Inter and Roboto files in `fonts/`. `npm run build:worker` writes that bundle. This file does not hardcode its gzip size. It has to stay inside the Workers script limit.
 
 ### Deploy
 

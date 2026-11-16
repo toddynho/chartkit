@@ -31,13 +31,13 @@ Checked 2026-10-18. ChartKit cells re-checked 2026-10-19 against main 116d0af (v
 | File | What it is |
 |---|---|
 | `matrix.json` | Main deliverable. Contains `schema` (statuses, verification kinds, cell fields), `libraries` (version, licence, npm downloads, GitHub stars, bundle size, escape hatch, docs URL), `notScored`, `taxonomy` (23 categories), `features` (263 rows with stable dotted ids), and `coverage`. |
-| `matrix.csv` | One line per feature × library (5,523 lines). Columns: id, category, label, relevance, library, version, status, assessed, tier, api_paths, source (d.ts file:line or URL), verified, strength, note. |
-| `features.md` | Human-readable grid by category, plus the library table (versions, licences, popularity, bundle sizes). |
-| `chartkit-gaps.md` | ChartKit gaps ranked by commonness × agent relevance, options the schema accepts but the renderer ignores, and where ChartKit leads. |
+| `matrix.csv` | One row per feature × library (5,523 data rows, plus a header). Columns: id, category, label, relevance, library, version, status, assessed, tier, api_paths, source (d.ts file:line or URL), verified, strength, note. |
+| `features.md` | Human-readable grid by category, plus the library table (versions, licences, popularity, bundle sizes). The gzip columns in that table are the 2026-10-18 extract. Current bundle figures are `libraries[].bundleGzip` in `catalog/public/features.json`, from `catalog/data/measured-sizes.json`. |
 | `conflicts.md` | "None" claims whose absence probe matched something. These are unknown until someone reviews them. |
-| `option-trees/<lib>.txt` | Full option-tree dumps from each library's types (about 7.9M lines, 569 MB), as `Root.path.to.option = literal\|values`. Agents can grep these for exact option names. |
-| `bundle/sizes.json` | Measured min and gzip bundle sizes, with method. |
-| `meta/popularity.json` | npm weekly downloads (window 2026-10-10..16) and GitHub stars. |
+| `chartkit-recheck.md` | ChartKit cells rechecked on 2026-10-19 against main `116d0af`. |
+| `popularity.json` | npm weekly downloads and GitHub stars. `fetched` is 2026-10-19. The download window in `features.md` is 2026-10-10..16. |
+
+`chartkit-gaps.md`, `option-trees/`, `bundle/sizes.json`, and `meta/popularity.json` are not in this repository. The option-tree dumps were about 7.9M lines and 569 MB in the extract workspace. This directory stores the result.
 
 ## Statuses
 
@@ -90,9 +90,11 @@ Checked 2026-10-18. ChartKit cells re-checked 2026-10-19 against main 116d0af (v
 | `doc-cited` | weak | Taken from docs, not machine-checked. |
 | `conflict`, `unverified` | none | Forced to `unknown`. |
 
-**Coverage of 5,523 cells:** 33.9% strong, 31.3% weak, 26.7% absence-verified none, 8.1% unknown (358 conflicts plus the unverified cells). `coverage.perLibrary` in matrix.json has the per-library numbers.
+**Coverage of 5,523 cells** (`coverage` in `matrix.json`, generated 2026-10-19): 34.7% strong (1,917), 31.3% weak (1,730), 25.9% absence-verified none (1,433), 8.0% unknown (443). `coverage.perLibrary` has the per-library numbers.
 
 ## How to update
+
+The extract toolchain below is not in this repository. The commands are the original workspace, kept so a later extract has the steps. They do not run from a chartkit checkout.
 
 ```bash
 cd /workspace/chart-matrix/pkgs && npm i --legacy-peer-deps <pkg>@latest   # bump libraries

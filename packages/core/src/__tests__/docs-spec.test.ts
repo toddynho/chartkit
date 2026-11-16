@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { renderBarList } from "../charts/bar-list";
 import { render } from "../extra";
 import { validate } from "../validate";
 import { validatePhase4 } from "../validate-phase4";
@@ -48,6 +49,7 @@ const CHART_TYPES = [
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
+const README_ONLY = ["radial-bar", "rose", "bar-list"];
 
 function fencedSpecs(relativePath: string): unknown[] {
   const text = readFileSync(join(repoRoot, relativePath), "utf8");
@@ -64,7 +66,12 @@ describe("published JSON examples", () => {
     it(`${file} has one valid, drawable spec per chart type`, () => {
       const specs = fencedSpecs(file);
       const types = specs.map((spec) => (spec as { type?: string }).type);
-      const expected = file === "catalog/public/llms.txt" ? CHART_TYPES.filter((type) => type !== "pie") : CHART_TYPES;
+      const expected =
+        file === "catalog/public/llms.txt"
+          ? CHART_TYPES.filter((type) => type !== "pie")
+          : file === "packages/core/README.md"
+            ? [...CHART_TYPES, ...README_ONLY]
+            : CHART_TYPES;
       expect([...types].sort()).toEqual([...expected].sort());
       if (file === "catalog/public/llms.txt") {
         const text = readFileSync(join(repoRoot, file), "utf8");
@@ -78,7 +85,7 @@ describe("published JSON examples", () => {
         const type = (spec as { type?: string }).type ?? "";
         const result = PHASE4.has(type) ? validatePhase4(spec) : validate(spec);
         expect(result.ok, JSON.stringify(result.errors)).toBe(true);
-        const svg = render(spec);
+        const svg = type === "bar-list" ? (renderBarList(spec) ?? "") : render(spec);
         expect(svg).not.toContain("ck-chart-error");
         expect(svg).toContain(`data-ck-type="${(spec as { type: string }).type}"`);
       }

@@ -2,13 +2,13 @@
 
 React adapter for the ChartKit JSON spec.
 
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
+**[Documentation](https://chartkit.dev)** | **[Playground](https://chartkit.dev/playground)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
 
 ---
 
 `<Chart spec={...} />` renders a ChartKit v1 spec. Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies.
 
-The v0 prop-based components (14 chart components and 17 themes) are frozen and live at `@chartkitdev/react/legacy`. See [Legacy components](#legacy-components).
+The v0 prop-based components (14 chart components and 17 themes, `ThemeName` in `src/themes/types.ts`) are frozen and live at `@chartkitdev/react/legacy`. They take their own props, not a spec. See [Legacy components](#legacy-components).
 
 ## Installation
 
@@ -71,15 +71,6 @@ function Dashboard({ data }) {
   );
 }
 ```
-
-### Features
-
-- **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, candlesticks, and more
-- **17 Curated Themes** - Dark and light themes that look great out of the box
-- **Pure SVG** - Depends on `@chartkitdev/core`, not on a third-party chart library
-- **TypeScript First** - Full type safety with autocomplete
-- **Dual Y-Axis** - Display multiple scales in LineChart
-- **Responsive** - Charts automatically resize to fit their container
 
 ### Components
 
