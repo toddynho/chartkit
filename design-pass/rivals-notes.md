@@ -4,12 +4,12 @@ Rendered 2026-11-16 in Playwright Chromium, `deviceScaleFactor: 2`, element scre
 
 All numbers below were read from the rendered DOM / computed styles in the same run that took the screenshot; the raw dump is `measurements.json` next to this file. Colours were converted to hex by painting the computed value on a canvas. "n/a" means the thing does not exist in that library's default output.
 
-Files: `<lib>-<chart>.light.png` for all five libraries, `.dark.png` for shadcn and Tremor.
+Files: `<lib>-<chart>.light.png` for all five libraries, `.dark.png` for shadcn and Tremor. `alt/` holds the shadcn charts again on recharts 3.8.0 (light and dark).
 Not rendered: `plot-donut` (see Plot section).
 
 ## Things that are not what the brief assumed
 
-1. **shadcn installs recharts 3.8.0, not 3.10.1.** `npx shadcn add chart` pins `recharts@3.8.0` (registry JSON below). The `shadcn-*` PNGs therefore use 3.8.0. The same five charts on recharts 3.10.1 are in `alt/shadcn-recharts3.10.1-<chart>.light.png`; line, bar, stacked and donut are byte-identical to the 3.8.0 PNGs, area differs by some pixels (not investigated) and every measured value is the same.
+1. **shadcn installs recharts 3.8.0, not 3.10.1.** `npx shadcn add chart` pins `recharts@3.8.0` (registry JSON below). The `shadcn-*` PNGs use 3.10.1 as the brief pinned; the same charts on 3.8.0 are in `alt/shadcn-recharts3.8.0-<chart>.<light|dark>.png`. Line, bar, stacked and donut are byte-identical between the two versions. Area differs by some pixels: 3.10.1 wraps each area path in an extra `<g class="recharts-layer recharts-shape">`; geometry and every measured value are the same.
 2. **shadcn tick labels are `#666666`, not `muted-foreground`.** `chart.tsx` targets `.recharts-cartesian-axis-tick text`, but recharts 3.8.0 and 3.10.1 put the tick `<text>` in a separate `.recharts-cartesian-axis-tick-label` group, so the rule never matches and recharts' own `fill="#666"` wins, in light and dark. Checked against the live site (`https://ui.shadcn.com/charts/bar`, iframes `/view/new-york-v4/chart-bar-*`): computed tick fill there is `rgb(102, 102, 102)` too. The grid rule (`line[stroke='#ccc']` -> border at 50 %) does match.
 3. **shadcn has three different `--chart-N` sets.** Used: the documented one (chart docs, manual install, theming pages). Not used: the greyscale set the CLI registry now ships for neutral (`oklch(0.87 0 0)`, `0.556`, `0.439`, `0.371`, `0.269`; `https://ui.shadcn.com/r/colors/neutral.json`) and the blue set the docs site itself runs on (`--color-blue-300/500/600/700/800`; `apps/v4/app/globals.css`). `--muted-foreground` and `--border` are the same in all three.
 4. **shadcn's docs examples differ from the prop list in the brief** (source followed): multi-series line uses `type="monotone"` (only the single-series example uses `natural`); bar examples use `tickMargin={10}`; stacked bars use `radius={[0,0,4,4]}` on the bottom series and `[4,4,0,0]` on the top, so the middle series is square; no example has a `YAxis`, so there are no y ticks at all; the multi-line example has no legend (added `ChartLegend` below, as the brief asked).
@@ -18,7 +18,7 @@ Not rendered: `plot-donut` (see Plot section).
 
 ## shadcn/ui charts
 
-- **Rendered with:** recharts 3.8.0 (primary) and 3.10.1 (`alt/`), react 19.3.1, react-dom 19.3.1.
+- **Rendered with:** recharts 3.10.1 (primary) and 3.8.0 (`alt/`), react 19.3.1, react-dom 19.3.1.
 - **Real or recreation:** real Recharts; shadcn's `ChartContainer` / `ChartLegendContent` are a **recreation in plain CSS + a small React component** (shadcn is copy-in source that needs Tailwind v4). Every selector in `chart.tsx`'s class string is reproduced one-to-one; `stroke-border/50` is written as `color-mix(in oklab, var(--border) 50%, transparent)` as Tailwind v4 emits it.
 - **Harness deviations:** `aspect-video` overridden so the chart fills 640x320 (it would be 640x360). The donut keeps the docs example's `mx-auto aspect-square max-h-[250px]`, so it is a 250x250 chart centred in the box. Legend text colour comes from `--foreground` (shadcn puts `text-foreground` on body).
 - **Sources:**
@@ -112,13 +112,13 @@ Not rendered: `plot-donut` (see Plot section).
 | Axis line | none; only the explicit `ruleY([0])` baseline, `#000000` 1px |
 | Tick marks | yes, 6px, currentColor, on both axes |
 | Axis labels | `↑ mrr` / `↑ signups` / `↑ count` top-left and `month` / `channel` bottom centre, by default |
-| Line stroke | 1.5px, straight segments, no dots |
+| Line stroke | 1.5px, straight segments, round caps, no dots |
 | Area | fill opacity 1, no stroke |
 | Bar corner radius | 0 |
-| Bar width / gap | single: 86 / 9 px; stacked: 75.25 / 7.88 px; gap:width 0.10, bar = 0.91 of band |
+| Bar width / gap | 86 / 9 px (single and stacked), gap:width 0.10, bar = 0.91 of band |
 | Series colours | `#4269d0`, `#efb118`, `#ff725c` (scheme `observable10`); the single-series bar has no colour channel and is `#000000` |
 | Donut | n/a |
-| Y tick format | integers with thousands comma: `0, 500, 1,000 ... 4,000` |
+| Y tick format | integers with thousands comma: `0, 500, 1,000 ... 4,000` (y starts at 0 on every chart) |
 
 ## Highcharts
 
@@ -140,7 +140,7 @@ Not rendered: `plot-donut` (see Plot section).
 | Line stroke | 2px, straight segments; point markers on every datum (8px; circle, diamond, square per series) |
 | Area | fill opacity 0.75, 2px line and markers on top |
 | Bar corner radius | 3 on the top corners of the top segment, 0 elsewhere; 1px `#ffffff` border on every bar |
-| Bar width / gap | 46 / 49 px, gap:width 1.07, bar = 0.48 of band |
+| Bar width / gap | single: 46 / 49 px; stacked: 45 / 48 px; gap:width 1.07, bar = 0.48 of band |
 | Series colours | `#2caffe`, `#544fc5`, `#00e272`, `#fe6a35`, `#6b8abc` |
 | Donut | inner 62.7 / outer 125.6 px, ratio 0.50; centre empty; connector data labels with category names (11.2px, bold, `#000000`); 1px `#ffffff` slice stroke |
 | Y tick format | SI-style suffix above 999: `0, 1k, 2k, 3k, 4k, 5k`; plain below (`0, 100, 200, 300`) |
