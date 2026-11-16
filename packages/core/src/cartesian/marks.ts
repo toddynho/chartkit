@@ -297,6 +297,11 @@ function paintStroke(out: string[], points: Pt[], model: PlotModel, series: Seri
     pushStroke(out, stroked(points.slice(-2), model.curve, spans), model, series, extra, model.partial);
     return;
   }
+  // One point has no line to draw. A round cap on a hairline segment paints it as a dot.
+  if (points.length === 1) {
+    out.push(`<path d="M ${n(points[0].x)} ${n(points[0].y)} h.01" stroke="${strokeOf(series, model)}" stroke-linecap="round" stroke-width="${n(model.strokeWidth * 4)}"${extra} />`);
+    return;
+  }
   pushStroke(out, stroked(points, model.curve, spans), model, series, extra);
 }
 
