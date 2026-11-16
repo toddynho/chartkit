@@ -1,6 +1,6 @@
 # Roadmap
 
-ChartKit's goals are the best-looking defaults, the smallest bundles, and the most agent-friendly JSON spec, with the gaps stated in the open.
+ChartKit's goal is to be the chart spec that agents write and servers render: one JSON spec, checked and repaired locally, drawn as SVG in any framework or none. The gaps are stated in the open. The position is in [docs/POSITIONING.md](docs/POSITIONING.md).
 
 Work is ordered by how widely a feature already exists across charting libraries, weighted by how popular those libraries are; how often agents and users ask for it; what it costs in the bundle; and how much effort it takes. The coverage data is the [feature matrix](https://chartkit.dev/features.json) (263 features across 21 libraries), the [feature pages](https://chartkit.dev/features), and the [compare pages](https://chartkit.dev/compare).
 

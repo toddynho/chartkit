@@ -1,0 +1,55 @@
+---
+import { Chart } from "@chartkitdev/astro";
+import { homeServerCharts } from "../data/home-charts";
+import { homeSsr } from "../data/home-ssr";
+import { rivalSwatch } from "../data/rival-colors";
+
+const ssr = homeSsr();
+const charts = homeServerCharts();
+const others = ssr.libraries.filter((name) => name !== "ChartKit").map((name) => ({ name, ...rivalSwatch(name) }));
+---
+
+<section class="band" data-ckx="server" aria-labelledby="server-title">
+  <div class="band-head">
+    <div class="band-head__copy">
+      <p class="eyebrow eyebrow--blue">On the server</p>
+      <h2 id="server-title"><span>Renders in Node.</span><span>No browser needed.</span></h2>
+      <p>{ssr.lead}</p>
+    </div>
+    <div class="band-stat">
+      <p class="band-stat__num">{ssr.stat}<span>ms</span></p>
+      <p class="band-stat__cap"><strong>48-bar chart</strong>, server render. {ssr.statCaption}</p>
+    </div>
+  </div>
+  <div class="proof-card ckx-card">
+    <div class="ckx-head">
+      <div>
+        <h3>Server render by chart type</h3>
+        <p>Milliseconds, log scale. Left is faster.</p>
+      </div>
+      <div class="ckx-key">
+        <span class="ckx-key__us"><i></i>ChartKit</span>
+        <span class="ckx-key__vs">vs</span>
+        <span class="ckx-key__others" tabindex="0" aria-label={`${others.length} other libraries: ${others.map((lib) => lib.name).join(", ")}`}>
+          <span class="ckx-cluster" aria-hidden="true">{others.map((lib) => <i style={`--c:${lib.fill}`}></i>)}</span>
+          {others.length} others
+          <span class="ckx-pop" role="tooltip">
+            {others.map((lib) => <span style={`--c:${lib.fill};--ink:${lib.ink}`}><i></i>{lib.name}</span>)}
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="ckx-charts">
+      {
+        charts.map((chart) => (
+          <div class={`ckx-chart ckx-chart--${chart.size}`} style={`aspect-ratio: ${chart.width} / ${chart.height}`}>
+            <Chart spec={chart.spec} />
+          </div>
+        ))
+      }
+    </div>
+    <p class="proof-note">
+      Median of five in Node after one warmup, measured {ssr.measuredOn}. A library with no native chart of that type, or no way to render without a browser, is left out of that row. Large line charts are sampled to the plot width, so they are not in this chart. Browser paint times, including the ones we lose, are in the <a href="/benchmarks">full benchmark matrix →</a>
+    </p>
+  </div>
+</section>

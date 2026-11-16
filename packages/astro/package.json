@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/astro",
   "version": "0.5.0",
-  "description": "Astro component for the ChartKit JSON spec. Validates and renders static SVG at build time. Zero client JS unless client is set. Evidence: https://chartkit.dev/docs/astro",
+  "description": "Astro component for the ChartKit JSON spec. Validates and renders static SVG at build time. Zero client JS unless client is set.",
   "keywords": [
     "chart",
     "astro",

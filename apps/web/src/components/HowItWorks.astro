@@ -1,5 +1,6 @@
 ---
 import { howSpecLines, howSpecRender, howSpecText, howSpecTokens } from "../data/home-spec";
+import { stacks } from "../data/stacks";
 import { scriptJson } from "../lib/spec-text";
 
 const { spec, svg } = howSpecRender();
@@ -9,18 +10,18 @@ const shown = howSpecText.replaceAll("&", "&amp;").replaceAll("<", "&lt;").repla
 <section class="band band--how" aria-labelledby="how-title">
   <div class="band-head">
     <div class="band-head__copy">
-      <p class="eyebrow eyebrow--blue">How it works</p>
+      <p class="eyebrow eyebrow--blue">Every stack</p>
       <h2 id="how-title">
         <span>{howSpecLines} lines of JSON.</span>
-        <span>That's the whole chart.</span>
+        <span>The same chart everywhere.</span>
       </h2>
       <p>
-        A ChartSpec is data plus intent. No components, no imperative API. The same spec renders in every framework and on the server.
+        A spec is data plus intent, with no components and no chart code. The same JSON draws in React, Vue, Svelte, Solid, Qwik, Angular, Astro, plain JavaScript and a <code>&lt;chart-kit&gt;</code> element.
       </p>
     </div>
     <div class="band-stat">
-      <p class="band-stat__num">1<span>spec</span></p>
-      <p class="band-stat__cap"><strong>Every target.</strong> React, Vue, Svelte, Astro, vanilla JS, server, and more.</p>
+      <p class="band-stat__num">{stacks.length}<span>adapters</span></p>
+      <p class="band-stat__cap"><strong>One spec.</strong> Each adapter prints the SVG on the server. <a href="/docs">Pick your framework →</a></p>
     </div>
   </div>
   <div class="how-body">

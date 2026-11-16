@@ -118,6 +118,7 @@ export function renderReport(result) {
   lines.push("");
   lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.");
   lines.push("");
+  lines.push(...round13ReportLines());
   lines.push(...canvasReportLines());
   lines.push("");
   lines.push("The round 13 ChartKit row still downsamples with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off. Canvas first-paint losses are in the section above.");
@@ -569,6 +570,67 @@ function canvasLossLine(rows) {
     return `${slower ? "loses" : "wins"} ${label} (${one(canvas?.updateMs)} vs SVG ${one(svg?.updateMs)} and uPlot ${one(uplot?.updateMs)})`;
   });
   return `Canvas loses first paint at every size: ${paints.join("; ")}. Render is slower at every size: ${renders.join("; ")}. Updates: ${updates.join("; ")}.`;
+}
+
+/**
+ * Round 13 line against uPlot: the aligned update, hover, and sampling none.
+ * These rows used to open README.md. Numbers come from catalog/public/benchmarks.json.
+ */
+export function round13ReportLines() {
+  const file = join(dirname(fileURLToPath(import.meta.url)), "../../catalog/public/benchmarks.json");
+  if (!existsSync(file)) return ["Round 13 line comparison: `catalog/public/benchmarks.json` is missing.", ""];
+  const bench = JSON.parse(readFileSync(file, "utf8"));
+  const cells = Array.isArray(bench.browserMs) ? bench.browserMs : [];
+  const steady = Array.isArray(bench.hoverSteady100k) ? bench.hoverSteady100k : [];
+  const first = Array.isArray(bench.firstHoverPainted) ? bench.firstHoverPainted : [];
+  const none = Array.isArray(bench.samplingNoneMs) ? bench.samplingNoneMs : [];
+  const count = (points) => points.toLocaleString("en-US");
+  const shape = { even: "even", jitter: "jittered", tsgaps: "gapped" };
+  const initialWins = cells.filter((cell) => cell.chartkit.initial < cell.uplot.initial).length;
+  const updateLosses = cells.filter((cell) => cell.chartkit.update > cell.uplot.update);
+  const lines = [];
+  lines.push(`## Line against uPlot, round ${bench.round}`);
+  lines.push("");
+  lines.push(`Measured ${bench.measured} on \`${bench.core?.commit ?? "unknown"}\`. This is an older run than the tables above and it was not re-timed. Source: \`catalog/public/benchmarks.json\`, fields \`browserMs\`, \`hoverSteady100k\`, \`firstHoverPainted\`, and \`samplingNoneMs\`. Median of 5, Playwright Chromium, a 640×360 line, sampling auto.`);
+  lines.push("");
+  lines.push("The aligned update starts at the top of a requestAnimationFrame, awaits the library's own completion, and reads the clock from a MessageChannel task after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`.");
+  lines.push("");
+  lines.push("| X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update |");
+  lines.push("| --- | ---: | ---: | ---: | ---: | ---: |");
+  for (const cell of cells) {
+    lines.push(`| ${shape[cell.shape] ?? cell.shape} | ${count(cell.points)} | ${one(cell.chartkit.initial)} | ${one(cell.uplot.initial)} | ${one(cell.chartkit.update)} | ${one(cell.uplot.update)} |`);
+  }
+  lines.push("");
+  const lost = updateLosses.map((cell) => `${shape[cell.shape] ?? cell.shape} ${count(cell.points)} (${one(cell.chartkit.update)} vs ${one(cell.uplot.update)})`);
+  lines.push(`ChartKit's initial render is faster in ${initialWins} of ${cells.length} cells. Every line above 1,000 points is sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The update is slower than uPlot in ${updateLosses.length} of ${cells.length} cells: ${lost.join(", ")}.`);
+  lines.push("");
+  lines.push("Hover at 100,000 points, painted median:");
+  lines.push("");
+  lines.push("| Library | Tip ms | Painted median ms | Painted p95 ms |");
+  lines.push("| --- | ---: | ---: | ---: |");
+  for (const row of steady) lines.push(`| ${row.lib} | ${one(row.tipMs)} | ${one(row.paintedMs)} | ${one(row.p95Ms)} |`);
+  lines.push("");
+  lines.push("First hover on a fresh 100,000-point chart is a loss to uPlot at every delay:");
+  lines.push("");
+  lines.push("| Ms after mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |");
+  lines.push("| ---: | ---: | ---: | ---: | ---: |");
+  for (const row of first) lines.push(`| ${row.afterMountMs} | ${one(row.chartkit)} | ${one(row.chartkitMax)} | ${one(row.uplot)} | ${one(row.uplotMax)} |`);
+  lines.push("");
+  lines.push("Sampling none draws every point. Round 13, ChartKit only:");
+  lines.push("");
+  lines.push("| Points | Initial ms | Update ms |");
+  lines.push("| ---: | ---: | ---: |");
+  for (const row of none) lines.push(`| ${count(row.points)} | ${one(row.initialMs)} | ${one(row.updateMs)} |`);
+  lines.push("");
+  const paintFile = join(dirname(fileURLToPath(import.meta.url)), "../results/paint.json");
+  const paint = existsSync(paintFile) ? JSON.parse(readFileSync(paintFile, "utf8")) : null;
+  const retimed = (paint?.charts ?? []).filter((cell) => cell.chart === "line" && cell.variant === "sampling-none" && typeof cell.updateMs === "number");
+  if (retimed.length > 0) {
+    const later = retimed.map((cell) => `${count(Math.round(cell.updateMs * 10) / 10)} ms at ${count(cell.points)} points`);
+    lines.push(`The Browser render table above re-timed sampling none on a later commit (\`bench/results/paint.json\`, library \`ChartKit sampling none\`, field \`updateMs\`), and its update is much slower: ${later.join(" and ")}. The two runs time the update differently, and the gap has not been explained. For millions of raw points, use a GPU library.`);
+  }
+  lines.push("");
+  return lines;
 }
 
 /** Canvas line measured separately from round 13. Numbers come from catalog/data/canvas-bench.json. */

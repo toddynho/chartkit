@@ -13,7 +13,7 @@ export const SITE = {
   url: "https://chartkit.dev",
   version: coreVersion(),
   description:
-    "JSON-spec charts. An agent, a server, a database, or Mermaid can write the spec. The same object renders in React, Vue, Svelte, Astro, vanilla JavaScript, and server SVG.",
+    "Charts an agent can write and a server can render. One JSON spec, validated and repaired locally, drawn as SVG in React, Vue, Svelte, Astro, vanilla JavaScript, or Node.",
   github: "https://github.com/toddynho/chartkit",
 } as const;
 

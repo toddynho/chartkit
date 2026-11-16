@@ -1,139 +1,108 @@
-# ChartKit - AI/LLM Context
+# ChartKit: context for AI assistants
 
-> This file provides context for AI assistants and LLMs working with this codebase.
+> Read this before working in this repository.
 
-## Project Overview
+## What ChartKit is
 
-**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`), `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`), and thin spec adapters `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/astro` (`<Chart spec={spec} />`, static SVG, `client` hydrates with vanilla `mount`), `@chartkitdev/solid` (SSR string, then vanilla `mount` on hydrate), `@chartkitdev/qwik` (static SVG, then vanilla `mount` in a visible task), `@chartkitdev/angular` (standalone `<ck-chart>`, OnPush, SSR SVG, `afterNextRender` calls `mount`), `@chartkitdev/vanilla` (`mount(el, spec)` → `{ update, destroy }`), and `@chartkitdev/element` (`<chart-kit>`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
+Charts an agent can write and a server can render. A chart is one JSON spec. `validate()` and `repair()` check and fix it locally, with no model call. `render()` returns an SVG string, in Node or in the browser. Thin adapters draw the same spec in nine stacks.
 
-- **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `mark.sampling` defaults to `auto` and downsamples line, area, sparkline, mini-area, stacked-area, combo lines, and spike above twice the plot width (`packages/core/SPEC.md`). `npm run bench` writes the public comparison in `BENCHMARKS.md`. `npm run bench:core` prints core size and validate throughput. `npm run size` fails when the line, all-charts, validate, or adapter bundles grow past their budgets. Adapter budgets exclude core and the framework.
-- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+. `@chartkitdev/vue` peers Vue 3. `@chartkitdev/svelte` peers Svelte 4 or 5 (the component uses `export let`). `@chartkitdev/astro` depends on the core and on `@chartkitdev/vanilla`, and peers Astro 4+. The default component ships no client script. `@chartkitdev/solid` depends on the core and on `@chartkitdev/vanilla`, and peers Solid 1.8+. `@chartkitdev/qwik` depends on the core and on `@chartkitdev/vanilla`, and peers Qwik 1.5+. `@chartkitdev/angular` depends on the core and on `@chartkitdev/vanilla`, and peers Angular 18+. `@chartkitdev/vanilla` depends only on the core.
-- **Beautiful defaults**: 17 curated themes that work out of the box
-- **TypeScript-first**: Full type safety and autocomplete
+The position, the claims to avoid, and the owner's decisions are in [docs/POSITIONING.md](docs/POSITIONING.md). Read section 4 before writing any marketing copy.
 
-## Repository Structure
+## The API is the spec
+
+```ts
+import { render } from "@chartkitdev/core/all";
+import { repair, validate } from "@chartkitdev/core/validate";
+
+const spec = {
+  version: "1",
+  type: "line",
+  data: [
+    { quarter: "Q1", units: 40 },
+    { quarter: "Q2", units: 55 },
+  ],
+  encoding: { x: "quarter", y: "units" },
+  a11y: { alt: "Units rose from Q1 to Q2." },
+};
+
+const svg = render(spec);
+```
+
+- `version` is `"1"`. `a11y.alt` is required.
+- `data` is a plain array of rows, not `{ values: [...] }`.
+- The chart type goes in `type`. `mark` is an options object, not a string.
+- `encoding` maps fields to channels. A second axis is `encoding.*.axis: "y2"`.
+- `theme` is optional. Omitted, it is Soft, which follows the page's light or dark scheme.
+- The schema id is `https://chartkit.dev/schema/v1.json`. The full rules are in `packages/core/SPEC.md` and `packages/core/README.md`.
+
+Adapters take the spec and nothing else: `<Chart spec={spec} />` in React, Vue, Svelte, Astro, Solid and Qwik, `<ck-chart [spec]="spec" />` in Angular, `mount(el, spec)` and `renderToString(spec)` in vanilla, and `<chart-kit>` as a custom element. Each one prints the SVG during server rendering.
+
+The older prop-based React components (`LineChart`, `KpiCard`, `dataKey`, `theme="midnight"` and so on) are a frozen v0 API. They live at `@chartkitdev/react/legacy`. Do not use them in new code, and do not copy their props into a spec. The migration guide is `catalog/migrate.md`.
+
+## Repository layout
 
 ```
 chartkit/
 ├── packages/
-│   ├── core/                 # @chartkitdev/core — registry, charts/*, themes/*, validate
-│   ├── react/                # @chartkitdev/react — components, hooks, themes
-│   ├── vue/                  # @chartkitdev/vue — <Chart :spec="..." />
-│   ├── svelte/               # @chartkitdev/svelte — <Chart {spec} />
-│   ├── astro/                # @chartkitdev/astro — <Chart spec={spec} />, client hydrates with vanilla
-│   ├── solid/                # @chartkitdev/solid — <Chart spec={spec} />, SSR string, hydrate with mount
-│   ├── qwik/                 # @chartkitdev/qwik — static SVG, visible task calls mount
-│   ├── angular/              # @chartkitdev/angular — <ck-chart>, OnPush, SSR, afterNextRender calls mount
-│   ├── vanilla/              # @chartkitdev/vanilla — mount(el, spec)
-│   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
-├── apps/web/                 # Public site (Astro)
-├── catalog/                  # llms.txt, feature matrix, benchmarks, measured sizes
-└── CONTEXT.md
+│   ├── core/               # @chartkitdev/core: schema, validate, repair, render, charts/*, themes/*
+│   ├── react/ vue/ svelte/ # adapters: <Chart spec />
+│   ├── astro/ solid/ qwik/ angular/
+│   ├── vanilla/            # mount(el, spec), renderToString(spec)
+│   ├── element/            # <chart-kit>
+│   ├── geo/                # choropleth and point maps
+│   ├── markdown/           # remark and rehype plugins for chartkit fences
+│   ├── mcp/                # local stdio MCP server: validate, repair, render
+│   ├── convert/            # private: Chart.js, Recharts and ECharts configs to a spec
+│   └── compat-derpdaderp/  # @derpdaderp/chartkit shim for v0 users
+├── apps/
+│   ├── web/                # chartkit.dev (Astro). The only public site.
+│   └── cloud/              # render service for Cloudflare Workers: /render, /validate, /mcp
+├── bench/                  # benchmark harness. Results in bench/results/*.json
+├── catalog/                # llms.txt, feature matrix, published benchmark data, migrate.md
+├── docs/                   # POSITIONING.md and design notes
+└── scripts/                # size gate, render harness, README drift test
 ```
 
-## Key Components
+## Dependencies
 
-| Component | Purpose | Key Props |
-|-----------|---------|-----------|
-| `LineChart` | Time series, trends | `data`, `series`/`dataKey`, `theme`, `responsive`, `curve` |
-| `BarChart` | Categorical comparison | `data`, `dataKey`, `categoryKey`, `theme` |
-| `DonutChart` | Composition, percentages | `data`, `dataKey`, `labelKey`, `theme` |
-| `KpiCard` | Metrics with sparkline | `label`, `value`, `delta`, `data`, `theme` |
-| `Sparkline` | Inline trends | `data`, `theme`, `glow`, `fill` |
-| `Heatmap` | Activity visualization | `data`, `theme`, `weeks` |
-| `CandlestickChart` | Financial OHLC | `data`, `theme`, `showVolume` |
+- `@chartkitdev/core` has zero runtime dependencies. Chart renderers and most themes are opt-in imports.
+- Each adapter depends on core and peers its framework: React 18+, Vue 3, Svelte 4 or 5, Astro 4+, Solid 1.8+, Qwik 1.5+, Angular 18+.
+- Astro, Solid, Qwik and Angular hydrate through `@chartkitdev/vanilla`.
 
-## Common Patterns
-
-### Responsive Charts
-```tsx
-// Option 1: responsive prop
-<LineChart data={data} dataKey="value" theme="midnight" responsive />
-
-// Option 2: ResponsiveChart wrapper
-<ResponsiveChart aspectRatio={16/9}>
-  {({ width, height }) => <LineChart width={width} height={height} ... />}
-</ResponsiveChart>
-```
-
-### Dark/Light Mode
-```tsx
-import { useAutoTheme } from '@chartkitdev/react';
-
-const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
-<LineChart theme={theme} ... />
-```
-
-### Multi-Series with Dual Y-Axis
-```tsx
-<LineChart
-  data={data}
-  series={[
-    { key: 'requests', label: 'Requests', yAxisId: 'left' },
-    { key: 'latency', label: 'Latency', yAxisId: 'right' },
-  ]}
-  yAxisLeft={{ unit: 'req/s' }}
-  yAxisRight={{ unit: 'ms' }}
-  theme="midnight"
-/>
-```
-
-## Theme System
-
-- **Dark themes (13)**: midnight, emerald, mono, slate, arctic, orchid, obsidian, neon, mocha, owl, retro, copper, rose
-- **Light themes (4)**: sunset, silver, pearl, latte
-
-Access theme colors directly:
-```tsx
-import { themes } from '@chartkitdev/react';
-const t = themes['midnight'];
-// t.colors, t.bg, t.text, t.border, etc.
-```
-
-## Development Commands
+## Commands
 
 ```bash
-# Install dependencies (from root)
-npm install
-
-# Build the libraries (core, then react, then the shim)
-npm run build:lib
-
-# Run docs site
-npm run dev -w docs
-
-# Run tests
-npm test
-
-# Public comparison (bundle, browser, SSR). Writes BENCHMARKS.md
-npm run bench
-
-# Internal core size and validate throughput
-npm run bench:core
-
-# Fail if any bundle exceeds its cap, or a cap rose vs origin/main without scripts/size-exceptions.json
-npm run size
-
-# Top 10 source files by minified bytes in the line and all bundles
-npm run size:contributors
+npm install            # from the root
+npm run build:lib      # build every package
+npm test               # all package tests, bench tests, docs tests
+npm run dev            # the site at http://localhost:4321 (Node 22.23.4+)
+npm run build:web      # build the site
+npm run size           # fail if a bundle passes its budget
+npm run bench          # public comparison. Writes BENCHMARKS.md
 ```
 
-## Resources
+## Writing about ChartKit
 
-- **Documentation**: https://chartkit.dev
-- **npm (React)**: https://www.npmjs.com/package/@chartkitdev/react
-- **npm (core)**: https://www.npmjs.com/package/@chartkitdev/core
-- **Schema**: https://chartkit.dev/schema/v1.json
-- **GitHub**: https://github.com/toddynho/chartkit
-- **LLM Reference**: https://chartkit.dev/llms.txt (summary) or /llms-full.txt (complete API)
-- **LLM JSON**: https://chartkit.dev/llms.json (structured data)
-- **Migration**: catalog/migrate.md
+- Every number must match a file in `bench/results/`. `BENCHMARKS.md` is generated by `npm run bench`; change `bench/lib/report.mjs`, not the file.
+- Publish losses next to wins. uPlot is smaller and has a faster first hover.
+- Large line charts are sampled to the pixel width. Do not present sampled timings as raw-point performance. There is no WebGL and none is planned.
+- Do not claim the smallest bundle, the most features, first-try correctness for agents, or that ChartKit is the only library with an MCP.
+- Accessibility: alt text is required and enforced. Keyboard navigation and the data table are opt-in until the v1 default change ships.
+- `catalog/public/llms.txt` must stay at or under 6,400 bytes. A test enforces it, and `packages/mcp` bundles a copy.
+- `scripts/readme-drift.test.mjs` checks README links, imports and chart-type counts.
 
-## When Generating Code
+## When generating chart code
 
-1. Prefer a v1 JSON spec (`version`, `type`, `data`, `encoding`, `a11y.alt`). One-line quick start: `import { render } from "@chartkitdev/core/all"`. Validate with `import { validate } from "@chartkitdev/core/validate"`. For a smaller bundle, `createRenderer([line])` after `import { line } from "@chartkitdev/core/charts/line"`. `<Chart spec={...} />` from `@chartkitdev/react` uses every chart unless you pass `render`.
-2. Existing components still import from `@chartkitdev/react`. `theme` is required on those components — `"midnight"` is a solid default. It is optional on the JSON spec (default `auto`).
-3. For responsive charts, use the `responsive` prop or `ResponsiveChart` wrapper
-4. Use `useAutoTheme` hook when the app supports dark/light mode switching
-5. Data format: arrays of objects with consistent keys
-6. For single-series charts, use `dataKey` + `label` instead of `series` array
+1. Write a v1 JSON spec. Do not write component props.
+2. Run `validate(spec)`. If it fails, run `repair(spec)` and use `result.spec`.
+3. Render with `render` from `@chartkitdev/core/all`, or with the adapter for the app's framework.
+4. For a smaller bundle, `createRenderer([line])` with `import { line } from "@chartkitdev/core/charts/line"`.
+5. Histogram, boxplot, radar, funnel, treemap, sankey and the other extended types render from `@chartkitdev/core/extra`.
+
+## Links
+
+- Site: https://chartkit.dev
+- Schema: https://chartkit.dev/schema/v1.json
+- Agent reference: https://chartkit.dev/llms.txt (short) and https://chartkit.dev/llms-full.txt (complete)
+- GitHub: https://github.com/toddynho/chartkit
+- Launch steps: `LAUNCH_CHECKLIST.md`. The packages are not on npm until that is done.

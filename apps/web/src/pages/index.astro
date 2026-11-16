@@ -3,15 +3,14 @@ import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
 import HomeBeyond from "../components/HomeBeyond.astro";
 import HomeHero from "../components/HomeHero.astro";
-import HomePaint from "../components/HomePaint.astro";
+import HomeServer from "../components/HomeServer.astro";
 import HomeStart from "../components/HomeStart.astro";
 import HomeTokens from "../components/HomeTokens.astro";
 import HowItWorks from "../components/HowItWorks.astro";
 import { SITE } from "../data/site";
 
-const title = "One spec. Every framework. Built for agents.";
-const lede =
-  "Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.";
+const title = "Charts an agent can write and a server can render";
+const lede = "One JSON spec, validated and repaired locally, drawn as SVG in any framework or none.";
 ---
 
 <Base tone="light" title={title} description={lede || SITE.description}>
@@ -20,9 +19,9 @@ const lede =
   </div>
   <div class="home-sheet">
     <div class="v2">
-      <HowItWorks />
+      <HomeServer />
       <HomeTokens />
-      <HomePaint />
+      <HowItWorks />
     </div>
   </div>
   <HomeStart />

@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/qwik",
   "version": "0.5.0",
-  "description": "Qwik component for the ChartKit JSON spec. Static SVG, then vanilla mount in a visible task. Evidence: https://chartkit.dev/docs?framework=qwik",
+  "description": "Qwik component for the ChartKit JSON spec. Static SVG, then vanilla mount in a visible task.",
   "keywords": [
     "chart",
     "qwik",

@@ -1,5 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
-import { homePaint, type HomePaintDot } from "./home-bench";
+import { homeSsr } from "./home-ssr";
 import { rivalSwatch } from "./rival-colors";
 import { tokenObservations, tokenSpread } from "./token-eval";
 
@@ -33,27 +33,16 @@ function sized(specId: string, size: HomeStripChart["size"], width: number, heig
   return { size, width, height, spec: { ...spec, id: specId, size: { width, height } } as ChartSpec };
 }
 
-/** Log dot plot. ChartKit is a larger ringed dot. Runs past 5 s are pins. */
-export function homePaintCharts(): HomeStripChart[] {
-  const paint = homePaint();
-  const libraries: string[] = [];
-  const data: { type: string; library: string; ms: number; note: string }[] = [];
-  for (const row of paint.rows) {
-    const chartkit = row.dots.find((dot) => dot.lib === "ChartKit");
-    const rest = row.dots.filter((dot) => dot.lib !== "ChartKit");
-    const dots: HomePaintDot[] = chartkit ? [chartkit, ...rest] : rest;
-    for (const dot of dots) {
-      if (!libraries.includes(dot.lib)) libraries.push(dot.lib);
-      data.push({ type: row.type, library: dot.lib, ms: dot.ms, note: row.note });
-    }
-  }
-  const alt = `First paint by chart type on a log scale from 5 ms to 5 s. ChartKit's 100,000-point line is ${paint.stat} ms. ${paint.statCaption}`;
-  const height = 392;
+/** Server render, log dot plot. ChartKit is a larger ringed dot. */
+export function homeServerCharts(): HomeStripChart[] {
+  const ssr = homeSsr();
+  const data = ssr.rows.flatMap((row) => row.dots.map((dot) => ({ type: row.type, library: dot.library, ms: dot.ms, note: row.note })));
+  const alt = `Server render time by chart type on a log scale from 0.01 ms to 100 ms. ChartKit's 48-bar chart is ${ssr.stat} ms. ${ssr.statCaption}`;
   const theme = {
     tokens: {
       ...calm,
-      series: libraries.map((name) => rivalSwatch(name).fill),
-      lines: libraries.map((name) => rivalSwatch(name).ink),
+      series: ssr.libraries.map((name) => rivalSwatch(name).fill),
+      lines: ssr.libraries.map((name) => rivalSwatch(name).ink),
     },
   };
   return HOME_STRIP_SIZES.map((size) => {
@@ -62,7 +51,7 @@ export function homePaintCharts(): HomeStripChart[] {
       type: "strip",
       data,
       encoding: {
-        x: { field: "ms", scale: { type: "log", domain: [5, 5000], padding: 0 } },
+        x: { field: "ms", scale: { type: "log", domain: [0.01, 100], padding: 0 } },
         y: "type",
         color: "library",
         label: "library",
@@ -76,27 +65,18 @@ export function homePaintCharts(): HomeStripChart[] {
         highlight: "ChartKit",
         emphasis: "ring",
         note: "field",
-        pin: true,
-        pinFormat: "duration-ms",
         value: "highlight",
         labelColor: "accent",
-        labelFormat: { specifier: ".1f" },
+        labelFormat: { specifier: ".2f" },
         labelSuffix: " ms",
         zebra: true,
       },
-      axes: {
-        x: {
-          ticks: [10, 100, 1000],
-          format: "duration-ms",
-          edgeLabel: size.id === "narrow" ? "5s+" : "5s+ →",
-          grid: false,
-        },
-      },
+      axes: { x: { ticks: [0.1, 1, 10], grid: false } },
       legend: false,
       theme,
       a11y: { alt },
     };
-    return sized(`paint-${size.id}`, size.id, size.width, height, spec);
+    return sized(`server-${size.id}`, size.id, size.width, 300, spec);
   });
 }
 

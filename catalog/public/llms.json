@@ -15,12 +15,12 @@
     "compat": "@derpdaderp/chartkit"
   },
   "schema": "https://chartkit.dev/schema/v1.json",
-  "description": "JSON-spec charting library. @chartkitdev/core renders SVG with zero dependencies. Adapters for React, Vue, Svelte, Astro, Solid, Qwik, Angular, and vanilla. validate() and repair() are the agent loop. Round 7 evidence, including losses: https://chartkit.dev/benchmarks.json",
+  "description": "Charts an agent can write and a server can render. One JSON spec. @chartkitdev/core renders SVG with zero dependencies, in Node or the browser. validate() and repair() run locally with no model call. Adapters for React, Vue, Svelte, Astro, Solid, Qwik, Angular, and vanilla. Benchmarks, including losses: https://chartkit.dev/benchmarks.json",
   "benchmarks": {
     "json": "https://chartkit.dev/benchmarks.json",
     "markdown": "https://chartkit.dev/benchmarks.md",
     "html": "https://chartkit.dev/benchmarks",
-    "whenToUse": "https://chartkit.dev/when-to-use"
+    "whenToUse": "https://chartkit.dev/compare"
   },
   "homepage": "https://chartkit.dev",
   "repository": "https://github.com/toddynho/chartkit",
