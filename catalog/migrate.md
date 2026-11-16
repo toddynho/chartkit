@@ -50,7 +50,7 @@ const render = createRenderer([line]);
 
 Everything `@derpdaderp/chartkit` exported is at `@chartkitdev/react/legacy`, under the same names: the 14 components, `Legend`, `Annotations`, `ResponsiveChart`, the hooks (`useAutoTheme` and the rest), `themes`, `getTheme` and the scale and path helpers. That entry is frozen. It gets fixes, not features.
 
-During 0.x the main entry, `@chartkitdev/react`, still exports those names so an import you have not changed keeps working. They are marked `@deprecated` there, so your editor strikes them through, and they are removed from the main entry in 1.0. `@chartkitdev/react/legacy` stays.
+During 0.x the main entry, `@chartkitdev/react`, still exports those names so an import you have not changed keeps working. They are marked `@deprecated` there, so your editor strikes them through, and they are removed from the main entry in `@chartkitdev/react@1.0.0`. That is the package version, not the v1 spec: the launch release is 0.5.0 and keeps them. `@chartkitdev/react/legacy` stays.
 
 An app that imports only `Chart` from `@chartkitdev/react` does not bundle the legacy components.
 

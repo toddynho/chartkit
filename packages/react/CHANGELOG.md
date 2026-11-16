@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-- Importing the legacy names (`LineChart`, `KpiCard`, `useAutoTheme`, `themes`, `linearScale` and the rest) from the main entry. They still work in 0.x and are marked `@deprecated`. They are removed from the main entry in 1.0; `@chartkitdev/react/legacy` stays. See https://chartkit.dev/docs/migrate.
+- Importing the legacy names (`LineChart`, `KpiCard`, `useAutoTheme`, `themes`, `linearScale` and the rest) from the main entry. They still work in 0.x and are marked `@deprecated`. They are removed from the main entry in `@chartkitdev/react@1.0.0`; `@chartkitdev/react/legacy` stays. See https://chartkit.dev/docs/migrate.
 
 ## [0.4.1] - 2026-01-22
 

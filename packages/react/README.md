@@ -19,9 +19,9 @@ npm install @chartkitdev/react
 ## Quick Start
 
 ```tsx
-import { Chart } from '@chartkitdev/react';
+import { Chart, type ChartSpec } from '@chartkitdev/react';
 
-const spec = {
+const spec: ChartSpec = {
   version: '1',
   type: 'line',
   data: [
@@ -43,7 +43,7 @@ export function Revenue() {
 
 The components below are the v0 API. They are frozen: fixes, no new features. Import them from `@chartkitdev/react/legacy`.
 
-The main entry still exports the same names in 0.x, marked `@deprecated`, so existing imports do not break. They are removed from the main entry in 1.0. Importing only `Chart` does not bundle them. Moving a v0 app: [chartkit.dev/docs/migrate](https://chartkit.dev/docs/migrate).
+The main entry still exports the same names in 0.x, marked `@deprecated`, so existing imports do not break. They are removed from the main entry in `@chartkitdev/react@1.0.0` (the package version, not the v1 spec); `/legacy` stays. Importing only `Chart` does not bundle them. Moving a v0 app: [chartkit.dev/docs/migrate](https://chartkit.dev/docs/migrate).
 
 ```tsx
 import { LineChart, KpiCard } from '@chartkitdev/react/legacy';
