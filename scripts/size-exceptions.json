@@ -298,5 +298,17 @@
     "cap": 5177,
     "reason": "Keyboard and the data table are on by default for client mounts (decision D5). The lazy chunk gains the arrow-key model for points, series and slices, Home, End and Escape, the focus ring CSS, and the table builder moved out of interact so that eager entry stays inside its cap. Measured 4921 + 256.",
     "pr": "#176"
+  },
+  {
+    "key": "interact",
+    "cap": 24831,
+    "reason": "Pointer hover, the highlight and the keyboard now read rows in drawn order: interact applies the top-level sort (shared comparator from sort.ts), indexes horizontal bars down the plot and gives long-format rows one slot per category, and the keyboard shades the category band when there is no bar rect to light (canvas bars, zero-length bars). Measured 24575 + 256.",
+    "pr": "#178"
+  },
+  {
+    "key": "globalAuto",
+    "cap": 126198,
+    "reason": "Carries the interact change above (sorted, horizontal and long-format hover fixes). Measured 124949 + 1%.",
+    "pr": "#178"
   }
 ]

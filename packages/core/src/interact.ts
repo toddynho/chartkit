@@ -7,6 +7,7 @@ import { dataHit, paintScene } from "./canvas/hit-state";
 export { canvasWanted } from "./render-mode";
 import { formatValue } from "./format";
 import { refreshNavigator, unbindNavigator } from "./nav-hook";
+import { compare, sortField } from "./sort";
 import { joinSync, syncHide, syncHover, syncRange, type SyncMember } from "./sync-group";
 import { formatInstant, instantOf, namedZone } from "./timezone";
 import { motionMs, playMotion, type MotionFlight } from "./motion";
@@ -945,20 +946,19 @@ function legendItems(svg: SVGSVGElement): { name: string; text: SVGTextElement; 
   return out;
 }
 
-function numericValues(spec: InteractSpec, table: Table): Float64Array | null {
+function numericValues(spec: InteractSpec, table: Table, data: unknown): Float64Array | null {
   if (spec.type === "bar" || spec.type === "combo" || spec.type === "heatmap" || arcChart(spec.type)) return null;
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
   const field = fieldOf(enc.x);
   const declared = isRecord(enc.x) ? enc.x.type : undefined;
   if (declared === "nominal" || declared === "ordinal") return null;
   if (!field) {
-    if (!(Array.isArray(spec.data) && (spec.data.length === 0 || typeof spec.data[0] === "number"))) return null;
+    if (!(Array.isArray(data) && (data.length === 0 || typeof data[0] === "number"))) return null;
     const values = new Float64Array(table.n);
     for (let i = 0; i < table.n; i++) values[i] = i;
     return values;
   }
   if (!table.n) return null;
-  const data = spec.data;
   if (isRecord(data) && isRecord(data.columns)) {
     const column = data.columns[field];
     if (column instanceof Float64Array && column.length === table.n) return column;
@@ -985,6 +985,17 @@ function materialize(data: unknown): unknown[] | null {
     rows[i] = row;
   }
   return rows;
+}
+
+/** Rows in drawn order: the top-level `sort`, applied the way `loadTable` applies it. */
+function drawnData(spec: InteractSpec): unknown {
+  const sort = spec.sort;
+  const field = sortField(spec);
+  if (!field || !isRecord(sort) || (sort.by ?? "value") !== "value" || !["ascending", "descending", undefined].includes(sort.order as string)) return spec.data;
+  const rows = materialize(spec.data);
+  if (!rows || !isRecord(rows[0])) return spec.data;
+  const dir = sort.order === "descending" ? -1 : 1;
+  return rows.sort((a, b) => compare((a as Record<string, unknown>)[field], (b as Record<string, unknown>)[field]) * dir);
 }
 
 function copySelection(value: Selection | null | undefined): Selection {
@@ -1036,9 +1047,18 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   if (getComputedStyle(host).position === "static") (host as HTMLElement).style.position = "relative";
 
   let base = spec;
-  let table = openTable(spec.data);
+  /** `base.data` in drawn order. Every row index below counts in this order, like `data-ck-i`. */
+  let data = drawnData(spec);
+  let table = openTable(data);
   let series = seriesOf(spec, table);
   let n = table.n;
+  const read = (next: InteractSpec) => {
+    base = next;
+    data = drawnData(next);
+    table = openTable(data);
+    series = seriesOf(next, table);
+    n = table.n;
+  };
   let lo = 0;
   let hi = Math.max(0, n - 1);
   const hidden = new Set<string>();
@@ -1047,6 +1067,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let breakWatch: ResizeObserver | undefined;
   let focus = 0;
   let hover = buildHoverIndex(0, 0, 1, null);
+  /** Long rows repeat a category once per series. `slotRow` is the first row of each slot, `rowSlot` the slot of each row, both from `lo`. */
+  let slotRow: number[] | null = null;
+  let rowSlot: number[] = [];
+  const horizontal = () => base.type === "bar" && isRecord(base.mark) && base.mark.orientation === "horizontal";
   let box: Box = { l: 0, t: 0, w: 1, h: 1 };
   let colors = new Map<string, string>();
   const locale = () => (typeof base.locale === "string" ? base.locale : "en-US");
@@ -1476,7 +1500,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function isBar(node: Element): boolean {
-    if (node.localName !== "rect" || node.closest("defs,clipPath")) return false;
+    // Legend swatches are rects too, and sit within reach of the first category. So is the keyboard's category band.
+    if (node.localName !== "rect" || node.closest("defs,clipPath") || node.matches('[data-ck-dot],[data-ck-key^="leg:"]')) return false;
     const fill = node.getAttribute("fill") || "";
     if (!fill || fill === "none" || fill.startsWith("url(")) return false;
     const w = +(node.getAttribute("width") || 0);
@@ -1485,8 +1510,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function barsNear(snapped: number, horizontal: boolean): Element[] {
-    const span = horizontal ? box.h : box.w;
-    const tol = Math.max(hitPx(base), (span / Math.max(1, n)) * 0.49);
+    const tol = Math.max(hitPx(base), (hover.width / Math.max(1, hover.count)) * 0.49);
     const hits: Element[] = [];
     const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
@@ -1557,10 +1581,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const cx = rect.left + ((x0 + x1) / 2) * sx - bounds.left;
     const topEdge = rect.top + y0 * sy - bounds.top;
     const bottomEdge = rect.top + y1 * sy - bounds.top;
-    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
     let left = cx - width / 2;
     let top = topEdge - height - 8;
-    if (horizontal) {
+    if (horizontal()) {
       const end = rect.left + x1 * sx - bounds.left;
       left = end + 8;
       top = (rect.top + ((y0 + y1) / 2) * sy - bounds.top) - height / 2;
@@ -1635,30 +1658,27 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   /** Paint the hover state for a row with no pointer: a synced chart, or the keyboard (`keyed` adds the point markers). */
   function showAt(index: number, keyed?: 1): void {
     focus = index;
-    let px = crossX(Math.max(0, index - lo));
-    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
-    if (keyed && hover.uniform && !arcChart(base.type)) {
-      // Centre on the category along its own axis. Long rows repeat a category once per series, so count categories, not rows.
-      let slot = index - lo;
-      let count = hi - lo + 1;
-      if (series[0]?.match) {
-        const slots = new Map<string, number>();
-        for (let i = lo; i <= hi; i++) if (!slots.has(xKey(i))) slots.set(xKey(i), slots.size);
-        slot = slots.get(xKey(index)) ?? 0;
-        count = slots.size;
-      }
-      px = (horizontal ? box.t : hover.left) + (slot + 0.5) * ((horizontal ? box.h : hover.width) / count);
-    }
+    const px = crossX(Math.max(0, index - lo));
+    const flat = horizontal();
     const bars = barChart(base) && !showCross;
-    const hits = bars ? barsNear(px, horizontal) : [];
+    const hits = bars ? barsNear(px, flat) : [];
     let marks: { x: number; y: number }[] = [];
     if (bars) {
       paintBars(hits);
       clearDots();
       svg.querySelector("[data-ck-crosshair]")?.remove();
+      // No rect to light (canvas bars, a bar of zero length): the keyboard shades the category band instead.
+      if (keyed && !hits.length) {
+        const slot = hover.width / Math.max(1, hover.count);
+        const at = px - slot / 2;
+        svg.insertAdjacentHTML(
+          "beforeend",
+          `<rect data-ck-dot x="${flat ? box.l : at}" y="${flat ? at : box.t}" width="${flat ? box.w : slot}" height="${flat ? slot : box.h}" fill="currentColor" fill-opacity=".1" pointer-events="none"/>`,
+        );
+      }
     } else {
       moveCross(px, xText(index));
-      if (keyed) marks = placeDots(px, horizontal, index);
+      if (keyed) marks = placeDots(px, flat, index);
     }
     if (!showTip) return;
     const rect = svg.getBoundingClientRect();
@@ -1849,7 +1869,20 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   function rebuild(): void {
     dirty = false;
     const hit = dataHit(svg);
+    const viewN = Math.max(0, hi - lo + 1);
+    slotRow = null;
+    if (series[0]?.match && !arcChart(base.type)) {
+      const slots = new Map<string, number>();
+      slotRow = [];
+      rowSlot = [];
+      for (let i = 0; i < viewN; i++) {
+        const key = xKey(lo + i);
+        if (!slots.has(key)) slots.set(key, slotRow.push(i) - 1);
+        rowSlot[i] = slots.get(key)!;
+      }
+    }
     if (hit && hit.kind !== "scatter") {
+      if (slotRow?.length !== hit.count) slotRow = null;
       box = plotBox(svg);
       hover = {
         xs: NO_PIXELS,
@@ -1865,12 +1898,25 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       refreshColors();
       return;
     }
-    const viewN = Math.max(0, hi - lo + 1);
     box = plotBox(svg);
-    const values = numericValues(base, table);
+    const values = numericValues(base, table, data);
     const slice = values && viewN ? (lo === 0 && values.length === viewN ? values : values.subarray(lo, hi + 1)) : null;
-    hover = buildHoverIndex(viewN, box.l, box.w, slice);
+    if (slice) slotRow = null;
+    // Categories run down the plot on horizontal bars, and take one slot each however many rows they span.
+    const flat = horizontal();
+    hover = buildHoverIndex(slotRow ? slotRow.length : viewN, flat ? box.t : box.l, flat ? box.h : box.w, slice);
     refreshColors();
+  }
+
+  /** Row offset from `lo` under a pixel along the category axis. */
+  function rowOf(px: number): number {
+    const slot = lookupIndex(hover, px);
+    return slotRow ? slotRow[slot] ?? 0 : slot;
+  }
+
+  function rowAtPoint(point: { x: number; y: number }): number {
+    arm(1);
+    return Math.min(n - 1, Math.max(0, lo + rowOf(horizontal() ? point.y : point.x)));
   }
   function arm(now?: 1): void {
     const mine = ++ticket;
@@ -1884,8 +1930,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     ric ? ric(go, { timeout: 400 }) : setTimeout(go);
   }
 
+  /** Pixel centre of a row offset along the category axis: x, or y on horizontal bars. */
   function crossX(local: number): number {
     arm(1);
+    if (slotRow) local = rowSlot[local] ?? 0;
     if (hover.pixel) return hover.pixel(local);
     return hover.pixels[local] ?? box.l;
   }
@@ -1931,13 +1979,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function project(): InteractSpec {
-    const rows = materialize(base.data);
+    const rows = materialize(data);
     if (!rows) return base;
     const ranged = lo > 0 || hi < n - 1;
-    let data = ranged ? rows.slice(lo, hi + 1) : rows;
-    if (hidden.size > 0 && data.length && isRecord(data[0])) {
+    let kept = ranged ? rows.slice(lo, hi + 1) : rows;
+    if (hidden.size > 0 && kept.length && isRecord(kept[0])) {
       const drop = arcChart(base.type);
-      data = data.flatMap((row) => {
+      kept = kept.flatMap((row) => {
         const record = row as Record<string, unknown>;
         if (drop && series.some((item) => hidden.has(item.name) && item.match && String(record[item.match]) === item.name)) return [];
         if (!series.some((item) => hidden.has(item.name) && !item.match)) return [record];
@@ -1946,7 +1994,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         return [copy];
       });
     } else if (!ranged && hidden.size === 0) return base;
-    return { ...base, data };
+    return { ...base, data: kept };
   }
 
   function stopFlight(snap: boolean): void {
@@ -2033,7 +2081,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function rowAt(index: number): unknown {
-    const data = base.data;
     if (Array.isArray(data) || ArrayBuffer.isView(data)) return (data as ArrayLike<unknown>)[index];
     if (!isRecord(data) || !isRecord(data.columns) || index < 0) return null;
     const columns = data.columns as Record<string, ArrayLike<unknown>>;
@@ -2096,9 +2143,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function indexAt(clientX: number, clientY: number): number {
     arm(1);
-    const point = viewPoint(svg, clientX, clientY);
-    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
-    return Math.min(n - 1, Math.max(0, lo + lookupIndex(hover, horizontal ? point.y : point.x)));
+    return rowAtPoint(viewPoint(svg, clientX, clientY));
   }
 
   function nodeInk(node: Element): string | undefined {
@@ -2325,11 +2370,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (barChart(base) && !showCross) {
       if (!showTip && !keys) return;
       const point = viewPoint(svg, event.clientX, event.clientY);
-      const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
-      const local = lookupIndex(hover, horizontal ? point.y : point.x);
-      const index = Math.min(n - 1, Math.max(0, lo + local));
+      const flat = horizontal();
+      const index = rowAtPoint(point);
       focus = index;
-      const hits = barsNear(crossX(local), horizontal);
+      const hits = barsNear(crossX(index - lo), flat);
       paintBars(hits);
       clearDots();
       svg.querySelector("[data-ck-crosshair]")?.remove();
@@ -2354,15 +2398,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (showTip) placeTip(event.clientX, event.clientY, nearest.name || xText(nearest.index), entriesAt(nearest.index, nearest.y), marks, nearest.index);
       return;
     }
-    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
-    const local = lookupIndex(hover, horizontal ? point.y : point.x);
-    const index = Math.min(n - 1, Math.max(0, lo + local));
+    const index = rowAtPoint(point);
     focus = index;
     const title = xText(index);
     const rows = entriesAt(index, point.y);
-    const px = crossX(local);
+    const px = crossX(index - lo);
     moveCross(px, title);
-    const marks = placeDots(px, horizontal, index);
+    const marks = placeDots(px, horizontal(), index);
     if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks, index);
   }
 
@@ -2490,7 +2532,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           showTip,
           () => alive,
           (clientX, clientY) => viewPoint(svg, clientX, clientY),
-          (x) => (arm(1), lookupIndex(hover, x)),
+          (x) => (arm(1), rowOf(x)),
           zoomAt,
           resetRange,
           () => redraw(),
@@ -2602,11 +2644,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function applyBase(next: InteractSpec): void {
-    base = next;
     specNow = next;
-    table = openTable(next.data);
-    series = seriesOf(next, table);
-    n = table.n;
+    read(next);
     lo = 0;
     hi = Math.max(0, n - 1);
     hidden.clear();
@@ -2694,11 +2733,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     update(next, markup) {
       if (!alive) return;
       specNow = next;
-      base = next;
       const follow = lo === 0 && (n === 0 || hi === n - 1);
-      table = openTable(next.data);
-      series = seriesOf(next, table);
-      n = table.n;
+      read(next);
       if (follow) {
         lo = 0;
         hi = Math.max(0, n - 1);

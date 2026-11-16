@@ -1544,3 +1544,183 @@ describe("keyboard and data table defaults", () => {
     expect(host.querySelector("[data-ck-table]")).toBeNull();
   });
 });
+
+describe("pointer and keyboard name the drawn row", () => {
+  const laid = { x: 0, y: 0, left: 0, top: 0, width: 640, height: 280, right: 640, bottom: 280, toJSON() { return {}; } } as DOMRect;
+  const fruit = [
+    { fruit: "Kiwi", crates: 4 },
+    { fruit: "Apple", crates: 9 },
+    { fruit: "Mango", crates: 6 },
+    { fruit: "Plum", crates: 6 },
+  ];
+  const barSpec = (extra: Record<string, unknown> = {}): InteractSpec => ({
+    version: "1",
+    type: "bar",
+    data: fruit,
+    encoding: { x: "fruit", y: "crates" },
+    size: { width: 640, height: 280 },
+    a11y: { alt: "Crates by fruit." },
+    ...extra,
+  });
+  /** Category of a bar, from the key the renderer stamps on it. */
+  const categoryOf = (bar: Element) => (bar.getAttribute("data-ck-key") || "").split(":").pop() || "";
+
+  function mount(spec: InteractSpec) {
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    host.getBoundingClientRect = () => laid;
+    const fit = () => {
+      host.querySelector("svg")!.getBoundingClientRect = () => laid;
+    };
+    fit();
+    const bars = () => [...host.querySelectorAll('svg rect[data-ck-key^="b:"]')];
+    const lit = () => [...new Set([...host.querySelectorAll("svg .ck-bar-on")].map(categoryOf))];
+    const tip = () => (host.querySelector("[data-ck-tip]") as HTMLElement).textContent || "";
+    /** Move the pointer to the middle of the first bar of a category. */
+    const hover = (category: string) => {
+      fit();
+      const bar = bars().find((node) => categoryOf(node) === category)!;
+      const x = Number(bar.getAttribute("x")) + Number(bar.getAttribute("width")) / 2;
+      const y = Number(bar.getAttribute("y")) + Number(bar.getAttribute("height")) / 2;
+      host.querySelector("svg")!.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, bubbles: true }));
+    };
+    const press = (key: string) => host.querySelector("svg")!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+    const live = () => host.querySelector("[data-ck-live]")!.textContent || "";
+    return { host, ctl, bars, lit, tip, hover, press, live, fit };
+  }
+
+  /** Categories in drawn order along the category axis. */
+  const drawn = (bars: Element[], axis: "x" | "y") => {
+    const seen: string[] = [];
+    for (const bar of [...bars].sort((a, b) => Number(a.getAttribute(axis)) - Number(b.getAttribute(axis)))) {
+      if (!seen.includes(categoryOf(bar))) seen.push(categoryOf(bar));
+    }
+    return seen;
+  };
+
+  it("applies the top-level sort, ties and direction included", async () => {
+    const spec = barSpec({ sort: { by: "value", order: "descending" } });
+    const chart = mount(spec);
+    await chart.ctl.ready;
+    expect(drawn(chart.bars(), "x")).toEqual(["Apple", "Mango", "Plum", "Kiwi"]);
+    for (const name of ["Apple", "Mango", "Plum", "Kiwi"]) {
+      chart.hover(name);
+      expect(chart.tip()).toContain(name);
+      expect(chart.tip()).toContain(String(fruit.find((row) => row.fruit === name)!.crates));
+      expect(chart.lit()).toEqual([name]);
+    }
+    const read: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      chart.press(i ? "ArrowRight" : "Home");
+      read.push(chart.live());
+      expect(chart.lit()).toEqual([read[i].split(":")[0]]);
+    }
+    expect(read).toEqual(["Apple: crates 9", "Mango: crates 6", "Plum: crates 6", "Kiwi: crates 4"]);
+    const table = await new Promise<Element>((done) => setTimeout(() => done(chart.host.querySelector("[data-ck-table]")!), 5));
+    expect([...table.querySelectorAll("tbody tr")].map((row) => row.children[0].textContent)).toEqual(["Apple", "Mango", "Plum", "Kiwi"]);
+    chart.ctl.destroy();
+  });
+
+  it("reports the drawn row on click and follows a new sort on update", () => {
+    const spec = barSpec({ sort: { field: "fruit" } });
+    const chart = mount(spec);
+    const clicks: ClickDetail[] = [];
+    chart.host.addEventListener("pointclick", ((event: CustomEvent<ClickDetail>) => clicks.push(event.detail)) as unknown as EventListener);
+    chart.hover("Apple");
+    expect(chart.tip()).toContain("Apple");
+    const apple = chart.bars().find((bar) => categoryOf(bar) === "Apple")!;
+    apple.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: Number(apple.getAttribute("x")) + 4, clientY: 100 }));
+    expect(clicks[0]?.x).toBe("Apple");
+    expect(clicks[0]?.row).toEqual({ fruit: "Apple", crates: 9 });
+    const next = barSpec({ sort: { by: "value", order: "ascending" } });
+    chart.ctl.update(next, render(next));
+    expect(drawn(chart.bars(), "x")).toEqual(["Kiwi", "Mango", "Plum", "Apple"]);
+    chart.hover("Kiwi");
+    expect(chart.tip()).toContain("Kiwi");
+    expect(chart.lit()).toEqual(["Kiwi"]);
+    chart.hover("Apple");
+    expect(chart.tip()).toContain("Apple");
+    expect(chart.lit()).toEqual(["Apple"]);
+    chart.ctl.destroy();
+  });
+
+  it("reads horizontal bars down the category axis", async () => {
+    const spec = barSpec({ mark: { orientation: "horizontal" } });
+    const chart = mount(spec);
+    await chart.ctl.ready;
+    expect(drawn(chart.bars(), "y")).toEqual(["Kiwi", "Apple", "Mango", "Plum"]);
+    for (const name of ["Plum", "Kiwi", "Mango", "Apple"]) {
+      chart.hover(name);
+      expect(chart.tip()).toContain(name);
+      expect(chart.lit()).toEqual([name]);
+    }
+    chart.host.querySelector("svg")!.dispatchEvent(new PointerEvent("pointerleave"));
+    chart.press("Home");
+    chart.press("ArrowRight");
+    expect(chart.live()).toMatch(/^Apple: /);
+    expect(chart.lit()).toEqual(["Apple"]);
+    chart.ctl.destroy();
+  });
+
+  it("shades the category band when the focused bar has no length", async () => {
+    const spec = barSpec({ data: [{ fruit: "Kiwi", crates: 4 }, { fruit: "Fig", crates: 0 }, { fruit: "Apple", crates: 9 }] });
+    const chart = mount(spec);
+    await chart.ctl.ready;
+    const svg = chart.host.querySelector("svg")!;
+    chart.press("Home");
+    expect(chart.lit()).toEqual(["Kiwi"]);
+    expect(svg.querySelector("[data-ck-dot]")).toBeNull();
+    chart.press("ArrowRight");
+    expect(chart.live()).toBe("Fig: crates 0");
+    expect(chart.lit()).toEqual([]);
+    const band = svg.querySelector("rect[data-ck-dot]")!;
+    const kiwi = chart.bars().find((bar) => categoryOf(bar) === "Kiwi")!;
+    const apple = chart.bars().find((bar) => categoryOf(bar) === "Apple")!;
+    const mid = Number(band.getAttribute("x")) + Number(band.getAttribute("width")) / 2;
+    expect(mid).toBeGreaterThan(Number(kiwi.getAttribute("x")) + Number(kiwi.getAttribute("width")));
+    expect(mid).toBeLessThan(Number(apple.getAttribute("x")));
+    chart.press("ArrowRight");
+    expect(chart.lit()).toEqual(["Apple"]);
+    expect(svg.querySelector("[data-ck-dot]")).toBeNull();
+    chart.press("Escape");
+    expect(svg.querySelector(".ck-bar-on")).toBeNull();
+    chart.ctl.destroy();
+  });
+
+  const long = [
+    { region: "NA", plan: "Free", signups: 820 },
+    { region: "NA", plan: "Pro", signups: 260 },
+    { region: "EU", plan: "Free", signups: 640 },
+    { region: "EU", plan: "Pro", signups: 210 },
+    { region: "APAC", plan: "Free", signups: 300 },
+    { region: "APAC", plan: "Pro", signups: 90 },
+  ];
+  const longSpec = (extra: Record<string, unknown> = {}): InteractSpec =>
+    barSpec({ data: long, encoding: { x: "region", y: "signups", series: "plan" }, a11y: { alt: "Signups by region and plan." }, ...extra });
+
+  it.each([
+    ["vertical", {}, "x"],
+    ["horizontal", { mark: { orientation: "horizontal" } }, "y"],
+    ["sorted", { sort: { field: "region" } }, "x"],
+  ] as const)("gives long rows one slot per category (%s)", async (_name, extra, axis) => {
+    const chart = mount(longSpec(extra));
+    await chart.ctl.ready;
+    const order = drawn(chart.bars(), axis);
+    expect(order).toEqual(axis === "x" && "sort" in extra ? ["APAC", "EU", "NA"] : ["NA", "EU", "APAC"]);
+    for (const name of order) {
+      chart.hover(name);
+      const rows = long.filter((row) => row.region === name);
+      expect(chart.tip()).toContain(name);
+      for (const row of rows) expect(chart.tip()).toContain(String(row.signups));
+      expect(chart.lit()).toEqual([name]);
+      expect(chart.host.querySelectorAll("svg .ck-bar-on").length).toBe(2);
+    }
+    chart.host.querySelector("svg")!.dispatchEvent(new PointerEvent("pointerleave"));
+    for (const name of order) {
+      chart.press(name === order[0] ? "Home" : "ArrowRight");
+      expect(chart.live().split(":")[0]).toBe(name);
+      expect(chart.lit()).toEqual([name]);
+    }
+    chart.ctl.destroy();
+  });
+});
