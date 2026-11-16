@@ -66,7 +66,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const channels = readYChannels(encoding.y);
   const size = isRecord(spec.size) ? spec.size : {};
   const compact = type === "sparkline" || type === "mini-area";
-  const sized = chartSize({ size }, { width: 640, height: compact ? (type === "sparkline" ? 32 : 40) : 240 });
+  const sized = chartSize({ size }, { width: 640, height: compact ? (type === "sparkline" ? 32 : 40) : 320 });
   const width = sized.width;
   const geometry = resolveGeometry(spec.theme);
   const opacitySet = typeof mark.fillOpacity === "number";
