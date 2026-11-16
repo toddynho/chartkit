@@ -1,7 +1,7 @@
 {
   "name": "@derpdaderp/chartkit",
   "version": "0.5.0",
-  "description": "Compatibility shim. Re-exports @chartkitdev/react and logs a one-time notice in development. Do not use in new code.",
+  "description": "Compatibility shim. Re-exports @chartkitdev/react/legacy and logs a one-time notice in development. Do not use in new code.",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {

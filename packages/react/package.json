@@ -33,6 +33,16 @@
         "default": "./dist/ssr.cjs"
       }
     },
+    "./legacy": {
+      "import": {
+        "types": "./dist/legacy.d.ts",
+        "default": "./dist/legacy.js"
+      },
+      "require": {
+        "types": "./dist/legacy.d.cts",
+        "default": "./dist/legacy.cjs"
+      }
+    },
     "./themes": {
       "import": {
         "types": "./dist/themes/index.d.ts",

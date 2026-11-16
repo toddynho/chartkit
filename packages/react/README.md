@@ -1,12 +1,14 @@
 # @chartkitdev/react
 
-Beautiful charts for React. Zero config.
+React adapter for the ChartKit JSON spec.
 
 **[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
 
 ---
 
-React components for ChartKit. 14 chart components and 17 themes. Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies.
+`<Chart spec={...} />` renders a ChartKit v1 spec. Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies.
+
+The v0 prop-based components (14 chart components and 17 themes) are frozen and live at `@chartkitdev/react/legacy`. See [Legacy components](#legacy-components).
 
 ## Installation
 
@@ -17,7 +19,34 @@ npm install @chartkitdev/react
 ## Quick Start
 
 ```tsx
-import { LineChart, KpiCard } from '@chartkitdev/react';
+import { Chart } from '@chartkitdev/react';
+
+const spec = {
+  version: '1',
+  type: 'line',
+  data: [
+    { month: 'Jan', revenue: 120 },
+    { month: 'Feb', revenue: 150 },
+  ],
+  encoding: { x: 'month', y: 'revenue' },
+  a11y: { alt: 'Revenue rose from January to February.' },
+};
+
+export function Revenue() {
+  return <Chart spec={spec} />;
+}
+```
+
+`renderToString(spec)` from `@chartkitdev/react/ssr` returns the same SVG on the server.
+
+## Legacy components
+
+The components below are the v0 API. They are frozen: fixes, no new features. Import them from `@chartkitdev/react/legacy`.
+
+The main entry still exports the same names in 0.x, marked `@deprecated`, so existing imports do not break. They are removed from the main entry in 1.0. Importing only `Chart` does not bundle them. Moving a v0 app: [chartkit.dev/docs/migrate](https://chartkit.dev/docs/migrate).
+
+```tsx
+import { LineChart, KpiCard } from '@chartkitdev/react/legacy';
 
 function Dashboard({ data }) {
   return (
@@ -43,7 +72,7 @@ function Dashboard({ data }) {
 }
 ```
 
-## Features
+### Features
 
 - **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, candlesticks, and more
 - **17 Curated Themes** - Dark and light themes that look great out of the box
@@ -52,9 +81,9 @@ function Dashboard({ data }) {
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
 
-## Components
+### Components
 
-### Charts
+#### Charts
 - **LineChart** - Multi-series with dual Y-axis, curves, area fills
 - **BarChart** - Vertical and horizontal bars
 - **DonutChart** - Donut/pie with center content
@@ -64,7 +93,7 @@ function Dashboard({ data }) {
 - **Heatmap** - GitHub-style activity heatmaps
 - **CandlestickChart** - Financial OHLC with zoom/pan
 
-### Indicators
+#### Indicators
 - **KpiCard** - Metric cards with sparklines
 - **Sparkline** - Minimal inline trends
 - **MiniArea** - Small area charts
@@ -72,22 +101,22 @@ function Dashboard({ data }) {
 - **ProgressRing** - Circular progress
 - **SpikeChart** - Event visualization
 
-## Themes
+### Themes
 
 **Dark:** `midnight`, `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
 
 **Light:** `sunset`, `silver`, `pearl`, `latte`
 
 ```tsx
-import { useAutoTheme } from '@chartkitdev/react';
+import { useAutoTheme } from '@chartkitdev/react/legacy';
 
 // Auto dark/light switching
 const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 ```
 
-## Examples
+### Examples
 
-### Multi-Series Line Chart
+#### Multi-Series Line Chart
 
 ```tsx
 <LineChart
@@ -103,7 +132,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 />
 ```
 
-### Dual Y-Axis
+#### Dual Y-Axis
 
 ```tsx
 <LineChart
@@ -118,7 +147,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 />
 ```
 
-### Area Chart
+#### Area Chart
 
 ```tsx
 <LineChart
