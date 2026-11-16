@@ -50,7 +50,6 @@ export default defineConfig({
     "/utilities/legend": { status: 307, destination: "/docs/spec" },
     "/utilities/annotations": { status: 307, destination: "/docs/spec" },
     "/utilities/responsive-chart": { status: 307, destination: "/docs/spec" },
-    "/.well-known/llms.txt": { status: 307, destination: "/llms.txt" },
     "/themes": { status: 307, destination: "/docs/theming" },
     "/about": { status: 307, destination: "/agents" },
     "/docs/agents/mcp": { status: 307, destination: "/docs/mcp" },

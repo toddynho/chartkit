@@ -248,6 +248,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "schema/chartkit.schema.json",
     "README.md",
     "LICENSE"
