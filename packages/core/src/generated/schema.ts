@@ -4658,7 +4658,7 @@ export interface StripEnd {
   at: "summary" | "min" | "max" | "mean";
 }
 /**
- * Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px).
+ * Dimensions. Default: fill container width, height by type (line/bar 320px, sparkline 32px, gauge 160px).
  */
 export interface Size {
   /**

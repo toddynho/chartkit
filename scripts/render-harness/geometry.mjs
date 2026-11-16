@@ -379,6 +379,12 @@ function parseScene(svg) {
         if (name === "path" && at.fill && at.fill !== "none" && box.w < view.w * 0.92 && box.h < view.h * 0.92) {
           fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
         }
+        // A pie or donut slice is tested by its own shape. Its box also covers the hole and its neighbours.
+        const sector = name === "path" && (at["data-ck-mark"] === "slice" || at["data-ck-mark"] === "arc") && at.fill && at.fill !== "none" && frame.matrix.join() === ident().join() ? sectorOf(at.d) : null;
+        if (sector) {
+          if (fills.length && fills[fills.length - 1].bbox === box) fills.pop();
+          fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at), sector });
+        }
       }
       if (name === "circle" && at.fill && at.fill !== "none" && !frame.legend && !at["data-ck-mark"] && box.w < view.w * 0.92) {
         fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
@@ -391,7 +397,7 @@ function parseScene(svg) {
     const cy = item.bbox.y + item.bbox.h / 2;
     let behind = null;
     for (const fill of fills) {
-      if (cx >= fill.bbox.x && cx <= fill.bbox.x + fill.bbox.w && cy >= fill.bbox.y && cy <= fill.bbox.y + fill.bbox.h) behind = fill;
+      if (fill.sector ? inSector(fill.sector, cx, cy) : cx >= fill.bbox.x && cx <= fill.bbox.x + fill.bbox.w && cy >= fill.bbox.y && cy <= fill.bbox.y + fill.bbox.h) behind = fill;
     }
     item.behind = behind;
   }
@@ -575,6 +581,41 @@ function shapeBox(name, at, matrix) {
   }
   if (name === "path") return pathBox(at.d || "", matrix);
   return null;
+}
+
+/**
+ * A slice path as a ring sector: centre, outer and inner radius, start angle and clockwise span.
+ * Read from the outer arc (its end points, radius and flags). Null when the path is not one.
+ */
+function sectorOf(d) {
+  const text = String(d || "");
+  const arcs = [...text.matchAll(/(-?[0-9.]+)[ ,]+(-?[0-9.]+)\s*A\s*([0-9.]+)[ ,]+([0-9.]+)[ ,]+0[ ,]+([01])[ ,]+([01])[ ,]+(-?[0-9.]+)[ ,]+(-?[0-9.]+)/g)].map((match) => match.slice(1).map(Number));
+  if (!arcs.length) return null;
+  const [x0, y0, r, , large, sweep, x1, y1] = arcs[0];
+  const inner = arcs.find((arc) => Math.abs(arc[2] - r) > 0.01);
+  const ri = inner ? Math.min(inner[2], r) : 0;
+  const ro = inner ? Math.max(inner[2], r) : r;
+  // Two arcs of one radius are the two halves of a full ring.
+  if (arcs.length > 1 && Math.abs(arcs[1][2] - r) < 0.01) return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, ro, ri, a0: 0, span: Math.PI * 2 };
+  const hx = (x0 - x1) / 2;
+  const hy = (y0 - y1) / 2;
+  const half = hx * hx + hy * hy;
+  if (!(half > 0)) return null;
+  const coef = (large !== sweep ? 1 : -1) * Math.sqrt(Math.max(0, (r * r - half) / half));
+  const cx = coef * hy + (x0 + x1) / 2;
+  const cy = -coef * hx + (y0 + y1) / 2;
+  const turn = Math.PI * 2;
+  const a0 = Math.atan2(y0 - cy, x0 - cx);
+  const a1 = Math.atan2(y1 - cy, x1 - cx);
+  const span = sweep ? (((a1 - a0) % turn) + turn) % turn : (((a0 - a1) % turn) + turn) % turn;
+  return { cx, cy, ro, ri, a0: sweep ? a0 : a1, span };
+}
+
+function inSector(sector, x, y) {
+  const dist = Math.hypot(x - sector.cx, y - sector.cy);
+  if (dist > sector.ro || dist < sector.ri) return false;
+  const turn = Math.PI * 2;
+  return (((Math.atan2(y - sector.cy, x - sector.cx) - sector.a0) % turn) + turn) % turn <= sector.span;
 }
 
 function pathBox(d, matrix) {

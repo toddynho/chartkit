@@ -116,6 +116,8 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     width: right,
     height: frame.height,
     legendH,
+    ink: cssVar("text", frame.preset.text),
+    muted: cssVar("muted", frame.preset.muted),
   });
   const centre = root.name || fmt(total, frame.locale, shown);
   const holePx = inner;
@@ -166,7 +168,7 @@ interface Box {
 function placeLabels(
   parts: string[],
   slices: SliceLabel[],
-  frame: { cx: number; cy: number; outer: number; top: number; width: number; height: number; legendH: number },
+  frame: { cx: number; cy: number; outer: number; top: number; width: number; height: number; legendH: number; ink: string; muted: string },
 ): void {
   const placed: Box[] = [];
   const glyph = 7;
@@ -209,7 +211,7 @@ function alongArc(
 function outside(
   parts: string[],
   slice: SliceLabel,
-  frame: { cx: number; cy: number; outer: number },
+  frame: { cx: number; cy: number; outer: number; ink: string; muted: string },
   widthOf: (name: string) => number,
   hits: (box: Box) => boolean,
   inside: (box: Box) => boolean,
@@ -228,8 +230,8 @@ function outside(
     placed.push(box);
     const [sx, sy] = polar(frame.cx, frame.cy, frame.outer, slice.mid);
     const [ex, ey] = polar(frame.cx, frame.cy, frame.outer + 8, angle);
-    parts.push(`<line data-ck-leader="1" x1="${n(sx)}" y1="${n(sy)}" x2="${n(ex)}" y2="${n(ey)}" stroke="${cssVar("muted", "#6e6e73")}" stroke-width="1" />`);
-    parts.push(`<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${cssVar("text", "#1d1d1f")}" font-size="11" font-weight="650">${esc(slice.name)}</text>`);
+    parts.push(`<line data-ck-leader="1" x1="${n(sx)}" y1="${n(sy)}" x2="${n(ex)}" y2="${n(ey)}" stroke="${frame.muted}" stroke-width="1" />`);
+    parts.push(`<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${frame.ink}" font-size="11" font-weight="650">${esc(slice.name)}</text>`);
     return;
   }
 }

@@ -334,7 +334,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
  */
 function emptyMark(id: string, preset: { background: string; axis: string; text: string }): { def: string; fill: string; stroke: string } {
   const night = preset.background === "#0c0c0c" || preset.text === "#ffffff";
-  const card = cssVar("background", night ? preset.background : "#f5f5f7");
+  const card = cssVar("background", night ? preset.background : "light-dark(#f5f5f7, #2c2c2e)");
   const ink = cssVar("axis", preset.axis);
   const pattern = `${id}e${hash(card + ink)}`;
   const def =

@@ -2,6 +2,7 @@ import { isPaintColumn, matchRule, readRules, resolveColors, withPalette } from 
 import { legendPinned, paintLegend, readLegend } from "../legend";
 import { legendSpace } from "../legend";
 import { cssVar, paint } from "../theme";
+import { labelInk } from "../ink";
 import { formatValue } from "../format";
 import { bag, named } from "../glyphs";
 import {
@@ -227,19 +228,25 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const explode = Array.isArray(frame.mark.explode)
     ? frame.mark.explode.filter((item): item is string => typeof item === "string")
     : null;
-  const offset = typeof frame.mark.offset === "number" ? frame.mark.offset : explode && explode.length ? 12 : 0;
+  const offset = typeof frame.mark.offset === "number" ? Math.max(0, frame.mark.offset) : explode && explode.length ? 12 : 0;
   const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
   const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
   const inside = labelAt === "inside" || labelAt === "center";
   const leaders = showLabels && !inside;
   const valueFormat = frame.mark.labelFormat ?? channelFormat(frame.encoding.y);
   const legendBox = readLegend(spec);
-  const classicPlace = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 0 && (slices.length > 1 || legendPinned(spec)));
-  const place = legendBox ? (legendBox.position === "inside" ? false : legendBox.position) : classicPlace;
-  const showLegend = place !== false || legendBox?.position === "inside";
   const legendRow = 20;
   const longest = slices.reduce((max, slice) => Math.max(max, slice.label.length), 0);
-  const sideWidth = Math.min(240, Math.max(148, 36 + longest * 7 + 48));
+  // Swatch, the longest name at 12px, a gap, and the percent column.
+  const sideNeed = 44 + Math.ceil(longest * 6.6) + (frame.legendValues ? 104 : 60);
+  const sideWidth = Math.min(240, Math.max(132, sideNeed));
+  // The ring each default placement would leave. The legend goes where the ring is larger.
+  const headRoom = (frame.title ? 36 : 8) + (frame.subtitle ? 22 : 0) + 12;
+  const ringSide = leaders || sideNeed > 240 ? 0 : Math.min(frame.width - sideWidth - 16, frame.height - headRoom);
+  const ringBelow = Math.min(frame.width - 16, frame.height - headRoom - slices.length * legendRow - 8);
+  const classicPlace = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 0 && (slices.length > 1 || legendPinned(spec)), ringSide, ringBelow);
+  const place = legendBox ? (legendBox.position === "inside" ? false : legendBox.position) : classicPlace;
+  const showLegend = place !== false || legendBox?.position === "inside";
   const legendItems = slices.map((slice) => ({
     name: slice.label,
     color: slice.color,
@@ -263,12 +270,13 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const availW = width - sideLegend - 16;
   const availH = height - y0 - legendBlock - 12;
   let size = Math.max(48, Math.min(availW, availH));
-  let pieX = place === "left" ? width - size - 8 : place === "right" ? 8 : (width - sideLegend - size) / 2;
+  const sideGap = Math.max(0, availW - size) / 2;
+  let pieX = place === "left" ? width - size - 8 - sideGap : place === "right" ? 8 + sideGap : (width - sideLegend - size) / 2;
   let pieY = place === "bottom" ? y0 + 4 : y0 + (place === "top" ? legendBlock : 0) + Math.max(0, (availH - size) / 2);
   let cx = pieX + size / 2;
   let cy = pieY + size / 2;
   const margin = leaders ? 56 : showLabels ? 22 : 8;
-  let outer = Math.max(12, size / 2 - margin - (offset > 0 ? Math.min(offset, 24) : 0));
+  let outer = Math.max(12, size / 2 - margin - offset);
   let plotTop = pieY;
   let plotBottom = pieY + size;
   if (leaders) {
@@ -315,7 +323,9 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   if (frame.subtitle) parts.push(text(pieX, subtitleY, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
 
   if (showLegend && !legendBox && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
-  if (showLegend && !legendBox && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
+  const belowWidth = Math.min(width - 16, Math.max(size, sideNeed));
+  const sideY = Math.max(y0, (plotTop + plotBottom - arcs.length * 22 + 12) / 2);
+  if (showLegend && !legendBox && place === "left") parts.push(legend(arcs, pieX - sideWidth, sideY, frame, valueFormat, pieX - 16));
 
   const held = bag();
   let labelSvg = "";
@@ -348,7 +358,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
       const at = inner > 8 ? (inner + outer) / 2 : outer * 0.55;
       const point = polar(origin.x, origin.y, at, mid);
       const anchor = point.x < cx - 4 ? "end" : point.x > cx + 4 ? "start" : "middle";
-      labelSvg += held.put(body, point.x, point.y, anchor, cssVar("text", frame.preset.text));
+      labelSvg += held.put(body, point.x, point.y, anchor, labelInk(arc.color));
       continue;
     }
     const rim = polar(cx, cy, 1, mid);
@@ -375,26 +385,29 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     }
   }
 
-  if (inner > 8) {
+  // A legend anchored to the centre takes the hole. The total would sit under it.
+  if (inner > 8 && legendBox?.anchor !== "center") {
     const totalLabel = formatValue(total, valueFormat, frame.locale);
     const unit = centreUnit(frame.encoding.y);
     const fill = cssVar("text", frame.preset.text);
-    const label = unit ? `Total ${totalLabel} ${unit}` : `Total ${totalLabel}`;
+    const label = unit === "Total" ? `Total ${totalLabel}` : `Total ${totalLabel} ${unit}`;
+    // Bold tabular digits run about 0.62em. Keep the figure inside the hole.
+    const big = Math.max(11, Math.min(28, Math.round(inner * 0.5), Math.floor((inner * 2 - 16) / (totalLabel.length * 0.62))));
     if (unit) {
       parts.push(
-        `<text x="${n(cx)}" y="${n(cy - 6)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>` +
-          `<text x="${n(cx)}" y="${n(cy + 12)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="12">${esc(unit)}</text>`,
+        `<text x="${n(cx)}" y="${n(cy - big * 0.3)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="${big}" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>` +
+          `<text x="${n(cx)}" y="${n(cy + big * 0.55 + 2)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="12">${esc(unit)}</text>`,
       );
     } else {
       parts.push(
-        `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>`,
+        `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="${big}" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>`,
       );
     }
   }
 
   if (labelSvg) parts.push(labelSvg);
-  if (showLegend && !legendBox && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
-  if (showLegend && !legendBox && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
+  if (showLegend && !legendBox && place === "bottom") parts.push(legend(arcs, (width - belowWidth) / 2, pieY + size + 8, frame, valueFormat, (width + belowWidth) / 2));
+  if (showLegend && !legendBox && place === "right") parts.push(legend(arcs, pieX + size + 16, sideY, frame, valueFormat, pieX + size + sideWidth - 8));
   if (legendBox && showLegend) {
     const host = legendBox.position === "inside"
       ? { left: pieX, top: pieY, right: pieX + size, bottom: pieY + size }
@@ -424,13 +437,10 @@ interface Leader {
 function centreUnit(channel: unknown): string {
   const item = Array.isArray(channel) ? channel[0] : channel;
   let label = "";
-  if (typeof item === "string") label = item;
-  else if (isRecord(item)) {
+  if (isRecord(item)) {
     if (typeof item.title === "string" && item.title) label = item.title;
-    else if (typeof item.field === "string") label = item.field;
   }
-  if (!label || label === "value" || label === "y") return "";
-  return label;
+  return label || "Total";
 }
 
 /** 12px text is about 6.6px per character. */
@@ -473,10 +483,11 @@ function layoutOutside(input: {
     ...input.slices.map((slice) => estimateText(outsideText(slice.value, input.total, input.labelFormat, input.valueFormat, input.locale))),
   );
   const gutter = labelW + 32;
-  const pop = input.offset > 0 ? Math.min(input.offset, 12) : 0;
-  const cap = Math.min(plotW, plotH) / 2 - 2;
+  // An exploded slice moves out by the whole offset. Reserve it on every side.
+  const pop = input.offset;
+  const cap = Math.min(plotW, plotH) / 2 - 2 - pop;
   const minRadius = Math.min(cap, Math.max(40, Math.min(plotW, plotH) * 0.34));
-  let outer = Math.min(plotH / 2 - 28, plotW / 2 - gutter - pop);
+  let outer = Math.min(plotH / 2 - 28 - pop, plotW / 2 - gutter - pop);
   outer = Math.max(outer, minRadius);
   outer = Math.min(Math.max(24, outer), cap);
   const cx = plotLeft + plotW / 2;
@@ -609,6 +620,8 @@ function legendPlace(
   width: number,
   height: number,
   show: boolean,
+  side = 0,
+  below = 1,
 ): "top" | "right" | "bottom" | "left" | false {
   if (!show || spec.legend === false) return false;
   if (isRecord(spec.legend)) {
@@ -616,7 +629,7 @@ function legendPlace(
     const position = spec.legend.position;
     if (position === "top" || position === "right" || position === "bottom" || position === "left") return position;
   }
-  return width >= height * 2 ? "right" : "bottom";
+  return width >= height * 2 || side >= below ? "right" : "bottom";
 }
 
 function legend(
@@ -627,7 +640,7 @@ function legend(
   valueFormat: unknown,
   valueRight: number,
 ): string {
-  const valueWidth = frame.legendValues ? 112 : 68;
+  const valueWidth = frame.legendValues ? 100 : 56;
   return slices
     .map((slice, index) => {
       const dy = y + index * 22;
@@ -637,8 +650,8 @@ function legend(
       const label = fitLabel(slice.label, Math.max(12, valueRight - valueWidth - labelX));
       return (
         `<rect x="${n(x)}" y="${n(dy)}" width="10" height="10" rx="2" fill="${slice.color}" />` +
-        text(labelX, dy + 11, label, cssVar("muted", frame.preset.muted), 14, "400", "start") +
-        text(valueRight, dy + 11, `${pct}${extra}`, cssVar("text", frame.preset.text), 14, "600", "end")
+        text(labelX, dy + 9.5, label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
+        text(valueRight, dy + 9.5, `${pct}${extra}`, cssVar("text", frame.preset.text), 12, "600", "end")
       );
     })
     .join("");

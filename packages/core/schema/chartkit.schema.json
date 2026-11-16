@@ -3211,7 +3211,7 @@
           "description": "Inner padding in px around the plot, a number or per-side object. Default: automatic from axis label sizes."
         }
       },
-      "description": "Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px)."
+      "description": "Dimensions. Default: fill container width, height by type (line/bar 320px, sparkline 32px, gauge 160px)."
     },
     "layout": {
       "type": "object",

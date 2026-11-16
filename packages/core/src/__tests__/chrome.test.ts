@@ -236,7 +236,7 @@ describe("shared cartesian chrome", () => {
         x: "hour",
         y: [
           { field: "milliamp", title: "Reading" },
-          { field: "mean", title: "Mean" },
+          { field: "mean", title: "Mean", color: "#16803c" },
         ],
       },
       mark: {

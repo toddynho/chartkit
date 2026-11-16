@@ -324,7 +324,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       fills.push(fill);
     }
     if (fills.length) return fills[Math.min(index, fills.length - 1)] || fills[0];
-    return "light-dark(#007aff,#0a84ff)";
+    return "light-dark(#2f6fe4,#4a8ff0)";
   }
 
   function paintAt(index: number): string {
@@ -1004,7 +1004,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     for (const item of series) {
       if (!hidden.has(item.name) || visible.has(item.name)) continue;
       const name = esc(item.name);
-      svg.insertAdjacentHTML("beforeend", `<rect data-ck-hidden-key="${name}" x="${x}" y="${y - 9}" width="10" height="10" rx="2" fill="var(--ck-series-1, #007aff)" opacity="0.35"/><text data-ck-hidden-key="${name}" x="${x + 16}" y="${y}" font-size="12" opacity="0.35">${name}</text>`);
+      svg.insertAdjacentHTML("beforeend", `<rect data-ck-hidden-key="${name}" x="${x}" y="${y - 9}" width="10" height="10" rx="2" fill="var(--ck-series-1, #2f6fe4)" opacity="0.35"/><text data-ck-hidden-key="${name}" x="${x + 16}" y="${y}" font-size="12" opacity="0.35">${name}</text>`);
       (svg.lastElementChild as SVGTextElement).style.cursor = "pointer";
       y += 20;
     }

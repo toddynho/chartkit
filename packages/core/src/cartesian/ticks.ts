@@ -27,7 +27,8 @@ export function xStep(model: PlotModel, count: number, angle: number): number {
   const slot = Math.max(1, (model.width - 64) / Math.max(1, count));
   const labels = model.labels.length ? model.labels : [];
   if (model.xAxis.skip === true) return Math.max(1, Math.ceil(widest(labels) / slot));
-  if (!angle) return count > 8 ? Math.ceil(count / 6) : 1;
+  // Up to twelve labels when they fit with a 10px gap. Twelve months fit at 640.
+  if (!angle) return count > 8 ? Math.min(Math.ceil(count / 6), model.orientation === "horizontal" ? count : Math.max(Math.ceil(count / 12), Math.ceil((widest(labels) + 10) / slot))) : 1;
   const rad = (Math.abs(angle) * Math.PI) / 180;
   const footprint = widest(labels) * Math.abs(Math.cos(rad)) + 11 * Math.abs(Math.sin(rad));
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));

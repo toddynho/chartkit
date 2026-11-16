@@ -31,6 +31,29 @@ test("map label boxes use the stylesheet size", () => {
   assert.equal(checkSvg(label(22), { type: "choropleth" }).some((item) => item.check === "text-overlap"), true);
 });
 
+test("text in a donut hole is scored against the page, text on a slice against the slice", async () => {
+  const runtime = await loadRuntime();
+  const spec = {
+    version: "1",
+    type: "donut",
+    data: [
+      { label: "Search", value: 70 },
+      { label: "Direct", value: 30 },
+    ],
+    encoding: { x: "label", y: "value" },
+    mark: { padAngle: 0 },
+    a11y: { alt: "Search is seventy percent of sessions." },
+  };
+  const centre = (svg) => checkSvg(svg, spec).filter((item) => item.check === "contrast" && /Total|100/.test(item.detail));
+  // One slice spans more than half the ring, so its bounding box covers the centre.
+  assert.equal(centre(runtime.render(spec)).length, 0);
+  // A label drawn on the slice in the slice's own colour has to be caught.
+  const inside = runtime.render({ ...spec, mark: { padAngle: 0, labelPosition: "inside" } });
+  const painted = inside.replace(/(<text\b[^>]*?)fill="[^"]*"([^>]*>70%<)/, '$1fill="#2f6fe4"$2');
+  assert.notEqual(painted, inside);
+  assert.equal(checkSvg(painted, spec).some((item) => item.check === "contrast" && item.detail.includes("70%")), true);
+});
+
 test("legend text overlapping a date label is a layout finding", () => {
   const findings = checkSvg(overlapSvg, { type: "gantt" });
   const overlap = findings.find((item) => item.check === "text-overlap" && item.roles.includes("legend") && item.roles.includes("tick"));
