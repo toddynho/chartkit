@@ -152,7 +152,7 @@ function semanticOf(key) {
   if (file.includes("render.ts") || file.endsWith("charts/line.ts") || file.endsWith("entry.mjs")) return "renderer shell";
   if (file.includes("svg.ts") || file.includes("frame.ts")) return "SVG primitives and scales";
   if (file.includes("data.ts") || file.includes("data-prep.ts") || file.includes("sort.ts") || file.includes("transform.ts")) return "data table";
-  if (file.includes("cartesian.ts")) return "cartesian shell";
+  if (file.includes("cartesian.ts") || file.includes("/cartesian/")) return "cartesian shell";
   if (file.includes("layout-hook") || file.includes("chrome.ts")) return "axes, legend, layout";
   return "other";
 }
@@ -181,7 +181,7 @@ function groupOf(file) {
   if (src === "render.ts" || src === "charts/line.ts") return "renderer shell";
   if (src === "svg.ts" || src === "frame.ts") return "SVG primitives and scales";
   if (src === "data.ts" || src === "data-prep.ts" || src === "sort.ts" || src === "transform.ts") return "data table";
-  if (src === "renderers/cartesian.ts") return "cartesian renderer (line, axes, paths, leftover siblings)";
+  if (src === "renderers/cartesian.ts" || src.startsWith("cartesian/")) return "cartesian renderer (line, axes, paths, leftover siblings)";
   return src;
 }
 
