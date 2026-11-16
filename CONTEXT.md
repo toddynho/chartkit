@@ -87,7 +87,7 @@ npm run bench          # public comparison. Writes BENCHMARKS.md
 - Publish losses next to wins. uPlot is smaller and has a faster first hover.
 - Large line charts are sampled to the pixel width. Do not present sampled timings as raw-point performance. There is no WebGL and none is planned.
 - Do not claim the smallest bundle, the most features, first-try correctness for agents, or that ChartKit is the only library with an MCP.
-- Accessibility: alt text is required and enforced. Keyboard navigation and the data table are opt-in until the v1 default change ships.
+- Accessibility: alt text is required and enforced. Keyboard navigation and a hidden data table are on by default for client mounts, but only for the chart types with a keyboard model (`KEY_TYPES` in `packages/core/src/interact.ts`). Do not say every chart is keyboard accessible.
 - `catalog/public/llms.txt` must stay at or under 6,400 bytes. A test enforces it, and `packages/mcp` bundles a copy.
 - `scripts/readme-drift.test.mjs` checks README links, imports and chart-type counts.
 

@@ -28,7 +28,7 @@ npm install @chartkitdev/core
 
 A line chart is 32 KB gzip. uPlot is smaller at 24 KB. We publish the benchmarks we lose as well as the ones we win: [BENCHMARKS.md](BENCHMARKS.md).
 
-**Nothing to install:** ChartKit Cloud does the same render over HTTP. Send a spec to `/render` and get an SVG or PNG back. Agents can call its remote MCP, which has one tool, `render_chart`. It goes live at `cloud.chartkit.dev` with v1. The service is in [apps/cloud](apps/cloud/README.md).
+**Nothing to install:** ChartKit Cloud does the same render over HTTP. Send a spec to `/render` and get an SVG or PNG back. Agents can call its remote MCP, which has three tools: `render_chart`, `validate_chart` and `repair_chart`. It goes live at `cloud.chartkit.dev` with v1. The service is in [apps/cloud](apps/cloud/README.md).
 
 **[Docs](https://chartkit.dev/docs)** | **[Gallery](https://chartkit.dev/gallery)** | **[Playground](https://chartkit.dev/playground)** | **[Compare](https://chartkit.dev/compare)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
 
@@ -231,7 +231,7 @@ An option either draws or returns a warning that says why it did not.
 
 Tooltips, zoom, pan, brush, selection, a navigator, synced charts and drilldown run in the browser from `@chartkitdev/core/interact`. Server output is the static SVG.
 
-Every chart requires alt text, and the validator enforces it. Keyboard navigation and a hidden data table are opt-in today (`a11y.keyboard` and `a11y.dataTable`). They are set to become the default for client renders in v1.
+Every chart requires alt text, and the validator enforces it. When an adapter mounts a chart in the browser, keyboard navigation and a hidden data table are on by default for line, bar, area, combo, scatter, candlestick, pie, donut and a few more types. Set `a11y.keyboard` or `a11y.dataTable` to `false` to turn either off. The other chart types have no keyboard model yet, and server-rendered SVG is unchanged.
 
 ## Themes
 
