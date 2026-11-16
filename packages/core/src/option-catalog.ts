@@ -277,7 +277,7 @@ const IMPLIED_DEFAULTS: Record<string, string | number | boolean> = {
   animation: false,
 };
 
-/** Chart types accepted beside the schema enum. Same list as walker.ts DEFERRED_TYPES. */
+/** Chart types accepted beside the schema enum. Same list as walker/chart-type.ts DEFERRED_TYPES. */
 const EXTRA_TYPES = ["gantt", "timeline", "quadrant", "venn", "journey", "choropleth", "map-points"];
 
 const SKIP = new Set(["version", "$schema", "data"]);
