@@ -48,10 +48,10 @@ npm run preview --workspace=chartkit-web
 
 ## Routes
 
-Header: Cloud, Dashboards, Agents, Gallery, Examples, Docs. Pricing is on `/cloud#pricing`. Footer columns are Product, Docs, Agents, and Compare.
+Header (`primaryNav` in `src/data/nav.ts`): Cloud, Dashboards, Agents, Gallery, Playground, Docs. The docs header drops Dashboards. Pricing is on `/cloud#pricing`. Footer columns are Product, Docs, and Agents. Compare is a Product link and the bar under the columns, not its own column.
 
-Docs links are extensionless. The left rail is Start, Concepts, Charts (Core, Statistical, Planning, Maps), and Lookup. One upgrade link: [Upgrading from v0](/docs/migrate). Chart.js, Recharts, and ECharts stay as pages linked from that note, not as extra nav items.
+Docs links are extensionless. The left rail groups are Start, Concepts, and Lookup (`docsNav` in `src/data/docs-catalog.ts`). Chart types sit under Start, grouped Core, Statistical, Planning, Library, and Geo. One upgrade link: [Upgrading from v0](/docs/migrate). Chart.js, Recharts, and ECharts stay as pages linked from that note, not as extra nav items.
 
 `/llms.txt`, `/llms-full.txt`, `/llms.json`, `/features.json`, `/benchmarks.json`, `/recipes.json`, `/showcase.json`, and `/schema/v1.json` are served from this app.
 
-Old v0 URLs redirect: `/getting-started`, `/components` and the named chart paths, `/hooks`, `/utilities` (including legend, annotations, and responsive-chart), `/themes`, `/about`, and `/.well-known/llms.txt`. `/play` and `/playground` go to `/examples`. `/demo` goes to `/dashboards`, `/showcase` to `/gallery`, `/maps` to `/gallery#maps`, `/dashboard` to `/dashboards`, and `/pricing` to `/cloud#pricing`. Unknown `/_next` assets, `/blog`, and `/api` 404. The render API is `cloud.chartkit.dev`, not this host.
+Old v0 URLs redirect: `/getting-started`, `/components` and the named chart paths, `/hooks`, `/utilities` (including legend, annotations, and responsive-chart), `/themes`, `/about`, and `/.well-known/llms.txt`. `/play` and `/demo` go to `/playground`. `/playground` is a page. `/showcase` goes to `/gallery`, `/maps` to `/gallery#maps`, `/dashboard` to `/dashboards`, and `/pricing` to `/cloud#pricing`. `/when-to-use` goes to `/compare#when-to-use`; the compare page has no element with that id, so the fragment does not scroll. Unknown `/_next` assets, `/blog`, and `/api` have no routes, so they 404. The render API is `cloud.chartkit.dev`, not this host.
