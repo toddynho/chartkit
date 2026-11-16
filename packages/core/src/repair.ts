@@ -85,3 +85,62 @@ function addAt(root: unknown, path: string, value: unknown): boolean {
 function unescape(segment: string): string {
   return segment.replace(/~1/g, "/").replace(/~0/g, "~");
 }
+
+/**
+ * Parse model output as JSON, leniently. Accepts a Markdown code fence or prose around one
+ * object, `//` and block comments, trailing commas, single-quoted strings, and bare keys.
+ * Returns undefined when it still is not JSON.
+ */
+export function parseLoose(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    // fall through
+  }
+  let body = text.trim();
+  const fence = /```[a-zA-Z]*\s*\n([\s\S]*?)```/.exec(body);
+  if (fence) body = fence[1].trim();
+  const start = body.search(/[{[]/);
+  const end = Math.max(body.lastIndexOf("}"), body.lastIndexOf("]"));
+  if (start < 0 || end < start) return undefined;
+  body = body.slice(start, end + 1);
+  let out = "";
+  for (let i = 0; i < body.length; i++) {
+    const char = body[i];
+    if (char === '"' || char === "'") {
+      let j = i + 1;
+      let value = "";
+      while (j < body.length && body[j] !== char) {
+        if (body[j] === "\\" && j + 1 < body.length) {
+          value += body[j + 1] === "'" ? "'" : body.slice(j, j + 2);
+          j += 2;
+          continue;
+        }
+        value += char === "'" && body[j] === '"' ? '\\"' : body[j];
+        j++;
+      }
+      out += `"${value}"`;
+      i = j;
+    } else if (char === "/" && body[i + 1] === "/") {
+      while (i < body.length && body[i] !== "\n") i++;
+      out += "\n";
+    } else if (char === "/" && body[i + 1] === "*") {
+      const close = body.indexOf("*/", i + 2);
+      i = close < 0 ? body.length : close + 1;
+    } else if (char === ",") {
+      let j = i + 1;
+      while (j < body.length && /\s/.test(body[j])) j++;
+      if (body[j] !== "}" && body[j] !== "]") out += char;
+    } else if (/[A-Za-z_$]/.test(char) && /[{,\s]$/.test(out.trimEnd().slice(-1) || "{")) {
+      const word = /^[A-Za-z_$][\w$]*/.exec(body.slice(i))![0];
+      const after = body.slice(i + word.length).trimStart();
+      out += after.startsWith(":") ? `"${word}"` : word;
+      i += word.length - 1;
+    } else out += char;
+  }
+  try {
+    return JSON.parse(out) as unknown;
+  } catch {
+    return undefined;
+  }
+}

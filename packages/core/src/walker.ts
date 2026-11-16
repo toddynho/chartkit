@@ -2726,6 +2726,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     message: `missing required property ${quote(name)}`,
     path: pointer,
     hint: typeHint ?? (name === "alt" ? "describe the key takeaway in one sentence" : undefined),
+    fix: path === "" && name === "version" ? [{ op: "add", path: "/version", value: "1" }] : undefined,
   });
   void parent;
 }

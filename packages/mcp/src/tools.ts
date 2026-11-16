@@ -1,5 +1,6 @@
 import { render } from "@chartkitdev/core/extra";
-import { repair, validate } from "@chartkitdev/core/validate";
+import { validate } from "@chartkitdev/core/validate";
+import { repairAsync } from "@chartkitdev/core/validate/convert";
 import { getExample, listChartTypes } from "./examples.js";
 import { lookupFeature } from "./features.js";
 
@@ -12,8 +13,9 @@ export function validateSpec(spec: unknown): ReturnType<typeof validate> {
   return validate(spec);
 }
 
-export function repairSpec(spec: unknown): ReturnType<typeof repair> {
-  return repair(spec);
+/** repairAsync(): the JSON Patch fixes, plus the on-demand Chart.js, ECharts, Plotly, Vega-Lite, and Recharts converters and the phase-4 rules. */
+export function repairSpec(spec: unknown): ReturnType<typeof repairAsync> {
+  return repairAsync(spec);
 }
 
 export interface RenderResult {
