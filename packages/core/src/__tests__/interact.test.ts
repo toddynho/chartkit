@@ -1418,6 +1418,10 @@ describe("keyboard and data table defaults", () => {
     expect(live.textContent).toBe("Apr: revenue 14");
     press(svg, "ArrowDown");
     expect(live.textContent).toBe("Apr: cost 80");
+    const clicked: string[] = [];
+    host.addEventListener("pointclick", ((event: CustomEvent<ClickDetail>) => clicked.push(`${event.detail.series} ${event.detail.x} ${event.detail.y}`)) as unknown as EventListener);
+    press(svg, "Enter");
+    expect(clicked).toEqual(["cost Apr 80"]);
     press(svg, "ArrowUp");
     expect(live.textContent).toBe("Apr: revenue 14");
     press(svg, "Home");

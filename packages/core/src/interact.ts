@@ -2454,7 +2454,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       slice.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       return;
     }
-    const name = series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
+    // Up and Down narrow the reading to one series (`lit`). Enter then acts on that series, else on the first visible one.
+    const name = series.find((item) => item.name === lit && !hidden.has(lit))?.name || series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
     if (!name) return;
     event.preventDefault();
     emit("pointclick", payload(name, focus, inkAt(name, focus) ?? undefined));

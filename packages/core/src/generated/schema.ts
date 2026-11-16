@@ -4888,7 +4888,7 @@ export interface A11Y {
    */
   description?: string;
   /**
-   * Arrow-key navigation between points and series with announcements. On by default when an adapter mounts the chart on the client; set false to keep the chart out of the tab order. A static render() string is not affected. Types with no keyboard model yet ignore the default.
+   * Arrow-key navigation between points and series with announcements. On by default when an adapter mounts the chart on the client; set false to turn the keys off and keep the chart SVG out of the tab order. A static render() string is not affected. Types with no keyboard model yet ignore the default.
    */
   keyboard?: boolean;
   /**
