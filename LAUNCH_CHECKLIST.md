@@ -27,6 +27,12 @@ Check: `git log -1` is the commit you want released and live.
 npm ci
 ```
 
+`npm test` also runs the rival-library checks in `bench/`, which need their own install and a Playwright browser, as in CI:
+
+```bash
+(cd bench && npm ci && npx playwright install chromium)
+```
+
 ```bash
 npm test
 ```
