@@ -45,7 +45,7 @@ describe("worker fetch handler", () => {
     const cache = memoryCache();
     const health = await handleFetch(new Request("http://cloud.local/health"), { app, cache });
     expect(health.status).toBe(200);
-    expect(await health.json()).toEqual({ ok: true, service: "chartkit-cloud" });
+    expect(await health.json()).toEqual({ ok: true, service: "chartkit-cloud", storage: "memory", rateLimit: "memory", checkout: "off" });
     expect(cache.puts).toBe(0);
 
     const validated = await handleFetch(

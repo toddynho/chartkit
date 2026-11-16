@@ -9,7 +9,7 @@ import { canonical } from "./charts.ts";
 import { FONT_FALLBACK, rasterize } from "./png.ts";
 import { presentSvg, themeIsDark } from "./watermark.ts";
 
-const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
+export const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
 
 export interface Frame {
   w?: number;

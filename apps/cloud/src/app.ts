@@ -3,10 +3,10 @@ import type { ChartStore, StoredChart } from "./charts.ts";
 import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
 import { FONT_FALLBACK } from "./png.ts";
-import { keyStoreFromEnv, type KeyStore } from "./keys.ts";
-import { clientIp, memoryLimiter, type RateLimiter } from "./limit.ts";
+import { keyStoreFromEnv, storeKind, type KeyStore, type StoreKind } from "./keys.ts";
+import { clientIp, limiterFrom, type RateLimiter } from "./limit.ts";
 import { handleMcp } from "./mcp.ts";
-import { createCheckout, stripeFromEnv, verifyStripe, type StripeConfig } from "./stripe.ts";
+import { createCheckout, stripeFromEnv, stripeReady, verifyStripe, type StripeConfig } from "./stripe.ts";
 
 const EXPOSE = "ETag, X-ChartKit-Repairs, X-ChartKit-Warnings, X-ChartKit-Errors, X-ChartKit-Ok, X-ChartKit-Repair-Patch, X-ChartKit-Watermark, X-ChartKit-Cache, X-ChartKit-Key, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After";
 const LONG_CACHE = "public, max-age=31536000, immutable";
@@ -31,6 +31,16 @@ export interface CloudDeps {
   stripe?: StripeConfig;
   fetch?: typeof fetch;
   cache?: Map<string, Cached>;
+  /** Native Workers bindings. Objects, so they never reach process.env. */
+  bindings?: { kv?: unknown; rateLimit?: unknown };
+  /** Which store backs keys and charts. Read from env and bindings when omitted. */
+  storage?: StoreKind;
+  /**
+   * True on Cloudflare Workers. There, a memory store loses keys and /c/<id> links whenever an isolate ends,
+   * so /health answers 503 and the first request logs an error. CHARTKIT_ALLOW_MEMORY=1 turns that off for a smoke test.
+   */
+  workers?: boolean;
+  allowMemory?: boolean;
 }
 
 export interface CloudApp {
@@ -38,25 +48,47 @@ export interface CloudApp {
 }
 
 export function createApp(deps: CloudDeps = {}): CloudApp {
-  const keys = deps.keys ?? keyStoreFromEnv();
-  const charts = deps.charts ?? chartStoreFromEnv();
-  const limiter = deps.limiter ?? memoryLimiter();
+  const bindings = { kv: deps.bindings?.kv };
+  const keys = deps.keys ?? keyStoreFromEnv(process.env, bindings);
+  const charts = deps.charts ?? chartStoreFromEnv(process.env, bindings);
+  const storage = deps.storage ?? (deps.keys && deps.charts ? "memory" : storeKind(process.env, bindings));
+  const limiter = deps.limiter ?? limiterFrom(deps.bindings?.rateLimit);
   const stripe = deps.stripe ?? stripeFromEnv();
   const fetcher = deps.fetch ?? fetch;
   const cache = deps.cache ?? new Map<string, Cached>();
+  const allowMemory = deps.allowMemory ?? process.env.CHARTKIT_ALLOW_MEMORY === "1";
+  const unsafeStorage = Boolean(deps.workers) && storage === "memory" && !allowMemory;
+  let warned = false;
+  const health = () => ({
+    ok: !unsafeStorage,
+    service: "chartkit-cloud",
+    storage,
+    rateLimit: limiter.kind ?? "custom",
+    checkout: stripeReady(stripe) ? "on" : "off",
+    ...(unsafeStorage
+      ? { error: "No durable store. Keys and /c/<id> links are lost when this isolate ends. Bind CHARTKIT_KV or set KV_REST_API_URL and KV_REST_API_TOKEN." }
+      : {}),
+  });
 
   return {
     async handle(request) {
       const url = new URL(request.url);
       const path = url.pathname.replace(/\/+$/, "") || "/";
+      if (unsafeStorage && !warned) {
+        warned = true;
+        console.error(`[chartkit-cloud] ${health().error}`);
+      }
       if (request.method === "OPTIONS") return cors(new Response(null, { status: 204 }));
-      if (request.method === "GET" && path === "/health") return json(200, { ok: true, service: "chartkit-cloud" });
+      if (request.method === "GET" && path === "/health") {
+        const body = health();
+        return json(body.ok ? 200 : 503, body);
+      }
       if (path === "/checkout" && request.method === "POST") return checkout(request, url, stripe, fetcher);
       if (path === "/stripe/webhook" && request.method === "POST") return webhook(request, stripe, keys);
       if (path === "/checkout/success" && request.method === "GET") return successPage(url, keys);
       if (path === "/checkout/cancelled" && request.method === "GET") return html(200, "<p>Checkout was cancelled. The chart still renders, with the mark.</p>");
 
-      const limited = limiter.take(clientIp(request));
+      const limited = await limiter.take(clientIp(request));
       if (!limited.ok) return limitedResponse(request, limited.limit, limited.retryAfter);
 
       if (path === "/mcp") {

@@ -1,13 +1,18 @@
 /**
  * Stateless Streamable HTTP MCP at POST /mcp.
- * One tool, render_chart, which calls the same POST /render path as the HTTP API.
+ * render_chart calls the same POST /render path as the HTTP API.
+ * validate_chart and repair_chart run @chartkitdev/core/validate in process and draw nothing.
  * This is not the stdio server in @chartkitdev/mcp.
  */
+
+import { validate } from "@chartkitdev/core/validate";
+import { validatePhase4 } from "@chartkitdev/core/validate/phase4";
+import { parseSpec, PHASE4, readFrame, repairSpec } from "./draw.ts";
 
 const PROTOCOL = "2025-03-26";
 const SUPPORTED = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
 
-const TOOL = {
+const RENDER_TOOL = {
   name: "render_chart",
   description:
     "Render a ChartKit spec on this Cloud service. Returns the image URL plus repairs, warnings, and errors. Omit format, or pass svg. SVG is the default: it skips the resvg pass and stays sharp when attached in chat. Pass png only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. When format is png, set scale to 2 or higher for HiDPI. The chart background defaults to #ffffff so Soft labels stay readable on a dark lightbox. Pass background to override that plate. Use theme midnight, or a dark background with a dark theme, when the host is dark. Pass background transparent to keep the plot clear. Free renders include a chartkit.dev mark. Pass key, or send Authorization: Bearer, to remove it. The key is not part of the image URL.",
@@ -43,6 +48,43 @@ const TOOL = {
     additionalProperties: false,
   },
 } as const;
+
+const SPEC_INPUT = { description: "ChartKit spec object or JSON string." } as const;
+
+const VALIDATE_TOOL = {
+  name: "validate_chart",
+  description:
+    "Check a ChartKit spec without drawing it or changing it. Returns ok plus errors and warnings, each with a CK code, a JSON path, a message, a hint, and a fix patch when one is safe. Warnings do not make ok false. Use this to explain what is wrong. Use repair_chart to get a fixed spec, or render_chart to fix and draw in one call.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      spec: SPEC_INPUT,
+      data: { description: "Optional rows that replace spec.data for the data-aware checks. The spec is not changed." },
+    },
+    required: ["spec"],
+    additionalProperties: false,
+  },
+} as const;
+
+const REPAIR_TOOL = {
+  name: "repair_chart",
+  description:
+    "Apply the validator's safe JSON Patch fixes to a ChartKit spec and validate the result. Draws nothing. Returns ok, the repaired spec, the patches that were applied, and any errors that are left. Nothing is invented beyond those fixes, so ok can still be false. render_chart runs the same repair before it draws. w, h, and theme are written into the spec first, the way render_chart applies them.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      spec: SPEC_INPUT,
+      w: { type: "number" },
+      h: { type: "number" },
+      theme: { type: "string", description: 'Preset name such as "soft" or "midnight".' },
+    },
+    required: ["spec"],
+    additionalProperties: false,
+  },
+} as const;
+
+const TOOLS = [RENDER_TOOL, VALIDATE_TOOL, REPAIR_TOOL];
+const TOOL_NAMES = TOOLS.map((tool) => tool.name).join(", ");
 
 type JsonRpcId = string | number | null;
 
@@ -84,7 +126,7 @@ export async function handleMcp(request: Request, render: (call: ToolCall) => Pr
   try {
     if (method === "initialize") return reply(request, 200, { jsonrpc: "2.0", id, result: initializeResult(message.params) });
     if (method === "ping") return reply(request, 200, { jsonrpc: "2.0", id, result: {} });
-    if (method === "tools/list") return reply(request, 200, { jsonrpc: "2.0", id, result: { tools: [TOOL] } });
+    if (method === "tools/list") return reply(request, 200, { jsonrpc: "2.0", id, result: { tools: TOOLS } });
     if (method === "tools/call") return reply(request, 200, await callTool(id, message.params, request, render));
     return reply(request, 200, rpcError(id, -32601, `Unknown method ${method}.`));
   } catch (error) {
@@ -103,9 +145,10 @@ function initializeResult(params: unknown): { protocolVersion: string; capabilit
 }
 
 async function callTool(id: JsonRpcId, params: unknown, request: Request, render: (call: ToolCall) => Promise<Response>): Promise<unknown> {
-  if (!isRecord(params) || params.name !== "render_chart") {
-    return toolError(id, "Unknown tool. render_chart is the only tool.");
-  }
+  if (!isRecord(params)) return toolError(id, `tools/call expects { name, arguments }. The tools are ${TOOL_NAMES}.`);
+  const name = params.name;
+  if (name === "validate_chart" || name === "repair_chart") return checkTool(id, name, params.arguments);
+  if (name !== "render_chart") return toolError(id, `Unknown tool. The tools are ${TOOL_NAMES}.`);
   const args = isRecord(params.arguments) ? params.arguments : null;
   if (!args || !("spec" in args)) return toolError(id, "render_chart expects { spec }.");
   const body: Record<string, unknown> = { spec: args.spec };
@@ -134,6 +177,36 @@ async function callTool(id: JsonRpcId, params: unknown, request: Request, render
       isError: failed,
     },
   };
+}
+
+function checkTool(id: JsonRpcId, name: "validate_chart" | "repair_chart", raw: unknown): unknown {
+  const args = isRecord(raw) ? raw : null;
+  if (!args || !("spec" in args)) return toolError(id, `${name} expects { spec }.`);
+  const spec = typeof args.spec === "string" ? parseSpec(args.spec) : args.spec;
+  if (spec instanceof Error) return toolError(id, `spec is not JSON: ${spec.message}`);
+  if (name === "validate_chart") {
+    const type = isRecord(spec) && typeof spec.type === "string" ? spec.type : "";
+    const result = PHASE4.has(type) ? validatePhase4(spec, args.data) : validate(spec, args.data);
+    const payload = { ok: result.ok, errors: result.errors, warnings: result.warnings, diagnostics: result.diagnostics };
+    return { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(payload) }], isError: false } };
+  }
+  const source = new URLSearchParams();
+  for (const key of ["w", "h", "theme"] as const) {
+    const value = args[key];
+    if (typeof value === "string" || typeof value === "number") source.set(key, String(value));
+  }
+  const frame = readFrame(source);
+  if (typeof frame === "string") return toolError(id, frame);
+  const result = repairSpec(spec, frame);
+  const payload = {
+    ok: result.ok,
+    spec: result.spec,
+    applied: result.applied,
+    errors: result.errors,
+    warnings: result.warnings,
+    diagnostics: result.diagnostics,
+  };
+  return { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(payload) }], isError: !result.ok } };
 }
 
 function toolError(id: JsonRpcId, message: string): unknown {

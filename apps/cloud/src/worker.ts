@@ -23,6 +23,7 @@ export default {
     return handleFetch(request, {
       env,
       cache,
+      workers: true,
       waitUntil: (promise) => ctx.waitUntil(promise),
     });
   },
