@@ -41,6 +41,16 @@ npm run bench:agent-matrix
 
 `BENCH_POINTS=1000,10000` limits the line comparison. The default is 1000, 10000, 100000, and 1000000. It does not change chart-type point counts.
 
+### Pointer interaction
+
+```bash
+node bench/browser/hover.mjs                       # every case, 15 fresh pages each, JSON in bench/results/hover.json
+node bench/browser/hover.mjs --base <other>/packages/core/src   # before/after: the two builds alternate run by run
+node bench/browser/hover.mjs --case multi-line-5x1k --profile   # main-thread stages and function times for one case
+```
+
+It runs from the root install (esbuild and Playwright) and is not part of `npm run bench`. Each sample is a fresh page: the chart is drawn with `render` and `attach`, the page sits for 200 ms, then Playwright's real mouse moves in. It reports the first hover, one hover after a pause, 30 steady moves 16 ms apart, and moves between legend labels on multi-series cases. Each has two clocks, both started at the first pointer event of the move: `handler` ends with the bubbling `mousemove`, and `painted` ends in a MessageChannel task after the next animation frame. Raster and GPU time are in neither. Chromium runs with the frame-rate limit off, so `painted` is work and not a wait for vsync. `--vsync` leaves the limit on. uPlot runs the same moves on the line cases when `bench/node_modules/uplot` is installed or `--uplot <dir>` points at the package. The round 13 hover figures in `catalog/public/benchmarks.json` came from a script that is not in this repository, on another machine, so they do not compare with this file's numbers.
+
 ### Chart types
 
 The browser sweep paints every gallery type (`apps/web/src/data/chart-types.ts` and `GALLERY_TYPES` in `bench/browser/chart-types.mjs`, 39 types) for ChartKit and for the libraries already on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. Choropleth and map-points are not in that list. Cells land in `browser.charts` inside `bench/results/latest.json` when bundle, browser, and SSR all run, and in `bench/results/paint.json` (median of 5) or `bench/results/paint-smoke.json` (any other sample count). The line comparison table is unchanged: chart-type rows are not mixed into it.
