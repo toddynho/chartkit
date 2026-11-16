@@ -4888,11 +4888,11 @@ export interface A11Y {
    */
   description?: string;
   /**
-   * Arrow-key navigation between points with announcements. Off unless set, because turning it on loads the interaction runtime.
+   * Arrow-key navigation between points and series with announcements. On by default when an adapter mounts the chart on the client; set false to keep the chart out of the tab order. A static render() string is not affected. Types with no keyboard model yet ignore the default.
    */
   keyboard?: boolean;
   /**
-   * Render a visually hidden data table for screen readers. Off unless set, because turning it on loads the interaction runtime.
+   * A data table for screen readers, visually hidden, capped at 1000 evenly spaced rows. On by default when an adapter mounts the chart on the client; set false to leave it out. true also adds a visible 'Show data table' button. A static render() string is not affected.
    */
   dataTable?: boolean;
 }

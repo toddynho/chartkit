@@ -115,6 +115,9 @@ const TIP_TYPES = new Set([
   "bar-list",
 ]);
 
+/** Types with a keyboard index model and a data table. Other types stay out of the tab order unless the spec asks. */
+const KEY_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "sunburst", "candlestick", "sparkline", "mini-area", "spike"]);
+
 function arcChart(type: string | undefined): boolean {
   return type === "donut" || type === "pie" || type === "sunburst";
 }
@@ -452,7 +455,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:var(--ck-tip-radius,10px);font:12px/1.35 sans-serif;font-family:var(--ck-font-family, inherit);background:var(--ck-tip-bg,var(--ck-surface, light-dark(#fff,#2c2c2e)));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:var(--ck-tip-shadow,0 8px 24px #0003);font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:var(--ck-xhair,light-dark(#0006,#fff8));stroke-dasharray:3 3}.ck-xlabel{font-size:11px;font-family:var(--ck-font-family, inherit);fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 sans-serif;font-family:var(--ck-font-family, inherit);color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}[data-ck-tip]{transition:left 160ms ease-out,top 160ms ease-out}@media (prefers-reduced-motion:reduce){[data-ck-tip]{transition:none}}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:var(--ck-tip-radius,10px);font:12px/1.35 sans-serif;font-family:var(--ck-font-family, inherit);background:var(--ck-tip-bg,var(--ck-surface, light-dark(#fff,#2c2c2e)));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:var(--ck-tip-shadow,0 8px 24px #0003);font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:var(--ck-xhair,light-dark(#0006,#fff8));stroke-dasharray:3 3}.ck-xlabel{font-size:11px;font-family:var(--ck-font-family, inherit);fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 sans-serif;font-family:var(--ck-font-family, inherit);color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}[data-ck-tip]{transition:left 160ms ease-out,top 160ms ease-out}@media (prefers-reduced-motion:reduce){[data-ck-tip]{transition:none}}";
   document.head.append(style);
 }
 
@@ -1062,8 +1065,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   const showTip = tooltipOn(spec);
   const showCross = crosshairOn(spec);
   const legend = isRecord(spec.legend) && spec.legend.interactive === true;
-  const keys = isRecord(spec.a11y) && spec.a11y.keyboard === true;
-  const dataTable = isRecord(spec.a11y) && spec.a11y.dataTable === true;
+  const a11y = isRecord(spec.a11y) ? spec.a11y : {};
+  // `keys` and `dataTable` are the explicit `true` forms: pointer tracking and the visible table button.
+  const keys = a11y.keyboard === true;
+  const dataTable = a11y.dataTable === true;
+  // Both are on for a client mount unless the spec says `false`. Types with no index model stay out of the tab order.
+  const keysOn = keys || (a11y.keyboard !== false && KEY_TYPES.has(spec.type ?? ""));
+  const tableOn = a11y.dataTable !== false && (dataTable || KEY_TYPES.has(spec.type ?? ""));
   const zoom = zoomMode(spec);
   const zooming = zoom !== "none";
   const pan = zooming && !(isRecord(spec.interaction) && spec.interaction.pan === false);
@@ -1080,12 +1088,12 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let leaveSync = () => {};
   const stack: { spec: InteractSpec; label: string }[] = [];
   let levelLabel = titleOf(spec);
-  const focusable = () => keys || Boolean(selMode()) || Boolean(drillOf(base));
+  const focusable = () => keysOn || Boolean(selMode()) || Boolean(drillOf(base));
 
   if (showTip) host.append(tip);
   if (drillOf(spec)) svg.style.cursor = "pointer";
   if (focusable()) svg.setAttribute("tabindex", "0");
-  if (keys) host.append(live);
+  if (keysOn) host.append(live);
   const offs: (() => void)[] = [];
   const on = (target: EventTarget, type: string, fn: EventListener, opts?: AddEventListenerOptions) => {
     target.addEventListener(type, fn, opts);
@@ -1624,39 +1632,47 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return best;
   }
 
+  /** Paint the hover state for a row with no pointer: a synced chart, or the keyboard (`keyed` adds the point markers). */
+  function showAt(index: number, keyed?: 1): void {
+    focus = index;
+    let px = crossX(Math.max(0, index - lo));
+    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
+    if (keyed && hover.uniform && !arcChart(base.type)) {
+      // Centre on the category along its own axis. Long rows repeat a category once per series, so count categories, not rows.
+      let slot = index - lo;
+      let count = hi - lo + 1;
+      if (series[0]?.match) {
+        const slots = new Map<string, number>();
+        for (let i = lo; i <= hi; i++) if (!slots.has(xKey(i))) slots.set(xKey(i), slots.size);
+        slot = slots.get(xKey(index)) ?? 0;
+        count = slots.size;
+      }
+      px = (horizontal ? box.t : hover.left) + (slot + 0.5) * ((horizontal ? box.h : hover.width) / count);
+    }
+    const bars = barChart(base) && !showCross;
+    const hits = bars ? barsNear(px, horizontal) : [];
+    let marks: { x: number; y: number }[] = [];
+    if (bars) {
+      paintBars(hits);
+      clearDots();
+      svg.querySelector("[data-ck-crosshair]")?.remove();
+    } else {
+      moveCross(px, xText(index));
+      if (keyed) marks = placeDots(px, horizontal, index);
+    }
+    if (!showTip) return;
+    const rect = svg.getBoundingClientRect();
+    const vw = +(svg.getAttribute("viewBox") || "").split(/[\s,]+/)[2] || rect.width || 1;
+    const clientX = rect.left + (px / vw) * (rect.width || vw);
+    const clientY = rect.top + (rect.height || 1) / 2;
+    if (bars) placeBarTip(clientX, clientY, xText(index), entriesAt(index, null), hits, index);
+    else placeTip(clientX, clientY, xText(index), entriesAt(index, null), marks, index);
+  }
+
   const member: SyncMember = {
     hover(key) {
-      const index = indexForKey(key);
       quiet = true;
-      focus = index;
-      const local = Math.max(0, index - lo);
-      if (barChart(base) && !showCross) {
-        const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
-        const hits = barsNear(crossX(local), horizontal);
-        paintBars(hits);
-        clearDots();
-        svg.querySelector("[data-ck-crosshair]")?.remove();
-        if (showTip) {
-          const rect = svg.getBoundingClientRect();
-          const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
-          const vw = parts[2] || rect.width || 1;
-          const px = crossX(local);
-          const clientX = rect.left + (px / vw) * (rect.width || vw);
-          placeBarTip(clientX, rect.top + (rect.height || 1) / 2, xText(index), entriesAt(index, null), hits, index);
-        }
-        quiet = false;
-        return;
-      }
-      moveCross(crossX(local), xText(index));
-      if (showTip) {
-        const rect = svg.getBoundingClientRect();
-        const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
-        const vw = parts[2] || rect.width || 1;
-        const px = crossX(local);
-        const clientX = rect.left + (px / vw) * (rect.width || vw);
-        const clientY = rect.top + (rect.height || 1) / 2;
-        placeTip(clientX, clientY, xText(index), entriesAt(index, null), [], index);
-      }
+      showAt(indexForKey(key));
       quiet = false;
     },
     hide() {
@@ -1898,22 +1914,20 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
+  /** The table is built in `interact-extra`. This reads one data row as cells: x, the series name for long data, then the values. */
+  let fillTable: typeof import("./interact-extra").fillTable | undefined;
   function paintTable(): void {
-    const tableEl = dataTable ? host.querySelector("table.ck-table") : null;
-    if (!tableEl) return;
-    const cap = Math.min(n, 1000);
-    const head = [`<th>${esc(xField() || "x")}</th>`].concat(series.map((item) => `<th>${esc(item.name)}</th>`)).join("");
-    const body: string[] = [];
-    for (let i = 0; i < cap; i++) {
-      const cells = [`<td>${esc(xText(i))}</td>`];
-      for (const item of series) {
-        if (item.match && String(table.cell(item.match, i)) !== item.name && arcChart(base.type)) continue;
-        cells.push(`<td>${esc(fmt(table.cell(item.field, i), item.format, locale()))}</td>`);
-      }
-      body.push(`<tr>${cells.join("")}</tr>`);
-    }
-    const note = n > cap ? `<caption>Showing ${cap} of ${n} rows.</caption>` : "";
-    tableEl.innerHTML = `${note}<thead><tr>${head}</tr></thead><tbody>${body.join("")}</tbody>`;
+    const first = series[0];
+    if (!fillTable || !first) return;
+    const x = xField() || "x";
+    const long = first.match;
+    const split = long && long !== x;
+    fillTable(svg, base.title, long ? (split ? [x, long, first.field] : [x, first.field]) : [x].concat(series.map((item) => item.name)), n, (i) => {
+      const cells = [xText(i)];
+      if (split) cells.push(String(table.cell(long, i) ?? ""));
+      for (const item of long ? [first] : series) cells.push(fmt(table.cell(item.field, i), item.format, locale()));
+      return cells;
+    });
   }
 
   function project(): InteractSpec {
@@ -1973,7 +1987,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (svg.getAttribute("data-ck-scene") === "1" && paintScene(host, nextSpec)) {
       const nextSvg = host.querySelector("svg");
       if (nextSvg instanceof SVGSVGElement) svg = nextSvg;
-      if (keys || selMode()) svg.setAttribute("tabindex", "0");
+      if (focusable()) svg.setAttribute("tabindex", "0");
       dim();
       paintPick();
       arm();
@@ -2352,11 +2366,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks, index);
   }
 
-  function announce(index: number): void {
-    const rows = entriesAt(index, null);
-    live.textContent = `${xText(index)}: ${rows.map((row) => `${row.name} ${row.text}`.trim()).join(", ")}`;
-  }
-
   arm();
   paintTable();
   fade(svg, durationMs(spec, n), "0", easeOf(spec));
@@ -2438,6 +2447,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     if (event.key !== "Enter" && event.key !== " ") return;
+    const slice = svg.querySelector("[data-ck-kf]");
+    if (slice) {
+      // A slice under keyboard focus is clicked as itself, so the event names that slice.
+      event.preventDefault();
+      slice.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return;
+    }
     const name = series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
     if (!name) return;
     event.preventDefault();
@@ -2457,18 +2473,19 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     });
   }
 
-  const wantsExtra = zooming || brush || keys || dataTable || navigatorOn(spec) || Boolean(drillOf(spec));
+  const wantsExtra = zooming || brush || keysOn || tableOn || navigatorOn(spec) || Boolean(drillOf(spec));
   const ready: Promise<void> = wantsExtra
     ? import("./interact-extra").then((mod) => {
         if (!alive) return;
+        if (tableOn) fillTable = mod.fillTable;
         mod.armExtras([
           svg,
           on,
           zooming,
           pan,
           brush,
-          keys || Boolean(drillOf(spec)),
-          dataTable,
+          keysOn || (a11y.keyboard !== false && Boolean(drillOf(spec))),
+          tableOn ? (dataTable ? 2 : 1) : 0,
           showTip,
           () => alive,
           (clientX, clientY) => viewPoint(svg, clientX, clientY),
@@ -2485,8 +2502,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
             hi = end;
             publishRange();
           },
-          crossX,
-          moveCross,
+          showAt,
+          hideHover,
           entriesAt,
           placeTip,
           xText,
@@ -2494,10 +2511,16 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           (value) => {
             focus = value;
           },
-          announce,
+          (text) => {
+            live.textContent = text;
+          },
           paintTable,
           navigatorOn(spec),
           () => overview(),
+          (name) => {
+            lit = name;
+            paintPick();
+          },
         ]);
       })
     : Promise.resolve();

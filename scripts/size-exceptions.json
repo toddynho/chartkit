@@ -292,5 +292,11 @@
     "cap": 13959,
     "reason": "One-time reset to measured + max(1%, 256 B). The old cap was a ratcheted measured + 64.",
     "pr": "#168"
+  },
+  {
+    "key": "interactExtra",
+    "cap": 5177,
+    "reason": "Keyboard and the data table are on by default for client mounts (decision D5). The lazy chunk gains the arrow-key model for points, series and slices, Home, End and Escape, the focus ring CSS, and the table builder moved out of interact so that eager entry stays inside its cap. Measured 4921 + 256.",
+    "pr": "#PENDING"
   }
 ]

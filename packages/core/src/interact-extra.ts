@@ -1,7 +1,8 @@
 /**
  * Zoom, pan, brush, pinch, keyboard focus, the data table, and the overview navigator.
- * `attach` loads this only when the spec asks for one of them, so a tooltip-only
- * import of `@chartkitdev/core/interact` stays smaller.
+ * `attach` loads this after the chart is interactive, so the tooltip entry of
+ * `@chartkitdev/core/interact` stays smaller. Keyboard and the table are on by default,
+ * so most client mounts fetch it.
  */
 import { bindNavigator } from "./nav-hook";
 
@@ -16,7 +17,8 @@ export type ExtraHook = [
   boolean,
   boolean,
   boolean,
-  boolean,
+  /** Data table: 0 off, 1 screen-reader only, 2 with the visible toggle button. */
+  number,
   boolean,
   () => boolean,
   (clientX: number, clientY: number) => { x: number; y: number },
@@ -29,17 +31,21 @@ export type ExtraHook = [
   () => { t: number; w: number; h: number },
   () => { lo: number; hi: number; n: number },
   (lo: number, hi: number) => void,
-  (local: number) => number,
-  (x: number, title: string) => void,
+  /** Paint the hover state for a row. `keyed` adds the point markers. */
+  (index: number, keyed?: 1) => void,
+  () => void,
   (index: number, pointerY: number | null) => TipRow[],
   (clientX: number, clientY: number, title: string, rows: TipRow[], marks: { x: number; y: number }[], index?: number) => void,
   (index: number) => string,
   () => number,
   (value: number) => void,
-  (index: number) => void,
+  /** Write the polite live region. */
+  (text: string) => void,
   () => void,
   boolean,
   () => { samples: number[]; start: number; end: number },
+  /** Dim every series but this one. An empty name clears it. */
+  (name: string) => void,
 ];
 
 function ensureTableCss(): void {
@@ -47,8 +53,61 @@ function ensureTableCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-table-style";
   style.textContent =
-    ".ck-table{border-collapse:collapse;font:12px/1.4 sans-serif;font-family:var(--ck-font-family, inherit)}.ck-table td,.ck-table th{border:1px solid #0002;padding:2px 6px;text-align:right}.ck-table td:first-child,.ck-table th:first-child{text-align:left}";
+    ".ck-chart:focus-visible{outline:2px solid var(--ck-focus,light-dark(#0b57d0,#8ab4f8));outline-offset:2px}[data-ck-kf]{stroke:light-dark(#1d1d1f,#f5f5f7);stroke-width:2.5}.ck-table{border-collapse:collapse;font:12px/1.4 sans-serif;font-family:var(--ck-font-family, inherit)}.ck-table td,.ck-table th{border:1px solid #0002;padding:2px 6px;text-align:right}.ck-table td:first-child,.ck-table th:first-child{text-align:left}";
   document.head.append(style);
+}
+
+const TABLE_ROWS = 1000;
+/** The newest pending write per table. A stream of updates repaints the table a few times a second, not once per update. */
+const tableQueue = new WeakMap<Element, () => void>();
+
+/**
+ * Write the data table: one row per data row, capped at 1000. A longer series is read at even
+ * steps, first and last row included, so the table spans the whole range.
+ * A sunburst lists its arcs, since its rows are a tree and not a grid.
+ * The table behind the visible button is written at once. The hidden one is written in its own
+ * task, so a page of charts does not build every table in one long task.
+ */
+export function fillTable(svg: SVGSVGElement, title: unknown, head: string[], total: number, row: (index: number) => string[]): void {
+  const table = svg.parentElement?.querySelector("[data-ck-table]");
+  if (!table) return;
+  const esc = (text: string) => text.replace(/[&<>"]/g, (char) => `&#${char.charCodeAt(0)};`);
+  const write = () => {
+    if (svg.getAttribute("data-ck-type") === "sunburst") {
+      const arcs = svg.querySelectorAll("path[aria-label]");
+      head = ["name", head[head.length - 1]];
+      total = arcs.length;
+      row = (index) => {
+        const label = arcs[index].getAttribute("aria-label") || "";
+        const cut = label.indexOf(": ");
+        return cut < 0 ? [label, ""] : [label.slice(0, cut), label.slice(cut + 2)];
+      };
+    }
+    const cap = Math.min(total, TABLE_ROWS);
+    let body = "";
+    for (let r = 0; r < cap; r++) {
+      const cells = row(cap < total ? Math.round((r * (total - 1)) / (cap - 1)) : r);
+      body += `<tr>${cells.map((cell, c) => (c ? `<td>${esc(cell)}</td>` : `<th scope="row">${esc(cell)}</th>`)).join("")}</tr>`;
+    }
+    const note = cap < total ? `. Showing ${cap} of ${total} rows, evenly spaced.` : "";
+    table.innerHTML = `<caption>${esc(typeof title === "string" && title ? title : "Chart")} data${note}</caption><thead><tr>${head.map((name) => `<th scope="col">${esc(name)}</th>`).join("")}</tr></thead><tbody>${body}</tbody>`;
+  };
+  const first = !table.firstChild;
+  if (first && table.previousElementSibling) {
+    write();
+    return;
+  }
+  const waiting = tableQueue.has(table);
+  tableQueue.set(table, write);
+  if (waiting) return;
+  setTimeout(
+    () => {
+      const run = tableQueue.get(table);
+      tableQueue.delete(table);
+      if (table.isConnected) run?.();
+    },
+    first ? 0 : 300,
+  );
 }
 
 function pairDistance(points: Map<number, { x: number; y: number }>): number {
@@ -68,7 +127,6 @@ export function armExtras(a: ExtraHook): void {
   const brush = a[4];
   const keys = a[5];
   const dataTable = a[6];
-  const showTip = a[7];
   const alive = a[8];
   const viewPoint = a[9];
   const lookup = a[10];
@@ -80,8 +138,8 @@ export function armExtras(a: ExtraHook): void {
   const box = a[16];
   const range = a[17];
   const setRange = a[18];
-  const crossX = a[19];
-  const moveCross = a[20];
+  const showAt = a[19];
+  const hideHover = a[20];
   const entriesAt = a[21];
   const placeTip = a[22];
   const xText = a[23];
@@ -91,41 +149,115 @@ export function armExtras(a: ExtraHook): void {
   const paintTable = a[27];
   const navigator = a[28];
   const overview = a[29];
-  if (!alive()) return;
+  const light = a[30];
+  // The chunk can land after a test or server environment has torn the document down.
+  if (!alive() || typeof document === "undefined") return;
   if (navigator) mountNavigator(svg, on, alive, range, setRange, redraw, emit, rangeDetail, overview);
+  if (keys || dataTable) ensureTableCss();
   if (dataTable) {
-    ensureTableCss();
     const host = svg.parentElement;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.setAttribute("data-ck-table-btn", "");
-    btn.textContent = "Show data table";
     const table = document.createElement("table");
-    table.className = "ck-table ck-clip";
+    table.className = "ck-table";
     table.setAttribute("data-ck-table", "");
     const wrap = document.createElement("div");
     wrap.setAttribute("data-ck-table-wrap", "");
-    wrap.append(btn, table);
+    if (dataTable > 1) {
+      // `a11y.dataTable: true` adds a button that shows the table to everyone.
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("data-ck-table-btn", "");
+      btn.textContent = "Show data table";
+      table.className += " ck-clip";
+      wrap.append(btn);
+      on(btn, "click", () => {
+        const open = table.classList.toggle("ck-clip");
+        btn.textContent = open ? "Show data table" : "Hide data table";
+      });
+    } else wrap.className = "ck-clip";
+    wrap.append(table);
     host?.append(wrap);
-    on(btn, "click", () => {
-      const open = table.classList.toggle("ck-clip");
-      btn.textContent = open ? "Show data table" : "Hide data table";
-    });
     paintTable();
   }
   if (keys) {
+    const arc = /^(donut|pie|sunburst)$/.test(svg.getAttribute("data-ck-type") || "");
+    const slices = () => svg.querySelectorAll("path[aria-label]");
+    // `row` is the series under Up/Down. -1 reads every series at the point.
+    let row = -1;
+    let lit = "";
+    let shown = false;
+    const mark = (node?: Element) => {
+      svg.querySelector("[data-ck-kf]")?.removeAttribute("data-ck-kf");
+      node?.setAttribute("data-ck-kf", "");
+    };
+    const dimTo = (name: string) => {
+      if (name !== lit) light((lit = name));
+    };
+    const clear = () => {
+      if (!shown) return false;
+      shown = false;
+      row = -1;
+      mark();
+      dimTo("");
+      hideHover();
+      announce("");
+      return true;
+    };
+    on(svg, "blur", clear as EventListener);
     on(svg, "keydown", ((event: KeyboardEvent) => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-      event.preventDefault();
-      const { lo, hi } = range();
-      const next = event.key === "ArrowRight" ? Math.min(hi, readFocus() + 1) : Math.max(lo, readFocus() - 1);
-      writeFocus(next);
-      announce(next);
-      moveCross(crossX(next - lo), xText(next));
-      if (showTip) {
-        const bounds = svg.getBoundingClientRect();
-        placeTip(bounds.left + 24, bounds.top + 24, xText(next), entriesAt(next, null), [], next);
+      const key = event.key;
+      if (event.target !== svg || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (key === "Escape") {
+        if (clear()) event.preventDefault();
+        return;
       }
+      const span = range();
+      const nodes = arc ? slices() : null;
+      const lo = nodes ? 0 : span.lo;
+      const hi = nodes ? nodes.length - 1 : span.hi;
+      if (hi < lo) return;
+      const step = key === "ArrowRight" ? 1 : key === "ArrowLeft" ? -1 : 0;
+      const turn = key === "ArrowDown" ? 1 : key === "ArrowUp" ? -1 : 0;
+      let next = Math.max(lo, Math.min(hi, readFocus()));
+      // The first arrow lands on the current point. Later ones move.
+      if (step && shown) {
+        // Long data repeats an x once per series, so step to the next x, not the next row.
+        const from = nodes ? "" : xText(next);
+        const start = next;
+        do next += step;
+        while (!nodes && next >= lo && next <= hi && xText(next) === from);
+        next = Math.max(lo, Math.min(hi, next));
+        // At either end the key is left to the page.
+        if (next === start || (!nodes && xText(next) === from)) return;
+      } else if (key === "Home") next = lo;
+      else if (key === "End") next = hi;
+      else if (!step && !turn) return;
+      if (nodes) {
+        if (turn) return;
+        const node = nodes[next];
+        const label = node.getAttribute("aria-label") || "";
+        const cut = label.indexOf(": ");
+        const name = cut < 0 ? label : label.slice(0, cut);
+        const bounds = node.getBoundingClientRect();
+        const x = bounds.left + bounds.width / 2;
+        const y = bounds.top + bounds.height / 2;
+        writeFocus(next);
+        mark(node);
+        placeTip(x, y, name, [{ name, text: cut < 0 ? "" : label.slice(cut + 2), color: node.getAttribute("fill") || "" }], [viewPoint(x, y)]);
+        announce(label);
+      } else {
+        let rows = entriesAt(next, null);
+        if (turn) {
+          if (rows.length < 2) return;
+          row = (Math.max(row, turn > 0 ? -1 : 0) + turn + rows.length) % rows.length;
+        }
+        if (row >= rows.length) row = -1;
+        showAt(next, 1);
+        dimTo(row < 0 ? "" : rows[row].name);
+        if (row >= 0) rows = [rows[row]];
+        announce(`${xText(next)}: ${rows.map((item) => `${item.name} ${item.text}`.trim()).join(", ")}`);
+      }
+      shown = true;
+      event.preventDefault();
     }) as EventListener);
   }
 
