@@ -56,7 +56,7 @@ Indigo 600 (`#4f46e5`) leads, in the same family as Stripe’s `#635bff`, then o
 
 ### C. Soft modern
 
-Page is Apple’s system gray `#f5f5f7`. Bars get an 8px cap on the outer end and a wider gap. No dots. The series is Apple blue, green, orange, purple, and pink, plus sky, lime 600, and a warm orange. Dark is `#1c1c1e`. Several of those system colours sit under 3:1 as fills; the ≤2px stroke uses a darker variant (`#248a3d`, `#c93400`, `#0071a4`, `#4d7c0f`, `#9a3412`).
+Page is Apple’s system gray `#f5f5f7`. Bars get an 8px cap on the outer end and a wider gap. No dots. The series is blue `#2f6fe4`, orange, teal, amber, pink, green, violet, and red, one list for fills and strokes. Dark is `#1c1c1e`, with the same hues stepped for the dark page. Every step clears 3:1 on its page, and neighbours stay apart under protan and deutan simulation.
 
 ## Colour-vision and contrast checks
 
