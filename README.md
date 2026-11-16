@@ -9,13 +9,9 @@ A chart is one JSON spec. `validate()` and `repair()` check and fix it locally, 
 ```js
 import { render } from "@chartkitdev/core/all";
 
-const svg = render({
-  version: "1",
-  type: "bar",
-  data: [{ region: "NA", revenue: 42 }, { region: "EU", revenue: 31 }, { region: "APAC", revenue: 24 }],
-  encoding: { x: "region", y: "revenue" },
-  a11y: { alt: "North America leads Q3 revenue at $42M." },
-});
+const data = [{ region: "NA", revenue: 42 }, { region: "EU", revenue: 31 }, { region: "APAC", revenue: 24 }];
+const a11y = { alt: "North America leads Q3 revenue at $42M." };
+const svg = render({ version: "1", type: "bar", data, encoding: { x: "region", y: "revenue" }, a11y });
 ```
 
 `svg` is a string. It needs no browser, so the same call works in Node, in a build step, or in an edge worker.
