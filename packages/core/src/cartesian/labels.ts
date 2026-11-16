@@ -48,6 +48,8 @@ export function queueBarLabel(
   tipLeft = false,
   gutter = 0,
   viewWidth = 0,
+  over = "",
+  room = 0,
 ): void {
   if (!wantLabels(model) || typeof value !== "number") return;
   let pos = model.labelAt || (model.stackTotal ? "inside" : horizontal ? "right" : "top");
@@ -91,7 +93,9 @@ export function queueBarLabel(
     anchor = "start";
   }
   const onBar = pos === "inside" || pos === "center" || pos === "bottom" || (horizontal && (pos === "left" || pos === "inside"));
-  labs.push({ x: lx, y: ly, anchor, text, ink: onBar ? labelInk(series.color) : undefined });
+  // A label past the tip of a stacked segment lands on the segment above, when that segment is big enough to hold it. Its ink follows that fill.
+  const beyond = over && room >= (horizontal ? textW + 8 : 16) && (pos === "outside" || pos === (horizontal ? "right" : "top"));
+  labs.push({ x: lx, y: ly, anchor, text, ink: onBar ? labelInk(series.color) : beyond ? labelInk(over) : undefined });
 }
 
 export function placeLineLabels(

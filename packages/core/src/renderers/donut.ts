@@ -2,6 +2,7 @@ import { isPaintColumn, matchRule, readRules, resolveColors, withPalette } from 
 import { legendPinned, paintLegend, readLegend } from "../legend";
 import { legendSpace } from "../legend";
 import { cssVar, paint } from "../theme";
+import { labelInk } from "../ink";
 import { formatValue } from "../format";
 import { bag, named } from "../glyphs";
 import {
@@ -227,7 +228,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const explode = Array.isArray(frame.mark.explode)
     ? frame.mark.explode.filter((item): item is string => typeof item === "string")
     : null;
-  const offset = typeof frame.mark.offset === "number" ? frame.mark.offset : explode && explode.length ? 12 : 0;
+  const offset = typeof frame.mark.offset === "number" ? Math.max(0, frame.mark.offset) : explode && explode.length ? 12 : 0;
   const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
   const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
   const inside = labelAt === "inside" || labelAt === "center";
@@ -269,13 +270,13 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const availW = width - sideLegend - 16;
   const availH = height - y0 - legendBlock - 12;
   let size = Math.max(48, Math.min(availW, availH));
-  const sideGap = Math.max(0, (width - sideLegend - size - 16) / 2);
+  const sideGap = Math.max(0, availW - size) / 2;
   let pieX = place === "left" ? width - size - 8 - sideGap : place === "right" ? 8 + sideGap : (width - sideLegend - size) / 2;
   let pieY = place === "bottom" ? y0 + 4 : y0 + (place === "top" ? legendBlock : 0) + Math.max(0, (availH - size) / 2);
   let cx = pieX + size / 2;
   let cy = pieY + size / 2;
   const margin = leaders ? 56 : showLabels ? 22 : 8;
-  let outer = Math.max(12, size / 2 - margin - (offset > 0 ? Math.min(offset, 24) : 0));
+  let outer = Math.max(12, size / 2 - margin - offset);
   let plotTop = pieY;
   let plotBottom = pieY + size;
   if (leaders) {
@@ -323,7 +324,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
 
   if (showLegend && !legendBox && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
   const belowWidth = Math.min(width - 16, Math.max(size, sideNeed));
-  const sideY = Math.max(y0, pieY + (size - arcs.length * 22 + 12) / 2);
+  const sideY = Math.max(y0, (plotTop + plotBottom - arcs.length * 22 + 12) / 2);
   if (showLegend && !legendBox && place === "left") parts.push(legend(arcs, pieX - sideWidth, sideY, frame, valueFormat, pieX - 16));
 
   const held = bag();
@@ -357,7 +358,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
       const at = inner > 8 ? (inner + outer) / 2 : outer * 0.55;
       const point = polar(origin.x, origin.y, at, mid);
       const anchor = point.x < cx - 4 ? "end" : point.x > cx + 4 ? "start" : "middle";
-      labelSvg += held.put(body, point.x, point.y, anchor, cssVar("text", frame.preset.text));
+      labelSvg += held.put(body, point.x, point.y, anchor, labelInk(arc.color));
       continue;
     }
     const rim = polar(cx, cy, 1, mid);
@@ -384,7 +385,8 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     }
   }
 
-  if (inner > 8) {
+  // A legend anchored to the centre takes the hole. The total would sit under it.
+  if (inner > 8 && legendBox?.anchor !== "center") {
     const totalLabel = formatValue(total, valueFormat, frame.locale);
     const unit = centreUnit(frame.encoding.y);
     const fill = cssVar("text", frame.preset.text);
@@ -481,10 +483,11 @@ function layoutOutside(input: {
     ...input.slices.map((slice) => estimateText(outsideText(slice.value, input.total, input.labelFormat, input.valueFormat, input.locale))),
   );
   const gutter = labelW + 32;
-  const pop = input.offset > 0 ? Math.min(input.offset, 12) : 0;
-  const cap = Math.min(plotW, plotH) / 2 - 2;
+  // An exploded slice moves out by the whole offset. Reserve it on every side.
+  const pop = input.offset;
+  const cap = Math.min(plotW, plotH) / 2 - 2 - pop;
   const minRadius = Math.min(cap, Math.max(40, Math.min(plotW, plotH) * 0.34));
-  let outer = Math.min(plotH / 2 - 28, plotW / 2 - gutter - pop);
+  let outer = Math.min(plotH / 2 - 28 - pop, plotW / 2 - gutter - pop);
   outer = Math.max(outer, minRadius);
   outer = Math.min(Math.max(24, outer), cap);
   const cx = plotLeft + plotW / 2;

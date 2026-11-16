@@ -422,6 +422,16 @@ function bars(
     const b = yScale(value ?? baseline);
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
+    // The segment stacked directly on this one, and its length. A label past the tip lands there.
+    let over = "";
+    let room = 0;
+    for (let j = index + 1; stacked && !over && j < model.series.length; j++) {
+      const top = layers!.top[j][i];
+      if (layers!.on[j] && layers!.bottom[j][i] === value && top !== value) {
+        over = model.series[j].color;
+        room = Math.abs(yScale(top ?? 0) - b);
+      }
+    }
     const caption = series.ruleLabels?.[i] ?? "";
     const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
     const valueAttr = typeof raw === "number" && Number.isFinite(raw) ? ` data-ck-value="${numKey(raw)}"` : "";
@@ -451,7 +461,7 @@ function bars(
       if (stacked && width === 0) continue;
       const edge = b >= a ? "right" : "left";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
-      queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width);
+      queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width, over, room);
     } else {
       const x = start;
       let y = Math.min(a, b);
@@ -464,7 +474,7 @@ function bars(
       if (stacked && height === 0) continue;
       const edge = b <= a ? "top" : "bottom";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
-      queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width);
+      queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width, over, room);
     }
   }
   return out.join("");
