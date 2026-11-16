@@ -43,7 +43,8 @@ export function sortIssue(spec: Record<string, unknown>, table: DataTable): stri
   return null;
 }
 
-function compare(a: unknown, b: unknown): number {
+/** Blank cells sort as the largest value. Shared with `interact`, which orders its rows the same way. */
+export function compare(a: unknown, b: unknown): number {
   const an = a === null || a === undefined || a === "";
   const bn = b === null || b === undefined || b === "";
   if (an || bn) return an === bn ? 0 : an ? 1 : -1;

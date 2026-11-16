@@ -46,6 +46,8 @@ export type ExtraHook = [
   () => { samples: number[]; start: number; end: number },
   /** Dim every series but this one. An empty name clears it. */
   (name: string) => void,
+  /** The row one step (`by` is 1 or -1) along the category axis, or an index outside the window at either end. */
+  (row: number, by: number) => number,
 ];
 
 function ensureTableCss(): void {
@@ -150,6 +152,7 @@ export function armExtras(a: ExtraHook): void {
   const navigator = a[28];
   const overview = a[29];
   const light = a[30];
+  const stepRow = a[31];
   // The chunk can land after a test or server environment has torn the document down.
   if (!alive() || typeof document === "undefined") return;
   if (navigator) mountNavigator(svg, on, alive, range, setRange, redraw, emit, rangeDetail, overview);
@@ -220,14 +223,10 @@ export function armExtras(a: ExtraHook): void {
       let next = Math.max(lo, Math.min(hi, readFocus()));
       // The first arrow lands on the current point. Later ones move.
       if (step && shown) {
-        // Long data repeats an x once per series, so step to the next x, not the next row.
-        const from = nodes ? "" : xText(next);
-        const start = next;
-        do next += step;
-        while (!nodes && next >= lo && next <= hi && xText(next) === from);
-        next = Math.max(lo, Math.min(hi, next));
+        // Long data repeats an x once per series, so rows step to the next category, not the next row.
+        next = nodes ? next + step : stepRow(next, step);
         // At either end the key is left to the page.
-        if (next === start || (!nodes && xText(next) === from)) return;
+        if (next < lo || next > hi) return;
       } else if (key === "Home") next = lo;
       else if (key === "End") next = hi;
       else if (!step && !turn) return;

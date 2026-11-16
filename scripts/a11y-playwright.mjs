@@ -91,6 +91,12 @@ const fruit = [
   { fruit: "Mango", crates: 6 },
 ];
 specs.push({ id: "bar-sorted", spec: { version: "1", type: "bar", data: fruit, encoding: { x: "fruit", y: "crates" }, sort: { by: "value", order: "descending" }, a11y: { alt: "Apple leads." } } });
+// Horizontal bars and long rows: the category under the pointer or the keyboard is the one that lights up and is read.
+specs.push({ id: "bar-horizontal", spec: { version: "1", type: "bar", data: fruit, encoding: { x: "fruit", y: "crates" }, mark: { orientation: "horizontal" }, a11y: { alt: "Apple leads." } } });
+const longBars = { version: "1", type: "bar", data: longRows, encoding: { x: "month", y: "seats", series: "plan" }, a11y: { alt: "Pro seats grow faster than Starter seats." } };
+specs.push({ id: "bar-long", spec: longBars });
+specs.push({ id: "bar-long-horizontal", spec: { ...longBars, mark: { orientation: "horizontal" }, sort: { field: "seats", order: "descending" } } });
+const AGREE = ["bar-sorted", "bar-horizontal", "bar-long", "bar-long-horizontal"];
 
 const html = `<!doctype html><meta charset="utf-8"><title>ChartKit keyboard and table</title>
 <style>
@@ -132,7 +138,7 @@ page.on("console", (msg) => {
   if (msg.type() === "error") errors.push(msg.text());
 });
 const fail = (message) => errors.push(message);
-/** Gaps this script proves but does not fail on. Each is listed in the PR that introduced the defaults. */
+/** Gaps this script proves but does not fail on. */
 const knownGaps = [];
 
 await page.goto(`file://${pageFile}`, { waitUntil: "networkidle" });
@@ -185,6 +191,8 @@ const state = (id) =>
         }
         return best;
       })(),
+      // Categories of the lit bars, from the key the renderer stamps on each bar.
+      litKeys: [...new Set([...(svg?.querySelectorAll(".ck-bar-on") ?? [])].map((bar) => (bar.getAttribute("data-ck-key") || "").split(":").pop()))],
       dotOn: (() => {
         const dot = svg?.querySelector("[data-ck-dot]");
         if (!dot) return -1;
@@ -266,8 +274,7 @@ for (const { id, spec } of specs) {
   if (!out.second.live || out.second.live === out.first.live) fail(`${id}: second arrow did not move (${out.second.live})`);
   if (out.second.live?.includes(out.tab.label)) fail(`${id}: the announcement repeats the alt text`);
   const visible = out.second.dots > 0 || out.second.barsOn > 0 || out.second.slice || out.second.crosshair;
-  if (!visible && id === "canvas-bar") knownGaps.push("canvas bars: the tooltip follows the keyboard, but no bar is highlighted");
-  else if (!visible) fail(`${id}: no visible mark for the focused point`);
+  if (!visible) fail(`${id}: no visible mark for the focused point`);
   if (spec.tooltip !== false && !out.second.tipShown) fail(`${id}: tooltip stayed hidden on arrow`);
 
   await page.locator(`[id="${id}"]`).screenshot({ path: join(outDir, `a11y-${id}.png`) });
@@ -321,8 +328,31 @@ for (const { id, spec } of specs) {
 
 // The lit mark is the announced row, also when rows are sorted or x is unsorted.
 const sorted = report.charts["bar-sorted"];
-// `interact` reads rows in data order and does not apply the top-level `sort`, for the pointer as well as the keyboard.
-if (sorted.second && !sorted.second.live.startsWith(`${sorted.second.litLabel}:`)) knownGaps.push(`top-level sort: announced "${sorted.second.live}", the lit bar is ${sorted.second.litLabel}`);
+if (sorted.second && !sorted.second.live.startsWith(`${sorted.second.litLabel}:`)) fail(`top-level sort: announced "${sorted.second.live}", the lit bar is ${sorted.second.litLabel}`);
+if (sorted.first && !sorted.first.live.startsWith("Apple:")) fail(`top-level sort: the first arrow read "${sorted.first.live}", the first drawn bar is Apple`);
+for (const id of AGREE) {
+  // Keyboard: every arrow lights exactly the category it reads.
+  for (const step of ["first", "second"]) {
+    const at = report.charts[id][step];
+    if (at && (at.litKeys.length !== 1 || !at.live.startsWith(`${at.litKeys[0]}:`))) fail(`${id}: keyboard read "${at.live}", lit ${JSON.stringify(at.litKeys)}`);
+  }
+  // Pointer: the middle of each drawn bar shows that bar's category in the tooltip and lights only it.
+  await page.locator(`[id="${id}"]`).scrollIntoViewIfNeeded();
+  const bars = await page.evaluate((hostId) => [...document.getElementById(hostId).querySelectorAll('svg rect[data-ck-key^="b:"]')].map((bar) => {
+    const box = bar.getBoundingClientRect();
+    return { category: bar.getAttribute("data-ck-key").split(":").pop(), x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  }), id);
+  if (!bars.length) fail(`${id}: no bars to hover`);
+  const seen = [];
+  for (const bar of bars) {
+    await page.mouse.move(bar.x, bar.y);
+    const at = await state(id);
+    seen.push(`${bar.category}>${at.tipText.slice(0, bar.category.length)}|${at.litKeys.join(",")}`);
+    if (!at.tipText.startsWith(bar.category) || at.litKeys.join() !== bar.category) fail(`${id}: pointer on ${bar.category} showed "${at.tipText}", lit ${JSON.stringify(at.litKeys)}`);
+  }
+  report.charts[id].pointer = seen;
+  await page.mouse.move(2, 2);
+}
 const loose = report.charts["scatter-unsorted"];
 if (loose.second && (loose.first.dotOn !== 0 || loose.second.dotOn !== 1)) fail(`scatter-unsorted: dots on drawn points ${loose.first.dotOn}, ${loose.second.dotOn}; rows 0 and 1 were announced`);
 if (!report.charts["canvas-scatter"].second?.dots) knownGaps.push("canvas scatter: crosshair and tooltip follow the keyboard, but the point has no marker");
