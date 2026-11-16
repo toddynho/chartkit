@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/solid",
   "version": "0.5.0",
-  "description": "Solid component for the ChartKit JSON spec. SSR string output, then hydration with vanilla mount. Evidence: https://chartkit.dev/docs?framework=solid",
+  "description": "Solid component for the ChartKit JSON spec. SSR string output, then hydration with vanilla mount.",
   "keywords": [
     "chart",
     "solid",

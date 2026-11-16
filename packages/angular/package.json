@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/angular",
   "version": "0.5.0",
-  "description": "Standalone Angular component for the ChartKit JSON spec. SSR SVG and OnPush updates. Evidence: https://chartkit.dev/docs?framework=angular",
+  "description": "Standalone Angular component for the ChartKit JSON spec. SSR SVG and OnPush updates.",
   "keywords": [
     "chart",
     "angular",

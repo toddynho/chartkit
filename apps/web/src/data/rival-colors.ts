@@ -22,6 +22,10 @@ const RIVALS: Record<string, RivalSwatch> = {
   Recharts: { fill: "#4d896b", ink: "#31684d", band: "#e1efe8" },
   ECharts: { fill: "#826ea6", ink: "#463465", band: "#e6e1ef" },
   Nivo: { fill: "#b67154", ink: "#6d402c", band: "#efe5e1" },
+  "Vega-Lite": { fill: "#a68a4d", ink: "#6b5520", band: "#efeadf" },
+  Victory: { fill: "#a66e6e", ink: "#6a3434", band: "#efe1e1" },
+  ApexCharts: { fill: "#6e8f9e", ink: "#3c5a68", band: "#e1eaef" },
+  "MUI X Charts": { fill: "#8a8a8f", ink: "#55555a", band: "#e9e9ec" },
 };
 
 export function rivalSwatch(name: string): RivalSwatch {

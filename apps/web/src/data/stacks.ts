@@ -1,4 +1,5 @@
-export const stackIds = ["react", "vue", "svelte", "astro", "solid", "qwik", "angular", "vanilla", "element"] as const;
+/** React, plain JavaScript and Node, Vue, Svelte, then the rest (docs/POSITIONING.md, D3). */
+export const stackIds = ["react", "vanilla", "vue", "svelte", "astro", "solid", "qwik", "angular", "element"] as const;
 
 export type StackId = (typeof stackIds)[number];
 
@@ -30,6 +31,16 @@ export const stacks: Stack[] = [
     blurb: "React",
     install: "npm install @chartkitdev/core\nnpm install @chartkitdev/react",
     snippet: 'import { Chart } from "@chartkitdev/react";\n\nexport function Panel() {\n  return <Chart spec={spec} />;\n}',
+  },
+  {
+    id: "vanilla",
+    label: "Vanilla",
+    chip: "JS",
+    mount: "mount(el, spec)",
+    blurb: "vanilla JS",
+    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/vanilla",
+    snippet:
+      'import { mount } from "@chartkitdev/vanilla";\n\nconst chart = mount(document.querySelector("#chart"), spec);\nchart.update(spec);',
   },
   {
     id: "vue",
@@ -87,16 +98,6 @@ export const stacks: Stack[] = [
     install: "npm install @chartkitdev/core\nnpm install @chartkitdev/angular",
     snippet:
       'import { Component } from "@angular/core";\nimport { Chart } from "@chartkitdev/angular";\n\n@Component({\n  standalone: true,\n  imports: [Chart],\n  template: `<ck-chart [spec]="spec" />`,\n})\nexport class Panel {\n  spec = spec;\n}',
-  },
-  {
-    id: "vanilla",
-    label: "Vanilla",
-    chip: "JS",
-    mount: "mount(el, spec)",
-    blurb: "vanilla JS",
-    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/vanilla",
-    snippet:
-      'import { mount } from "@chartkitdev/vanilla";\n\nconst chart = mount(document.querySelector("#chart"), spec);\nchart.update(spec);',
   },
   {
     id: "element",

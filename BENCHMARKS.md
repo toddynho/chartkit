@@ -624,6 +624,57 @@ Before is the median of 5 from 2026-10-16T15:40:22.418Z, after sampling was adde
 
 On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.
 
+## Line against uPlot, round 13
+
+Measured 2026-10-18 on `d8dcc5a`. This is an older run than the tables above and it was not re-timed. Source: `catalog/public/benchmarks.json`, fields `browserMs`, `hoverSteady100k`, `firstHoverPainted`, and `samplingNoneMs`. Median of 5, Playwright Chromium, a 640×360 line, sampling auto.
+
+The aligned update starts at the top of a requestAnimationFrame, awaits the library's own completion, and reads the clock from a MessageChannel task after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`.
+
+| X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| even | 1,000 | 11.3 | 12.0 | 1.5 | 1.2 |
+| even | 10,000 | 13.2 | 14.8 | 1.9 | 1.7 |
+| even | 100,000 | 14.1 | 16.3 | 2.3 | 2.9 |
+| even | 1,000,000 | 23.6 | 26.5 | 10.7 | 11.2 |
+| jittered | 1,000 | 10.1 | 14.2 | 1.6 | 1.4 |
+| jittered | 10,000 | 12.6 | 15.2 | 1.9 | 2.2 |
+| jittered | 100,000 | 15.0 | 19.4 | 2.7 | 3.4 |
+| jittered | 1,000,000 | 24.4 | 32.1 | 11.7 | 13.0 |
+| gapped | 1,000 | 11.8 | 12.3 | 1.6 | 1.4 |
+| gapped | 10,000 | 12.5 | 14.5 | 1.9 | 1.6 |
+| gapped | 100,000 | 15.0 | 17.8 | 3.5 | 3.4 |
+| gapped | 1,000,000 | 27.3 | 29.1 | 11.5 | 11.8 |
+
+ChartKit's initial render is faster in 12 of 12 cells. Every line above 1,000 points is sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The update is slower than uPlot in 6 of 12 cells: even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), gapped 100,000 (3.5 vs 3.4).
+
+Hover at 100,000 points, painted median:
+
+| Library | Tip ms | Painted median ms | Painted p95 ms |
+| --- | ---: | ---: | ---: |
+| ChartKit | 16.0 | 16.5 | 17.1 |
+| uPlot | 15.4 | 16.2 | 17.0 |
+| Chart.js | 17.0 | 20.3 | 22.2 |
+| Observable Plot | 22.7 | 28.3 | 34.6 |
+| Recharts | 28.2 | 28.9 | 35.1 |
+| ECharts | 20.4 | 2881.4 | 3113.2 |
+
+First hover on a fresh 100,000-point chart is a loss to uPlot at every delay:
+
+| Ms after mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |
+| ---: | ---: | ---: | ---: | ---: |
+| 50 | 20.8 | 27.0 | 4.0 | 16.6 |
+| 200 | 15.9 | 35.9 | 4.6 | 8.4 |
+| 500 | 16.5 | 29.2 | 4.9 | 5.0 |
+
+Sampling none draws every point. Round 13, ChartKit only:
+
+| Points | Initial ms | Update ms |
+| ---: | ---: | ---: |
+| 100,000 | 54.8 | 39.2 |
+| 1,000,000 | 471.8 | 462.4 |
+
+The Browser render table above re-timed sampling none on a later commit (`bench/results/paint.json`, library `ChartKit sampling none`, field `updateMs`), and its update is much slower: 1,157.2 ms at 100,000 points and 21,550.2 ms at 1,000,000 points. The two runs time the update differently, and the gap has not been explained. For millions of raw points, use a GPU library.
+
 ## Canvas line, 2026-10-21
 
 This is not a re-time of the round above. Median of 5, Playwright Chromium, a 640×360 sampled line. Canvas paints the marks and builds SVG for the axes only. First paint waits for the same two frames. Sampling none was not re-timed. Canvas loses first paint at 10k, 100k, and 1M.

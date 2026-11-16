@@ -13,7 +13,7 @@ const others = spread.rows.filter((row) => !row.us).map((row) => ({ name: row.na
   <div class="band-head">
     <div class="band-head__copy">
       <p class="eyebrow eyebrow--blue">For the agent</p>
-      <h2 id="tokens-title"><span>Fewer tokens per chart.</span><span>On every model.</span></h2>
+      <h2 id="tokens-title"><span>Fewer tokens per working chart.</span><span>On every model we tested.</span></h2>
       <p>
         Same {spread.tasks} tasks, {spread.modelWord} models, {spread.libraryWord} libraries. The agent writes a short spec instead of a component, so the median is {spread.calls} model {spread.calls === "1.0" ? "call" : "calls"} with a fraction of the output.
       </p>
@@ -67,6 +67,7 @@ const others = spread.rows.filter((row) => !row.us).map((row) => ({ name: row.na
       </div>
     </div>
     <p class="proof-note">
+      A JSON spec is always shorter than code that imports a library, and these four are code libraries. Vega-Lite, the closest JSON grammar, is not in this eval yet.
       <a class="quiet-link" href="/methodology/agent-eval">Review test details and methodology →</a>
     </p>
   </div>
