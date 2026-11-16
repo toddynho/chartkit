@@ -1,6 +1,6 @@
 # ChartKit
 
-One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, Astro, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
+One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, Solid, Qwik, Angular, Astro, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
 The line-gzip and first-paint rows cite the bench files named in the table. The other browser rows are round 13, measured 2026-10-18 on phase 2 `d8dcc5a`, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
 
@@ -14,23 +14,23 @@ The line-gzip and first-paint rows cite the bench files named in the table. The 
 | First hover, painted | 20.8 / 15.9 / 16.5 ms | uPlot 4 / 4.6 / 4.9 ms, at about 50 / 200 / 500 ms after mount |
 | Steady hover, 100k | 16.5 ms | uPlot 16.2 ms |
 
-The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, 1M is 471.8 ms to draw and 462.4 ms to update.
+The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, round 13 records 1M at 471.8 ms to draw and 462.4 ms to update (`catalog/public/benchmarks.json`, `samplingNoneMs`, points 1000000). `bench/results/paint.json` (measuredAt 2026-10-29, library `ChartKit sampling none`, variant `sampling-none`) re-timed that case: 100k `initialMs` 54 and `updateMs` 1157.2; 1M `initialMs` 466.7 and `updateMs` 21550.2.
 
-Canvas line, measured 2026-10-21, median of 5, Playwright Chromium, 640×360, sampling auto (minmax above twice the plot width). Canvas paints the sampled points and builds SVG for the axes only. `render` is that synchronous work. First paint includes the same two frames as the other libraries. uPlot does not split a synchronous render time out of that paint. Sampling none was not re-timed in this run.
+Canvas line in that same paint file, median of 5, Playwright Chromium, 640×360, sampling auto (minmax above twice the plot width). SVG rows are library `ChartKit`, variant `sampling-auto`, renderer `svg`. Canvas rows are library `ChartKit canvas`, variant `canvas`, renderer `canvas`. uPlot is library `uPlot`, renderer `canvas`. Canvas paints the sampled points and builds SVG for the axes only. `renderMs` is that synchronous work. First paint is `initialMs` and includes the same two frames as the other libraries. uPlot’s `renderMs` is null. One decimal below.
 
 | Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10k | 7.3 | 7.8 | 13.1 | 21.8 | 14.5 | 25.6 | 19.1 | 33.2 |
-| 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
-| 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
+| 10k | 7.6 | 8.9 | 15.3 | 22.8 | 16.7 | 33.1 | 23.5 | 33.2 |
+| 100k | 8.6 | 10.7 | 14.2 | 22.1 | 14.7 | 30.8 | 18.5 | 30.5 |
+| 1M | 19.5 | 23.0 | 24.3 | 32.9 | 24.2 | 23.9 | 21.1 | 23.9 |
 
-Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. The current line bundle is 32,110 bytes gzip (`bench/results/bundle.json`, library ChartKit minimal, chart `line`, `gzipBytes`). `/all` is 78,081 bytes gzip (library ChartKit all, chart `all`, `gzipBytes`). uPlot’s package is 23,292 bytes gzip and its stylesheet is 762 (`packages` id `uplot`, `gzipBytes` and `cssGzipBytes`).
+Canvas render is slower than SVG at 10k (8.9 vs 7.6), 100k (10.7 vs 8.6), and 1M (23.0 vs 19.5). First paint is slower than SVG at those sizes (22.8 vs 15.3, 22.1 vs 14.2, 32.9 vs 24.3) and slower than uPlot (16.7, 14.7, 24.2). Canvas update is faster than both at 10k (23.5 vs 33.1 and 33.2), 100k (18.5 vs 30.8 and 30.5), and 1M (21.1 vs 23.9 and 23.9). `render: "auto"` still switches at 100,000 rows (`CANVAS_AT` in `packages/core/src/render-mode.ts`). The comment on that constant cites a 2026-10-21 run, which is not this paint file. The current line bundle is 32,110 bytes gzip (`bench/results/bundle.json`, library ChartKit minimal, chart `line`, `gzipBytes`). `/all` is 78,081 bytes gzip (library ChartKit all, chart `all`, `gzipBytes`). uPlot’s package is 23,292 bytes gzip and its stylesheet is 762 (`packages` id `uplot`, `gzipBytes` and `cssGzipBytes`).
 
-**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
+**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/compare)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
 
 ---
 
-`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each chart type is in [packages/core/README.md](packages/core/README.md) and [catalog/public/llms.txt](catalog/public/llms.txt).
+`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. [packages/core/README.md](packages/core/README.md) has one fenced spec per core chart type, including radial-bar, rose, and bar-list. [catalog/public/llms.txt](catalog/public/llms.txt) is the short agent file (at or under 6400 bytes) and omits pie, radial-bar, rose, and bar-list. Choropleth and map-points are in [packages/geo/README.md](packages/geo/README.md). The site catalog is 41 types (`HERO_TYPE_COUNT` in `apps/web/src/data/hero-catalog.ts`): the 39 ids in `apps/web/src/data/chart-types.ts`, plus those two maps.
 
 ## Installation
 
@@ -214,7 +214,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 | `MiniArea` | Small area charts with gradients |
 | `ProgressRing` | Circular progress indicators |
 | `SpikeChart` | Event/activity spike visualization |
-| `CandlestickChart` | Financial OHLC charts. Zoom and pan are not drawn. |
+| `CandlestickChart` | Financial OHLC charts. The React component pans and zooms on x unless `enableZoom` is false. The JSON spec does the same when `zoom` is omitted. |
 
 ## Themes
 
@@ -224,13 +224,13 @@ The JSON spec default is Soft. Omit `theme`, or set `"auto"` or `"soft"`. Colour
 .ck-card { background: light-dark(#f5f5f7, #1c1c1e); }
 ```
 
-Or set `--ck-background` to that pair. `"refined"` and `"editorial"` are built-in names. `"midnight"` is the opt-in dark card. A name that has not been imported still renders as midnight.
-
-Other presets, imported from `@chartkitdev/core/themes/<name>`:
+Or set `--ck-background` to that pair. `"refined"` and `"editorial"` are built-in names. `"midnight"` is the opt-in dark card. Other presets, imported from `@chartkitdev/core/themes/<name>`:
 
 **Dark:** `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
 
 **Light:** `sunset`, `silver`, `pearl`, `latte`
+
+`tape`, `kite`, `mustard`, and `violet` are the same kind of preset. Import `@chartkitdev/core/themes/<name>` or `@chartkitdev/core/themes/all`. A name that has not been imported renders as midnight when that preset is registered, and as Soft otherwise.
 
 A brand palette is `@chartkitdev/core/themes/brand`: `paletteFromBrand("#635bff")`, then `theme: { tokens: { series } }`. It stays out of the default bundle.
 
@@ -247,10 +247,10 @@ Full documentation and examples at **[chartkit.dev](https://chartkit.dev)**
 
 - [Getting started](https://chartkit.dev/docs)
 - [Roadmap](ROADMAP.md)
-- [When to use ChartKit](https://chartkit.dev/when-to-use)
+- [When to use ChartKit](https://chartkit.dev/compare)
 - [Benchmarks](https://chartkit.dev/benchmarks.json)
 - [Themes](https://chartkit.dev/docs/theming)
-- [Live demo](https://chartkit.dev/demo)
+- [Playground](https://chartkit.dev/playground)
 
 ## Public site
 

@@ -43,7 +43,7 @@ npm run bench:agent-matrix
 
 ### Chart types
 
-The browser sweep paints every gallery type (`apps/web/src/data/chart-types.ts`, 35 types) for ChartKit and for the libraries already on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. Cells land in `browser.charts` inside `bench/results/latest.json` when bundle, browser, and SSR all run, and in `bench/results/paint.json` (median of 5) or `bench/results/paint-smoke.json` (any other sample count). The line comparison table is unchanged: chart-type rows are not mixed into it.
+The browser sweep paints every gallery type (`apps/web/src/data/chart-types.ts` and `GALLERY_TYPES` in `bench/browser/chart-types.mjs`, 39 types) for ChartKit and for the libraries already on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. Choropleth and map-points are not in that list. Cells land in `browser.charts` inside `bench/results/latest.json` when bundle, browser, and SSR all run, and in `bench/results/paint.json` (median of 5) or `bench/results/paint-smoke.json` (any other sample count). The line comparison table is unchanged: chart-type rows are not mixed into it.
 
 There is no `type: "area"`. The homepage row **area** is native **stacked-area** (full size, four series). A filled line is still `line` with `mark.area: true`. `mini-area` is one filled series with the axes off, still in the 640×360 frame.
 
@@ -72,6 +72,10 @@ Point counts are the fair N for that chart, not a copy of the line's 100,000:
 | bullet | 6 | Rows with a target and ranges. |
 | gauge, kpi, progress-ring | 1 | One metric. KPI's sparkline stays 24 and is not N. |
 | venn | 3 sets | Largest supported Venn. Four or more is unsupported. |
+| strip | 48 | Observations across 8 groups. Not a dense series. |
+| streamgraph | 48 | x positions, 3 layers. |
+| density | 400 | Observations in one sample. |
+| tree | 31 | Nodes under one root. |
 
 Phase 3 (`BENCH_PHASE=3`) adds the rest of the compare matrix and times the eleven types that had no Phase-2 rival ok cell: bar-list, gantt, journey, kpi, progress-ring, quadrant, sparkline, spike, timeline, venn, and waterfall. ChartKit is painted again for those eleven. Phase-2 rivals stay unsupported there and are not repainted. Candlestick is included only where a Phase-3 library has a native OHLC series, because Phase 2 had ECharts alone. A cell is timed only for a native chart. Credits, logos, and trial watermarks stay visible. A library that will not paint without a license key is `status: "blocked"`. Pins and the commercial notes are in `chartMethod` on `bench/results/paint.json`. This pass does not change the homepage.
 

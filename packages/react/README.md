@@ -1,12 +1,8 @@
 # @chartkitdev/react
 
-Beautiful charts for React. Zero config.
+React components for ChartKit. 14 chart components and 17 themes (`ThemeName` in `src/themes/types.ts`). Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies. `Chart` takes a JSON spec. The components below take their own props.
 
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
-
----
-
-React components for ChartKit. 14 chart components and 17 themes. Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies.
+**[Documentation](https://chartkit.dev)** | **[Playground](https://chartkit.dev/playground)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
 
 ## Installation
 
@@ -42,15 +38,6 @@ function Dashboard({ data }) {
   );
 }
 ```
-
-## Features
-
-- **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, candlesticks, and more
-- **17 Curated Themes** - Dark and light themes that look great out of the box
-- **Pure SVG** - Depends on `@chartkitdev/core`, not on a third-party chart library
-- **TypeScript First** - Full type safety with autocomplete
-- **Dual Y-Axis** - Display multiple scales in LineChart
-- **Responsive** - Charts automatically resize to fit their container
 
 ## Components
 

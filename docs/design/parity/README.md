@@ -1,5 +1,7 @@
 # Streamgraph, density, and tree
 
+Streamgraph, the 1D density curve, and the tidy tree and dendrogram are shipped. Org-chart boxes, node images, ridgeline, cumulative density, and 2D contours are not yet supported.
+
 Partial counts as offered. A lack is a feature that library offers and ChartKit does not draw. Exceeded is a feature ChartKit draws that the library does not offer. The grids are [streamgraph.md](./streamgraph.md), [density.md](./density.md), and [tree.md](./tree.md).
 
 ## Streamgraph
