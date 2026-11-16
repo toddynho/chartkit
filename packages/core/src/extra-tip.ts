@@ -23,18 +23,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Mark tooltips follow `tooltip: false` and `interaction.hover: false`. Callers that only have a painted SVG keep the previous behaviour. */
+/**
+ * Mark tooltips follow `tooltip: false` and `interaction.hover: false`. Callers that only have a painted SVG keep the previous behaviour.
+ * Tree and streamgraph arrow keys are on unless `a11y.keyboard` is false, with or without the tooltip.
+ */
 export function attach(host: EventTarget & { querySelector?(selector: string): Element | null }, spec?: unknown): TipController {
   if (typeof document === "undefined" || typeof host.addEventListener !== "function" || typeof host.querySelector !== "function") {
     return { destroy() {} };
   }
+  let quiet = false;
   if (isRecord(spec)) {
     const tooltip = spec.tooltip;
     const interaction = spec.interaction;
-    if (tooltip === false || (isRecord(tooltip) && tooltip.show === false)) return { destroy() {} };
-    if (isRecord(interaction) && interaction.hover === false) return { destroy() {} };
+    quiet = tooltip === false || (isRecord(tooltip) && tooltip.show === false) || (isRecord(interaction) && interaction.hover === false);
   }
   const root = host as unknown as Element;
+  const chartType = root.querySelector("svg")?.getAttribute("data-ck-type") ?? (isRecord(spec) && typeof spec.type === "string" ? spec.type : "");
+  const keys = !(isRecord(spec) && isRecord(spec.a11y) && spec.a11y.keyboard === false) && (chartType === "streamgraph" || chartType === "tree");
+  if (quiet && !keys) return { destroy() {} };
   // Keep position off the shared `.ck-tip` class. Interact places that card with host-relative coordinates.
   if (!document.getElementById("ck-extra-tip-style")) {
     const style = document.createElement("style");
@@ -88,8 +94,6 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
       if (fill) node.setAttribute("fill-opacity", fill);
     });
   };
-  const chartType = root.querySelector("svg")?.getAttribute("data-ck-type") ?? (isRecord(spec) && typeof spec.type === "string" ? spec.type : "");
-  const keys = isRecord(spec) && isRecord(spec.a11y) && spec.a11y.keyboard === true && (chartType === "streamgraph" || chartType === "tree");
   const tree = chartType === "tree";
   let liveSpec = isRecord(spec) ? spec : null;
   const live = document.createElement("div");
@@ -158,10 +162,12 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
     if (!svg || !current) return;
     current.outerHTML = svg;
   };
-  root.addEventListener("pointermove", move);
-  root.addEventListener("pointerleave", hide);
+  if (!quiet) {
+    root.addEventListener("pointermove", move);
+    root.addEventListener("pointerleave", hide);
+  }
   if (keys) root.addEventListener("keydown", onKey, true);
-  if (tree) root.addEventListener("click", onClick);
+  if (tree && !quiet) root.addEventListener("click", onClick);
   return {
     destroy() {
       root.removeEventListener("pointermove", move);

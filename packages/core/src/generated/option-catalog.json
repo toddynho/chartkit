@@ -12678,26 +12678,26 @@
   },
   {
     "path": "a11y.keyboard",
-    "description": "Arrow-key navigation between points with announcements. Off unless set, because turning it on loads the interaction runtime.",
+    "description": "Arrow-key navigation between points and series with announcements. On by default when an adapter mounts the chart on the client; set false to turn the keys off and keep the chart SVG out of the tab order.",
     "group": "Accessibility",
     "docs": "/docs/options#a11y.keyboard",
     "label": "Keyboard",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": false,
+    "defaultValue": true,
     "essential": true
   },
   {
     "path": "a11y.dataTable",
-    "description": "Render a visually hidden data table for screen readers. Off unless set, because turning it on loads the interaction runtime.",
+    "description": "A data table for screen readers, visually hidden, capped at 1000 evenly spaced rows. On by default when an adapter mounts the chart on the client; set false to leave it out. true also adds a visible 'Show data table' button.",
     "group": "Accessibility",
     "docs": "/docs/options#a11y.dataTable",
     "label": "Data Table",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": false,
+    "defaultValue": true,
     "essential": true
   }
 ]

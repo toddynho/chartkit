@@ -610,13 +610,14 @@ describe("attach", () => {
     const ctl = attach(host, spec, { render });
     await ctl.ready;
     const svg = host.querySelector("svg")!;
+    // The first arrow lands on the first point. The second moves.
     svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
     expect(tip.hidden).toBe(false);
-    expect(tip.textContent).toContain("Feb");
+    expect(tip.textContent).toContain("Jan");
     expect(tip.getAttribute("data-ck-tip-motion")).toBe("snap");
     svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
-    expect(tip.textContent).toContain("Mar");
+    expect(tip.textContent).toContain("Feb");
     expect(tip.getAttribute("data-ck-tip-motion")).toBe("ease");
     expect(tip.style.transition).not.toBe("none");
     ctl.destroy();
@@ -1032,6 +1033,8 @@ describe("attach", () => {
     expect(svg.getAttribute("tabindex")).toBe("0");
     svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     const live = host.querySelector("[data-ck-live]");
+    expect(live?.textContent).toContain("Jan");
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     expect(live?.textContent).toContain("Feb");
     expect(live?.textContent).toContain("revenue");
     expect(svg.querySelector("[data-ck-xlabel]")?.textContent).toBe("Feb");
@@ -1334,5 +1337,210 @@ describe("interaction plus", () => {
     tiles.querySelector('rect[data-ck-name="North"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(tiles.querySelector("[aria-current]")?.textContent).toBe("North");
     treeCtl.destroy();
+  });
+});
+
+describe("keyboard and data table defaults", () => {
+  const press = (svg: Element, key: string) => {
+    const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+    svg.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  /** The hidden table is written in its own task after `ready`. */
+  const tableOf = async (host: Element) => {
+    await new Promise((done) => setTimeout(done, 5));
+    return host.querySelector("[data-ck-table]")!;
+  };
+
+  it("turns both on for a client mount and leaves the static string alone", async () => {
+    const spec = lineSpec();
+    const markup = render(spec);
+    expect(markup).not.toContain("tabindex");
+    expect(markup).not.toContain("data-ck-intent");
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    expect(svg.getAttribute("tabindex")).toBe("0");
+    expect(host.querySelectorAll("[aria-live]").length).toBe(1);
+    expect(host.querySelector("[data-ck-table-btn]")).toBeNull();
+    expect(host.querySelector("[data-ck-table-wrap]")?.classList.contains("ck-clip")).toBe(true);
+    const table = await tableOf(host);
+    expect(table.querySelector("caption")?.textContent).toBe("Chart data");
+    expect(table.textContent).not.toContain(alt);
+    expect([...table.querySelectorAll("thead th")].map((cell) => cell.textContent)).toEqual(["month", "revenue", "cost"]);
+    expect([...table.querySelectorAll("tbody tr")].map((row) => [...row.children].map((cell) => cell.textContent))).toEqual([
+      ["Jan", "10", "100"],
+      ["Feb", "12", "110"],
+      ["Mar", "9", "90"],
+      ["Apr", "14", "80"],
+    ]);
+    expect(render(spec)).toBe(markup);
+    ctl.destroy();
+    expect(svg.hasAttribute("tabindex")).toBe(false);
+    expect(host.querySelector("[data-ck-table]")).toBeNull();
+  });
+
+  it("turns each off with an explicit false", async () => {
+    const spec = lineSpec({ a11y: { alt, keyboard: false, dataTable: false } });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    expect(svg.hasAttribute("tabindex")).toBe(false);
+    expect(host.querySelector("[data-ck-table]")).toBeNull();
+    expect(host.querySelector("[aria-live]")).toBeNull();
+    expect(press(svg, "ArrowRight")).toBe(false);
+
+    const tableOnly = lineSpec({ a11y: { alt, keyboard: false } });
+    const tableHost = hostOf(tableOnly);
+    await attach(tableHost, tableOnly, { render }).ready;
+    expect(tableHost.querySelector("svg")!.hasAttribute("tabindex")).toBe(false);
+    expect(tableHost.querySelector("[data-ck-table]")).not.toBeNull();
+  });
+
+  it("walks points, narrows to a series, and clears on Escape", async () => {
+    const spec = lineSpec();
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    const live = host.querySelector("[data-ck-live]")!;
+    expect(live.textContent).toBe("");
+    expect(press(svg, "Escape")).toBe(false);
+    expect(press(svg, "ArrowRight")).toBe(true);
+    expect(live.textContent).toBe("Jan: revenue 10, cost 100");
+    expect(press(svg, "ArrowLeft")).toBe(false);
+    expect(press(svg, "End")).toBe(true);
+    expect(live.textContent).toBe("Apr: revenue 14, cost 80");
+    expect(press(svg, "ArrowRight")).toBe(false);
+    expect(press(svg, "ArrowDown")).toBe(true);
+    expect(live.textContent).toBe("Apr: revenue 14");
+    press(svg, "ArrowDown");
+    expect(live.textContent).toBe("Apr: cost 80");
+    const clicked: string[] = [];
+    host.addEventListener("pointclick", ((event: CustomEvent<ClickDetail>) => clicked.push(`${event.detail.series} ${event.detail.x} ${event.detail.y}`)) as unknown as EventListener);
+    press(svg, "Enter");
+    expect(clicked).toEqual(["cost Apr 80"]);
+    press(svg, "ArrowUp");
+    expect(live.textContent).toBe("Apr: revenue 14");
+    press(svg, "Home");
+    expect(live.textContent).toBe("Jan: revenue 10");
+    expect(svg.querySelectorAll("[data-ck-dot]").length).toBeGreaterThan(0);
+    expect(live.textContent).not.toContain(alt);
+    expect(press(svg, "Escape")).toBe(true);
+    expect(live.textContent).toBe("");
+    expect(svg.querySelector("[data-ck-dot]")).toBeNull();
+    expect((host.querySelector("[data-ck-tip]") as HTMLElement).hidden).toBe(true);
+    expect(press(svg, "a")).toBe(false);
+  });
+
+  it("steps by category and lists one row per pair when the data is long", async () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "bar",
+      data: [
+        { region: "NA", plan: "Free", signups: 820 },
+        { region: "NA", plan: "Pro", signups: 260 },
+        { region: "EU", plan: "Free", signups: 640 },
+        { region: "EU", plan: "Pro", signups: 210 },
+      ],
+      encoding: { x: "region", y: "signups", series: "plan" },
+      a11y: { alt: "Free signups lead in both regions." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    const live = host.querySelector("[data-ck-live]")!;
+    press(svg, "ArrowRight");
+    expect(live.textContent).toBe("NA: Free 820, Pro 260");
+    press(svg, "ArrowRight");
+    expect(live.textContent).toBe("EU: Free 640, Pro 210");
+    expect(press(svg, "ArrowRight")).toBe(false);
+    const table = await tableOf(host);
+    expect([...table.querySelectorAll("thead th")].map((cell) => cell.textContent)).toEqual(["region", "plan", "signups"]);
+    expect([...table.querySelectorAll("tbody tr")].map((row) => [...row.children].map((cell) => cell.textContent))[1]).toEqual(["NA", "Pro", "260"]);
+  });
+
+  it("walks donut slices and clicks the focused one on Enter", async () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "donut",
+      data: [
+        { wood: "Oak", boards: 8 },
+        { wood: "Pine", boards: 5 },
+        { wood: "Maple", boards: 3 },
+      ],
+      encoding: { x: "wood", y: "boards" },
+      a11y: { alt: "Oak is the largest share of boards." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    const live = host.querySelector("[data-ck-live]")!;
+    const seen: string[] = [];
+    host.addEventListener("seriesclick", ((event: CustomEvent<ClickDetail>) => seen.push(String(event.detail.series))) as unknown as EventListener);
+    press(svg, "ArrowRight");
+    press(svg, "ArrowRight");
+    expect(live.textContent).toContain("Pine");
+    expect(svg.querySelector("[data-ck-kf]")?.getAttribute("aria-label")).toContain("Pine");
+    expect(press(svg, "ArrowDown")).toBe(false);
+    press(svg, "Enter");
+    expect(seen).toEqual(["Pine"]);
+    const table = await tableOf(host);
+    expect([...table.querySelectorAll("thead th")].map((cell) => cell.textContent)).toEqual(["wood", "boards"]);
+    expect(table.querySelectorAll("tbody tr").length).toBe(3);
+    press(svg, "Escape");
+    expect(svg.querySelector("[data-ck-kf]")).toBeNull();
+  });
+
+  it("samples a long series into 1000 evenly spaced rows", async () => {
+    const data = Array.from({ length: 5000 }, (_, i) => ({ t: i, load: i % 7 }));
+    const spec: InteractSpec = { version: "1", type: "line", data, encoding: { x: "t", y: "load" }, a11y: { alt: "Load repeats every seven samples." } };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const table = await tableOf(host);
+    const rows = table.querySelectorAll("tbody tr");
+    expect(rows.length).toBe(1000);
+    expect(rows[0].firstElementChild?.textContent).toBe("0");
+    expect(rows[999].firstElementChild?.textContent).toBe("4,999");
+    expect(table.querySelector("caption")?.textContent).toBe("Chart data. Showing 1000 of 5000 rows, evenly spaced.");
+  });
+
+  it("repaints the table after an update, not during it", async () => {
+    const spec = lineSpec();
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const table = await tableOf(host);
+    expect(table.querySelectorAll("tbody tr").length).toBe(4);
+    const next = lineSpec();
+    (next.data as unknown[]).push({ month: "May", revenue: 20, cost: 70 });
+    ctl.update(next);
+    expect(table.querySelectorAll("tbody tr").length).toBe(4);
+    await new Promise((done) => setTimeout(done, 340));
+    expect(table.querySelectorAll("tbody tr").length).toBe(5);
+    expect(table.querySelector("tbody tr:last-child")?.textContent).toBe("May2070");
+  });
+
+  it("keeps a type with no keyboard model out of the tab order", async () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "heatmap",
+      data: [
+        { day: "Mon", hour: "9", count: 3 },
+        { day: "Tue", hour: "9", count: 5 },
+      ],
+      encoding: { x: "day", y: "hour", color: "count" },
+      a11y: { alt: "Tuesday at nine is the busiest cell." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    expect(host.querySelector("svg")!.hasAttribute("tabindex")).toBe(false);
+    expect(host.querySelector("[data-ck-table]")).toBeNull();
   });
 });

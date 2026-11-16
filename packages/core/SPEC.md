@@ -44,6 +44,18 @@ The painter is `@chartkitdev/core/canvas/hydrate`. It loads on demand. `createRe
 
 Sampling assumes each series is already ordered by x. Nulls stay as gaps unless `mark.connectNulls` is true, in which case the finite points are sampled as one run.
 
+## Keyboard and the data table
+
+`a11y.keyboard` and `a11y.dataTable` are client behaviour. Both are **on by default** when an adapter mounts the chart (`mount()`, `<Chart>`, `<chartkit-chart>`), and each is turned off with an explicit `false`. `render()` and `renderToString()` are not affected: the static SVG has no `tabindex`, no table, and no live region, and it records `data-ck-intent` only when the spec sets a value to `true`, as before.
+
+- **Tab order.** The chart SVG is one tab stop with a visible focus ring (`--ck-focus` sets its colour). Focus alone announces nothing beyond `a11y.alt`.
+- **Keys.** Left and Right move between points; the first press lands on the current point. Home and End jump to the ends of the visible range. Up and Down narrow the reading to one series and dim the others. Escape clears the highlight, the tooltip, and the announcement, and so does leaving the chart. Enter and Space fire `pointclick` (or `seriesclick` on a slice) for the focused point. A key that has nothing to do is left to the page, so arrows still scroll at either end.
+- **Announcements.** Each move writes one polite live region: the x value, then each series and value. It never repeats `a11y.alt`.
+- **Covered types.** `line`, `bar`, `stacked-area`, `combo`, `scatter`, `candlestick`, `sparkline`, `mini-area`, and `spike` walk rows. `donut`, `pie`, and `sunburst` walk slices in drawing order. `tree` (parent, child, sibling) and `streamgraph` (columns and layers) move focus between their own marks, which are tab stops in the static SVG too. Every other type has no keyboard model yet: its SVG is not made a tab stop and it gets no table by default. `strip` and `density` keep the per-mark tab stops their static SVG already has, with no arrow keys.
+- **Limits.** Rows are walked in data order, so a scatter moves through its rows, not left to right. The top-level `sort` is not applied by `interact`: on a sorted chart the reading and the tooltip name the data row while the highlight sits on the drawn slot, the same as the pointer. With `render: "canvas"` a line gets its markers, a scatter gets the crosshair and tooltip but no point marker, and a bar gets the tooltip but no highlight. The script-tag build (`@chartkitdev/vanilla/global`) does not pass the spec to the tree and streamgraph keys, so `keyboard: false` does not turn them off there. No screen reader has been tested.
+- **Table.** One visually hidden `<table>` after the SVG, with a caption, column headers, and a row header per row. Wide data is x plus one column per series. Long data (`encoding.series`) is x, series, value. A sunburst lists its arcs. The table reads the full data, not the drawn sample. Past 1000 rows it takes 1000 rows at even steps, first and last included, and the caption says so. `dataTable: true` also adds a visible "Show data table" button.
+- **Cost.** Both live in the lazy `@chartkitdev/core/interact/extra` chunk, which a client mount now fetches after the chart is interactive. The hidden table is written in its own task after mount, and a stream of `update()` calls rewrites it at most once per 300 ms.
+
 ## Repairable shapes
 
 These are errors with a JSON Patch in `fix`. Applying the patch is the correction.
