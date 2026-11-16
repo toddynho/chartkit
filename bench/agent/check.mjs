@@ -11,6 +11,7 @@ import { charts as extraCharts } from "../../packages/core/src/extra.ts";
 import { render as renderGeo, validate as validateGeo } from "../../packages/geo/src/index.ts";
 import { mapKind } from "../../packages/geo/src/spec.ts";
 import { repair, validate } from "../../packages/core/src/validate.ts";
+import { repairAsync } from "../../packages/core/src/foreign-convert.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
 import { bar } from "../../packages/core/src/charts/bar.ts";
 import { donut } from "../../packages/core/src/charts/donut.ts";
@@ -34,7 +35,7 @@ const render = createRenderer([
 ]);
 const fullRender = createRenderer([...coreCharts, ...extraCharts]);
 
-export { repair };
+export { repair, repairAsync };
 
 function observedChartTypes(facts) {
   if (!Array.isArray(facts?.chartTypes)) return [];

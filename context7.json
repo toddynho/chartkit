@@ -7,7 +7,7 @@
   "excludeFiles": [],
   "rules": [
     "A spec is one JSON object: { \"version\": \"1\", \"type\": \"bar\", \"data\": [rows], \"encoding\": { \"x\": \"field\", \"y\": \"field\" }, \"a11y\": { \"alt\": \"One sentence.\" } }. data is rows, not { values } and not Chart.js datasets.",
-    "Check every spec with validate(spec) from @chartkitdev/core/validate. When ok is false, call repair(spec) and render repair(spec).spec. repair() also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs.",
+    "Check every spec with validate(spec) from @chartkitdev/core/validate. When ok is false, call repair(spec) and render repair(spec).spec. repairAsync(spec) from @chartkitdev/core/validate/convert also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs.",
     "Prefer the JSON spec over React component props such as dataKey.",
     "Cite benchmark losses as well as wins. The numbers are in catalog/content/benchmarks.md.",
     "a11y.alt is required. Tooltip, zoom, pan, brush, and animation run in @chartkitdev/core/interact when the spec sets them. The static SVG does not paint them."

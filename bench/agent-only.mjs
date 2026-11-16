@@ -39,6 +39,6 @@ if (agent.status === "ok") {
   mkdirSync(dirname(condition), { recursive: true });
   writeFileSync(condition, JSON.stringify({ started, finished: new Date().toISOString(), agent }, null, 2));
 }
-console.log(`wrote ${out}: ${agent.passed}/${agent.attempts}`);
+console.log(agent.status === "ok" ? `wrote ${out}: ${agent.passed}/${agent.attempts}` : `wrote ${out}: ${agent.status}. ${agent.reason ?? ""}`);
 // Playwright can keep the event loop alive after browser.close(); exit once the report is written.
 process.exit(0);

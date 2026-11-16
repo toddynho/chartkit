@@ -97,6 +97,7 @@ const entry: Record<string, string> = {
   validate: "src/validate.ts",
   options: "src/option-catalog.ts",
   "validate-phase4": "src/validate-phase4.ts",
+  "validate-convert": "src/foreign-convert.ts",
   mermaid: "src/mermaid.ts",
   "mermaid-phase4": "src/mermaid-phase4.ts",
   interact: "src/interact.ts",
@@ -150,6 +151,11 @@ export default defineConfig({
         build.onResolve({ filter: /^\.\/sampling-run$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
           return { path: "@chartkitdev/core/sampling", external: true };
+        });
+        // The converter entry uses the published validator instead of a second copy of it.
+        build.onResolve({ filter: /^\.\/validate$/ }, (args) => {
+          if (!/foreign-convert\.ts$/.test(args.importer)) return null;
+          return { path: "@chartkitdev/core/validate", external: true };
         });
         build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;

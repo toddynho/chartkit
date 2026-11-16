@@ -183,9 +183,8 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
       const px = typeof value === "string" ? /^(-?\d+(?:\.\d+)?)px$/.exec(value) : null;
       const wantsNumber = types.includes("number") || types.includes("integer");
       const hint = px && wantsNumber ? `use a number of px: ${Number(px[1])}` : undefined;
-      const coerced = px && wantsNumber ? Number(px[1]) : coerceScalar(value, types);
       const fix: JsonPatchOperation[] | undefined =
-        coerced !== undefined && path ? [{ op: "replace", path, value: coerced }] : undefined;
+        px && wantsNumber ? [{ op: "replace", path: path || "/", value: Number(px[1]) }] : undefined;
       emit(ctx, {
         code: "CK1006",
         severity: "error",
@@ -1125,50 +1124,6 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   }
   if (compact === "bubblemap" || folded === "map") return { type: "map-points", kind: "rename" };
   if (compact === "choroplethmap" || folded === "heat map of countries") return { type: "choropleth", kind: "rename" };
-  const simple = SIMPLE_ALIAS[compact];
-  if (simple) return { type: simple, kind: "rename" };
-  const stem = folded.replace(/ (chart|plot|graph|diagram)$/, "");
-  if (stem !== folded && stem) {
-    const kebab = stem.replace(/ /g, "-");
-    if ((CHART_TYPES as readonly string[]).includes(kebab)) return { type: kebab, kind: "rename" };
-    return aliasFor(kebab, root);
-  }
-  return undefined;
-}
-
-/** Names other libraries use for a ChartKit type. Keys are lower case with separators removed. */
-const SIMPLE_ALIAS: Record<string, string> = {
-  doughnut: "donut",
-  column: "bar",
-  columns: "bar",
-  horizontalbar: "bar",
-  verticalbar: "bar",
-  hbar: "bar",
-  barh: "bar",
-  bubble: "scatter",
-  scatterplot: "scatter",
-  ohlc: "candlestick",
-  candle: "candlestick",
-  stock: "candlestick",
-  number: "kpi",
-  stat: "kpi",
-  bignumber: "kpi",
-  singlevalue: "kpi",
-  scorecard: "kpi",
-  progress: "progress-ring",
-  progresscircle: "progress-ring",
-  radialprogress: "progress-ring",
-};
-
-/** A scalar of the wrong JSON type that converts without guessing: "12" to 12, "true" to true, 12 to "12". */
-function coerceScalar(value: unknown, types: string[]): unknown {
-  if (typeof value === "string") {
-    const text = value.trim();
-    if ((types.includes("number") || (types.includes("integer") && /^-?\d+$/.test(text))) && /^-?\d+(?:\.\d+)?$/.test(text)) return Number(text);
-    if (types.includes("boolean") && (text === "true" || text === "false")) return text === "true";
-    return undefined;
-  }
-  if (typeof value === "number" && Number.isFinite(value) && types.length === 1 && types[0] === "string") return String(value);
   return undefined;
 }
 
@@ -2753,17 +2708,6 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     return;
   }
   if (path === "" && concatViews(ctx.rootValue) && (name === "type" || name === "data" || name === "encoding" || name === "metric")) return;
-  if (path === "" && name === "version") {
-    emit(ctx, {
-      code: "CK1003",
-      severity: "error",
-      message: 'missing required property "version"',
-      path: "",
-      hint: 'add "version": "1"',
-      fix: [{ op: "add", path: "/version", value: "1" }],
-    });
-    return;
-  }
   if (path === "" && name === "type") {
     emit(ctx, {
       code: "CK1003",
@@ -2782,6 +2726,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     message: `missing required property ${quote(name)}`,
     path: pointer,
     hint: typeHint ?? (name === "alt" ? "describe the key takeaway in one sentence" : undefined),
+    fix: path === "" && name === "version" ? [{ op: "add", path: "/version", value: "1" }] : undefined,
   });
   void parent;
 }

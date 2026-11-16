@@ -103,6 +103,21 @@ describe("MCP tools", () => {
     });
   });
 
+  it("repair converts a Chart.js config with the on-demand converter", async () => {
+    await withClient(async (client) => {
+      const chartjs = { type: "bar", data: { labels: ["Jan", "Feb"], datasets: [{ label: "Revenue", data: [120, 150] }] } };
+      const repaired = payload((await client.callTool({ name: "repair", arguments: { spec: chartjs } })) as ToolText) as {
+        ok: boolean;
+        spec: { type?: string; data?: unknown[]; encoding?: unknown };
+      };
+      expect(repaired.ok).toBe(true);
+      expect(repaired.spec.type).toBe("bar");
+      expect(repaired.spec.data).toEqual([{ label: "Jan", Revenue: 120 }, { label: "Feb", Revenue: 150 }]);
+      expect(repaired.spec.encoding).toEqual({ x: "label", y: "Revenue" });
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+  });
+
   it("repairs the broken spec, then renders the repaired chart", async () => {
     await withClient(async (client) => {
       const repaired = payload((await client.callTool({ name: "repair", arguments: { spec: broken } })) as ToolText) as {

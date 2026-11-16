@@ -15,6 +15,7 @@ const entries = {
   "@chartkitdev/core/charts/bar-list": join(core, "charts/bar-list.ts"),
   "@chartkitdev/core/validate": join(core, "validate.ts"),
   "@chartkitdev/core/validate/phase4": join(core, "validate-phase4.ts"),
+  "@chartkitdev/core/validate/convert": join(core, "foreign-convert.ts"),
 };
 
 await esbuild.build({

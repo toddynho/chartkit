@@ -1,4 +1,4 @@
-// Re-score recorded ChartKit first answers with the current validate() and repair().
+// Re-score recorded ChartKit first answers with the current validate() and repairAsync().
 // No model calls and no API key. It answers "would today's repair() have passed that first answer?"
 // Usage: node bench/agent/replay.mjs [results.jsonl ...] [--all]
 import { mkdirSync, readFileSync } from "node:fs";
@@ -38,7 +38,7 @@ export async function replayRows(suite, rows) {
       continue;
     }
     const raw = await check(spec, task);
-    const fixed = suite.repair(spec);
+    const fixed = await suite.repairAsync(spec);
     const after = await check(fixed.spec, task);
     const failed = Object.entries(after.stages).filter(([, stage]) => !stage.ok).map(([name, stage]) => (stage.errors?.length ? `${name}: ${stage.errors.join(" | ")}` : name));
     out.push({ id: row.id, raw: raw.ok, repaired: after.ok, failed });

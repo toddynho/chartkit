@@ -1,7 +1,6 @@
 import schemaJson from "./generated/schema.runtime.json";
 import { toResult, type Diagnostic, type JsonPatchOperation, type ValidationResult } from "./diagnostics";
-import { foreignShapes } from "./foreign";
-import { applyPatch, parseLoose } from "./repair";
+import { applyPatch } from "./repair";
 import { semanticChecks } from "./semantic";
 import { walkSchema } from "./walker";
 
@@ -46,21 +45,6 @@ function validateLevel(spec: unknown, data: unknown, depth: number): ValidationR
   } else {
     semanticChecks(spec, diagnostics);
   }
-
-  // Chart.js, ECharts, Plotly, Vega-Lite, and Recharts shapes: one error with a converting fix.
-  // A local note only explains an error the schema already raised. It never fails a valid spec.
-  let foreign = foreignShapes(spec);
-  if (foreign.some((note) => note.whole)) diagnostics.length = 0;
-  else if (foreign.some((note) => note.stop)) {
-    for (let index = 0; index < diagnostics.length; index += 1) diagnostics[index] = { ...diagnostics[index], fix: undefined };
-  } else if (foreign.length) {
-    foreign = foreign.filter((note) => diagnostics.some((item) => item.severity === "error" && note.covers?.(item)));
-    for (let index = diagnostics.length - 1; index >= 0; index -= 1) {
-      if (foreign.some((note) => note.covers?.(diagnostics[index]))) diagnostics.splice(index, 1);
-    }
-  }
-  for (const note of foreign) diagnostics.push(note.diagnostic);
-  deferAltFix(diagnostics);
 
   const phase4 = phase4Type(spec);
   if (phase4) {
@@ -122,26 +106,20 @@ export interface RepairResult extends ValidationResult {
 }
 
 const MAX_REPAIR_ROUNDS = 8;
-/**
- * Warnings whose patch writes what render already does with the value: drop an option that has
- * no effect, clamp to the range render clamps to, or name the fallback render uses.
- * Applying them leaves the drawn chart the same.
- */
-const FALLBACK_REPAIR = ["CK3019", "CK3034", "CK3035", "CK3036", "CK3042", "CK3043", "CK3072", "CK3125", "CK3126", "CK3127", "CK3128", "CK3129", "CK3131"];
-const STRIP_REPAIR = new Set([...FALLBACK_REPAIR, "CK3090", "CK3091", "CK3092", "CK3093", "CK3094", "CK3096", "CK3098", "CK3099", "CK3100", "CK3101", "CK3107", "CK3111", "CK3112", "CK3116", "CK3119", "CK3120", "CK3121", "CK3122", "CK3123", "CK3124", "CK3132", "CK3133", "CK3134", "CK3135"]);
+const STRIP_REPAIR = new Set(["CK3090", "CK3091", "CK3092", "CK3093", "CK3094", "CK3096", "CK3098", "CK3099", "CK3100", "CK3101", "CK3107", "CK3111", "CK3112", "CK3116", "CK3119", "CK3120", "CK3121", "CK3122", "CK3123", "CK3124", "CK3132", "CK3133", "CK3134", "CK3135"]);
 
 /**
  * Apply the validator's safe JSON Patch fixes and revalidate.
  * Stops when the spec is valid, when no patch still applies, or after a few rounds.
  * Patches whose path is already gone are skipped. Nothing is invented beyond `fix`.
- * A string is parsed leniently first: a Markdown fence, comments, trailing commas,
- * single quotes, and bare keys are accepted. `validate()` stays strict JSON.
  */
 export function repair(spec: unknown, data?: unknown): RepairResult {
   if (typeof spec === "string") {
-    const parsed = parseLoose(spec);
-    if (parsed === undefined) return { spec, ...validate(spec, data), applied: [] };
-    spec = parsed;
+    try {
+      spec = JSON.parse(spec) as unknown;
+    } catch {
+      return { spec, ...validate(spec, data), applied: [] };
+    }
   }
 
   let current = structuredClone(spec);
@@ -161,7 +139,7 @@ export function repair(spec: unknown, data?: unknown): RepairResult {
     result = next;
   }
 
-  // Strip and render-fallback warnings carry a safe patch. repair() otherwise applies error patches only.
+  // Strip warnings carry a safe patch. repair() otherwise applies error patches only.
   if (result.ok) {
     const ops = result.warnings.filter((warning) => STRIP_REPAIR.has(warning.code)).flatMap((warning) => warning.fix ?? []);
     let changed = false;
@@ -175,22 +153,6 @@ export function repair(spec: unknown, data?: unknown): RepairResult {
   }
 
   return { spec: current, ...result, applied };
-}
-
-const SHAPE_PATH = /^\/(?:type|encoding|data|metric)(?:\/|$)/;
-
-/**
- * The suggested alt names the chart type and fields. While another fix still changes those,
- * the alt fix waits a round so it is not written from the old shape ("column chart of ...").
- */
-function deferAltFix(diagnostics: Diagnostic[]): void {
-  const reshaping = diagnostics.some((item) => item.severity === "error" && item.fix?.some((op) => SHAPE_PATH.test(op.path) || op.path === ""));
-  if (!reshaping) return;
-  for (let index = 0; index < diagnostics.length; index += 1) {
-    const item = diagnostics[index];
-    const alt = (item.code === "CK1004" && item.path === "/a11y") || (item.code === "CK1006" && item.path === "/a11y/alt");
-    if (alt && item.fix) diagnostics[index] = { ...item, fix: undefined };
-  }
 }
 
 function sameErrors(a: ValidationResult, b: ValidationResult): boolean {

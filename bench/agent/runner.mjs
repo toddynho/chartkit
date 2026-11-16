@@ -1,6 +1,6 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { CODE_LIBRARIES } from "./capabilities.mjs";
-import { LIBRARY_LABEL, checkChartKit, checkSupp, executeAnswer, extractJson, extractModule, libraryUse, promptFor, repair, scoreModule } from "./check.mjs";
+import { LIBRARY_LABEL, checkChartKit, checkSupp, executeAnswer, extractJson, extractModule, libraryUse, promptFor, repairAsync, scoreModule } from "./check.mjs";
 import { docsManifest } from "./docs.mjs";
 import { askModel, selectProvider } from "./provider.mjs";
 import { scoreAgent } from "./score.mjs";
@@ -111,7 +111,7 @@ function addUsage(sum, usage) {
   };
 }
 
-/** repair() is local. A pass here does not spend another model call. */
+/** repairAsync() is local: repair() plus the on-demand converters. A pass here does not spend another model call. */
 async function chartkitRepairPasses(attemptResult, task) {
   if (!attemptResult || attemptResult.ok) return false;
   let spec;
@@ -120,7 +120,7 @@ async function chartkitRepairPasses(attemptResult, task) {
   } catch {
     return false;
   }
-  const fixed = repair(spec);
+  const fixed = await repairAsync(spec);
   if (!fixed?.spec) return false;
   const checked = typeof task.pass === "function" ? await checkSupp(fixed.spec, task) : checkChartKit(fixed.spec, task);
   return checked.ok === true;

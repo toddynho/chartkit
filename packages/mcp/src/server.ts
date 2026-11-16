@@ -58,11 +58,11 @@ export function createServer(): McpServer {
     {
       title: "Repair a ChartKit spec",
       description:
-        "Apply the safe JSON Patch fixes from @chartkitdev/core repair() and revalidate. Returns that function's result: spec, ok, diagnostics, errors, warnings, and applied. The input spec is not mutated. Fixes that the validator did not provide are not invented. Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs are converted, and a string may carry a Markdown fence, comments, or trailing commas.",
+        "Apply the safe JSON Patch fixes from @chartkitdev/core/validate/convert repairAsync() and revalidate. Returns that function's result: spec, ok, diagnostics, errors, warnings, and applied. The input spec is not mutated. Fixes that the validator did not provide are not invented. Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs are converted, and a string may carry a Markdown fence, comments, or trailing commas.",
       inputSchema: { spec: specField },
       annotations: READ_ONLY,
     },
-    async ({ spec }) => text(repairSpec(spec)),
+    async ({ spec }) => text(await repairSpec(spec)),
   );
 
   server.registerTool(
