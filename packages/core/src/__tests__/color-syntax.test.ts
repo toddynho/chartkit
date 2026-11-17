@@ -38,10 +38,10 @@ describe("legacy rgba colour syntax", () => {
     for (const item of shipped) {
       for (const color of strings(item)) expect(color).not.toMatch(MODERN_COLOR);
     }
-    expect(auto.grid).toBe("light-dark(rgba(0, 0, 0, 0.16), rgba(245, 245, 247, 0.22))");
-    expect(auto.axis).toBe("light-dark(rgba(0, 0, 0, 0.14), rgba(245, 245, 247, 0.16))");
+    expect(auto.grid).toBe("light-dark(rgba(0, 0, 0, 0.09), rgba(245, 245, 247, 0.12))");
+    expect(auto.axis).toBe("light-dark(rgba(0, 0, 0, 0.2), rgba(245, 245, 247, 0.24))");
     expect(auto.track).toBe("light-dark(rgba(0, 0, 0, 0.10), rgba(245, 245, 247, 0.16))");
-    expect(css).toContain("rgba(0, 0, 0, 0.16)");
+    expect(css).toContain("rgba(0, 0, 0, 0.09)");
     expect(css).toContain("rgba(245, 245, 247, 0.16)");
   });
 
@@ -76,8 +76,8 @@ describe("legacy rgba colour syntax", () => {
       expect(svg).not.toMatch(MODERN_COLOR);
       expect(svg).not.toContain(" / ");
     }
-    expect(line).toContain("rgba(0, 0, 0, 0.16)");
-    expect(line).toContain("rgba(245, 245, 247, 0.22)");
+    expect(line).toContain("rgba(0, 0, 0, 0.09)");
+    expect(line).toContain("rgba(245, 245, 247, 0.12)");
     expect(gauge).toContain("light-dark(#6e6e73, #98989d)");
     expect(gauge).not.toContain("rgba(0, 0, 0, 0.10)");
   });

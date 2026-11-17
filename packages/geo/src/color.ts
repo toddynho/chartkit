@@ -4,7 +4,7 @@ import type { ColorScaleName } from "./types";
 const SEQUENTIAL = ["#43a047", "#238b45", "#006d2c"];
 const DIVERGING = ["#b2182b", "#f7f7f7", "#2166ac"];
 /** Soft negative, surface, and accent. Dark middle is surface #2c2c2e. */
-export const SOFT_DIVERGING = ["light-dark(#be123c, #ff453a)", "light-dark(#f5f5f7, #2c2c2e)", "light-dark(#007aff, #0a84ff)"];
+export const SOFT_DIVERGING = ["light-dark(#be123c, #ff453a)", "light-dark(#f5f5f7, #2c2c2e)", "light-dark(#2f6fe4, #4a8ff0)"];
 const THRESHOLD = ["#f7f7f7", "#c7e9c0", "#74c476", "#238b45", "#00441b"];
 
 function channel(hex: string, index: number): number {

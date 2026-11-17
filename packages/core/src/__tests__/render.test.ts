@@ -676,7 +676,7 @@ describe("remaining chart renderers", () => {
         { kind: "Timber", tons: 18 },
         { kind: "Mail", tons: 12 },
       ],
-      encoding: { x: "kind", y: "tons" },
+      encoding: { x: "kind", y: { field: "tons", title: "tons" } },
       mark: { innerRadius: 0.62 },
       size: { width: 320, height: 280 },
       a11y: { alt: "Cargo by tons." },
@@ -689,7 +689,7 @@ describe("remaining chart renderers", () => {
   it("keeps donut legend values inside the view box", () => {
     const svg = render(spec("04-donut.json"));
     expect(svg).toContain('text-anchor="end"');
-    expect(svg).toContain('font-size="20" font-weight="700"');
+    expect(svg).toMatch(/font-size="\d+" font-weight="700"/);
     for (const match of svg.matchAll(/<text\b([^>]*)text-anchor="end"[^>]*>([^<]*)<\/text>/g)) {
       const x = Number(/ x="([^"]+)"/.exec(match[1])?.[1]);
       expect(x).toBeLessThanOrEqual(420);

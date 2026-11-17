@@ -31,7 +31,7 @@ function dark(preset: PresetTokens): boolean {
 }
 
 const LIGHT_STOPS: Record<string, string[]> = {
-  blue: ["#dbeafe", "#007aff"],
+  blue: ["#dbeafe", "#2f6fe4"],
   teal: ["#ccfbf1", "#0d9488", "#134e4a"],
   orange: ["#ffedd5", "#ff9500", "#9a3412"],
   violet: ["#ede9fe", "#7c3aed", "#4c1d95"],
@@ -48,9 +48,9 @@ function schemeStops(name: string, preset: PresetTokens, diverging: boolean): st
   if (diverging) {
     if (dark(preset)) return ["#38bdf8", "#a1a1aa", "#fb923c"];
     if (preset.background.includes("light-dark(") || !hex(preset.background)) {
-      return ["light-dark(#007aff, #38bdf8)", "light-dark(#767676, #a1a1aa)", "light-dark(#c2410c, #fb923c)"];
+      return ["light-dark(#2f6fe4, #38bdf8)", "light-dark(#767676, #a1a1aa)", "light-dark(#c2410c, #fb923c)"];
     }
-    return ["#007aff", "#767676", "#c2410c"];
+    return ["#2f6fe4", "#767676", "#c2410c"];
   }
   const scheme = SCHEMES.has(name) ? name : "blue";
   const light = LIGHT_STOPS[scheme] ?? LIGHT_STOPS.blue;
@@ -60,7 +60,7 @@ function schemeStops(name: string, preset: PresetTokens, diverging: boolean): st
     const count = Math.max(light.length, night.length);
     const stops: string[] = [];
     for (let i = 0; i < count; i++) {
-      const left = light[Math.min(light.length - 1, i)] ?? "#007aff";
+      const left = light[Math.min(light.length - 1, i)] ?? "#2f6fe4";
       const right = night[Math.min(night.length - 1, i)] ?? "#38bdf8";
       stops.push(left.toLowerCase() === right.toLowerCase() ? left : `light-dark(${left}, ${right})`);
     }
@@ -163,12 +163,12 @@ function nudge(color: string, card: string): string {
 }
 
 function sample(stops: string[], t: number): string {
-  if (stops.length === 0) return "#007aff";
-  if (stops.length === 1) return stops[0] ?? "#007aff";
+  if (stops.length === 0) return "#2f6fe4";
+  if (stops.length === 1) return stops[0] ?? "#2f6fe4";
   const u = Math.min(1, Math.max(0, t));
   const scaled = u * (stops.length - 1);
   const index = Math.min(stops.length - 2, Math.floor(scaled));
-  return mix(stops[index] ?? stops[0] ?? "#007aff", stops[index + 1] ?? stops[index] ?? "#007aff", scaled - index);
+  return mix(stops[index] ?? stops[0] ?? "#2f6fe4", stops[index + 1] ?? stops[index] ?? "#2f6fe4", scaled - index);
 }
 
 function numbers(scale: Record<string, unknown> | undefined, key: string): number[] {
@@ -258,12 +258,12 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   let swatches: string[] = [];
   if (kind === "quantize") {
     swatches = binSwatches(bins, preset, 0);
-    paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
+    paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#2f6fe4";
   } else if (kind === "threshold") {
     swatches = binSwatches(cuts.length + 1, preset, coolBins(min, max, cuts.length + 1, cuts));
     paint = (value) => {
       const index = cuts.findIndex((edge) => value < edge);
-      return swatches[index < 0 ? cuts.length : index] ?? swatches[0] ?? "#007aff";
+      return swatches[index < 0 ? cuts.length : index] ?? swatches[0] ?? "#2f6fe4";
     };
   } else {
     paint = (value) => sample(stops, unit(value));
