@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Smaller install: 2.7 MB packed, 12.0 MB unpacked (was 3.7 MB and 15.7 MB). The ESM `charts/*`, `themes/*` and helper entries share code through `dist/chunk-*.js`. Import paths, types and the CJS files are unchanged. Two things follow for ESM: chart entries loaded on demand no longer each carry a renderer, and `fromMermaidAsync` from `@chartkitdev/core/mermaid` now returns gantt, timeline, journey, venn and quadrant specs (the built `mermaid/phase4` entry used to register into its own copy of the parser; the CJS build still does).
 - Soft default look. One series palette for fills and strokes, so a series keeps its colour across chart types: `#2f6fe4 #e2622a #0f9d83 #b7791f #d9488f #3f8f2f #8b5cf6 #d14343` on light, `#4a8ff0 #e06a35 #1aa37e #c08318 #dd5f97 #4aa040 #9180ea #e66767` on dark. Neighbours stay apart under protan and deutan simulation and every step clears 3:1 on its page. The grid is lighter (9% black, 12% white) and the axis line firmer. `--ck-series-N`, `--ck-line-N` and `theme.tokens` still override all of it.
 - Line, bar, stacked-area and combo default to 640×320 when the spec has no `size` (was 640×240).
 - A category axis shows up to twelve labels when they fit, so twelve months are no longer thinned to six.
