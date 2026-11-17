@@ -282,6 +282,9 @@ code {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
+  /* The lockup aligns box bottoms; this puts the tag on the wordmark's baseline. */
+  position: relative;
+  top: -1.5px;
 }
 
 .primary {
@@ -293,7 +296,15 @@ code {
 }
 
 .site-header--docs .primary { margin-left: 0; justify-content: flex-end; gap: 18px; flex: none; }
-.site-header--docs .docs-search { flex: 1 1 220px; max-width: 360px; margin: 0 auto; min-width: 0; }
+/* Search starts where the article text starts: sidebar column + article padding (docs.css). */
+.site-header--docs .brand { min-width: calc(264px + 48px - var(--gutter) - 20px); }
+.site-header--docs .docs-search { flex: 1 1 220px; max-width: 360px; margin: 0 auto 0 0; min-width: 0; }
+@media (max-width: 1100px) {
+  .site-header--docs .brand { min-width: calc(240px + 48px - var(--gutter) - 20px); }
+}
+@media (max-width: 760px) {
+  .site-header--docs .brand { min-width: 0; }
+}
 .site-header--docs .star-chip { white-space: nowrap; flex: none; }
 
 .primary a {
