@@ -361,9 +361,10 @@ function stages(trace, first) {
 }
 
 const round = (value) => Math.round(value * 100) / 100;
+/** The last commit that changed the source being timed, so the id still exists after this branch is squashed. */
 function commitOf() {
   try {
-    return execSync("git rev-parse --short HEAD", { cwd: root }).toString().trim();
+    return execSync("git log -1 --format=%h -- .", { cwd: SRC }).toString().trim();
   } catch {
     return "unknown";
   }
