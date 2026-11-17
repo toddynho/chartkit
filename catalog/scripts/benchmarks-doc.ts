@@ -13,6 +13,8 @@ import {
   firstHoverRows,
   headline,
   hoverMarkdown,
+  hoverMeta,
+  hoverMethod,
   hoverRows,
   published,
   samplingRows,
@@ -39,6 +41,7 @@ export function benchmarksPayload() {
     methodology: {
       browser: "Playwright Chromium, a 640×360 line, median of 5. Shapes are even x, jittered x, and gapped timestamps. ChartKit initial is mount(); the aligned update is mount().update().",
       updates: updateMethod,
+      hover: hoverMethod,
       sampling:
         "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
       bundle:
@@ -53,7 +56,7 @@ export function benchmarksPayload() {
       allGzipBytes: phase4.allBytes,
       lineGzipCommit: headline.sizeCommit,
       lineGzipMeasured: headline.sizeMeasured,
-      otherFigures: "browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Bundle and SSR are the phase 4 matrices.",
+      otherFigures: `browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Bundle and SSR are the phase 4 matrices. Hover is ${hoverMeta.script}, measured ${hoverMeta.measured} on ${hoverMeta.commit}.`,
       bundleVsUplot: {
         chartkitBytes: published.sizeScriptLineBytes,
         uplotJsBytes: Number(headline.uplotJsBytes.replace(/,/g, "")),
@@ -70,6 +73,7 @@ export function benchmarksPayload() {
     sizeScriptLineBytes: published.sizeScriptLineBytes,
     browserMs: published.browser,
     samplingNoneMs: published.samplingNone,
+    hover: hoverMeta,
     hoverSteady100k: published.hoverSteady100k,
     firstHoverPainted: published.firstHoverPainted,
     ssrMs: published.ssr,
@@ -173,10 +177,10 @@ export function benchmarksMarkdown(): string {
     )
     .join("\n");
   const hover = doc.hoverSteady100k
-    .map((row) => `| ${row.lib} | ${row.tipMs} | ${row.paintedMs} | ${row.p95Ms} |`)
+    .map((row) => `| ${row.lib} | ${ms(row.handlerMs)} | ${ms(row.paintedMs)} | ${ms(row.p95Ms)} |`)
     .join("\n");
   const firstHover = doc.firstHoverPainted
-    .map((row) => `| ${row.afterMountMs} | ${row.chartkit} | ${row.chartkitMax} | ${row.uplot} | ${row.uplotMax} |`)
+    .map((row) => `| ${row.afterMountMs} | ${ms(row.chartkit)} | ${ms(row.chartkitP95)} | ${ms(row.chartkitHandler)} | ${ms(row.uplot)} | ${ms(row.uplotP95)} | ${ms(row.uplotHandler)} |`)
     .join("\n");
   const sampling = doc.samplingNoneMs
     .map((row) => `| ${row.points.toLocaleString("en-US")} | ${row.initialMs} | ${row.updateMs} |`)
@@ -258,17 +262,21 @@ ${browserRivalsOmitted}
 
 ## Hover
 
-${hoverMarkdown(hoverRows, firstHoverRows).steady}
-
-| Library | Tip ms | Painted median ms | Painted p95 ms |
-| --- | ---: | ---: | ---: |
-${hover}
+${hoverMethod}
 
 ${hoverMarkdown(hoverRows, firstHoverRows).fresh}
 
-| After mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |
-| ---: | ---: | ---: | ---: | ---: |
+| Ms after mount | ChartKit painted | ChartKit p95 | ChartKit handler | uPlot painted | uPlot p95 | uPlot handler |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${firstHover}
+
+${hoverMarkdown(hoverRows, firstHoverRows).steady}
+
+| Library | Handler ms | Painted median ms | Painted p95 ms |
+| --- | ---: | ---: | ---: |
+${hover}
+
+Chart.js, Observable Plot, Recharts and ECharts had rows in the round 13 hover table. No script in the repository reproduces those rows, so they are gone. \`${hoverMeta.script}\` times ChartKit and uPlot.
 
 ## Sampling none, ChartKit only, fair timer
 

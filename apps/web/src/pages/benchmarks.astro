@@ -206,19 +206,25 @@ const description =
       <table>
         <thead>
           <tr>
-            <th>Library</th>
-            <th class="num">Tip ms</th>
-            <th class="num">Painted median ms</th>
-            <th class="num">Painted p95 ms</th>
+            <th>First hover</th>
+            <th class="num">ChartKit painted ms</th>
+            <th class="num">ChartKit p95</th>
+            <th class="num">ChartKit handler</th>
+            <th class="num">uPlot painted ms</th>
+            <th class="num">uPlot p95</th>
+            <th class="num">uPlot handler</th>
           </tr>
         </thead>
         <tbody>
-          {page.hoverRows.map((row) => (
+          {page.firstHoverRows.map((row) => (
             <tr>
-              <td>{row.lib}</td>
-              <td class="num">{row.tip}</td>
-              <td class="num">{row.painted}</td>
-              <td class="num">{row.p95}</td>
+              <td>{row.delay}</td>
+              <td class="num">{row.ck}</td>
+              <td class="num">{row.ckP95}</td>
+              <td class="num">{row.ckHandler}</td>
+              <td class="num">{row.uplot}</td>
+              <td class="num">{row.uplotP95}</td>
+              <td class="num">{row.uplotHandler}</td>
             </tr>
           ))}
         </tbody>
@@ -228,26 +234,25 @@ const description =
       <table>
         <thead>
           <tr>
-            <th>First hover</th>
-            <th class="num">ChartKit painted</th>
-            <th class="num">ChartKit max</th>
-            <th class="num">uPlot painted</th>
-            <th class="num">uPlot max</th>
+            <th>Steady hover</th>
+            <th class="num">Handler ms</th>
+            <th class="num">Painted median ms</th>
+            <th class="num">Painted p95 ms</th>
           </tr>
         </thead>
         <tbody>
-          {page.firstHoverRows.map((row) => (
+          {page.hoverRows.map((row) => (
             <tr>
-              <td>{row.delay}</td>
-              <td class="num">{row.ck}</td>
-              <td class="num">{row.ckMax}</td>
-              <td class="num">{row.uplot}</td>
-              <td class="num">{row.uplotMax}</td>
+              <td>{row.lib}</td>
+              <td class="num">{row.handler}</td>
+              <td class="num">{row.painted}</td>
+              <td class="num">{row.p95}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+    <p>{page.hoverMethod}</p>
 
     <h2>Downsampling</h2>
     <div class="note">

@@ -573,8 +573,9 @@ function canvasLossLine(rows) {
 }
 
 /**
- * Round 13 line against uPlot: the aligned update, hover, and sampling none.
+ * Round 13 line against uPlot: the aligned update and sampling none, then hover.
  * These rows used to open README.md. Numbers come from catalog/public/benchmarks.json.
+ * Hover is not round 13: that file takes it from bench/results/hover.json and hover-50ms.json.
  */
 export function round13ReportLines() {
   const file = join(dirname(fileURLToPath(import.meta.url)), "../../catalog/public/benchmarks.json");
@@ -591,7 +592,7 @@ export function round13ReportLines() {
   const lines = [];
   lines.push(`## Line against uPlot, round ${bench.round}`);
   lines.push("");
-  lines.push(`Measured ${bench.measured} on \`${bench.core?.commit ?? "unknown"}\`. This is an older run than the tables above and it was not re-timed. Source: \`catalog/public/benchmarks.json\`, fields \`browserMs\`, \`hoverSteady100k\`, \`firstHoverPainted\`, and \`samplingNoneMs\`. Median of 5, Playwright Chromium, a 640×360 line, sampling auto.`);
+  lines.push(`Measured ${bench.measured} on \`${bench.core?.commit ?? "unknown"}\`. This is an older run than the tables above and it was not re-timed. Source: \`catalog/public/benchmarks.json\`, fields \`browserMs\` and \`samplingNoneMs\`. Median of 5, Playwright Chromium, a 640×360 line, sampling auto. The hover tables below are a newer run with their own protocol.`);
   lines.push("");
   lines.push("The aligned update starts at the top of a requestAnimationFrame, awaits the library's own completion, and reads the clock from a MessageChannel task after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`.");
   lines.push("");
@@ -603,18 +604,6 @@ export function round13ReportLines() {
   lines.push("");
   const lost = updateLosses.map((cell) => `${shape[cell.shape] ?? cell.shape} ${count(cell.points)} (${one(cell.chartkit.update)} vs ${one(cell.uplot.update)})`);
   lines.push(`ChartKit's initial render is faster in ${initialWins} of ${cells.length} cells. Every line above 1,000 points is sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The update is slower than uPlot in ${updateLosses.length} of ${cells.length} cells: ${lost.join(", ")}.`);
-  lines.push("");
-  lines.push("Hover at 100,000 points, painted median:");
-  lines.push("");
-  lines.push("| Library | Tip ms | Painted median ms | Painted p95 ms |");
-  lines.push("| --- | ---: | ---: | ---: |");
-  for (const row of steady) lines.push(`| ${row.lib} | ${one(row.tipMs)} | ${one(row.paintedMs)} | ${one(row.p95Ms)} |`);
-  lines.push("");
-  lines.push("First hover on a fresh 100,000-point chart is a loss to uPlot at every delay:");
-  lines.push("");
-  lines.push("| Ms after mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |");
-  lines.push("| ---: | ---: | ---: | ---: | ---: |");
-  for (const row of first) lines.push(`| ${row.afterMountMs} | ${one(row.chartkit)} | ${one(row.chartkitMax)} | ${one(row.uplot)} | ${one(row.uplotMax)} |`);
   lines.push("");
   lines.push("Sampling none draws every point. Round 13, ChartKit only:");
   lines.push("");
@@ -630,6 +619,33 @@ export function round13ReportLines() {
     lines.push(`The Browser render table above re-timed sampling none on a later commit (\`bench/results/paint.json\`, library \`ChartKit sampling none\`, field \`updateMs\`), and its update is much slower: ${later.join(" and ")}. The two runs time the update differently, and the gap has not been explained. For millions of raw points, use a GPU library.`);
   }
   lines.push("");
+  const hover = bench.hover;
+  if (hover && steady.length && first.length) {
+    const ck = steady.find((row) => row.lib === "ChartKit");
+    const up = steady.find((row) => row.lib === "uPlot");
+    lines.push("### Hover against uPlot");
+    lines.push("");
+    lines.push(bench.methodology?.hover ?? `Measured ${hover.measured} on \`${hover.commit}\` with \`${hover.script}\`.`);
+    lines.push("");
+    lines.push(`Source: ${hover.source.map((name) => `\`${name}\``).join(" and ")}, copied into \`catalog/public/benchmarks.json\` as \`hoverSteady100k\` and \`firstHoverPainted\`.`);
+    lines.push("");
+    lines.push("First hover on a fresh 100,000-point chart is a loss to uPlot in every row:");
+    lines.push("");
+    lines.push("| Ms after mount | ChartKit painted | ChartKit p95 | ChartKit handler | uPlot painted | uPlot p95 | uPlot handler |");
+    lines.push("| ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+    for (const row of first) lines.push(`| ${row.afterMountMs} | ${one(row.chartkit)} | ${one(row.chartkitP95)} | ${one(row.chartkitHandler)} | ${one(row.uplot)} | ${one(row.uplotP95)} | ${one(row.uplotHandler)} |`);
+    lines.push("");
+    if (ck && up) {
+      lines.push(`Steady hover at 100,000 points is level: ChartKit's painted median is ${one(ck.paintedMs)} ms and uPlot's is ${one(up.paintedMs)} ms, which is inside the run-to-run spread. uPlot's handler is shorter. uPlot places no tooltip and ChartKit does.`);
+      lines.push("");
+    }
+    lines.push("| Library | Handler ms | Painted median ms | Painted p95 ms |");
+    lines.push("| --- | ---: | ---: | ---: |");
+    for (const row of steady) lines.push(`| ${row.lib} | ${one(row.handlerMs)} | ${one(row.paintedMs)} | ${one(row.p95Ms)} |`);
+    lines.push("");
+    lines.push("The round 13 hover table also had Chart.js, Observable Plot, Recharts and ECharts. No script in the repository reproduces those rows, so they were removed.");
+    lines.push("");
+  }
   return lines;
 }
 

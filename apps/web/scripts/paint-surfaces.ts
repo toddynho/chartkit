@@ -314,6 +314,7 @@ function paintBenchmarks(): void {
     },
     browserClaim: benchmarks.uplotBrowserParagraph(benchmarks.browserRows),
     hoverClaim: benchmarks.hoverParagraph(benchmarks.hoverRows, benchmarks.firstHoverRows),
+    hoverMethod: benchmarks.hoverMethod.replace(/`/g, ""),
     samplingClaim: benchmarks.samplingParagraph(benchmarks.samplingRows),
     rivalsOmitted: benchmarks.browserRivalsOmitted,
   });
@@ -381,20 +382,17 @@ function paintHomeStory(): void {
   const sizeCaption = `Gzip bytes for the line, log scale, smaller toward the top. ${sizeBits.join(". ")}. createRenderer line, measured ${benchmarks.headline.sizeMeasured} on ${benchmarks.headline.sizeCommit}. ${benchmarks.headline.bundleLoss}`;
   const sizeAlt = `Line chart gzip. ${sizeBits.join(". ")}. uPlot is the smallest. ChartKit is next.`;
 
-  const hoverRows = [...benchmarks.published.hoverSteady100k].sort((a, b) => a.paintedMs - b.paintedMs);
-  const hoverBits = hoverRows.map((row) => `${row.lib} ${msLabel(row.paintedMs)} ms`);
-  const hoverChartkit = hoverRows.find((row) => row.lib === "ChartKit");
-  const hoverUplot = hoverRows.find((row) => row.lib === "uPlot");
-  const hoverGap =
-    hoverChartkit && hoverUplot ? Math.round((hoverChartkit.paintedMs - hoverUplot.paintedMs) * 10) / 10 : 0;
-  const hoverAhead =
-    hoverGap > 0
-      ? `uPlot is ${msLabel(hoverGap)} ms ahead of ChartKit.`
-      : hoverGap < 0
-        ? `ChartKit is ${msLabel(Math.abs(hoverGap))} ms ahead of uPlot.`
-        : "ChartKit and uPlot match.";
-  const hoverCaption = `Painted median at 100,000 points, log scale. ${hoverBits.join(". ")}. ${hoverAhead} Nivo is not in these hover rows.`;
-  const hoverAlt = `Steady hover at 100,000 points. ${hoverBits.join(". ")}.`;
+  // First hover at the hover script's default wait. It is the row ChartKit loses.
+  const firstHover = benchmarks.published.firstHoverPainted[benchmarks.published.firstHoverPainted.length - 1];
+  if (!firstHover) throw new Error("the hover run has no first hover row");
+  const hoverRows = [
+    { lib: "uPlot", paintedMs: firstHover.uplot },
+    { lib: "ChartKit", paintedMs: firstHover.chartkit },
+  ];
+  const hoverBits = hoverRows.map((row) => `${row.lib} ${row.paintedMs.toFixed(1)} ms`);
+  const steadyBits = benchmarks.published.hoverSteady100k.map((row) => `${row.lib} ${row.paintedMs.toFixed(1)} ms`);
+  const hoverCaption = `First hover on a 100,000 point line, painted median, ${firstHover.afterMountMs} ms after mount. ${hoverBits.join(". ")}. uPlot is faster. It places no tooltip and ChartKit does. Steady hover is level: ${steadyBits.join(", ")}. Measured ${benchmarks.hoverMeta.measured} with ${benchmarks.hoverMeta.script}.`;
+  const hoverAlt = `First hover at 100,000 points. ${hoverBits.join(". ")}. uPlot is faster.`;
 
   const ssrRows = benchmarks.published.ssr.filter(
     (row): row is (typeof benchmarks.published.ssr)[number] & { medianMs: number } => typeof row.medianMs === "number",
@@ -420,7 +418,7 @@ function paintHomeStory(): void {
     round: benchmarks.ROUND,
     measured: benchmarks.MEASURED,
     coreCommit: benchmarks.CORE_COMMIT,
-    lede: "Line gzip, steady hover, and server render from the published benchmark file. Paint by chart type is on the homepage and on Benchmarks.",
+    lede: "Line gzip, first hover, and server render from the published benchmark file. Paint by chart type is on the homepage and on Benchmarks.",
     lineGzipBytes: benchmarks.headline.lineGzipBytes,
     uplotJsBytes: benchmarks.headline.uplotJsBytes,
     uplotCssBytes: benchmarks.headline.uplotCssBytes,
@@ -435,7 +433,7 @@ function paintHomeStory(): void {
       ),
       painted(
         "hover",
-        "Hover at 100,000 points",
+        "First hover at 100,000 points",
         hoverCaption,
         comparisonSpec("home-hover-100k", hoverRows.map((row) => ({ lib: row.lib, value: row.paintedMs })), "Milliseconds", hoverAlt, 640, 340),
       ),

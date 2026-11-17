@@ -39,11 +39,12 @@ const scale = 150;
 const bench = {
   lineBytes: 32110,
   ssrMedianMs: 2.63,
-  hover: [
-    { after: 50, chartkit: 20.8, uplot: 4 },
-    { after: 200, chartkit: 15.9, uplot: 4.6 },
-    { after: 500, chartkit: 16.5, uplot: 4.9 },
-  ],
+  // bench/browser/hover.mjs through benchmarks.json: first hover on a 100,000 point line, painted median.
+  hover: (JSON.parse(readFileSync(join(repoRoot(), "catalog/public/benchmarks.json"), "utf8")) as { firstHoverPainted: { afterMountMs: number; chartkit: number; uplot: number }[] }).firstHoverPainted.map((row) => ({
+    after: row.afterMountMs,
+    chartkit: row.chartkit.toFixed(1),
+    uplot: row.uplot.toFixed(1),
+  })),
   even1k: { chartkit: 1.5, uplot: 1.2 },
 };
 
@@ -203,12 +204,12 @@ const description = `ChartKit against ${count} libraries. Median per library: ${
           </div>
           <div class="cmp-call">
             <div>
-              <strong>First hover must be a few milliseconds</strong>
+              <strong>First hover must be as fast as it can be</strong>
               <p>
-                ChartKit paints first hover in {bench.hover.map((row) => row.chartkit).join(", ")} ms. uPlot does it in {bench.hover.map((row) => row.uplot).join(", ")}.
+                ChartKit paints the first hover on a 100,000 point line in {bench.hover.map((row) => row.chartkit).join(" and ")} ms. uPlot does it in {bench.hover.map((row) => row.uplot).join(" and ")} ms ({bench.hover.map((row) => row.after).join(" and ")} ms after mount). uPlot places no tooltip.
               </p>
             </div>
-            <div class="cmp-call__n"><b>{bench.hover[0]?.uplot}</b><span>ms · uPlot, 50 ms after mount</span></div>
+            <div class="cmp-call__n"><b>{bench.hover[0]?.uplot}</b><span>ms · uPlot, {bench.hover[0]?.after} ms after mount</span></div>
           </div>
           <div class="cmp-call">
             <div>

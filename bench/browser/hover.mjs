@@ -22,13 +22,16 @@
  *   handler  to the end of the bubbling `mousemove`, so every synchronous listener and forced layout is in it.
  *   painted  to a MessageChannel task after the next animation frame, so style, layout and paint are in it.
  * Chromium runs with the frame-rate limit off, so `painted` is work and not a wait for vsync.
- * uPlot runs the same protocol when `uplot` resolves from bench/node_modules or `--uplot <dir>`.
+ * uPlot runs the same protocol when `uplot` resolves from bench/node_modules or `--uplot <dir>`. It runs with default options:
+ * a cursor crosshair, a hover point per series and its live legend. It has no tooltip. ChartKit fills and places one on every move.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
+import { machineInfo } from "../lib/machine.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../..");
@@ -69,7 +72,7 @@ if (BASE) sources.base = await bundleOf(resolve(BASE), "base");
 let uplot = null;
 for (const dir of [flag("uplot", ""), join(root, "bench/node_modules/uplot")]) {
   if (dir && existsSync(join(dir, "dist/uPlot.iife.min.js"))) {
-    uplot = { js: readFileSync(join(dir, "dist/uPlot.iife.min.js"), "utf8"), css: readFileSync(join(dir, "dist/uPlot.min.css"), "utf8") };
+    uplot = { version: JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).version, js: readFileSync(join(dir, "dist/uPlot.iife.min.js"), "utf8"), css: readFileSync(join(dir, "dist/uPlot.min.css"), "utf8") };
     break;
   }
 }
@@ -358,6 +361,13 @@ function stages(trace, first) {
 }
 
 const round = (value) => Math.round(value * 100) / 100;
+function commitOf() {
+  try {
+    return execSync("git rev-parse --short HEAD", { cwd: root }).toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
 function stats(values) {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -450,6 +460,11 @@ await browser.close();
 if (!PROFILE) {
   const result = {
     measured: new Date().toISOString().slice(0, 10),
+    commit: commitOf(),
+    machine: machineInfo(),
+    uplot: uplot
+      ? { version: uplot.version, setup: "Default options: cursor crosshair, a hover point per series, and the live legend under the plot. uPlot has no tooltip, so its moves place no tooltip. ChartKit's moves fill and place one." }
+      : null,
     method: `Playwright Chromium ${version}, frame-rate limit ${VSYNC ? "on" : "off"}, 640×360, fresh page per run. ${RUNS} runs per case: one first hover and one rested hover each, ${MOVES} steady moves each, 11 legend moves each on multi-series cases, ${GAP} ms apart. ${DELAY} ms between mount and the first move.${BASE ? " base is the --base checkout, and the two alternate run by run." : ""} Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.`,
     runs: RUNS,
     moves: MOVES,

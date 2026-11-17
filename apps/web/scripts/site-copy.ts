@@ -17,6 +17,9 @@ export interface WhenToUseFacts {
   harnessLineBytes: string;
   noDocsFirst: number;
   tokensOfficial: number;
+  /** Hover sentences built in catalog/lib/benchmarks.ts from the hover run. */
+  hoverPick: string;
+  hoverLoss: string;
 }
 
 export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
@@ -28,7 +31,7 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
     {
       question: "When should I pick another chart library?",
       answer:
-        "The static SVG does not paint tooltip, zoom, pan, brush, or animation. Those run in the client runtime. Keyboard, the data table, and legend clicks stay off unless set. Pick Recharts, Chart.js, ECharts, or Nivo for maps. Pick uPlot when the 1,000-point aligned update is the constraint: ChartKit loses even (1.5 vs 1.2), jittered (1.6 vs 1.4), and gapped (1.6 vs 1.4). Pick uPlot when first hover has to be a few milliseconds: ChartKit 20.8, 15.9, and 16.5 ms, uPlot 4, 4.6, and 4.9 ms.",
+        `The static SVG does not paint tooltip, zoom, pan, brush, or animation. Those run in the client runtime. Keyboard, the data table, and legend clicks stay off unless set. Pick Recharts, Chart.js, ECharts, or Nivo for maps. Pick uPlot when the 1,000-point aligned update is the constraint: ChartKit loses even (1.5 vs 1.2), jittered (1.6 vs 1.4), and gapped (1.6 vs 1.4). ${facts.hoverPick}`,
     },
     {
       question: "How large is a ChartKit line chart?",
@@ -45,7 +48,7 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
     {
       question: "Where does ChartKit lose?",
       answer:
-        "Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6: even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). Steady hover at 100k is 16.5 vs uPlot 16.2. First hover painted medians are 20.8, 15.9, and 16.5 ms against uPlot 4, 4.6, and 4.9. With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update.",
+        `Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6: even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${facts.hoverLoss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update.`,
     },
     {
       question: "How do I reproduce the numbers?",
@@ -163,6 +166,8 @@ export interface PerfFacts {
   measured: string;
   coreCommit: string;
   sizeCommit: string;
+  /** The hover rows are a newer run than the round: its date, commit and script. */
+  hover: { measured: string; commit: string; script: string };
   hoverSteady100k: HoverCell[];
   ssrMs: SsrCell[];
   browserMs: BrowserCell[];
@@ -192,7 +197,9 @@ export function perfBrief(libraryId: string, libraryName: string, bench: PerfFac
   const hoverChartkit = bench.hoverSteady100k.find((row) => row.lib === "ChartKit");
   const hover = bench.hoverSteady100k.find((row) => row.lib === name);
   if (hover && hoverChartkit) {
-    parts.push(`Steady hover at 100k, painted median: ChartKit ${hoverChartkit.paintedMs} ms, ${name} ${hover.paintedMs} ms.`);
+    parts.push(
+      `Hover is a newer run (${bench.hover.measured}, ${bench.hover.commit}, ${bench.hover.script}). Steady hover at 100k, painted median: ChartKit ${hoverChartkit.paintedMs.toFixed(1)} ms, ${name} ${hover.paintedMs.toFixed(1)} ms, which is level. ${name} places no tooltip in that run.`,
+    );
   }
   const ssrChartkit = bench.ssrMs.find((row) => row.lib === "ChartKit");
   const ssr = bench.ssrMs.find((row) => row.lib === name);
@@ -214,7 +221,7 @@ export function perfBrief(libraryId: string, libraryName: string, bench: PerfFac
     );
     const first = bench.firstHoverPainted;
     parts.push(
-      `First hover painted: ChartKit ${first.map((row) => row.chartkit).join(", ")} ms, uPlot ${first.map((row) => row.uplot).join(", ")} ms, at ${first.map((row) => row.afterMountMs).join(", ")} ms after mount.`,
+      `First hover is a loss in the same hover run: ChartKit ${first.map((row) => row.chartkit.toFixed(1)).join(", ")} ms painted, uPlot ${first.map((row) => row.uplot.toFixed(1)).join(", ")} ms, at ${first.map((row) => row.afterMountMs).join(", ")} ms after mount.`,
     );
   } else {
     parts.push("Browser millisecond rows are ChartKit vs uPlot only.");

@@ -43,6 +43,7 @@ interface BenchmarkFile {
     chartkit: { initial: number; update: number };
     uplot: { initial: number; update: number };
   }[];
+  hover: { measured: string; commit: string; script: string };
   hoverSteady100k: { lib: string; paintedMs: number }[];
   firstHoverPainted: { afterMountMs: number; chartkit: number; uplot: number }[];
   ssrMs: { lib: string; meanMs: number | null; medianMs: number | null; supported: boolean; points?: number }[];
@@ -134,7 +135,9 @@ export function perfParagraph(libraryId: string, libraryName: string): string {
   const hoverChartkit = bench.hoverSteady100k.find((row) => row.lib === "ChartKit");
   const hover = bench.hoverSteady100k.find((row) => row.lib === name);
   if (hover && hoverChartkit) {
-    parts.push(`Steady hover at 100k, painted median: ChartKit ${hoverChartkit.paintedMs} ms, ${name} ${hover.paintedMs} ms.`);
+    parts.push(
+      `Hover is a newer run, ${bench.hover.measured} on ${bench.hover.commit} with ${bench.hover.script}. Steady hover at 100k, painted median: ChartKit ${hoverChartkit.paintedMs.toFixed(1)} ms, ${name} ${hover.paintedMs.toFixed(1)} ms, which is level. ${name} places no tooltip in that run.`,
+    );
   }
   const ssrChartkit = bench.ssrMs.find((row) => row.lib === "ChartKit");
   const ssr = bench.ssrMs.find((row) => row.lib === name);
@@ -158,7 +161,7 @@ export function perfParagraph(libraryId: string, libraryName: string): string {
     );
     const first = bench.firstHoverPainted;
     parts.push(
-      `First hover painted medians: ChartKit ${first.map((row) => row.chartkit).join(", ")} ms against uPlot ${first.map((row) => row.uplot).join(", ")} at ${first.map((row) => row.afterMountMs).join(", ")} ms after mount.`,
+      `First hover is a loss, from the same hover run: painted medians are ChartKit ${first.map((row) => row.chartkit.toFixed(1)).join(", ")} ms against uPlot ${first.map((row) => row.uplot.toFixed(1)).join(", ")} ms at ${first.map((row) => row.afterMountMs).join(", ")} ms after mount.`,
     );
   } else {
     parts.push(`Browser initial and update rows in that file are ChartKit against uPlot only, so ${name} has no browser millisecond there.`);
