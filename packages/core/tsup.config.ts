@@ -114,13 +114,24 @@ const entry: Record<string, string> = {
 for (const name of charts) entry[`charts/${name}`] = `src/charts/${name}.ts`;
 for (const name of themes) entry[`themes/${name}`] = `src/themes/${name}.ts`;
 
-export default defineConfig({
-  entry,
+/**
+ * Entries whose ESM build stays one self-contained file, as every entry was before ESM splitting.
+ * Sharing chunks would grow what a bundler ships for them (gzip, measured from dist):
+ * - `all`, `validate`, `extra`: a shared chunk loses the per-entry dead-code pass, +0.6% to +2.8%.
+ * - `interact`, and `canvas/hydrate`, `interact-extra`, `export-menu`, which it loads through import() only:
+ *   Rollup and Vite put a module that a first chunk and a lazy chunk share into the first chunk,
+ *   so the tooltip entry grew by 1.3 kB.
+ * Each one costs its full size in the tarball, so add to this list only with a measurement.
+ */
+const standalone = ["all", "validate", "extra", "interact", "canvas/hydrate", "interact-extra", "export-menu"];
+const standaloneEntry: Record<string, string> = {};
+const sharedEntry: Record<string, string> = {};
+for (const [name, file] of Object.entries(entry)) (standalone.includes(name) ? standaloneEntry : sharedEntry)[name] = file;
+
+const shared = {
   format: ["cjs", "esm"],
-  dts: true,
-  splitting: false,
   sourcemap: true,
-  clean: true,
+  // No `clean`: the two builds below write into dist at the same time. `npm run build` empties dist first.
   treeshake: true,
   esbuildPlugins: [
     externalInteractExtra,
@@ -168,4 +179,20 @@ export default defineConfig({
       },
     },
   ],
-} satisfies Options);
+} satisfies Options;
+
+export default defineConfig([
+  {
+    ...shared,
+    entry: sharedEntry,
+    // Types for every entry come from this one build, so the .d.ts files do not depend on the split below.
+    dts: { entry },
+    // No `splitting` key, on purpose: tsup then splits ESM and leaves CJS unsplit.
+    // ESM entries share code through dist/chunk-*.js, so the renderer ships once and not once per chart.
+    // CJS stays one self-contained file per entry. A bundler cannot tree-shake a shared CJS chunk,
+    // so a one-chart require() would ship about 60% more (measured with tsup's CJS splitting).
+    // Shared chunks hold the registration side effects of features and themes/*.
+    // package.json lists ./dist/chunk-*.js under sideEffects so a bundler keeps a bare import of those entries.
+  },
+  { ...shared, entry: standaloneEntry, splitting: false },
+]);
