@@ -2,7 +2,7 @@
   "version": "1",
   "id": "soft-tree",
   "type": "tree",
-  "title": "One hierarchy",
+  "title": "Support org",
   "theme": {
     "preset": "soft",
     "tokens": {
@@ -16,20 +16,40 @@
   },
   "data": [
     {
-      "id": "Root",
+      "id": "Support",
       "parent": ""
     },
     {
-      "id": "A",
-      "parent": "Root"
+      "id": "Inbox",
+      "parent": "Support"
     },
     {
-      "id": "B",
-      "parent": "Root"
+      "id": "Docs",
+      "parent": "Support"
     },
     {
-      "id": "A1",
-      "parent": "A"
+      "id": "Billing",
+      "parent": "Support"
+    },
+    {
+      "id": "Triage",
+      "parent": "Inbox"
+    },
+    {
+      "id": "Replies",
+      "parent": "Inbox"
+    },
+    {
+      "id": "Guides",
+      "parent": "Docs"
+    },
+    {
+      "id": "Reference",
+      "parent": "Docs"
+    },
+    {
+      "id": "Invoices",
+      "parent": "Billing"
     }
   ],
   "encoding": {
@@ -37,6 +57,6 @@
     "parent": "parent"
   },
   "a11y": {
-    "alt": "Root has two children. A has one child."
+    "alt": "Support splits into Inbox, Docs, and Billing. Each of those has its own work."
   }
 }

@@ -18,11 +18,15 @@
     {
       "label": "Founded",
       "date": "2014-04-02",
+      "start": "2014-04-02",
+      "end": "2014-04-02",
       "kind": "event"
     },
     {
       "label": "First paid plan",
       "date": "2015-11-01",
+      "start": "2015-11-01",
+      "end": "2015-11-01",
       "kind": "event"
     },
     {
@@ -34,6 +38,8 @@
     {
       "label": "London office",
       "date": "2018-02-14",
+      "start": "2018-02-14",
+      "end": "2018-02-14",
       "kind": "event"
     },
     {
@@ -45,11 +51,15 @@
     {
       "label": "Series B",
       "date": "2021-06-01",
+      "start": "2021-06-01",
+      "end": "2021-06-01",
       "kind": "event"
     },
     {
       "label": "Public API",
       "date": "2023-03-20",
+      "start": "2023-03-20",
+      "end": "2023-03-20",
       "kind": "event"
     },
     {
@@ -61,6 +71,8 @@
     {
       "label": "ChartKit",
       "date": "2026-02-02",
+      "start": "2026-02-02",
+      "end": "2026-02-02",
       "kind": "event"
     }
   ],
