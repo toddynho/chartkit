@@ -79,7 +79,8 @@ export function hoverBench() {
     case: CASE,
     source: ["bench/results/hover.json", "bench/results/hover-50ms.json"],
     script: "bench/browser/hover.mjs",
-    machine: `${main.machine.cpu}, ${main.machine.platform}`,
+    // The two files must come from the same machine (checked above). Its name is not published.
+    machine: "one machine",
     uplotVersion: main.uplot.version,
     uplotSetup: main.uplot.setup,
     protocol: main.method,
