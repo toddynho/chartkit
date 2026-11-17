@@ -1,4 +1,4 @@
-import { headline, hoverFaq, published } from "./benchmarks";
+import { headline, hoverFaq, published, sampledNote } from "./benchmarks";
 
 export interface FaqItem {
   question: string;
@@ -30,7 +30,7 @@ export const whenToUseFaqs: FaqItem[] = [
   {
     question: "Where does ChartKit lose?",
     answer:
-      `Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6. The losses are even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${hoverFaq().loss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update on the fair timer.`,
+      `Round 13 initial render wins all 12 cells against uPlot. ${sampledNote} The aligned update wins 6 and loses 6. The losses are even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${hoverFaq().loss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update on the fair timer.`,
   },
   {
     question: "How do I reproduce the numbers?",

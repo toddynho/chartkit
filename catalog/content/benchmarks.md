@@ -18,7 +18,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 ## Headline
 
 - Line chart: **32,110 bytes** gzip, createRenderer of the line, measured 2026-10-29 on `55fc89d`. Bar is 33,686. Mini-area is 32,114. `/all` is 78,081. That is a loss to uPlot at 23,292 bytes of JS. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,054, still smaller than ChartKit. It is smaller than Chart.js (49,361), Recharts (96,168, React external), Nivo (96,550, React external), Observable Plot (97,695), and ECharts (162,948). The donut is 15,292 bytes and is smaller than Chart.js (46,913), ECharts (122,134), Recharts (90,046, React external), Nivo (75,494, React external), Highcharts (104,204), Plotly.js (1,477,742), Victory (61,082, React external), ApexCharts (169,473), Tremor (246,834), Vega-Lite (377,693), AG Charts (420,736), amCharts 5 (81,711), MUI X Charts (137,377, React external), and AntV G2 (407,348). uPlot, Observable Plot, visx, Google Charts, TradingView Lightweight Charts, and Mermaid have no donut.
-- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
+- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points.
 - Aligned update: ChartKit wins 6 of 12 aligned-update cells against uPlot and loses 6. Those losses are marked in the browser table.
 - Server render, 100,000 point line: **2.63 ms** median (mean 2.7 ms).
 - `repair()`, no model call, no docs: **21/42 → 42/42**. That agent run is 2026-10-16, not round 13.
@@ -115,7 +115,7 @@ This table renders 293 ok, 442 unsupported, 0 error, and 0 timeout cells. The re
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
-ChartKit wins every initial cell of the 12. The update column is the fair timer. 6 of those 12 cells are losses (6 wins), and they are marked in the result column.
+ChartKit wins every initial cell of the 12. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The update column is the fair timer. 6 of those 12 cells are losses (6 wins), and they are marked in the result column.
 
 | X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update | Result |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |

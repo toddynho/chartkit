@@ -48,7 +48,7 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
     {
       question: "Where does ChartKit lose?",
       answer:
-        `Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6: even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${facts.hoverLoss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update.`,
+        `Round 13 initial render wins all 12 cells against uPlot. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The aligned update wins 6 and loses 6: even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${facts.hoverLoss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update.`,
     },
     {
       question: "How do I reproduce the numbers?",
@@ -217,7 +217,7 @@ export function perfBrief(libraryId: string, libraryName: string, bench: PerfFac
     const initialWins = rows.filter((row) => row.chartkit.initial < row.uplot.initial).length;
     const updateSlower = rows.filter((row) => row.chartkit.update > row.uplot.update);
     parts.push(
-      `Browser cells are ChartKit vs uPlot only (${rows.length}). Initial render is faster in ${initialWins} of ${rows.length}. Aligned update is slower in ${updateSlower.length}: ${updateSlower.map((row) => `${shapeLabel(row.shape)} ${row.points.toLocaleString("en-US")} ${row.chartkit.update} vs ${row.uplot.update}`).join(", ")}.`,
+      `Browser cells are ChartKit vs uPlot only (${rows.length}). Initial render is faster in ${initialWins} of ${rows.length}. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. Aligned update is slower in ${updateSlower.length}: ${updateSlower.map((row) => `${shapeLabel(row.shape)} ${row.points.toLocaleString("en-US")} ${row.chartkit.update} vs ${row.uplot.update}`).join(", ")}.`,
     );
     const first = bench.firstHoverPainted;
     parts.push(
