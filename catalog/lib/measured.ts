@@ -157,7 +157,7 @@ export function perfParagraph(libraryId: string, libraryName: string): string {
     const initialWins = rows.filter((row) => row.chartkit.initial < row.uplot.initial).length;
     const updateSlower = rows.filter((row) => row.chartkit.update > row.uplot.update);
     parts.push(
-      `Browser initial and update rows in that file are ChartKit against uPlot only (${rows.length} cells). ChartKit’s initial render is faster in ${initialWins} of ${rows.length}. Aligned update is slower in ${updateSlower.length}: ${updateSlower.map((row) => `${shapeLabel(row.shape)} ${row.points.toLocaleString("en-US")} ${row.chartkit.update} vs ${row.uplot.update}`).join(", ")}.`,
+      `Browser initial and update rows in that file are ChartKit against uPlot only (${rows.length} cells). ChartKit’s initial render is faster in ${initialWins} of ${rows.length}. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. Aligned update is slower in ${updateSlower.length}: ${updateSlower.map((row) => `${shapeLabel(row.shape)} ${row.points.toLocaleString("en-US")} ${row.chartkit.update} vs ${row.uplot.update}`).join(", ")}.`,
     );
     const first = bench.firstHoverPainted;
     parts.push(

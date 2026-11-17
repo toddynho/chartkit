@@ -31,7 +31,7 @@ export const hoverMeta = {
   steadySecondRun: hoverRun.steadyOther,
 };
 
-export const hoverMethod = `Measured ${hoverRun.measured} on \`${hoverRun.commit}\` with \`${hoverRun.script}\`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, ${hoverRun.runs} fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and ${hoverRun.moves} steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (\`${hoverRun.source[0]}\`), the other 50 ms (\`${hoverRun.source[1]}\`). uPlot is ${hoverRun.uplotVersion} with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (${hoverRun.machine}). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.`;
+export const hoverMethod = `Measured ${hoverRun.measured} on \`${hoverRun.commit}\` with \`${hoverRun.script}\`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, ${hoverRun.runs} fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and ${hoverRun.moves} steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (\`${hoverRun.source[0]}\`), the other 50 ms (\`${hoverRun.source[1]}\`). uPlot is ${hoverRun.uplotVersion} with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine. The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.`;
 
 export const ROUND = 13;
 export const MEASURED = "2026-10-18";
@@ -112,7 +112,7 @@ export const initial1m: Race = {
   unit: "ms",
   alt: "At one million even points ChartKit’s initial render is 23.6 ms and uPlot’s is 26.5 ms. The aligned update is 10.7 ms against 11.2 ms.",
   caption:
-    "Even x. Initial 23.6 vs 26.5. Aligned update 10.7 vs 11.2. Jittered 1M is 24.4 vs 32.1 initial and 11.7 vs 13.0 update. Gapped 1M is 27.3 vs 29.1 initial and 11.5 vs 11.8 update.",
+    "Even x, sampling auto, so not a million drawn points. Initial 23.6 vs 26.5. Aligned update 10.7 vs 11.2. Jittered 1M is 24.4 vs 32.1 initial and 11.7 vs 13.0 update. Gapped 1M is 27.3 vs 29.1 initial and 11.5 vs 11.8 update.",
   rows: [
     { lib: "ChartKit", value: 23.6 },
     { lib: "uPlot", value: 26.5 },
@@ -305,6 +305,10 @@ function cellName(row: BrowserDisplay): string {
   return `${shapeShort(row.shape)} ${pointsShort(row.points)}`;
 }
 
+/** Said wherever the initial-render cells are counted: the large cells do not draw every point. */
+export const sampledNote =
+  "Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points.";
+
 /** ChartKit vs uPlot, from the published 12-cell table. */
 export function uplotBrowserParagraph(rows: readonly BrowserDisplay[]): string {
   const n = rows.length;
@@ -323,7 +327,7 @@ export function uplotBrowserParagraph(rows: readonly BrowserDisplay[]): string {
       : ` Slower initial cells: ${initialSlower.map((row) => `${cellName(row)} (${row.ckI} vs ${row.upI})`).join(", ")}.`;
   const millionText = million ? ` Even 1,000,000 points is ${million.ckI} ms vs ${million.upI} ms.` : "";
   const slowerList = updateSlower.map((row) => `${cellName(row)} (${row.ckU} vs ${row.upU})`).join(", ");
-  return `${initial}${initialLoss}${millionText} The aligned update is faster in ${updateFaster.length} of ${n} and slower in ${updateSlower.length}. The slower cells are ${slowerList}.`;
+  return `${initial}${initialLoss}${millionText} ${sampledNote} The aligned update is faster in ${updateFaster.length} of ${n} and slower in ${updateSlower.length}. The slower cells are ${slowerList}.`;
 }
 
 export function uplotHeadline(rows: readonly BrowserDisplay[]): { initial: string; update: string } {
@@ -334,8 +338,8 @@ export function uplotHeadline(rows: readonly BrowserDisplay[]): { initial: strin
   const million = rows.find((row) => row.shape === "Even" && row.points === "1,000,000");
   const initial =
     initialFaster === n
-      ? `ChartKit is faster than uPlot in all ${n} cells.${million ? ` Even 1,000,000 points is ${million.ckI} ms vs ${million.upI} ms.` : ""}`
-      : `ChartKit is faster than uPlot on the initial render in ${initialFaster} of ${n} cells.`;
+      ? `ChartKit is faster than uPlot in all ${n} cells.${million ? ` Even 1,000,000 points is ${million.ckI} ms vs ${million.upI} ms.` : ""} ${sampledNote}`
+      : `ChartKit is faster than uPlot on the initial render in ${initialFaster} of ${n} cells. ${sampledNote}`;
   return {
     initial,
     update: `ChartKit wins ${updateFaster} of ${n} aligned-update cells against uPlot and loses ${updateSlower}. Those losses are marked in the browser table.`,
@@ -351,7 +355,7 @@ export function uplotBrowserLead(rows: readonly BrowserDisplay[]): string {
     initialFaster === n
       ? `ChartKit wins every initial cell of the ${n}.`
       : `ChartKit wins ${initialFaster} of ${n} initial cells.`;
-  return `${initial} The update column is the fair timer. ${updateSlower} of those ${n} cells are losses (${updateFaster} wins), and they are marked in the result column.`;
+  return `${initial} ${sampledNote} The update column is the fair timer. ${updateSlower} of those ${n} cells are losses (${updateFaster} wins), and they are marked in the result column.`;
 }
 
 type HoverDisplay = { lib: string; handler: string; painted: string; p95: string };

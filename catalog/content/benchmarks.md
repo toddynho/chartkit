@@ -18,7 +18,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 ## Headline
 
 - Line chart: **32,110 bytes** gzip, createRenderer of the line, measured 2026-10-29 on `55fc89d`. Bar is 33,686. Mini-area is 32,114. `/all` is 78,081. That is a loss to uPlot at 23,292 bytes of JS. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,054, still smaller than ChartKit. It is smaller than Chart.js (49,361), Recharts (96,168, React external), Nivo (96,550, React external), Observable Plot (97,695), and ECharts (162,948). The donut is 15,292 bytes and is smaller than Chart.js (46,913), ECharts (122,134), Recharts (90,046, React external), Nivo (75,494, React external), Highcharts (104,204), Plotly.js (1,477,742), Victory (61,082, React external), ApexCharts (169,473), Tremor (246,834), Vega-Lite (377,693), AG Charts (420,736), amCharts 5 (81,711), MUI X Charts (137,377, React external), and AntV G2 (407,348). uPlot, Observable Plot, visx, Google Charts, TradingView Lightweight Charts, and Mermaid have no donut.
-- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
+- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points.
 - Aligned update: ChartKit wins 6 of 12 aligned-update cells against uPlot and loses 6. Those losses are marked in the browser table.
 - Server render, 100,000 point line: **2.63 ms** median (mean 2.7 ms).
 - `repair()`, no model call, no docs: **21/42 → 42/42**. That agent run is 2026-10-16, not round 13.
@@ -115,7 +115,7 @@ This table renders 293 ok, 442 unsupported, 0 error, and 0 timeout cells. The re
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
-ChartKit wins every initial cell of the 12. The update column is the fair timer. 6 of those 12 cells are losses (6 wins), and they are marked in the result column.
+ChartKit wins every initial cell of the 12. Lines above 1,000 points are sampled to the plot width, so the 1,000,000-point cells are not a million drawn points. The update column is the fair timer. 6 of those 12 cells are losses (6 wins), and they are marked in the result column.
 
 | X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update | Result |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -136,7 +136,7 @@ These 12 cells publish ChartKit and uPlot only. Chart.js, Observable Plot, EChar
 
 ## Hover
 
-Measured 2026-11-17 on `a97fdc5c` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (`bench/results/hover.json`), the other 50 ms (`bench/results/hover-50ms.json`). uPlot is 1.6.32 with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (Apple M4 Max, darwin 25.0.0 arm64). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.
+Measured 2026-11-17 on `a97fdc5c` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (`bench/results/hover.json`), the other 50 ms (`bench/results/hover-50ms.json`). uPlot is 1.6.32 with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine. The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.
 
 First hover on a fresh 100,000 point line is a loss to uPlot. ChartKit paints it in 2.1 to 2.2 ms and uPlot in 1.0 to 1.2 ms, painted median, so uPlot is 1.8 to 2.1 times faster. The handler alone is 1.4 to 1.6 ms against 0.3 ms.
 
