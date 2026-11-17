@@ -556,27 +556,22 @@ Each example below is a minimal valid spec.
 {"version":"1","type":"journey","data":[{"section":"Pay","step":"Enter card","score":2,"actors":"Shopper"}],"a11y":{"alt":"Entering a card scores 2."}}
 ```
 
-## React components (not the JSON spec)
+## React
 
-`@chartkitdev/react` components take props. Those props are not the spec. Agents writing JSON should ignore this section. `<Chart spec={...} />` is the component that takes a spec.
+`<Chart spec={...} />` from `@chartkitdev/react` takes the JSON spec above. Its props are not spec keys.
 
-| Component | Notable props (not spec keys) |
+| Prop | What it does |
 |---|---|
-| `LineChart` | `data`, `series` or `dataKey`, `theme`, `responsive`, `curve` |
-| `BarChart` | `data`, `dataKey`, `categoryKey`, `theme` |
-| `DonutChart` | `data`, `dataKey`, `labelKey`, `theme` |
-| `StackedArea` | `data`, `series`, `theme` |
-| `ScatterChart` | `data`, `xKey`, `yKey`, `sizeKey`, `theme` |
-| `ComboChart` | `data`, `xKey`, `leftAxis`, `rightAxis`, `theme` |
-| `Heatmap` | `data`, `theme` |
-| `GaugeChart` | `value`, `min`, `max`, `theme` |
-| `KpiCard` | `label`, `value`, `delta`, `data`, `theme` |
-| `Sparkline` | `data`, `theme`, `height` |
-| `MiniArea` | `data`, `theme`, `height` |
-| `ProgressRing` | `value`, `theme`, `size` |
-| `SpikeChart` | `data`, `theme` |
-| `CandlestickChart` | `data`, `theme`, `showVolume` |
-| `Chart` | `spec` (the JSON object above), optional `render` |
+| `spec` | Required. The v1 chart spec. |
+| `className`, `style` | Applied to the host element. |
+| `render` | Optional `(spec) => string`. Defaults to the core charts. Pass `createRenderer([...])` to ship a subset. |
+| `onPointClick`, `onSeriesClick`, `onLegendClick` | Click handlers for a mark (or Enter/Space on the focused point), a series, and a legend item. |
+| `selection`, `onSelectionChange` | Controlled selection. Omit `selection` to let the chart own the state. |
+| `tooltip` | Replaces the tooltip card. Return HTML, a node, or null to hide it. |
+
+`renderToString(spec)` from `@chartkitdev/react/ssr` is the server HTML.
+
+The v0 prop components (`LineChart`, `BarChart`, `KpiCard` and the rest) are frozen and live at `@chartkitdev/react/legacy`. They take props, not a spec, and get fixes, not features. Migration: https://chartkit.dev/docs/migrate
 
 ## Other frameworks
 
