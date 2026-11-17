@@ -4,7 +4,10 @@ import "../../styles/compare.css";
 import { validate } from "@chartkitdev/core/validate";
 import { samples } from "@chartkitdev/convert";
 import Base from "../../layouts/Base.astro";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
+import { repoRoot } from "../../lib/repo-root";
 import { readableCheck, readableOption } from "../../lib/spec-text";
 
 export function getStaticPaths() {
@@ -33,14 +36,14 @@ function rank(value: string): string {
 
 const lineBytes = 32110;
 const theirBytes = library.bundleGzip?.minimalLine ?? null;
-const hoverPainted: Record<string, number> = {
-  uplot: 16.2,
-  chartjs: 20.3,
-  plot: 28.3,
-  recharts: 28.9,
-  echarts: 2881.4,
+// Hover comes from bench/browser/hover.mjs through benchmarks.json. That script times ChartKit and uPlot only.
+const hoverFile = JSON.parse(readFileSync(join(repoRoot(), "catalog/public/benchmarks.json"), "utf8")) as {
+  hover: { measured: string; commit: string; script: string };
+  hoverSteady100k: { lib: string; paintedMs: number }[];
+  firstHoverPainted: { afterMountMs: number; chartkit: number; uplot: number }[];
 };
-const theirHover = hoverPainted[library.id];
+const firstHover = library.id === "uplot" ? hoverFile.firstHoverPainted[hoverFile.firstHoverPainted.length - 1] : undefined;
+const steadyHover = hoverFile.hoverSteady100k.map((row) => `${row.lib} ${row.paintedMs.toFixed(1)} ms`).join(", ");
 const ssrNote =
   library.id === "recharts"
     ? "Recharts 3 SSR returns no SVG except sunburst."
@@ -189,14 +192,14 @@ const description = `ChartKit vs ${library.name}. ${page.counts.win} ahead, ${pa
           ) : null
         }
         {
-          theirHover != null ? (
+          firstHover ? (
             <article class="ck-panel">
-              <div class="ck-bar ck-bar--light"><span>steady hover · 100k</span><span>round 13</span></div>
+              <div class="ck-bar ck-bar--light"><span>first hover · 100k</span><span>{hoverFile.hover.measured}</span></div>
               <div class="cmp-metric__pair">
-                <div class="is-us"><b>16.5</b><span>ms · ChartKit</span></div>
-                <div><b>{theirHover}</b><span>ms · {library.name}</span></div>
+                <div class="is-us"><b>{firstHover.chartkit.toFixed(1)}</b><span>ms · ChartKit</span></div>
+                <div><b>{firstHover.uplot.toFixed(1)}</b><span>ms · {library.name}</span></div>
               </div>
-              <p>Painted median. Round 13, 2026-10-18, phase 2 d8dcc5a.</p>
+              <p>Painted median, {firstHover.afterMountMs} ms after mount. {library.name} is faster. It places no tooltip and ChartKit does. Steady hover is level: {steadyHover}. Measured on {hoverFile.hover.commit} with {hoverFile.hover.script}, on one machine.</p>
             </article>
           ) : null
         }

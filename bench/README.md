@@ -49,7 +49,16 @@ node bench/browser/hover.mjs --base <other>/packages/core/src   # before/after: 
 node bench/browser/hover.mjs --case multi-line-5x1k --profile   # main-thread stages and function times for one case
 ```
 
-It runs from the root install (esbuild and Playwright) and is not part of `npm run bench`. Each sample is a fresh page: the chart is drawn with `render` and `attach`, the page sits for 200 ms, then Playwright's real mouse moves in. It reports the first hover, one hover after a pause, 30 steady moves 16 ms apart, and moves between legend labels on multi-series cases. Each has two clocks, both started at the first pointer event of the move: `handler` ends with the bubbling `mousemove`, and `painted` ends in a MessageChannel task after the next animation frame. Raster and GPU time are in neither. Chromium runs with the frame-rate limit off, so `painted` is work and not a wait for vsync. `--vsync` leaves the limit on. uPlot runs the same moves on the line cases when `bench/node_modules/uplot` is installed or `--uplot <dir>` points at the package. The round 13 hover figures in `catalog/public/benchmarks.json` came from a script that is not in this repository, on another machine, so they do not compare with this file's numbers.
+It runs from the root install (esbuild and Playwright) and is not part of `npm run bench`. Each sample is a fresh page: the chart is drawn with `render` and `attach`, the page sits for 200 ms, then Playwright's real mouse moves in. It reports the first hover, one hover after a pause, 30 steady moves 16 ms apart, and moves between legend labels on multi-series cases. Each has two clocks, both started at the first pointer event of the move: `handler` ends with the bubbling `mousemove`, and `painted` ends in a MessageChannel task after the next animation frame. Raster and GPU time are in neither. Chromium runs with the frame-rate limit off, so `painted` is work and not a wait for vsync. `--vsync` leaves the limit on. uPlot runs the same moves on the line cases when `bench/node_modules/uplot` is installed or `--uplot <dir>` points at the package. It runs with default options there: a cursor crosshair, a hover point per series and its live legend. uPlot has no tooltip, so its moves place none, and ChartKit's moves fill and place one.
+
+The published hover figures are this script's output. `catalog/lib/hover-bench.ts` reads the `line-100k` rows of `bench/results/hover.json` (200 ms after mount) and `bench/results/hover-50ms.json` (50 ms), and `catalog/lib/benchmarks.ts` builds the tables and the sentences from them. The sentences throw when the rows stop supporting them. To refresh:
+
+```bash
+node bench/browser/hover.mjs --uplot <dir of the uplot package>
+node bench/browser/hover.mjs --uplot <dir of the uplot package> --delay 50 --case line-100k --out bench/results/hover-50ms.json
+```
+
+Then regenerate `catalog/public/benchmarks.json`, `catalog/content/benchmarks.md` and the showcase copies from them. The numbers are from one machine and move from run to run, so the two columns compare with each other and not with another page.
 
 ### Chart types
 

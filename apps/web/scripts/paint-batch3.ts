@@ -56,7 +56,7 @@ const matrixLib = await import("../../../catalog/lib/matrix.ts");
 const { lineSizeRows } = await import("../../../catalog/lib/size-matrix.ts");
 const geoSamples = await import("../../../catalog/lib/geo-samples.ts");
 const { paintScale, render: renderGeo } = await import("@chartkitdev/geo");
-const { headline, published, CORE_COMMIT, MEASURED, ROUND } = await import("../../../catalog/lib/benchmarks.ts");
+const { headline, hoverFaq, hoverMeta, published, CORE_COMMIT, MEASURED, ROUND } = await import("../../../catalog/lib/benchmarks.ts");
 const { perfBrief, sizeBrief, whenToUseFaqs } = await import("./site-copy.ts");
 const { SITE } = await import("../../../catalog/lib/site.ts");
 const { specPages } = await import("../../../catalog/lib/spec-charts.ts");
@@ -83,6 +83,7 @@ function paintCompare(): number {
     measured: MEASURED,
     coreCommit: CORE_COMMIT,
     sizeCommit: sizes.commit,
+    hover: { measured: hoverMeta.measured, commit: hoverMeta.commit, script: hoverMeta.script },
     hoverSteady100k: published.hoverSteady100k.map((row) => ({ lib: row.lib, paintedMs: row.paintedMs })),
     ssrMs: published.ssr.map((row) => ({
       lib: row.lib,
@@ -294,6 +295,8 @@ function paintCopy(): void {
     harnessLineBytes: headline.harnessLineBytes,
     noDocsFirst: chartkitAgent.noDocsFirst,
     tokensOfficial: chartkitAgent.tokensOfficial,
+    hoverPick: hoverFaq().pick,
+    hoverLoss: hoverFaq().loss,
   });
   const jsonLd = {
     "@context": "https://schema.org",

@@ -34,6 +34,7 @@ interface BenchmarkFile {
     result: string;
   }[];
   hoverSteady100k: { lib: string; paintedMs: number }[];
+  firstHoverPainted: { afterMountMs: number; chartkit: number; uplot: number }[];
 }
 
 function docsRoot(): string {
@@ -117,9 +118,15 @@ export function benchmarkCharts(): ChartSlot[] {
   const bundleCaption =
     "Log scale. ChartKit is createRenderer of the line from the phase 4 bundle matrix. React libraries use the React-external gzip when that cell has one. uPlot is the full package plus its stylesheet.";
 
-  const hover = bench.hoverSteady100k
-    .filter((row) => row.lib === "ChartKit" || row.lib === "uPlot" || row.lib === "Chart.js" || row.lib === "Observable Plot" || row.lib === "Recharts" || row.lib === "ECharts")
-    .map((row) => ({ lib: row.lib, ms: row.paintedMs }));
+  // The first hover row with the longest wait after mount, which is the hover script's default.
+  const firstHover = bench.firstHoverPainted[bench.firstHoverPainted.length - 1];
+  if (!firstHover) throw new Error("benchmarks.json has no first hover row");
+  const hover = [
+    { lib: "uPlot", ms: firstHover.uplot },
+    { lib: "ChartKit", ms: firstHover.chartkit },
+  ];
+  const hoverText = hover.map((row) => `${row.lib} ${row.ms.toFixed(1)} ms`).join(", ");
+  const steadyText = bench.hoverSteady100k.map((row) => `${row.lib} ${row.paintedMs.toFixed(1)} ms`).join(", ");
 
   return [
     {
@@ -190,8 +197,8 @@ export function benchmarkCharts(): ChartSlot[] {
     },
     {
       id: "hover",
-      title: "Steady hover at 100k",
-      caption: "Painted median from the same round 13 file. uPlot is ahead of ChartKit here.",
+      title: "First hover at 100k",
+      caption: `Painted median of the first hover on a 100,000 point line, ${firstHover.afterMountMs} ms after mount, from bench/browser/hover.mjs: ${hoverText}. uPlot is faster. It places no tooltip and ChartKit does. Steady hover is level (${steadyText}).`,
       span: "board-12",
       spec: {
         version: "1",
@@ -201,14 +208,14 @@ export function benchmarkCharts(): ChartSlot[] {
         data: hover,
         encoding: {
           x: "lib",
-          y: { field: "ms", scale: { type: "log" } },
+          y: "ms",
         },
         mark: { orientation: "horizontal" },
         axes: { x: { title: "Library" }, y: { title: "Milliseconds" } },
         tooltip: { position: "top", fields: [{ field: "ms", title: "Painted ms" }] },
         interaction: { select: "point" },
         size: { width: 980, height: 380, padding: { left: 72 } },
-        a11y: { alt: "At 100,000 points, uPlot’s painted hover is slightly faster than ChartKit’s. ECharts is far slower." },
+        a11y: { alt: `First hover at 100,000 points, painted median: ${hoverText}. uPlot is faster than ChartKit.` },
       },
     },
   ];

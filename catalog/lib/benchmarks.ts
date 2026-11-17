@@ -5,10 +5,33 @@
  * That run is 2026-10-16 and was not re-run for round 13.
  * Bundle and server-render figures are the phase 4 matrices in bench/results/bundle.json
  * and bench/results/ssr.json. Browser rows stay round 13.
+ * Hover is not round 13. It is read from bench/results/hover.json and hover-50ms.json,
+ * the output of bench/browser/hover.mjs, through ./hover-bench.ts.
  */
+import { hoverBench } from "./hover-bench.ts";
 import { phase4Headline } from "./size-matrix.ts";
 
 const phase4 = phase4Headline();
+const hoverRun = hoverBench();
+const ms1 = (value: number) => value.toFixed(1);
+
+/** Where the hover figures come from, and what each side of the run draws. */
+export const hoverMeta = {
+  measured: hoverRun.measured,
+  commit: hoverRun.commit,
+  runs: hoverRun.runs,
+  moves: hoverRun.moves,
+  script: hoverRun.script,
+  source: hoverRun.source,
+  machine: hoverRun.machine,
+  uplotVersion: hoverRun.uplotVersion,
+  uplotSetup: hoverRun.uplotSetup,
+  protocol: hoverRun.protocol,
+  /** Steady moves from the second file, hover-50ms.json. The tables show hover.json. */
+  steadySecondRun: hoverRun.steadyOther,
+};
+
+export const hoverMethod = `Measured ${hoverRun.measured} on \`${hoverRun.commit}\` with \`${hoverRun.script}\`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, ${hoverRun.runs} fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and ${hoverRun.moves} steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (\`${hoverRun.source[0]}\`), the other 50 ms (\`${hoverRun.source[1]}\`). uPlot is ${hoverRun.uplotVersion} with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (${hoverRun.machine}). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.`;
 
 export const ROUND = 13;
 export const MEASURED = "2026-10-18";
@@ -137,20 +160,22 @@ export const browserRows = [
   { shape: "Gapped timestamps", points: "1,000,000", ckI: "27.3", upI: "29.1", ckU: "11.5", upU: "11.8", call: "Win initial. Win update.", tone: "win" },
 ] as const;
 
-export const hoverRows = [
-  { lib: "ChartKit", tip: "16", painted: "16.5", p95: "17.1" },
-  { lib: "uPlot", tip: "15.4", painted: "16.2", p95: "17" },
-  { lib: "Chart.js", tip: "17", painted: "20.3", p95: "22.2" },
-  { lib: "Observable Plot", tip: "22.7", painted: "28.3", p95: "34.6" },
-  { lib: "Recharts", tip: "28.2", painted: "28.9", p95: "35.1" },
-  { lib: "ECharts", tip: "20.4", painted: "2881.4", p95: "3113.2" },
-] as const;
+export const hoverRows = hoverRun.steady.map((row) => ({
+  lib: row.lib,
+  handler: ms1(row.handlerMs),
+  painted: ms1(row.paintedMs),
+  p95: ms1(row.p95Ms),
+}));
 
-export const firstHoverRows = [
-  { delay: "~50 ms after mount", ck: "20.8", ckMax: "27", uplot: "4", uplotMax: "16.6" },
-  { delay: "~200 ms after mount", ck: "15.9", ckMax: "35.9", uplot: "4.6", uplotMax: "8.4" },
-  { delay: "~500 ms after mount", ck: "16.5", ckMax: "29.2", uplot: "4.9", uplotMax: "5" },
-] as const;
+export const firstHoverRows = hoverRun.first.map((row) => ({
+  delay: `${row.afterMountMs} ms after mount`,
+  ck: ms1(row.chartkit),
+  ckP95: ms1(row.chartkitP95),
+  ckHandler: ms1(row.chartkitHandler),
+  uplot: ms1(row.uplot),
+  uplotP95: ms1(row.uplotP95),
+  uplotHandler: ms1(row.uplotHandler),
+}));
 
 export const samplingRows = [
   { points: "100,000", initial: "54.8", update: "39.2" },
@@ -178,7 +203,7 @@ export const agentRows = [
   { lib: "Chart.js", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "295.0 / 258.4" },
 ] as const;
 
-/** Machine-readable round 13 timings, plus the phase 4 bundle and SSR line cells. Display strings above must match these values. */
+/** Machine-readable round 13 timings, plus the phase 4 bundle and SSR line cells and the hover run. Display strings above must match these values. */
 export const published = {
   bundleGzip: phase4.lineRace.map((row) => ({
     id: row.id,
@@ -207,19 +232,8 @@ export const published = {
     { points: 100000, initialMs: 54.8, updateMs: 39.2 },
     { points: 1000000, initialMs: 471.8, updateMs: 462.4 },
   ],
-  hoverSteady100k: [
-    { lib: "ChartKit", tipMs: 16, paintedMs: 16.5, p95Ms: 17.1 },
-    { lib: "uPlot", tipMs: 15.4, paintedMs: 16.2, p95Ms: 17 },
-    { lib: "Chart.js", tipMs: 17, paintedMs: 20.3, p95Ms: 22.2 },
-    { lib: "Observable Plot", tipMs: 22.7, paintedMs: 28.3, p95Ms: 34.6 },
-    { lib: "Recharts", tipMs: 28.2, paintedMs: 28.9, p95Ms: 35.1 },
-    { lib: "ECharts", tipMs: 20.4, paintedMs: 2881.4, p95Ms: 3113.2 },
-  ],
-  firstHoverPainted: [
-    { afterMountMs: 50, chartkit: 20.8, chartkitMax: 27, uplot: 4, uplotMax: 16.6 },
-    { afterMountMs: 200, chartkit: 15.9, chartkitMax: 35.9, uplot: 4.6, uplotMax: 8.4 },
-    { afterMountMs: 500, chartkit: 16.5, chartkitMax: 29.2, uplot: 4.9, uplotMax: 5 },
-  ],
+  hoverSteady100k: hoverRun.steady,
+  firstHoverPainted: hoverRun.first,
   ssr: phase4.ssrLine,
   agents: [
     { lib: "ChartKit", noDocsFirst: 21, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 139.3, tokensOfficial: 132.4, inEval: true },
@@ -340,8 +354,8 @@ export function uplotBrowserLead(rows: readonly BrowserDisplay[]): string {
   return `${initial} The update column is the fair timer. ${updateSlower} of those ${n} cells are losses (${updateFaster} wins), and they are marked in the result column.`;
 }
 
-type HoverDisplay = { lib: string; painted: string };
-type FirstHoverDisplay = { ck: string; uplot: string };
+type HoverDisplay = { lib: string; handler: string; painted: string; p95: string };
+type FirstHoverDisplay = { ck: string; uplot: string; ckHandler: string; uplotHandler: string };
 
 function rangeEnds(values: readonly string[]): { low: string; high: string } {
   const ranked = [...values].sort((a, b) => Number(a) - Number(b));
@@ -351,25 +365,60 @@ function rangeEnds(values: readonly string[]): { low: string; high: string } {
   return { low, high };
 }
 
-export function hoverParagraph(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): string {
+function span(ends: { low: string; high: string }): string {
+  return ends.low === ends.high ? ends.low : `${ends.low} to ${ends.high}`;
+}
+
+/** The two hover sentences. Each one is built from the rows under it and throws when the rows stop supporting it. */
+function hoverCalls(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): { fresh: string; steady: string } {
   const chartkit = rows.find((row) => row.lib === "ChartKit");
   const uplot = rows.find((row) => row.lib === "uPlot");
   if (!chartkit || !uplot) throw new Error("hover rows are missing ChartKit or uPlot");
   const ck = rangeEnds(first.map((row) => row.ck));
   const up = rangeEnds(first.map((row) => row.uplot));
-  return `Steady hover at 100,000 points is close. ChartKit’s painted median is ${chartkit.painted} ms and uPlot’s is ${uplot.painted} ms. First hover on a fresh chart is not close: uPlot paints in ${up.low} to ${up.high} ms, and ChartKit paints in ${ck.low} to ${ck.high} ms.`;
+  const ckHandler = rangeEnds(first.map((row) => row.ckHandler));
+  const upHandler = rangeEnds(first.map((row) => row.uplotHandler));
+  if (first.some((row) => Number(row.ck) <= Number(row.uplot))) throw new Error("first hover is no longer a loss in every row: rewrite the hover claim");
+  const times = first.map((row) => Number(row.ck) / Number(row.uplot));
+  const ratio = `${Math.min(...times).toFixed(1)} to ${Math.max(...times).toFixed(1)}`;
+  const fresh = `First hover on a fresh 100,000 point line is a loss to uPlot. ChartKit paints it in ${span(ck)} ms and uPlot in ${span(up)} ms, painted median, so uPlot is ${ratio} times faster. The handler alone is ${span(ckHandler)} ms against ${span(upHandler)} ms.`;
+  const other = hoverRun.steadyOther;
+  const ckOther = other.find((row) => row.lib === "ChartKit");
+  const upOther = other.find((row) => row.lib === "uPlot");
+  if (!ckOther || !upOther) throw new Error("the second hover run is missing ChartKit or uPlot");
+  const gap = Math.max(Math.abs(Number(chartkit.painted) - Number(uplot.painted)), Math.abs(ckOther.paintedMs - upOther.paintedMs));
+  const slowest = Math.max(Number(chartkit.painted), Number(uplot.painted), ckOther.paintedMs, upOther.paintedMs);
+  if (gap > 1 || slowest > 1.5 || Number(chartkit.p95) > 4 || Number(uplot.p95) > 4) throw new Error("steady hover is no longer level at about a millisecond: rewrite the hover claim");
+  if (Number(chartkit.handler) <= Number(uplot.handler)) throw new Error("uPlot's steady handler is no longer shorter: rewrite the hover claim");
+  const steady = `Steady hover is level: both libraries paint a steady move in about a millisecond or less. ChartKit’s painted median is ${chartkit.painted} ms and uPlot’s is ${uplot.painted} ms in the run below, and ${ms1(ckOther.paintedMs)} ms and ${ms1(upOther.paintedMs)} ms in the other run. uPlot’s handler is shorter, ${uplot.handler} ms against ${chartkit.handler} ms.`;
+  return { fresh, steady };
+}
+
+const hoverScope = "uPlot draws a cursor, a hover point and its legend, and has no tooltip. ChartKit also fills and places a tooltip.";
+
+/** Short hover sentences for the FAQ and the compare pages, built from the same rows as the tables. */
+export function hoverFaq(rows: readonly HoverDisplay[] = hoverRows, first: readonly (FirstHoverDisplay & { delay: string })[] = firstHoverRows): { pick: string; loss: string } {
+  hoverCalls(rows, first);
+  const chartkit = rows.find((row) => row.lib === "ChartKit");
+  const uplot = rows.find((row) => row.lib === "uPlot");
+  if (!chartkit || !uplot) throw new Error("hover rows are missing ChartKit or uPlot");
+  const ck = first.map((row) => row.ck).join(" and ");
+  const up = first.map((row) => row.uplot).join(" and ");
+  const delays = first.map((row) => row.delay.replace(" ms after mount", "")).join(" and ");
+  return {
+    pick: `Pick uPlot when the first hover has to be as fast as it can be: on a 100,000 point line uPlot paints it in ${up} ms and ChartKit in ${ck} ms (painted median, ${delays} ms after mount).`,
+    loss: `First hover on a 100,000 point line is a loss: ${ck} ms against uPlot ${up} ms, painted median at ${delays} ms after mount. Steady hover is level, ${chartkit.painted} ms against uPlot ${uplot.painted} ms, and uPlot places no tooltip.`,
+  };
+}
+
+export function hoverParagraph(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): string {
+  const calls = hoverCalls(rows, first);
+  return `${calls.fresh} ${calls.steady} ${hoverScope}`;
 }
 
 export function hoverMarkdown(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): { steady: string; fresh: string } {
-  const chartkit = rows.find((row) => row.lib === "ChartKit");
-  const uplot = rows.find((row) => row.lib === "uPlot");
-  if (!chartkit || !uplot) throw new Error("hover rows are missing ChartKit or uPlot");
-  const ck = rangeEnds(first.map((row) => row.ck));
-  const up = rangeEnds(first.map((row) => row.uplot));
-  return {
-    steady: `Steady hover at 100,000 points. Painted median is the number to cite. ChartKit ${chartkit.painted} ms, uPlot ${uplot.painted} ms.`,
-    fresh: `First hover on a fresh 100,000 point chart, painted median. uPlot is ${up.low}–${up.high} ms. ChartKit is ${ck.low}–${ck.high} ms. That gap is a loss.`,
-  };
+  const calls = hoverCalls(rows, first);
+  return { steady: `${calls.steady} ${hoverScope}`, fresh: calls.fresh };
 }
 
 export function samplingParagraph(rows: readonly { points: string; initial: string; update: string }[]): string {

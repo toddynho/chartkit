@@ -192,8 +192,9 @@ export interface BenchmarksPage {
   ssr: RaceChart;
   bundleRows: { lib: string; gzip: string; note: string }[];
   browserRows: { shape: string; points: string; ckI: string; upI: string; ckU: string; upU: string; call: string; tone: string }[];
-  hoverRows: { lib: string; tip: string; painted: string; p95: string }[];
-  firstHoverRows: { delay: string; ck: string; ckMax: string; uplot: string; uplotMax: string }[];
+  hoverRows: { lib: string; handler: string; painted: string; p95: string }[];
+  firstHoverRows: { delay: string; ck: string; ckP95: string; ckHandler: string; uplot: string; uplotP95: string; uplotHandler: string }[];
+  hoverMethod: string;
   samplingRows: { points: string; initial: string; update: string }[];
   ssrRows: { lib: string; mean: string; median: string; status: string }[];
   agentRows: { lib: string; noFirst: string; noTwo: string; offFirst: string; offTwo: string; tokens: string }[];

@@ -22,13 +22,16 @@
  *   handler  to the end of the bubbling `mousemove`, so every synchronous listener and forced layout is in it.
  *   painted  to a MessageChannel task after the next animation frame, so style, layout and paint are in it.
  * Chromium runs with the frame-rate limit off, so `painted` is work and not a wait for vsync.
- * uPlot runs the same protocol when `uplot` resolves from bench/node_modules or `--uplot <dir>`.
+ * uPlot runs the same protocol, alternating with ChartKit run by run, when `uplot` resolves from bench/node_modules or `--uplot <dir>`. It runs with default options:
+ * a cursor crosshair, a hover point per series and its live legend. It has no tooltip. ChartKit fills and places one on every move.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
+import { machineInfo } from "../lib/machine.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../..");
@@ -69,7 +72,7 @@ if (BASE) sources.base = await bundleOf(resolve(BASE), "base");
 let uplot = null;
 for (const dir of [flag("uplot", ""), join(root, "bench/node_modules/uplot")]) {
   if (dir && existsSync(join(dir, "dist/uPlot.iife.min.js"))) {
-    uplot = { js: readFileSync(join(dir, "dist/uPlot.iife.min.js"), "utf8"), css: readFileSync(join(dir, "dist/uPlot.min.css"), "utf8") };
+    uplot = { version: JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).version, js: readFileSync(join(dir, "dist/uPlot.iife.min.js"), "utf8"), css: readFileSync(join(dir, "dist/uPlot.min.css"), "utf8") };
     break;
   }
 }
@@ -358,6 +361,14 @@ function stages(trace, first) {
 }
 
 const round = (value) => Math.round(value * 100) / 100;
+/** The last commit that changed the source being timed, so the id still exists after this branch is squashed. */
+function commitOf() {
+  try {
+    return execSync("git log -1 --format=%h -- .", { cwd: SRC }).toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
 function stats(values) {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -374,8 +385,13 @@ const caseNames = await (async () => {
 
 const rows = [];
 const jobs = [];
-for (const name of caseNames.ck) if (!ONLY || ONLY.split(",").includes(name)) jobs.push([BASE && !PROFILE ? ["base", "chartkit"] : ["chartkit"], name]);
-if (uplot && !PROFILE) for (const name of caseNames.up) if (!ONLY || ONLY.split(",").includes(name)) jobs.push([["uplot"], name]);
+for (const name of caseNames.ck) {
+  if (ONLY && !ONLY.split(",").includes(name)) continue;
+  // Every library timed for a case shares one job, so they alternate run by run and see the same machine state.
+  const libs = BASE && !PROFILE ? ["base", "chartkit"] : ["chartkit"];
+  if (uplot && !PROFILE && caseNames.up.includes(name)) libs.push("uplot");
+  jobs.push([libs, name]);
+}
 
 // One discarded page first, so the browser's own cold start is in no sample.
 await sample("chartkit", jobs[0]?.[1] ?? "line-1k", false);
@@ -403,7 +419,7 @@ for (const [libs, name] of jobs) {
   }
   const acc = {};
   for (const lib of libs) acc[lib] = { first: { handler: [], painted: [] }, rested: { handler: [], painted: [] }, steady: { handler: [], painted: [] }, legend: { handler: [], painted: [] }, state: null };
-  // Libraries alternate inside a case, so both see the same machine state.
+  // Libraries alternate inside a case, and the order flips every run.
   for (let i = 0; i < RUNS; i++) {
     for (const lib of i % 2 ? [...libs].reverse() : libs) {
       const one = await sample(lib, name, false);
@@ -450,7 +466,12 @@ await browser.close();
 if (!PROFILE) {
   const result = {
     measured: new Date().toISOString().slice(0, 10),
-    method: `Playwright Chromium ${version}, frame-rate limit ${VSYNC ? "on" : "off"}, 640×360, fresh page per run. ${RUNS} runs per case: one first hover and one rested hover each, ${MOVES} steady moves each, 11 legend moves each on multi-series cases, ${GAP} ms apart. ${DELAY} ms between mount and the first move.${BASE ? " base is the --base checkout, and the two alternate run by run." : ""} Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.`,
+    commit: commitOf(),
+    machine: machineInfo(),
+    uplot: uplot
+      ? { version: uplot.version, setup: "Default options: cursor crosshair, a hover point per series, and the live legend under the plot. uPlot has no tooltip, so its moves place no tooltip. ChartKit's moves fill and place one." }
+      : null,
+    method: `Playwright Chromium ${version}, frame-rate limit ${VSYNC ? "on" : "off"}, 640×360, fresh page per run. ${RUNS} runs per case: one first hover and one rested hover each, ${MOVES} steady moves each, 11 legend moves each on multi-series cases, ${GAP} ms apart. ${DELAY} ms between mount and the first move.${BASE ? " base is the --base checkout." : ""} Libraries timed for the same case alternate run by run. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.`,
     runs: RUNS,
     moves: MOVES,
     delayMs: DELAY,

@@ -380,9 +380,9 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
 }
 ```
 
-## Steady hover at 100k
+## First hover at 100k
 
-Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
+Painted median of the first hover on a 100,000 point line, 200 ms after mount, from bench/browser/hover.mjs: uPlot 1.2 ms, ChartKit 2.2 ms. uPlot is faster. It places no tooltip and ChartKit does. Steady hover is level (ChartKit 0.5 ms, uPlot 0.8 ms).
 
 ```json
 {
@@ -392,38 +392,17 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
   "theme": "soft",
   "data": [
     {
-      "lib": "ChartKit",
-      "ms": 16.5
-    },
-    {
       "lib": "uPlot",
-      "ms": 16.2
+      "ms": 1.2
     },
     {
-      "lib": "Chart.js",
-      "ms": 20.3
-    },
-    {
-      "lib": "Observable Plot",
-      "ms": 28.3
-    },
-    {
-      "lib": "Recharts",
-      "ms": 28.9
-    },
-    {
-      "lib": "ECharts",
-      "ms": 2881.4
+      "lib": "ChartKit",
+      "ms": 2.2
     }
   ],
   "encoding": {
     "x": "lib",
-    "y": {
-      "field": "ms",
-      "scale": {
-        "type": "log"
-      }
-    }
+    "y": "ms"
   },
   "mark": {
     "orientation": "horizontal"
@@ -456,7 +435,7 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
     }
   },
   "a11y": {
-    "alt": "At 100,000 points, uPlot’s painted hover is slightly faster than ChartKit’s. ECharts is far slower."
+    "alt": "First hover at 100,000 points, painted median: uPlot 1.2 ms, ChartKit 2.2 ms. uPlot is faster than ChartKit."
   }
 }
 ```

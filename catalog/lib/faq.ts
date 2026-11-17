@@ -1,4 +1,4 @@
-import { headline, published } from "./benchmarks";
+import { headline, hoverFaq, published } from "./benchmarks";
 
 export interface FaqItem {
   question: string;
@@ -13,7 +13,7 @@ export const whenToUseFaqs: FaqItem[] = [
   {
     question: "When should I pick another chart library?",
     answer:
-      "Tooltip, zoom, pan, brush, and animation run in the client runtime. The static SVG does not paint them. Keyboard, the data table, and legend clicks stay off unless set. Pick Recharts, Chart.js, ECharts, or Nivo when you need maps. Pick uPlot when the aligned update at 1,000 points is the constraint: ChartKit loses that cell on even, jittered, and gapped x (1.5 vs 1.2, 1.6 vs 1.4, and 1.6 vs 1.4). Pick uPlot when the first hover has to be a few milliseconds: ChartKit’s painted median is 20.8, 15.9, and 16.5 ms, and uPlot’s is 4, 4.6, and 4.9 ms.",
+      `Tooltip, zoom, pan, brush, and animation run in the client runtime. The static SVG does not paint them. Keyboard, the data table, and legend clicks stay off unless set. Pick Recharts, Chart.js, ECharts, or Nivo when you need maps. Pick uPlot when the aligned update at 1,000 points is the constraint: ChartKit loses that cell on even, jittered, and gapped x (1.5 vs 1.2, 1.6 vs 1.4, and 1.6 vs 1.4). ${hoverFaq().pick}`,
   },
   {
     question: "How large is a ChartKit line chart?",
@@ -30,7 +30,7 @@ export const whenToUseFaqs: FaqItem[] = [
   {
     question: "Where does ChartKit lose?",
     answer:
-      "Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6. The losses are even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). Steady hover at 100k is 16.5 vs uPlot 16.2. First hover painted medians are 20.8, 15.9, and 16.5 ms against uPlot 4, 4.6, and 4.9. With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update on the fair timer.",
+      `Round 13 initial render wins all 12 cells against uPlot. The aligned update wins 6 and loses 6. The losses are even 1,000 (1.5 vs 1.2), even 10,000 (1.9 vs 1.7), jittered 1,000 (1.6 vs 1.4), gapped 1,000 (1.6 vs 1.4), gapped 10,000 (1.9 vs 1.6), and gapped 100,000 (3.5 vs 3.4). ${hoverFaq().loss} With sampling off, 1,000,000 points is 471.8 ms to draw and 462.4 ms to update on the fair timer.`,
   },
   {
     question: "How do I reproduce the numbers?",
