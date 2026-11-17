@@ -123,12 +123,53 @@ npm audit signatures
 
 Check: the `node` line prints `true <svg`. `npm audit signatures` reports verified registry signatures and verified attestations (provenance) for the `@chartkitdev` packages. The npm page for `@chartkitdev/core` shows the "Built and signed on GitHub Actions" provenance badge.
 
-## 7. Deploy chartkit.dev
+## 7. Deploy chartkit.dev (Cloudflare Workers static assets)
 
-The repo does not record which host serves chartkit.dev. It sits behind Cloudflare, and the origin still runs the v0 Next.js build. `nixpacks.toml` (`npm ci`, `npm run build`, `npm run start`) is the config for a Nixpacks host such as Railway. Use whichever of these matches the host:
+The site is static. `apps/web/wrangler.jsonc` uploads `apps/web/dist` as a Worker named `chartkit-web` with no script. `apps/web/public/_headers` carries the CORS and cache headers for the agent files. The config has no `chartkit.dev` route on purpose: deploying only updates the `workers.dev` URL, and the live domain moves in 7c.
 
-- **Nixpacks host (Railway or similar), building from the repo.** Point the service at `toddynho/chartkit`, branch `main`, and redeploy. `npm run start` is `astro preview` on port 4321 with `host: true`, so set the service port to 4321 (or set the host's `PORT` routing to 4321). Make sure the build uses Node 22.23.4 or newer: `apps/web` declares `engines.node >=22.23.4`. If `nodejs_22` in Nixpacks resolves older, set `NIXPACKS_NODE_VERSION=22.23.4` or bump the version in `nixpacks.toml`.
-- **Static host (Cloudflare Pages, S3, or similar).** Build locally (step 1, `npm run build:web`) and upload `apps/web/dist`. Old v0 paths redirect via static meta-refresh pages, which works on any static host.
+### 7a. Deploy to workers.dev
+
+Use the `dist` built in step 1 (or run `npm run build` again from the repo root; the libraries build first). Log in once with `npx wrangler login`, or export `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+```bash
+npm run deploy:check --workspace=chartkit-web
+```
+
+```bash
+npm run deploy --workspace=chartkit-web
+```
+
+Check: the first reads the assets and exits with `--dry-run: exiting now.` The second prints the live URL, `https://chartkit-web.<account-subdomain>.workers.dev`.
+
+### 7b. Check the workers.dev copy before moving the domain
+
+Set the URL Wrangler printed, then run the checks:
+
+```bash
+export CK_PREVIEW=https://chartkit-web.<account-subdomain>.workers.dev
+```
+
+```bash
+for u in / /docs /docs/migrate /benchmarks /when-to-use /schema/v1.json /llms-full.txt /llms.json /features.json /benchmarks.json /recipes.json /showcase.json /sitemap.xml; do echo "$(curl -s -o /dev/null -w '%{http_code}' $CK_PREVIEW$u) $u"; done
+```
+
+```bash
+curl -s $CK_PREVIEW/llms.txt | cmp - catalog/public/llms.txt && curl -s $CK_PREVIEW/.well-known/llms.txt | cmp - catalog/public/llms.txt && echo llms ok
+```
+
+```bash
+curl -sI $CK_PREVIEW/schema/v1.json | grep -i access-control-allow-origin
+```
+
+Check: every line of the first starts with `200`, the second prints `llms ok`, and the third prints `access-control-allow-origin: *`. Open the URL in a browser and click through the home page, `/docs` and `/playground`.
+
+### 7c. Move chartkit.dev to the Worker
+
+The zone already proxies `chartkit.dev` to the v0 origin. Add a **Route**, not a Custom Domain: a route runs the Worker in front of the existing DNS record, so the record stays and removing the route is the rollback. (A Custom Domain cannot be created on a hostname that still has a CNAME record.)
+
+Cloudflare dashboard, Workers & Pages, `chartkit-web`, Settings, Domains & Routes, Add, Route: `chartkit.dev/*`, zone `chartkit.dev`. Add `www.chartkit.dev/*` too if `www` has a DNS record.
+
+Rollback: delete the route. Requests go back to the v0 origin. Leave the v0 origin running until the checks below pass and you are happy with the site; shut it down later. Once it is gone, replace the route with a Custom Domain so Cloudflare manages the DNS record.
 
 If the site should call the Cloud render worker on a host other than `https://cloud.chartkit.dev`, set `PUBLIC_CHARTKIT_CLOUD_URL` for the build (see `apps/web/README.md`).
 
@@ -164,7 +205,7 @@ curl -s https://chartkit.dev/getting-started | grep -o 'url=/docs'
 
 Prints `url=/docs`, so the v0 path redirects.
 
-`/llms.txt` was served with `max-age=86400`, so a client that fetched v0 within the last day can keep it until it expires. Nothing on our side shortens that.
+`/llms.txt` was served with `max-age=86400`, so a client that fetched v0 within the last day can keep it until it expires. Nothing on our side shortens that. The v1 file is served with `max-age=3600`.
 
 ## 8. Deprecate v0
 

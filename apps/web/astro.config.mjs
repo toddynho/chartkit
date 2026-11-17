@@ -10,7 +10,7 @@ import { defineConfig } from "astro/config";
  */
 const cookieV2 = fileURLToPath(new URL("../../node_modules/astro/node_modules/cookie/dist/index.js", import.meta.url));
 
-/** Static site for chartkit.dev. Todd deploys apps/web/dist by hand. */
+/** Static site for chartkit.dev. apps/web/dist goes to Cloudflare Workers static assets (wrangler.jsonc). */
 export default defineConfig({
   site: "https://chartkit.dev",
   devToolbar: { enabled: false },

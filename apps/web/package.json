@@ -14,6 +14,8 @@
     "prebuild": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "deploy": "wrangler deploy",
+    "deploy:check": "wrangler deploy --dry-run",
     "precheck": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
   },
