@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { defineConfig, type Options } from "tsup";
 import type { Plugin } from "esbuild";
 
@@ -115,23 +116,41 @@ for (const name of charts) entry[`charts/${name}`] = `src/charts/${name}.ts`;
 for (const name of themes) entry[`themes/${name}`] = `src/themes/${name}.ts`;
 
 /**
- * Entries whose ESM build stays one self-contained file, as every entry was before ESM splitting.
- * Sharing chunks would grow what a bundler ships for them (gzip, measured from dist):
- * - `all`, `validate`, `extra`: a shared chunk loses the per-entry dead-code pass, +0.6% to +2.8%.
- * - `interact`, and `canvas/hydrate`, `interact-extra`, `export-menu`, which it loads through import() only:
- *   Rollup and Vite put a module that a first chunk and a lazy chunk share into the first chunk,
- *   so the tooltip entry grew by 1.3 kB.
- * Each one costs its full size in the tarball, so add to this list only with a measurement.
+ * The ESM build runs in three groups. Entries in a group share code through dist/chunk-*.js, so the
+ * renderer ships once per group and not once per chart. Groups do not share with each other.
+ * The rule behind the grouping: Rollup and Vite put a module that a first chunk and a lazy chunk both
+ * use into the first chunk, whole. So an entry must not share chunks with an entry it loads through import().
+ *
+ * 1. Shared: `index`, the fifteen v1 charts, `bar-list`, themes, and the helper entries.
+ *    One exception to the rule, kept on purpose: `mermaid` loads `mermaid/phase4` through import(), and
+ *    phase4 registers its diagrams into the parser `mermaid` owns, so the two must be one copy.
+ *    Cost under Vite: `mermaid` +0.9 kB gzip (1.6%); its lazy chunk went from 58 kB to 3 kB.
+ * 2. On demand: the charts `load()` imports. Sharing them with group 1 grew the first chunk of a
+ *    `charts/line` + `load()` app from 35.6 kB to 44.2 kB gzip under Vite.
+ * 3. Standalone: one self-contained file each, as every entry was before. Sharing grew what a bundler
+ *    ships for them (gzip, measured from dist):
+ *    - `all`, `validate`, `extra`: a shared chunk loses the per-entry dead-code pass, +0.6% to +2.8%.
+ *    - `interact`, and `canvas/hydrate`, `interact-extra`, `export-menu`, which it loads through import()
+ *      only: the tooltip entry grew by 1.3 kB under Vite.
+ *    - `sampling`: +6%.
+ *    Each one costs its full size in the tarball, so add to this list only with a measurement.
  */
-const standalone = ["all", "validate", "extra", "interact", "canvas/hydrate", "interact-extra", "export-menu"];
+const standalone = ["all", "validate", "extra", "interact", "canvas/hydrate", "interact-extra", "export-menu", "sampling"];
+const onDemand = [...readFileSync("src/load.ts", "utf8").matchAll(/import\("\.\/charts\/([a-z0-9-]+)"\)/g)].map((match) => `charts/${match[1]}`);
 const standaloneEntry: Record<string, string> = {};
+const onDemandEntry: Record<string, string> = {};
 const sharedEntry: Record<string, string> = {};
-for (const [name, file] of Object.entries(entry)) (standalone.includes(name) ? standaloneEntry : sharedEntry)[name] = file;
+for (const [name, file] of Object.entries(entry)) {
+  (standalone.includes(name) ? standaloneEntry : onDemand.includes(name) ? onDemandEntry : sharedEntry)[name] = file;
+}
+if (Object.keys(onDemandEntry).length !== onDemand.length || onDemand.length === 0) {
+  throw new Error("tsup.config.ts: every chart load.ts imports must be a charts/* entry");
+}
 
 const shared = {
   format: ["cjs", "esm"],
   sourcemap: true,
-  // No `clean`: the two builds below write into dist at the same time. `npm run build` empties dist first.
+  // No `clean`: the builds below write into dist at the same time. `npm run build` empties dist first.
   treeshake: true,
   esbuildPlugins: [
     externalInteractExtra,
@@ -185,14 +204,14 @@ export default defineConfig([
   {
     ...shared,
     entry: sharedEntry,
-    // Types for every entry come from this one build, so the .d.ts files do not depend on the split below.
+    // Types for every entry come from this one build, so the .d.ts files do not depend on the grouping.
     dts: { entry },
     // No `splitting` key, on purpose: tsup then splits ESM and leaves CJS unsplit.
-    // ESM entries share code through dist/chunk-*.js, so the renderer ships once and not once per chart.
     // CJS stays one self-contained file per entry. A bundler cannot tree-shake a shared CJS chunk,
     // so a one-chart require() would ship about 60% more (measured with tsup's CJS splitting).
     // Shared chunks hold the registration side effects of features and themes/*.
     // package.json lists ./dist/chunk-*.js under sideEffects so a bundler keeps a bare import of those entries.
   },
+  { ...shared, entry: onDemandEntry },
   { ...shared, entry: standaloneEntry, splitting: false },
 ]);
