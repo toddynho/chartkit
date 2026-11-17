@@ -310,5 +310,11 @@
     "cap": 126225,
     "reason": "Carries the interact change above (sorted, horizontal and long-format hover fixes). Measured 124975 + 1%.",
     "pr": "#178"
+  },
+  {
+    "key": "global",
+    "cap": 181245,
+    "reason": "Hover reads the drawn SVG once per draw and not on every pointer move. bench/browser/hover.mjs, handler median of 15 runs, alternated with main: on five lines of 1,000 points steady hover 5.1 to 0.8 ms and first hover 12.6 to 2.9 ms; on a 100,000-point line steady 0.7 to 0.3 ms and first 3.7 to 2.1 ms. interact grows 24,638 to 24,909 B and stays inside its own cap (its minified size fell 428 B). global had 2 B of headroom and cannot carry the 235 B. Measured 179450 + 1%.",
+    "pr": "#183"
   }
 ]
