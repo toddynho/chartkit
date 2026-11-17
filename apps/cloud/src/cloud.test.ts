@@ -322,7 +322,7 @@ describe("rate limit and keys", () => {
     expect(hook.status).toBe(200);
     const page = await app.handle(new Request("http://cloud.local/checkout/success?session_id=cs_test_123"));
     const html = await page.text();
-    const key = html.match(/ck_test_[a-z0-9]+/)?.[0] ?? "";
+    const key = html.match(/ck_live_[a-z0-9]+/)?.[0] ?? "";
     expect(key).toBeTruthy();
     expect(html).not.toContain("?key=");
     const created = await app.handle(

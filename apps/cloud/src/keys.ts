@@ -23,13 +23,13 @@ export type StoreKind = "kv-binding" | "kv-rest" | "memory";
 /** The part of a Workers KV namespace this service uses. */
 export interface KvNamespaceLike {
   get(key: string): Promise<string | null>;
-  put(key: string, value: string): Promise<void>;
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 }
 
-/** String get and set. Both durable stores reduce to this. */
+/** String get and set. Both durable stores reduce to this. `ttlSeconds` makes the row expire. */
 export interface KvBackend {
   get(key: string): Promise<string | null>;
-  set(key: string, value: string): Promise<void>;
+  set(key: string, value: string, ttlSeconds?: number): Promise<void>;
 }
 
 export interface KvConfig {
@@ -157,8 +157,9 @@ export function bindingBackend(namespace: KvNamespaceLike): KvBackend {
       const value = await namespace.get(key);
       return typeof value === "string" && value ? value : null;
     },
-    async set(key, value) {
-      await namespace.put(key, value);
+    async set(key, value, ttlSeconds) {
+      if (ttlSeconds) await namespace.put(key, value, { expirationTtl: ttlSeconds });
+      else await namespace.put(key, value);
     },
   };
 }
@@ -183,8 +184,8 @@ export function restBackend(config: KvConfig, label: string): KvBackend {
       if (typeof value === "number") return String(value);
       return typeof value === "string" && value ? value : null;
     },
-    async set(key, value) {
-      await call(["SET", key, value]);
+    async set(key, value, ttlSeconds) {
+      await call(ttlSeconds ? ["SET", key, value, "EX", ttlSeconds] : ["SET", key, value]);
     },
   };
 }
@@ -200,5 +201,5 @@ function seedKeys(env: NodeJS.ProcessEnv): string[] {
 }
 
 function newKey(): string {
-  return `ck_test_${crypto.randomUUID().replace(/-/g, "")}`;
+  return `ck_live_${crypto.randomUUID().replace(/-/g, "")}`;
 }

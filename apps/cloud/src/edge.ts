@@ -32,7 +32,17 @@ export async function handleFetch(request: Request, options: EdgeOptions = {}): 
       return new Response(hit.body, { status: hit.status, statusText: hit.statusText, headers });
     }
   }
-  const response = await app.handle(request);
+  let response: Response;
+  try {
+    response = await app.handle(request);
+  } catch (error) {
+    // Nothing should reach here. If something does, answer in JSON and not with the platform's error page.
+    console.error("[chartkit-cloud] unhandled", error);
+    return new Response(JSON.stringify({ ok: false, error: "The render failed. Nothing was drawn." }), {
+      status: 500,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": "*" },
+    });
+  }
   if (request.method === "GET" && options.cache && cacheable(response)) {
     const pending = options.cache.put(request, response.clone()).catch(() => undefined);
     if (options.waitUntil) options.waitUntil(pending);

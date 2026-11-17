@@ -12,7 +12,6 @@ import { cloudPresets, cloudSnippets, placeLines, renderUrl } from "../lib/cloud
 const origin = chartkitCloudUrl();
 const perMinute = freeRenderLimit();
 const typeCount = HERO_TYPE_COUNT;
-const proDraft = true;
 const initial = cloudPresets.bar;
 const initialText = JSON.stringify(initial, null, 2);
 const initialJson = JSON.stringify(initial);
@@ -38,7 +37,7 @@ const headers = [
     val: "image/svg+xml; charset=utf-8",
     title: "SVG or PNG",
     via: "format · w · h · scale · theme",
-    body: "SVG unless format=png. Width and height go up to 4096. PNG scale is 1 to 4. theme and background are query params. There is no dpr param.",
+    body: "SVG unless format=png. Width and height go up to 4096. PNG scale is 1 to 4, and a PNG holds at most 4 million pixels (width × height × scale²). theme and background are query params. There is no dpr param.",
   },
   {
     n: "2",
@@ -310,7 +309,7 @@ const description =
         <div class="ck-panel ck-panel--dark cloud-dark">
           <div class="ck-bar cloud-bar"><span>terminal</span><span>local</span></div>
           <div class="cloud-term">
-            <div><span class="dim">$</span> npm run dev:node --workspace=@chartkitdev/cloud</div>
+            <div><span class="dim">$</span> npm run dev --workspace=@chartkitdev/cloud</div>
             <div class="dim">→ listening on <span class="key">http://127.0.0.1:8787</span></div>
             <div><span class="dim">$</span> curl -sG localhost:8787/render \</div>
             <div>&nbsp;&nbsp;--data-urlencode 'spec=…' \</div>
@@ -344,7 +343,8 @@ const description =
           <ul>
             <li><span class="yes">✓</span>All {typeCount} chart types, SVG and PNG</li>
             <li><span class="yes">✓</span>{perMinute} renders / min per IP</li>
-            <li><span class="yes">✓</span>Width and height up to 4096. PNG scale up to 4.</li>
+            <li><span class="yes">✓</span>Width and height up to 4096. PNG up to 4 million pixels, counting scale.</li>
+            <li><span class="yes">✓</span>A chart stored without a key is kept for 30 days</li>
             <li><span class="no">–</span><span class="dim">Small chartkit.dev mark, bottom-right</span></li>
           </ul>
           <a class="cloud-using" href="#try">You're already using it ↑</a>
@@ -352,25 +352,14 @@ const description =
         <article class="cloud-plan cloud-plan--pro">
           <div class="cloud-plan__top">
             <h3>Pro</h3>
-            {/* Placeholder. Todd has not decided $29/mo, 10,000 renders, $0.002, or a free first month. */}
-            <div class="cloud-plan__meta">$29 / mo</div>
+            <div class="cloud-plan__meta">pricing to come</div>
           </div>
           <ul>
             <li><span class="yes">✓</span>No mark</li>
-            <li><span class="yes">✓</span>10,000 renders / month, then $0.002 each</li>
             <li><span class="yes">✓</span>Same {perMinute}/min ceiling with or without a key</li>
-            <li><span class="yes">✓</span>A valid key stores an unmarked chart at /c/&lt;id&gt;</li>
+            <li><span class="yes">✓</span>A valid key stores an unmarked chart at /c/&lt;id&gt;, with no expiry</li>
           </ul>
-          {proDraft ? (
-            <>
-              {/* TODO: no waitlist endpoint or address exists in the repo. Submit opens the visitor's mail client and does not store the address. */}
-              <form class="cloud-wait" data-waitlist action="mailto:?subject=ChartKit%20Cloud%20Pro%20waitlist" method="post" enctype="text/plain">
-                <input type="email" name="email" required placeholder="you@company.com" autocomplete="email" aria-label="Email" />
-                <button type="submit">Join waitlist</button>
-              </form>
-              <p class="cloud-wait__fine">Launching with the price above. Waitlist gets the first month free. Nothing is stored here: Join opens your email app.</p>
-            </>
-          ) : null}
+          <p class="cloud-wait__fine">Pricing is to come. To use Pro now, email <a href="mailto:todd@toddgarland.com">todd@toddgarland.com</a>.</p>
         </article>
       </div>
     </section>

@@ -4,13 +4,33 @@ Free SVG and PNG renders of a ChartKit spec. An API key removes the small `chart
 
 SVG is ChartKit SSR. PNG is `@resvg/resvg-wasm` in the same process. Cloudflare Browser Rendering is not used.
 
-## Node server
+## Local server
 
 ```bash
-npm run dev:node --workspace=@chartkitdev/cloud
+npm run dev --workspace=@chartkitdev/cloud
 ```
 
-Listens on `http://127.0.0.1:8787` (`PORT` overrides it). `npm run start` is the same process. Vitest uses this handler directly and does not need Cloudflare.
+Bundles the worker and runs it in Cloudflare's local runtime (`wrangler dev --local`) on `http://127.0.0.1:8787`. No Cloudflare account is needed. Without a KV binding `/health` answers 503 by design; add `-- --var CHARTKIT_ALLOW_MEMORY:1` for a local smoke test. Vitest uses the same handler directly in Node.
+
+`npm run dev:node` and `npm run start` (the plain Node server) do not start on Node 22.23.4: Node's type stripping cannot resolve the extensionless imports in `packages/core/src`.
+
+## Limits
+
+Enforced in `src/draw.ts`, `src/app.ts` and `src/charts.ts`:
+
+| Limit | Value | Over it |
+| --- | --- | --- |
+| Requests | 120 a minute per IP | 429 |
+| Request body, or `spec` in a GET | 1 MB | 413 |
+| Width and height (`w`, `h` or `spec.size`) | 4096 | 400 for `w`/`h`, 422 for `spec.size` |
+| PNG scale | 1 to 4 | 400 |
+| PNG pixels (width × height × scale²) | 4,000,000 | 422, with a small PNG that says why |
+| Rows in `spec.data` | 20,000 | 422 |
+| A chart stored without a key (`/c/<id>`) | kept 30 days | 404 after that |
+
+A chart stored with a valid key does not expire. SVG has no pixel limit. A 422 from a limit carries a `CK1006` error with the limit in the message. The PNG pixel limit is set for a Workers isolate's memory (about 128 MB); it was checked in the local runtime, not under production load.
+
+The Workers Free plan allows about 10 ms of CPU per request. A PNG render takes more than that, so the worker needs the Workers Paid plan.
 
 ## Workers
 
@@ -165,6 +185,8 @@ Use the host wrangler printed. Docs snippets are painted during that build, so t
 
 Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on a machine with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set (or after `npx wrangler login`). Nothing in this repo runs them.
 
+0. **Confirm the account is on Workers Paid.** PNG renders need more CPU time than the Free plan allows.
+
 1. **Create the KV namespace.**
 
    ```bash
@@ -229,6 +251,9 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    # Stored chart: POST /charts returns an id, then /c/<id>.svg serves it
    ID=$(curl -s "$HOST/charts" -H 'content-type: application/json' -d "{\"spec\":$SPEC}" | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')
    curl -s -o /dev/null -w '%{http_code} %{content_type}\n' "$HOST/c/$ID.svg"
+
+   # Limits: a PNG past 4,000,000 pixels is refused with a small PNG that says why
+   curl -s -o /dev/null -w '%{http_code} %{content_type}\n' -G "$HOST/render?format=png&w=2400&h=2400" --data-urlencode "spec=$SPEC"   # 422 image/png
 
    # Key: with a key issued by hand, the mark is gone
    curl -s "$HOST/render" -H "authorization: Bearer $KEY" -H 'content-type: application/json' \

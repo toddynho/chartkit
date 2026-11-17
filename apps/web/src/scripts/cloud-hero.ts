@@ -261,19 +261,6 @@ export function mountCloudPage(root: HTMLElement): void {
     });
   });
 
-  const waitlist = root.querySelector<HTMLFormElement>("[data-waitlist]");
-  waitlist?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const email = new FormData(waitlist).get("email");
-    const address = typeof email === "string" ? email.trim() : "";
-    const subject = "ChartKit Cloud Pro waitlist";
-    const body = address
-      ? `Please add ${address} to the ChartKit Cloud Pro waitlist.`
-      : "Please add me to the ChartKit Cloud Pro waitlist.";
-    // TODO: no waitlist endpoint or inbox exists in the repo. This only opens the visitor's mail client.
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  });
-
   applyFormat();
   renderNow();
 }
