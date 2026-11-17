@@ -8,6 +8,7 @@
  *   node bench/browser/hover.mjs --base <dir>    # another checkout's packages/core/src, alternated run by run (before/after)
  *   node bench/browser/hover.mjs --src <dir>     # time this packages/core/src and not the checkout's own
  *   node bench/browser/hover.mjs --out <file>    # write the JSON somewhere else
+ *   node bench/browser/hover.mjs --adapter       # call update(spec, markup) right after attach, as the React adapter does on mount
  *   node bench/browser/hover.mjs --vsync         # leave the frame-rate limit on, as the round 13 numbers did
  *
  * Protocol. Every sample is a fresh page. Data is built in the page, the chart is drawn with
@@ -47,6 +48,7 @@ const ONLY = flag("case", "");
 const PROFILE = args.includes("--profile");
 const VSYNC = args.includes("--vsync");
 const DOM = args.includes("--dom");
+const ADAPTER = args.includes("--adapter");
 const GAP = Number(flag("gap", 16));
 const BASE = flag("base", "");
 const SRC = resolve(flag("src", join(root, "packages/core/src")));
@@ -234,13 +236,15 @@ async function sample(lib, name, wantProfile) {
   const page = await openPage(lib);
   if (lib === "uplot") await page.evaluate((id) => window.mountUplot(id), name);
   else {
-    await page.evaluate((id) => {
+    await page.evaluate(([id, adapter]) => {
       const spec = window.CASES[id]();
       window.spec = spec;
       const host = document.getElementById("host");
-      host.innerHTML = window.CK.render(spec);
+      const markup = window.CK.render(spec);
+      host.innerHTML = markup;
       window.ctl = window.CK.attach(host, spec, { render: (next) => window.CK.render(next) });
-    }, name);
+      if (adapter) window.ctl.update(spec, markup);
+    }, [name, ADAPTER]);
   }
   await page.mouse.move(5, 5);
   await page.waitForTimeout(DELAY);

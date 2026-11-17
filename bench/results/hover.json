@@ -1,5 +1,5 @@
 {
-  "measured": "2026-11-16",
+  "measured": "2026-11-17",
   "method": "Playwright Chromium 140.0.7339.16, frame-rate limit off, 640×360, fresh page per run. 15 runs per case: one first hover and one rested hover each, 30 steady moves each, 11 legend moves each on multi-series cases, 16 ms apart. 200 ms between mount and the first move. base is the --base checkout, and the two alternate run by run. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.",
   "runs": 15,
   "moves": 30,
@@ -11,45 +11,45 @@
       "case": "line-1k",
       "nodes": 1029,
       "firstHandler": {
-        "median": 4.4,
-        "p95": 8.6,
-        "min": 3.7,
-        "max": 8.6,
+        "median": 6.1,
+        "p95": 8.3,
+        "min": 3.9,
+        "max": 8.3,
         "n": 15
       },
       "firstPainted": {
-        "median": 5.1,
-        "p95": 10,
-        "min": 4.3,
-        "max": 10,
+        "median": 6.8,
+        "p95": 9.4,
+        "min": 4.6,
+        "max": 9.4,
         "n": 15
       },
       "restedHandler": {
         "median": 1.3,
-        "p95": 1.4,
+        "p95": 1.5,
         "min": 1.2,
-        "max": 1.4,
+        "max": 1.5,
         "n": 15
       },
       "restedPainted": {
-        "median": 1.5,
-        "p95": 1.8,
+        "median": 1.6,
+        "p95": 1.6,
         "min": 1.4,
-        "max": 1.8,
+        "max": 1.6,
         "n": 15
       },
       "steadyHandler": {
         "median": 1.2,
-        "p95": 2.2,
+        "p95": 2.4,
         "min": 0.9,
-        "max": 5,
+        "max": 3.8,
         "n": 450
       },
       "steadyPainted": {
-        "median": 1.4,
-        "p95": 2.6,
-        "min": 1.1,
-        "max": 6.1,
+        "median": 1.3,
+        "p95": 2.7,
+        "min": 1,
+        "max": 4.5,
         "n": 450
       },
       "legendHandler": null,
@@ -60,128 +60,30 @@
       "case": "line-1k",
       "nodes": 1029,
       "firstHandler": {
-        "median": 2.9,
-        "p95": 3.9,
-        "min": 1.6,
-        "max": 3.9,
+        "median": 3.3,
+        "p95": 4,
+        "min": 2.6,
+        "max": 4,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.9,
+        "median": 4.5,
         "p95": 5.4,
-        "min": 2.2,
+        "min": 3.4,
         "max": 5.4,
         "n": 15
       },
       "restedHandler": {
         "median": 0.4,
         "p95": 0.6,
-        "min": 0.4,
+        "min": 0.3,
         "max": 0.6,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.7,
-        "p95": 0.8,
-        "min": 0.5,
-        "max": 0.8,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.3,
-        "p95": 0.6,
-        "min": 0.1,
-        "max": 1.1,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.5,
-        "p95": 0.8,
-        "min": 0.3,
-        "max": 1.8,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "base",
-      "case": "line-100k",
-      "nodes": 29,
-      "firstHandler": {
-        "median": 3.9,
-        "p95": 5.3,
-        "min": 2.4,
-        "max": 5.3,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 4.9,
-        "p95": 6.6,
-        "min": 3,
-        "max": 6.6,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.8,
-        "p95": 1,
-        "min": 0.7,
-        "max": 1,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1.1,
-        "p95": 1.3,
-        "min": 0.8,
-        "max": 1.3,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.7,
-        "p95": 1.3,
-        "min": 0.4,
-        "max": 2.6,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.9,
-        "p95": 1.6,
-        "min": 0.6,
-        "max": 3.7,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "chartkit",
-      "case": "line-100k",
-      "nodes": 29,
-      "firstHandler": {
-        "median": 2.6,
-        "p95": 3.7,
-        "min": 1.4,
-        "max": 3.7,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 3.4,
-        "p95": 5.1,
-        "min": 2.1,
-        "max": 5.1,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.3,
-        "max": 0.4,
         "n": 15
       },
       "restedPainted": {
         "median": 0.6,
         "p95": 0.8,
-        "min": 0.4,
+        "min": 0.5,
         "max": 0.8,
         "n": 15
       },
@@ -189,14 +91,112 @@
         "median": 0.3,
         "p95": 0.5,
         "min": 0.1,
-        "max": 1.5,
+        "max": 0.9,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.5,
         "p95": 0.8,
+        "min": 0.3,
+        "max": 1.6,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "base",
+      "case": "line-100k",
+      "nodes": 29,
+      "firstHandler": {
+        "median": 4.7,
+        "p95": 5.9,
+        "min": 2.4,
+        "max": 5.9,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 5.9,
+        "p95": 7.2,
+        "min": 3.1,
+        "max": 7.2,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.8,
+        "p95": 0.9,
+        "min": 0.6,
+        "max": 0.9,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 1,
+        "p95": 1.1,
+        "min": 0.8,
+        "max": 1.1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.6,
+        "p95": 1.4,
+        "min": 0.4,
+        "max": 2.2,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.8,
+        "p95": 1.6,
+        "min": 0.5,
+        "max": 2.9,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "chartkit",
+      "case": "line-100k",
+      "nodes": 29,
+      "firstHandler": {
+        "median": 3,
+        "p95": 3.4,
+        "min": 2.4,
+        "max": 3.4,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 4.2,
+        "p95": 5,
+        "min": 3.5,
+        "max": 5,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.3,
+        "p95": 0.4,
         "min": 0.2,
-        "max": 3,
+        "max": 0.4,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.5,
+        "p95": 0.7,
+        "min": 0.4,
+        "max": 0.7,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.2,
+        "p95": 0.5,
+        "min": 0,
+        "max": 1,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.4,
+        "p95": 0.7,
+        "min": 0.2,
+        "max": 1.7,
         "n": 450
       },
       "legendHandler": null,
@@ -207,59 +207,59 @@
       "case": "multi-line-5x1k",
       "nodes": 5063,
       "firstHandler": {
-        "median": 14.5,
-        "p95": 18.1,
-        "min": 9.7,
-        "max": 18.1,
+        "median": 16.4,
+        "p95": 17.3,
+        "min": 9.8,
+        "max": 17.3,
         "n": 15
       },
       "firstPainted": {
-        "median": 15.5,
-        "p95": 19.1,
-        "min": 10.4,
-        "max": 19.1,
+        "median": 17.2,
+        "p95": 18.2,
+        "min": 10.5,
+        "max": 18.2,
         "n": 15
       },
       "restedHandler": {
-        "median": 5.6,
-        "p95": 6.1,
-        "min": 4.9,
-        "max": 6.1,
+        "median": 5.5,
+        "p95": 5.7,
+        "min": 5.1,
+        "max": 5.7,
         "n": 15
       },
       "restedPainted": {
-        "median": 6.2,
-        "p95": 6.5,
-        "min": 5.5,
-        "max": 6.5,
+        "median": 6.1,
+        "p95": 6.3,
+        "min": 5.7,
+        "max": 6.3,
         "n": 15
       },
       "steadyHandler": {
-        "median": 5,
-        "p95": 5.7,
-        "min": 4.4,
-        "max": 9.9,
+        "median": 4.9,
+        "p95": 5.5,
+        "min": 4.3,
+        "max": 9.8,
         "n": 450
       },
       "steadyPainted": {
-        "median": 5.4,
-        "p95": 6.2,
-        "min": 4.7,
-        "max": 10.4,
+        "median": 5.2,
+        "p95": 5.9,
+        "min": 4.6,
+        "max": 10.3,
         "n": 450
       },
       "legendHandler": {
-        "median": 8.4,
-        "p95": 10.2,
-        "min": 7.4,
-        "max": 10.9,
+        "median": 7.9,
+        "p95": 9.7,
+        "min": 7.3,
+        "max": 10,
         "n": 165
       },
       "legendPainted": {
-        "median": 8.8,
-        "p95": 10.5,
-        "min": 7.6,
-        "max": 11.3,
+        "median": 8.2,
+        "p95": 10,
+        "min": 7.5,
+        "max": 10.3,
         "n": 165
       }
     },
@@ -268,17 +268,17 @@
       "case": "multi-line-5x1k",
       "nodes": 5063,
       "firstHandler": {
-        "median": 4,
-        "p95": 4.9,
+        "median": 3.9,
+        "p95": 5,
         "min": 2.4,
-        "max": 4.9,
+        "max": 5,
         "n": 15
       },
       "firstPainted": {
-        "median": 4.9,
-        "p95": 6.2,
-        "min": 3,
-        "max": 6.2,
+        "median": 4.8,
+        "p95": 6.1,
+        "min": 3.2,
+        "max": 6.1,
         "n": 15
       },
       "restedHandler": {
@@ -289,38 +289,38 @@
         "n": 15
       },
       "restedPainted": {
-        "median": 1.5,
-        "p95": 1.7,
-        "min": 1.4,
-        "max": 1.7,
+        "median": 1.4,
+        "p95": 1.5,
+        "min": 1.3,
+        "max": 1.5,
         "n": 15
       },
       "steadyHandler": {
         "median": 0.7,
-        "p95": 1,
-        "min": 0.5,
-        "max": 1.7,
+        "p95": 0.9,
+        "min": 0.4,
+        "max": 1.5,
         "n": 450
       },
       "steadyPainted": {
-        "median": 1.1,
-        "p95": 1.4,
+        "median": 1,
+        "p95": 1.3,
         "min": 0.6,
-        "max": 2.6,
+        "max": 2.1,
         "n": 450
       },
       "legendHandler": {
-        "median": 3.8,
-        "p95": 5.8,
+        "median": 3.5,
+        "p95": 5.7,
         "min": 3,
-        "max": 6.4,
+        "max": 6,
         "n": 165
       },
       "legendPainted": {
-        "median": 4.1,
-        "p95": 6.3,
-        "min": 3.2,
-        "max": 7,
+        "median": 3.8,
+        "p95": 6.1,
+        "min": 3.3,
+        "max": 6.6,
         "n": 165
       }
     },
@@ -329,59 +329,59 @@
       "case": "multi-line-5x20k",
       "nodes": 62,
       "firstHandler": {
-        "median": 6,
-        "p95": 11.5,
-        "min": 5.8,
-        "max": 11.5,
+        "median": 11.1,
+        "p95": 12.3,
+        "min": 6,
+        "max": 12.3,
         "n": 15
       },
       "firstPainted": {
-        "median": 6.6,
-        "p95": 12.7,
-        "min": 6.4,
-        "max": 12.7,
+        "median": 11.9,
+        "p95": 13.8,
+        "min": 6.7,
+        "max": 13.8,
         "n": 15
       },
       "restedHandler": {
         "median": 2.4,
-        "p95": 2.7,
+        "p95": 2.8,
         "min": 2.2,
-        "max": 2.7,
+        "max": 2.8,
         "n": 15
       },
       "restedPainted": {
-        "median": 2.9,
-        "p95": 3.2,
+        "median": 2.8,
+        "p95": 3.1,
         "min": 2.6,
-        "max": 3.2,
+        "max": 3.1,
         "n": 15
       },
       "steadyHandler": {
-        "median": 2.5,
+        "median": 2.4,
         "p95": 3.6,
-        "min": 2,
-        "max": 4.6,
+        "min": 1.9,
+        "max": 4.8,
         "n": 450
       },
       "steadyPainted": {
-        "median": 5,
-        "p95": 12.1,
-        "min": 2.3,
-        "max": 14.7,
+        "median": 8.2,
+        "p95": 11.9,
+        "min": 2.2,
+        "max": 14.3,
         "n": 450
       },
       "legendHandler": {
-        "median": 2.5,
+        "median": 2.4,
         "p95": 2.8,
-        "min": 2.2,
-        "max": 3.2,
+        "min": 2.1,
+        "max": 3.1,
         "n": 165
       },
       "legendPainted": {
-        "median": 14.2,
-        "p95": 14.9,
-        "min": 2.8,
-        "max": 16.5,
+        "median": 13.9,
+        "p95": 14.6,
+        "min": 2.5,
+        "max": 15.1,
         "n": 165
       }
     },
@@ -390,16 +390,16 @@
       "case": "multi-line-5x20k",
       "nodes": 62,
       "firstHandler": {
-        "median": 1.8,
+        "median": 3.1,
         "p95": 3.9,
         "min": 1.7,
         "max": 3.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 2.7,
+        "median": 4.1,
         "p95": 5.3,
-        "min": 2.3,
+        "min": 2.4,
         "max": 5.3,
         "n": 15
       },
@@ -411,7 +411,7 @@
         "n": 15
       },
       "restedPainted": {
-        "median": 0.9,
+        "median": 0.8,
         "p95": 1,
         "min": 0.7,
         "max": 1,
@@ -421,14 +421,14 @@
         "median": 0.4,
         "p95": 0.6,
         "min": 0.2,
-        "max": 0.8,
+        "max": 0.9,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.9,
-        "p95": 11.7,
+        "median": 0.8,
+        "p95": 11.3,
         "min": 0.4,
-        "max": 14.7,
+        "max": 14.3,
         "n": 450
       },
       "legendHandler": {
@@ -439,10 +439,10 @@
         "n": 165
       },
       "legendPainted": {
-        "median": 14.2,
-        "p95": 15,
-        "min": 0.7,
-        "max": 15.7,
+        "median": 14,
+        "p95": 14.6,
+        "min": 0.9,
+        "max": 15,
         "n": 165
       }
     },
@@ -451,23 +451,23 @@
       "case": "long-line-5x200",
       "nodes": 1030,
       "firstHandler": {
-        "median": 8,
-        "p95": 8.7,
+        "median": 6.5,
+        "p95": 8.5,
         "min": 3.9,
-        "max": 8.7,
+        "max": 8.5,
         "n": 15
       },
       "firstPainted": {
-        "median": 9.1,
-        "p95": 10,
-        "min": 4.7,
-        "max": 10,
+        "median": 7.5,
+        "p95": 9.6,
+        "min": 4.5,
+        "max": 9.6,
         "n": 15
       },
       "restedHandler": {
         "median": 1.5,
         "p95": 1.7,
-        "min": 1.4,
+        "min": 1.3,
         "max": 1.7,
         "n": 15
       },
@@ -480,16 +480,16 @@
       },
       "steadyHandler": {
         "median": 1.4,
-        "p95": 2.6,
+        "p95": 2.4,
         "min": 1,
-        "max": 3.8,
+        "max": 4.1,
         "n": 450
       },
       "steadyPainted": {
-        "median": 1.6,
-        "p95": 2.9,
-        "min": 1.2,
-        "max": 4.4,
+        "median": 1.7,
+        "p95": 2.7,
+        "min": 1.3,
+        "max": 5.1,
         "n": 450
       },
       "legendHandler": null,
@@ -500,45 +500,45 @@
       "case": "long-line-5x200",
       "nodes": 1030,
       "firstHandler": {
-        "median": 3.9,
-        "p95": 4.4,
+        "median": 3.1,
+        "p95": 4.1,
         "min": 1.8,
-        "max": 4.4,
+        "max": 4.1,
         "n": 15
       },
       "firstPainted": {
-        "median": 5.4,
-        "p95": 5.9,
-        "min": 2.4,
-        "max": 5.9,
+        "median": 4.3,
+        "p95": 5.5,
+        "min": 2.5,
+        "max": 5.5,
         "n": 15
       },
       "restedHandler": {
         "median": 0.5,
-        "p95": 0.5,
+        "p95": 0.6,
         "min": 0.4,
-        "max": 0.5,
+        "max": 0.6,
         "n": 15
       },
       "restedPainted": {
         "median": 0.8,
-        "p95": 0.9,
+        "p95": 1,
         "min": 0.7,
-        "max": 0.9,
+        "max": 1,
         "n": 15
       },
       "steadyHandler": {
         "median": 0.4,
         "p95": 0.7,
         "min": 0.2,
-        "max": 1.1,
+        "max": 1.3,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.6,
+        "median": 0.7,
         "p95": 1,
         "min": 0.4,
-        "max": 1.9,
+        "max": 2.1,
         "n": 450
       },
       "legendHandler": null,
@@ -549,45 +549,45 @@
       "case": "long-line-5x2k",
       "nodes": 30,
       "firstHandler": {
-        "median": 5.9,
-        "p95": 7,
+        "median": 3.3,
+        "p95": 6.6,
         "min": 3.1,
-        "max": 7,
+        "max": 6.6,
         "n": 15
       },
       "firstPainted": {
-        "median": 7.1,
-        "p95": 8.4,
-        "min": 3.9,
-        "max": 8.4,
+        "median": 4.1,
+        "p95": 7.8,
+        "min": 3.8,
+        "max": 7.8,
         "n": 15
       },
       "restedHandler": {
         "median": 0.9,
-        "p95": 1.1,
+        "p95": 1.3,
         "min": 0.8,
-        "max": 1.1,
+        "max": 1.3,
         "n": 15
       },
       "restedPainted": {
         "median": 1.2,
-        "p95": 1.3,
+        "p95": 1.7,
         "min": 1.1,
-        "max": 1.3,
+        "max": 1.7,
         "n": 15
       },
       "steadyHandler": {
         "median": 0.8,
-        "p95": 1.6,
+        "p95": 1.4,
         "min": 0.6,
         "max": 3.4,
         "n": 450
       },
       "steadyPainted": {
-        "median": 1,
-        "p95": 1.9,
+        "median": 1.1,
+        "p95": 1.7,
         "min": 0.8,
-        "max": 4.1,
+        "max": 4.2,
         "n": 450
       },
       "legendHandler": null,
@@ -598,21 +598,21 @@
       "case": "long-line-5x2k",
       "nodes": 30,
       "firstHandler": {
-        "median": 4,
-        "p95": 4.4,
-        "min": 2.5,
-        "max": 4.4,
+        "median": 3.4,
+        "p95": 4.3,
+        "min": 1.9,
+        "max": 4.3,
         "n": 15
       },
       "firstPainted": {
-        "median": 5.3,
-        "p95": 5.9,
-        "min": 3.5,
-        "max": 5.9,
+        "median": 4.6,
+        "p95": 5.8,
+        "min": 2.7,
+        "max": 5.8,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.5,
+        "median": 0.4,
         "p95": 0.6,
         "min": 0.4,
         "max": 0.6,
@@ -629,14 +629,14 @@
         "median": 0.4,
         "p95": 0.7,
         "min": 0.2,
-        "max": 1.8,
+        "max": 2.1,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.6,
+        "median": 0.7,
         "p95": 1,
         "min": 0.4,
-        "max": 2.5,
+        "max": 3.1,
         "n": 450
       },
       "legendHandler": null,
@@ -648,44 +648,44 @@
       "nodes": 41,
       "firstHandler": {
         "median": 2.5,
-        "p95": 3.1,
-        "min": 1.7,
-        "max": 3.1,
+        "p95": 3.3,
+        "min": 1.3,
+        "max": 3.3,
         "n": 15
       },
       "firstPainted": {
         "median": 3.5,
-        "p95": 4.2,
-        "min": 2.4,
-        "max": 4.2,
+        "p95": 4.6,
+        "min": 1.8,
+        "max": 4.6,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.3,
-        "p95": 0.4,
+        "median": 0.4,
+        "p95": 0.5,
         "min": 0.2,
-        "max": 0.4,
+        "max": 0.5,
         "n": 15
       },
       "restedPainted": {
-        "median": 0.6,
-        "p95": 0.8,
-        "min": 0.5,
-        "max": 0.8,
+        "median": 0.7,
+        "p95": 1,
+        "min": 0.6,
+        "max": 1,
         "n": 15
       },
       "steadyHandler": {
-        "median": 0.2,
+        "median": 0.3,
         "p95": 0.4,
         "min": 0.1,
         "max": 0.9,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.4,
-        "p95": 0.7,
-        "min": 0.1,
-        "max": 1.6,
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 1.7,
         "n": 450
       },
       "legendHandler": null,
@@ -696,17 +696,115 @@
       "case": "bar-12",
       "nodes": 41,
       "firstHandler": {
-        "median": 2.1,
+        "median": 2.4,
         "p95": 2.9,
-        "min": 1.1,
+        "min": 1.2,
         "max": 2.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 3,
+        "median": 3.4,
         "p95": 4.2,
         "min": 1.6,
         "max": 4.2,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.3,
+        "p95": 0.5,
+        "min": 0.3,
+        "max": 0.5,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.6,
+        "p95": 1.1,
+        "min": 0.5,
+        "max": 1.1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.3,
+        "p95": 0.4,
+        "min": 0.1,
+        "max": 1,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 1.7,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "base",
+      "case": "bar-50",
+      "nodes": 79,
+      "firstHandler": {
+        "median": 2.5,
+        "p95": 3.6,
+        "min": 1.3,
+        "max": 3.6,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 3.6,
+        "p95": 4.9,
+        "min": 1.9,
+        "max": 4.9,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.3,
+        "p95": 0.4,
+        "min": 0.2,
+        "max": 0.4,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.6,
+        "p95": 0.8,
+        "min": 0.5,
+        "max": 0.8,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.2,
+        "p95": 0.4,
+        "min": 0.1,
+        "max": 1,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 1.9,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "chartkit",
+      "case": "bar-50",
+      "nodes": 79,
+      "firstHandler": {
+        "median": 1.6,
+        "p95": 2.6,
+        "min": 1.1,
+        "max": 2.6,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 2.4,
+        "p95": 3.9,
+        "min": 1.6,
+        "max": 3.9,
         "n": 15
       },
       "restedHandler": {
@@ -719,7 +817,7 @@
       "restedPainted": {
         "median": 0.5,
         "p95": 0.8,
-        "min": 0.4,
+        "min": 0.5,
         "max": 0.8,
         "n": 15
       },
@@ -727,56 +825,7 @@
         "median": 0.2,
         "p95": 0.4,
         "min": 0,
-        "max": 1,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.4,
-        "p95": 0.7,
-        "min": 0.1,
-        "max": 1.8,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "base",
-      "case": "bar-50",
-      "nodes": 79,
-      "firstHandler": {
-        "median": 2.6,
-        "p95": 3.1,
-        "min": 1.3,
-        "max": 3.1,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 3.6,
-        "p95": 4.5,
-        "min": 1.9,
-        "max": 4.5,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.3,
-        "p95": 0.5,
-        "min": 0.2,
-        "max": 0.5,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.6,
-        "p95": 0.9,
-        "min": 0.5,
-        "max": 0.9,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.1,
-        "max": 0.9,
+        "max": 0.8,
         "n": 450
       },
       "steadyPainted": {
@@ -790,74 +839,25 @@
       "legendPainted": null
     },
     {
-      "lib": "chartkit",
-      "case": "bar-50",
-      "nodes": 79,
-      "firstHandler": {
-        "median": 1.8,
-        "p95": 2.8,
-        "min": 1,
-        "max": 2.8,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 2.6,
-        "p95": 4.2,
-        "min": 1.6,
-        "max": 4.2,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.2,
-        "max": 0.4,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.6,
-        "p95": 0.7,
-        "min": 0.4,
-        "max": 0.7,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.2,
-        "p95": 0.4,
-        "min": 0.1,
-        "max": 0.8,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.4,
-        "p95": 0.7,
-        "min": 0.2,
-        "max": 1.5,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
       "lib": "base",
       "case": "grouped-bar-3x12",
       "nodes": 79,
       "firstHandler": {
-        "median": 3.1,
-        "p95": 3.6,
-        "min": 1.7,
-        "max": 3.6,
+        "median": 2.2,
+        "p95": 3.5,
+        "min": 1.3,
+        "max": 3.5,
         "n": 15
       },
       "firstPainted": {
-        "median": 4.4,
+        "median": 3.5,
         "p95": 5.1,
-        "min": 2.4,
+        "min": 2,
         "max": 5.1,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.3,
+        "median": 0.4,
         "p95": 0.5,
         "min": 0.3,
         "max": 0.5,
@@ -874,28 +874,28 @@
         "median": 0.3,
         "p95": 0.5,
         "min": 0.1,
-        "max": 1,
+        "max": 1.2,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.5,
-        "p95": 0.8,
+        "p95": 0.9,
         "min": 0.2,
-        "max": 1.8,
+        "max": 2,
         "n": 450
       },
       "legendHandler": {
-        "median": 0.3,
-        "p95": 0.5,
+        "median": 0.4,
+        "p95": 0.6,
         "min": 0.2,
         "max": 0.6,
         "n": 165
       },
       "legendPainted": {
-        "median": 0.5,
-        "p95": 0.7,
+        "median": 0.6,
+        "p95": 0.8,
         "min": 0.4,
-        "max": 0.8,
+        "max": 0.9,
         "n": 165
       }
     },
@@ -905,145 +905,23 @@
       "nodes": 79,
       "firstHandler": {
         "median": 2.6,
-        "p95": 3.2,
-        "min": 1.4,
-        "max": 3.2,
+        "p95": 2.9,
+        "min": 1.3,
+        "max": 2.9,
         "n": 15
       },
       "firstPainted": {
         "median": 3.9,
-        "p95": 4.8,
+        "p95": 4.4,
         "min": 2.1,
-        "max": 4.8,
+        "max": 4.4,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.2,
-        "max": 0.4,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.7,
-        "p95": 0.7,
-        "min": 0.6,
-        "max": 0.7,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.2,
-        "p95": 0.4,
-        "min": 0.1,
-        "max": 1,
-        "n": 450
-      },
-      "steadyPainted": {
         "median": 0.4,
-        "p95": 0.7,
-        "min": 0.2,
-        "max": 1.7,
-        "n": 450
-      },
-      "legendHandler": {
-        "median": 0.3,
         "p95": 0.5,
         "min": 0.2,
-        "max": 0.6,
-        "n": 165
-      },
-      "legendPainted": {
-        "median": 0.5,
-        "p95": 0.7,
-        "min": 0.4,
-        "max": 0.8,
-        "n": 165
-      }
-    },
-    {
-      "lib": "base",
-      "case": "grouped-bar-3x100",
-      "nodes": 343,
-      "firstHandler": {
-        "median": 3.6,
-        "p95": 4.3,
-        "min": 1.9,
-        "max": 4.3,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 4.5,
-        "p95": 5.4,
-        "min": 2.4,
-        "max": 5.4,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.6,
-        "p95": 0.6,
-        "min": 0.5,
-        "max": 0.6,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.8,
-        "p95": 0.9,
-        "min": 0.8,
-        "max": 0.9,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.4,
-        "p95": 0.7,
-        "min": 0.3,
-        "max": 1.4,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.6,
-        "p95": 0.9,
-        "min": 0.4,
-        "max": 1.8,
-        "n": 450
-      },
-      "legendHandler": {
-        "median": 0.8,
-        "p95": 1,
-        "min": 0.6,
-        "max": 1.2,
-        "n": 165
-      },
-      "legendPainted": {
-        "median": 1,
-        "p95": 1.2,
-        "min": 0.8,
-        "max": 1.4,
-        "n": 165
-      }
-    },
-    {
-      "lib": "chartkit",
-      "case": "grouped-bar-3x100",
-      "nodes": 343,
-      "firstHandler": {
-        "median": 2.6,
-        "p95": 3,
-        "min": 1.2,
-        "max": 3,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 3.6,
-        "p95": 4.2,
-        "min": 1.6,
-        "max": 4.2,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.4,
-        "p95": 0.6,
-        "min": 0.4,
-        "max": 0.6,
+        "max": 0.5,
         "n": 15
       },
       "restedPainted": {
@@ -1057,27 +935,149 @@
         "median": 0.3,
         "p95": 0.5,
         "min": 0.1,
+        "max": 1.1,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 2,
+        "n": 450
+      },
+      "legendHandler": {
+        "median": 0.4,
+        "p95": 0.5,
+        "min": 0.2,
+        "max": 0.6,
+        "n": 165
+      },
+      "legendPainted": {
+        "median": 0.6,
+        "p95": 0.8,
+        "min": 0.3,
+        "max": 0.9,
+        "n": 165
+      }
+    },
+    {
+      "lib": "base",
+      "case": "grouped-bar-3x100",
+      "nodes": 343,
+      "firstHandler": {
+        "median": 3.6,
+        "p95": 4.2,
+        "min": 1.7,
+        "max": 4.2,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 4.6,
+        "p95": 5.3,
+        "min": 2.1,
+        "max": 5.3,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.6,
+        "p95": 0.7,
+        "min": 0.4,
+        "max": 0.7,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.8,
+        "p95": 1.1,
+        "min": 0.7,
+        "max": 1.1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.3,
+        "max": 1.5,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.7,
+        "p95": 1.1,
+        "min": 0.4,
+        "max": 2.1,
+        "n": 450
+      },
+      "legendHandler": {
+        "median": 0.8,
+        "p95": 1.1,
+        "min": 0.6,
+        "max": 1.2,
+        "n": 165
+      },
+      "legendPainted": {
+        "median": 1.1,
+        "p95": 1.4,
+        "min": 0.8,
+        "max": 1.5,
+        "n": 165
+      }
+    },
+    {
+      "lib": "chartkit",
+      "case": "grouped-bar-3x100",
+      "nodes": 343,
+      "firstHandler": {
+        "median": 2.2,
+        "p95": 2.8,
+        "min": 1.4,
+        "max": 2.8,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 3.2,
+        "p95": 3.9,
+        "min": 1.9,
+        "max": 3.9,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.5,
+        "p95": 0.6,
+        "min": 0.4,
+        "max": 0.6,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.7,
+        "p95": 1,
+        "min": 0.6,
+        "max": 1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.4,
+        "p95": 0.5,
+        "min": 0.1,
         "max": 1,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.4,
-        "p95": 0.7,
-        "min": 0.3,
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.2,
         "max": 1.7,
         "n": 450
       },
       "legendHandler": {
-        "median": 0.6,
+        "median": 0.7,
         "p95": 0.9,
-        "min": 0.4,
+        "min": 0.5,
         "max": 1,
         "n": 165
       },
       "legendPainted": {
-        "median": 0.8,
-        "p95": 1.1,
-        "min": 0.6,
+        "median": 0.9,
+        "p95": 1.2,
+        "min": 0.7,
         "max": 1.3,
         "n": 165
       }
@@ -1087,59 +1087,59 @@
       "case": "area-3x1k",
       "nodes": 3048,
       "firstHandler": {
-        "median": 11.4,
-        "p95": 14,
-        "min": 7.1,
-        "max": 14,
+        "median": 11.5,
+        "p95": 13.9,
+        "min": 7.7,
+        "max": 13.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 12.2,
-        "p95": 14.8,
-        "min": 7.7,
-        "max": 14.8,
+        "median": 12.5,
+        "p95": 14.9,
+        "min": 8.6,
+        "max": 14.9,
         "n": 15
       },
       "restedHandler": {
-        "median": 3.7,
-        "p95": 3.9,
-        "min": 3,
-        "max": 3.9,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 4,
+        "median": 3.6,
         "p95": 4.3,
-        "min": 3.4,
+        "min": 3.1,
         "max": 4.3,
         "n": 15
       },
+      "restedPainted": {
+        "median": 3.9,
+        "p95": 4.7,
+        "min": 3.3,
+        "max": 4.7,
+        "n": 15
+      },
       "steadyHandler": {
-        "median": 2.9,
-        "p95": 4.3,
-        "min": 2.4,
-        "max": 7.4,
+        "median": 3,
+        "p95": 4.4,
+        "min": 2.5,
+        "max": 8.2,
         "n": 450
       },
       "steadyPainted": {
-        "median": 3.1,
-        "p95": 4.6,
+        "median": 3.2,
+        "p95": 4.7,
         "min": 2.6,
-        "max": 8,
+        "max": 8.9,
         "n": 450
       },
       "legendHandler": {
-        "median": 5,
-        "p95": 7,
+        "median": 5.1,
+        "p95": 7.3,
         "min": 4.5,
-        "max": 7.4,
+        "max": 7.9,
         "n": 165
       },
       "legendPainted": {
-        "median": 5.2,
-        "p95": 7.2,
-        "min": 4.6,
-        "max": 7.6,
+        "median": 5.4,
+        "p95": 7.5,
+        "min": 4.7,
+        "max": 8.7,
         "n": 165
       }
     },
@@ -1148,24 +1148,24 @@
       "case": "area-3x1k",
       "nodes": 3048,
       "firstHandler": {
-        "median": 3.8,
-        "p95": 4.2,
-        "min": 1.9,
-        "max": 4.2,
+        "median": 3.2,
+        "p95": 3.9,
+        "min": 1.8,
+        "max": 3.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 4.9,
-        "p95": 5.7,
-        "min": 2.5,
-        "max": 5.7,
+        "median": 4.2,
+        "p95": 5,
+        "min": 2.4,
+        "max": 5,
         "n": 15
       },
       "restedHandler": {
         "median": 0.7,
-        "p95": 1,
+        "p95": 0.9,
         "min": 0.6,
-        "max": 1,
+        "max": 0.9,
         "n": 15
       },
       "restedPainted": {
@@ -1184,23 +1184,23 @@
       },
       "steadyPainted": {
         "median": 0.7,
-        "p95": 1,
+        "p95": 1.1,
         "min": 0.4,
-        "max": 2.1,
+        "max": 2,
         "n": 450
       },
       "legendHandler": {
-        "median": 2.5,
+        "median": 2.6,
         "p95": 4.7,
-        "min": 2.1,
-        "max": 4.9,
+        "min": 2.2,
+        "max": 5.4,
         "n": 165
       },
       "legendPainted": {
-        "median": 2.7,
-        "p95": 4.8,
-        "min": 2.2,
-        "max": 5.3,
+        "median": 2.8,
+        "p95": 4.9,
+        "min": 2.4,
+        "max": 5.7,
         "n": 165
       }
     },
@@ -1209,31 +1209,31 @@
       "case": "line-1k",
       "nodes": null,
       "firstHandler": {
-        "median": 0.4,
-        "p95": 1.2,
-        "min": 0.2,
-        "max": 1.2,
+        "median": 0.5,
+        "p95": 0.9,
+        "min": 0.3,
+        "max": 0.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 1.8,
-        "p95": 3.4,
+        "median": 1.7,
+        "p95": 3.3,
         "min": 1,
-        "max": 3.4,
+        "max": 3.3,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.1,
+        "median": 0.2,
         "p95": 0.3,
         "min": 0,
         "max": 0.3,
         "n": 15
       },
       "restedPainted": {
-        "median": 0.8,
-        "p95": 1.5,
+        "median": 1.1,
+        "p95": 1.7,
         "min": 0.4,
-        "max": 1.5,
+        "max": 1.7,
         "n": 15
       },
       "steadyHandler": {
@@ -1245,7 +1245,7 @@
       },
       "steadyPainted": {
         "median": 0.8,
-        "p95": 1.6,
+        "p95": 1.5,
         "min": 0.1,
         "max": 1.8,
         "n": 450
@@ -1258,80 +1258,31 @@
       "case": "line-100k",
       "nodes": null,
       "firstHandler": {
-        "median": 0.6,
+        "median": 0.5,
         "p95": 0.8,
         "min": 0.2,
         "max": 0.8,
         "n": 15
       },
       "firstPainted": {
-        "median": 1.8,
-        "p95": 2.7,
+        "median": 1.6,
+        "p95": 2.6,
         "min": 1,
-        "max": 2.7,
+        "max": 2.6,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.2,
-        "p95": 0.3,
-        "min": 0.1,
-        "max": 0.3,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1,
-        "p95": 2,
-        "min": 0.6,
-        "max": 2,
-        "n": 15
-      },
-      "steadyHandler": {
         "median": 0.1,
         "p95": 0.3,
         "min": 0,
-        "max": 0.6,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.9,
-        "p95": 1.7,
-        "min": 0.3,
-        "max": 1.9,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "uplot",
-      "case": "multi-line-5x1k",
-      "nodes": null,
-      "firstHandler": {
-        "median": 0.8,
-        "p95": 1.2,
-        "min": 0.3,
-        "max": 1.2,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 2,
-        "p95": 3.1,
-        "min": 1.1,
-        "max": 3.1,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.2,
-        "p95": 0.3,
-        "min": 0.1,
         "max": 0.3,
         "n": 15
       },
       "restedPainted": {
-        "median": 1.2,
-        "p95": 2.2,
-        "min": 0.6,
-        "max": 2.2,
+        "median": 0.9,
+        "p95": 1.7,
+        "min": 0.4,
+        "max": 1.7,
         "n": 15
       },
       "steadyHandler": {
@@ -1342,8 +1293,57 @@
         "n": 450
       },
       "steadyPainted": {
-        "median": 1,
-        "p95": 2,
+        "median": 0.8,
+        "p95": 1.5,
+        "min": 0.2,
+        "max": 1.8,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "uplot",
+      "case": "multi-line-5x1k",
+      "nodes": null,
+      "firstHandler": {
+        "median": 0.7,
+        "p95": 1,
+        "min": 0.3,
+        "max": 1,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 2.4,
+        "p95": 3.2,
+        "min": 1.2,
+        "max": 3.2,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.2,
+        "p95": 0.3,
+        "min": 0.1,
+        "max": 0.3,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 1.4,
+        "p95": 2.2,
+        "min": 0.4,
+        "max": 2.2,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.2,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.5,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 1.2,
+        "p95": 1.9,
         "min": 0.3,
         "max": 2.2,
         "n": 450
@@ -1356,45 +1356,45 @@
       "case": "multi-line-5x20k",
       "nodes": null,
       "firstHandler": {
-        "median": 0.8,
-        "p95": 1.2,
-        "min": 0.4,
-        "max": 1.2,
+        "median": 0.7,
+        "p95": 1.1,
+        "min": 0.3,
+        "max": 1.1,
         "n": 15
       },
       "firstPainted": {
-        "median": 2.8,
-        "p95": 3.1,
-        "min": 1.2,
-        "max": 3.1,
+        "median": 2.4,
+        "p95": 3.2,
+        "min": 1.4,
+        "max": 3.2,
         "n": 15
       },
       "restedHandler": {
         "median": 0.2,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.3,
+        "p95": 0.4,
+        "min": 0.1,
+        "max": 0.4,
         "n": 15
       },
       "restedPainted": {
-        "median": 2,
-        "p95": 2.4,
-        "min": 0.5,
-        "max": 2.4,
+        "median": 1.2,
+        "p95": 1.8,
+        "min": 0.9,
+        "max": 1.8,
         "n": 15
       },
       "steadyHandler": {
-        "median": 0.2,
+        "median": 0.1,
         "p95": 0.3,
         "min": 0,
-        "max": 0.5,
+        "max": 0.4,
         "n": 450
       },
       "steadyPainted": {
-        "median": 1.3,
-        "p95": 2.1,
-        "min": 0.3,
-        "max": 2.5,
+        "median": 1,
+        "p95": 1.8,
+        "min": 0.2,
+        "max": 2.3,
         "n": 450
       },
       "legendHandler": null,
