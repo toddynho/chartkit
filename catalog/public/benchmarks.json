@@ -12,7 +12,7 @@
   "methodology": {
     "browser": "Playwright Chromium, a 640×360 line, median of 5. Shapes are even x, jittered x, and gapped timestamps. ChartKit initial is mount(); the aligned update is mount().update().",
     "updates": "The aligned update starts at the top of a requestAnimationFrame. The harness awaits the library's own completion, then reads the clock from a MessageChannel task after that frame's style, layout, and paint. GPU and raster time is not in the number. ChartKit is measured through mount(element, spec).update(spec), the same shape as uPlot's setData. The figure is the median of five samples.",
-    "hover": "Measured 2026-11-17 on `d5e79aa8` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart. Cells are the median, with the p95 beside it. uPlot is 1.6.32 with default options: a cursor crosshair, a hover point and its live legend. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (Apple M4 Max, darwin 25.0.0 arm64). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.",
+    "hover": "Measured 2026-11-17 on `a97fdc5c` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (`bench/results/hover.json`), the other 50 ms (`bench/results/hover-50ms.json`). uPlot is 1.6.32 with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (Apple M4 Max, darwin 25.0.0 arm64). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.",
     "sampling": "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
     "bundle": "Phase 4 per-type gzip from bench/results/bundle.json. esbuild minify, gzip level 9. ChartKit is createRenderer of that chart. /all is one bundle. unsupported and not tree-shakeable are labeled. uPlot’s JS and stylesheet are separate responses.",
     "ssr": "Phase 4 per-type Node render from bench/results/ssr.json. Median of 5 at the paint-matrix N. unsupported, error, and timeout are labeled. A blank cell is not used.",
@@ -25,7 +25,7 @@
     "allGzipBytes": 78081,
     "lineGzipCommit": "55fc89d",
     "lineGzipMeasured": "2026-10-29",
-    "otherFigures": "browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Bundle and SSR are the phase 4 matrices. Hover is bench/browser/hover.mjs, measured 2026-11-17 on d5e79aa8.",
+    "otherFigures": "browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Bundle and SSR are the phase 4 matrices. Hover is bench/browser/hover.mjs, measured 2026-11-17 on a97fdc5c.",
     "bundleVsUplot": {
       "chartkitBytes": 32110,
       "uplotJsBytes": 23292,
@@ -265,7 +265,7 @@
   ],
   "hover": {
     "measured": "2026-11-17",
-    "commit": "d5e79aa8",
+    "commit": "a97fdc5c",
     "runs": 15,
     "moves": 30,
     "script": "bench/browser/hover.mjs",
@@ -276,40 +276,54 @@
     "machine": "Apple M4 Max, darwin 25.0.0 arm64",
     "uplotVersion": "1.6.32",
     "uplotSetup": "Default options: cursor crosshair, a hover point per series, and the live legend under the plot. uPlot has no tooltip, so its moves place no tooltip. ChartKit's moves fill and place one.",
-    "protocol": "Playwright Chromium 140.0.7339.16, frame-rate limit off, 640×360, fresh page per run. 15 runs per case: one first hover and one rested hover each, 30 steady moves each, 11 legend moves each on multi-series cases, 16 ms apart. 200 ms between mount and the first move. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame."
+    "protocol": "Playwright Chromium 140.0.7339.16, frame-rate limit off, 640×360, fresh page per run. 15 runs per case: one first hover and one rested hover each, 30 steady moves each, 11 legend moves each on multi-series cases, 16 ms apart. 200 ms between mount and the first move. Libraries timed for the same case alternate run by run. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.",
+    "steadySecondRun": [
+      {
+        "lib": "ChartKit",
+        "handlerMs": 0.2,
+        "paintedMs": 0.4,
+        "p95Ms": 0.7
+      },
+      {
+        "lib": "uPlot",
+        "handlerMs": 0.1,
+        "paintedMs": 0.5,
+        "p95Ms": 1.4
+      }
+    ]
   },
   "hoverSteady100k": [
     {
       "lib": "ChartKit",
       "handlerMs": 0.3,
       "paintedMs": 0.5,
-      "p95Ms": 0.7
+      "p95Ms": 0.8
     },
     {
       "lib": "uPlot",
       "handlerMs": 0.1,
-      "paintedMs": 1,
-      "p95Ms": 1.5
+      "paintedMs": 0.8,
+      "p95Ms": 1.6
     }
   ],
   "firstHoverPainted": [
     {
       "afterMountMs": 50,
       "chartkit": 2.1,
-      "chartkitP95": 2.2,
-      "chartkitHandler": 1.5,
+      "chartkitP95": 2.6,
+      "chartkitHandler": 1.4,
       "uplot": 1,
       "uplotP95": 1.1,
       "uplotHandler": 0.3
     },
     {
       "afterMountMs": 200,
-      "chartkit": 3.1,
-      "chartkitP95": 4,
-      "chartkitHandler": 2.3,
-      "uplot": 1.6,
-      "uplotP95": 2.2,
-      "uplotHandler": 0.5
+      "chartkit": 2.2,
+      "chartkitP95": 4.3,
+      "chartkitHandler": 1.6,
+      "uplot": 1.2,
+      "uplotP95": 2.4,
+      "uplotHandler": 0.3
     }
   ],
   "ssrMs": [
@@ -16722,33 +16736,33 @@
         "lib": "ChartKit",
         "handler": "0.3",
         "painted": "0.5",
-        "p95": "0.7"
+        "p95": "0.8"
       },
       {
         "lib": "uPlot",
         "handler": "0.1",
-        "painted": "1.0",
-        "p95": "1.5"
+        "painted": "0.8",
+        "p95": "1.6"
       }
     ],
     "firstHoverRows": [
       {
         "delay": "50 ms after mount",
         "ck": "2.1",
-        "ckP95": "2.2",
-        "ckHandler": "1.5",
+        "ckP95": "2.6",
+        "ckHandler": "1.4",
         "uplot": "1.0",
         "uplotP95": "1.1",
         "uplotHandler": "0.3"
       },
       {
         "delay": "200 ms after mount",
-        "ck": "3.1",
-        "ckP95": "4.0",
-        "ckHandler": "2.3",
-        "uplot": "1.6",
-        "uplotP95": "2.2",
-        "uplotHandler": "0.5"
+        "ck": "2.2",
+        "ckP95": "4.3",
+        "ckHandler": "1.6",
+        "uplot": "1.2",
+        "uplotP95": "2.4",
+        "uplotHandler": "0.3"
       }
     ],
     "agentRows": [

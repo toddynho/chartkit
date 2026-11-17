@@ -382,7 +382,7 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
 
 ## First hover at 100k
 
-Painted median of the first hover on a 100,000 point line, 200 ms after mount, from bench/browser/hover.mjs: uPlot 1.6 ms, ChartKit 3.1 ms. uPlot is faster. It places no tooltip and ChartKit does. Steady hover is level (ChartKit 0.5 ms, uPlot 1.0 ms).
+Painted median of the first hover on a 100,000 point line, 200 ms after mount, from bench/browser/hover.mjs: uPlot 1.2 ms, ChartKit 2.2 ms. uPlot is faster. It places no tooltip and ChartKit does. Steady hover is level (ChartKit 0.5 ms, uPlot 0.8 ms).
 
 ```json
 {
@@ -393,11 +393,11 @@ Painted median of the first hover on a 100,000 point line, 200 ms after mount, f
   "data": [
     {
       "lib": "uPlot",
-      "ms": 1.6
+      "ms": 1.2
     },
     {
       "lib": "ChartKit",
-      "ms": 3.1
+      "ms": 2.2
     }
   ],
   "encoding": {
@@ -435,7 +435,7 @@ Painted median of the first hover on a 100,000 point line, 200 ms after mount, f
     }
   },
   "a11y": {
-    "alt": "First hover at 100,000 points, painted median: uPlot 1.6 ms, ChartKit 3.1 ms. uPlot is faster than ChartKit."
+    "alt": "First hover at 100,000 points, painted median: uPlot 1.2 ms, ChartKit 2.2 ms. uPlot is faster than ChartKit."
   }
 }
 ```

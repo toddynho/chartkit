@@ -27,9 +27,11 @@ export const hoverMeta = {
   uplotVersion: hoverRun.uplotVersion,
   uplotSetup: hoverRun.uplotSetup,
   protocol: hoverRun.protocol,
+  /** Steady moves from the second file, hover-50ms.json. The tables show hover.json. */
+  steadySecondRun: hoverRun.steadyOther,
 };
 
-export const hoverMethod = `Measured ${hoverRun.measured} on \`${hoverRun.commit}\` with \`${hoverRun.script}\`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, ${hoverRun.runs} fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and ${hoverRun.moves} steady moves 16 ms apart. Cells are the median, with the p95 beside it. uPlot is ${hoverRun.uplotVersion} with default options: a cursor crosshair, a hover point and its live legend. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (${hoverRun.machine}). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.`;
+export const hoverMethod = `Measured ${hoverRun.measured} on \`${hoverRun.commit}\` with \`${hoverRun.script}\`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, ${hoverRun.runs} fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and ${hoverRun.moves} steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (\`${hoverRun.source[0]}\`), the other 50 ms (\`${hoverRun.source[1]}\`). uPlot is ${hoverRun.uplotVersion} with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (${hoverRun.machine}). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.`;
 
 export const ROUND = 13;
 export const MEASURED = "2026-10-18";
@@ -380,10 +382,15 @@ function hoverCalls(rows: readonly HoverDisplay[], first: readonly FirstHoverDis
   const times = first.map((row) => Number(row.ck) / Number(row.uplot));
   const ratio = `${Math.min(...times).toFixed(1)} to ${Math.max(...times).toFixed(1)}`;
   const fresh = `First hover on a fresh 100,000 point line is a loss to uPlot. ChartKit paints it in ${span(ck)} ms and uPlot in ${span(up)} ms, painted median, so uPlot is ${ratio} times faster. The handler alone is ${span(ckHandler)} ms against ${span(upHandler)} ms.`;
-  const gap = Math.abs(Number(chartkit.painted) - Number(uplot.painted));
-  if (gap > 1 || Number(chartkit.p95) > 4 || Number(uplot.p95) > 4) throw new Error("steady hover is no longer level: rewrite the hover claim");
+  const other = hoverRun.steadyOther;
+  const ckOther = other.find((row) => row.lib === "ChartKit");
+  const upOther = other.find((row) => row.lib === "uPlot");
+  if (!ckOther || !upOther) throw new Error("the second hover run is missing ChartKit or uPlot");
+  const gap = Math.max(Math.abs(Number(chartkit.painted) - Number(uplot.painted)), Math.abs(ckOther.paintedMs - upOther.paintedMs));
+  const slowest = Math.max(Number(chartkit.painted), Number(uplot.painted), ckOther.paintedMs, upOther.paintedMs);
+  if (gap > 1 || slowest > 1.5 || Number(chartkit.p95) > 4 || Number(uplot.p95) > 4) throw new Error("steady hover is no longer level at about a millisecond: rewrite the hover claim");
   if (Number(chartkit.handler) <= Number(uplot.handler)) throw new Error("uPlot's steady handler is no longer shorter: rewrite the hover claim");
-  const steady = `Steady hover is level. ChartKit’s painted median is ${chartkit.painted} ms and uPlot’s is ${uplot.painted} ms, and a gap that small is inside the run-to-run spread. uPlot’s handler is shorter, ${uplot.handler} ms against ${chartkit.handler} ms.`;
+  const steady = `Steady hover is level: both libraries paint a steady move in about a millisecond or less. ChartKit’s painted median is ${chartkit.painted} ms and uPlot’s is ${uplot.painted} ms in the run below, and ${ms1(ckOther.paintedMs)} ms and ${ms1(upOther.paintedMs)} ms in the other run. uPlot’s handler is shorter, ${uplot.handler} ms against ${chartkit.handler} ms.`;
   return { fresh, steady };
 }
 

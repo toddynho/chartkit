@@ -1,8 +1,8 @@
 {
   "measured": "2026-11-17",
-  "commit": "d5e79aa8",
+  "commit": "a97fdc5c",
   "machine": {
-    "measuredAt": "2026-11-17T01:24:10.453Z",
+    "measuredAt": "2026-11-17T01:43:40.771Z",
     "node": "v22.23.4",
     "platform": "darwin 25.0.0 arm64",
     "cpu": "Apple M4 Max",
@@ -13,7 +13,7 @@
     "version": "1.6.32",
     "setup": "Default options: cursor crosshair, a hover point per series, and the live legend under the plot. uPlot has no tooltip, so its moves place no tooltip. ChartKit's moves fill and place one."
   },
-  "method": "Playwright Chromium 140.0.7339.16, frame-rate limit off, 640×360, fresh page per run. 15 runs per case: one first hover and one rested hover each, 30 steady moves each, 11 legend moves each on multi-series cases, 16 ms apart. 200 ms between mount and the first move. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.",
+  "method": "Playwright Chromium 140.0.7339.16, frame-rate limit off, 640×360, fresh page per run. 15 runs per case: one first hover and one rested hover each, 30 steady moves each, 11 legend moves each on multi-series cases, 16 ms apart. 200 ms between mount and the first move. Libraries timed for the same case alternate run by run. Cells are median / p95 in ms. handler ends with the bubbling mousemove. painted ends in a MessageChannel task after the next animation frame.",
   "runs": 15,
   "moves": 30,
   "delayMs": 200,
@@ -24,31 +24,129 @@
       "case": "line-1k",
       "nodes": 1029,
       "firstHandler": {
-        "median": 2.3,
-        "p95": 2.9,
-        "min": 1.7,
-        "max": 2.9,
+        "median": 3.1,
+        "p95": 3.9,
+        "min": 1.5,
+        "max": 3.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.2,
-        "p95": 4,
-        "min": 2.3,
-        "max": 4,
+        "median": 4.3,
+        "p95": 5.1,
+        "min": 2.2,
+        "max": 5.1,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.5,
-        "p95": 0.6,
-        "min": 0.3,
-        "max": 0.6,
+        "median": 0.4,
+        "p95": 0.5,
+        "min": 0.4,
+        "max": 0.5,
         "n": 15
       },
       "restedPainted": {
         "median": 0.7,
-        "p95": 0.9,
+        "p95": 0.8,
         "min": 0.6,
+        "max": 0.8,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.3,
+        "p95": 0.5,
+        "min": 0.1,
+        "max": 0.8,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.5,
+        "p95": 0.8,
+        "min": 0.3,
+        "max": 1.4,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "uplot",
+      "case": "line-1k",
+      "nodes": null,
+      "firstHandler": {
+        "median": 0.7,
+        "p95": 0.9,
+        "min": 0.3,
         "max": 0.9,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 2.3,
+        "p95": 2.7,
+        "min": 1.1,
+        "max": 2.7,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.2,
+        "p95": 0.2,
+        "min": 0,
+        "max": 0.2,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.9,
+        "p95": 1.9,
+        "min": 0.5,
+        "max": 1.9,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.1,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.4,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.7,
+        "p95": 1.5,
+        "min": 0.1,
+        "max": 1.7,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "chartkit",
+      "case": "line-100k",
+      "nodes": 29,
+      "firstHandler": {
+        "median": 1.6,
+        "p95": 3.3,
+        "min": 1.4,
+        "max": 3.3,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 2.2,
+        "p95": 4.3,
+        "min": 2,
+        "max": 4.3,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.3,
+        "p95": 0.4,
+        "min": 0.3,
+        "max": 0.4,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.6,
+        "p95": 0.8,
+        "min": 0.5,
+        "max": 0.8,
         "n": 15
       },
       "steadyHandler": {
@@ -69,49 +167,49 @@
       "legendPainted": null
     },
     {
-      "lib": "chartkit",
+      "lib": "uplot",
       "case": "line-100k",
-      "nodes": 29,
+      "nodes": null,
       "firstHandler": {
-        "median": 2.3,
-        "p95": 3,
-        "min": 1.4,
-        "max": 3,
+        "median": 0.3,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 0.8,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.1,
-        "p95": 4,
-        "min": 2.1,
-        "max": 4,
+        "median": 1.2,
+        "p95": 2.4,
+        "min": 0.9,
+        "max": 2.4,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.4,
-        "p95": 0.4,
-        "min": 0.3,
-        "max": 0.4,
+        "median": 0.1,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.3,
         "n": 15
       },
       "restedPainted": {
-        "median": 0.6,
-        "p95": 0.7,
-        "min": 0.5,
-        "max": 0.7,
+        "median": 0.8,
+        "p95": 1.7,
+        "min": 0.4,
+        "max": 1.7,
         "n": 15
       },
       "steadyHandler": {
-        "median": 0.3,
-        "p95": 0.4,
+        "median": 0.1,
+        "p95": 0.3,
         "min": 0,
-        "max": 0.9,
+        "max": 0.5,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.5,
-        "p95": 0.7,
+        "median": 0.8,
+        "p95": 1.6,
         "min": 0.2,
-        "max": 1.5,
+        "max": 1.9,
         "n": 450
       },
       "legendHandler": null,
@@ -122,78 +220,237 @@
       "case": "multi-line-5x1k",
       "nodes": 5063,
       "firstHandler": {
-        "median": 3.3,
-        "p95": 3.8,
+        "median": 3.8,
+        "p95": 5,
         "min": 2.4,
-        "max": 3.8,
+        "max": 5,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.9,
-        "p95": 4.8,
+        "median": 4.7,
+        "p95": 6.3,
         "min": 3,
-        "max": 4.8,
+        "max": 6.3,
         "n": 15
       },
       "restedHandler": {
-        "median": 1,
-        "p95": 1,
+        "median": 0.9,
+        "p95": 1.3,
         "min": 0.9,
-        "max": 1,
+        "max": 1.3,
         "n": 15
       },
       "restedPainted": {
         "median": 1.5,
-        "p95": 1.6,
+        "p95": 1.9,
         "min": 1.4,
-        "max": 1.6,
+        "max": 1.9,
         "n": 15
       },
       "steadyHandler": {
-        "median": 0.7,
-        "p95": 0.9,
-        "min": 0.4,
-        "max": 1.3,
+        "median": 0.8,
+        "p95": 1,
+        "min": 0.5,
+        "max": 1.4,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 1.1,
+        "p95": 1.5,
+        "min": 0.7,
+        "max": 2.1,
+        "n": 450
+      },
+      "legendHandler": {
+        "median": 3.7,
+        "p95": 5.9,
+        "min": 3.1,
+        "max": 6.5,
+        "n": 165
+      },
+      "legendPainted": {
+        "median": 4.1,
+        "p95": 6.3,
+        "min": 3.3,
+        "max": 6.9,
+        "n": 165
+      }
+    },
+    {
+      "lib": "uplot",
+      "case": "multi-line-5x1k",
+      "nodes": null,
+      "firstHandler": {
+        "median": 0.5,
+        "p95": 1,
+        "min": 0.3,
+        "max": 1,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 1.4,
+        "p95": 3.1,
+        "min": 1.2,
+        "max": 3.1,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.1,
+        "p95": 0.4,
+        "min": 0,
+        "max": 0.4,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 1,
+        "p95": 2.1,
+        "min": 0.5,
+        "max": 2.1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.1,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.4,
         "n": 450
       },
       "steadyPainted": {
         "median": 1,
-        "p95": 1.4,
-        "min": 0.5,
-        "max": 1.9,
+        "p95": 1.9,
+        "min": 0.3,
+        "max": 2.2,
         "n": 450
       },
-      "legendHandler": {
-        "median": 3.5,
-        "p95": 5.7,
-        "min": 3,
-        "max": 6.1,
-        "n": 165
-      },
-      "legendPainted": {
-        "median": 3.8,
-        "p95": 6,
-        "min": 3.2,
-        "max": 6.9,
-        "n": 165
-      }
+      "legendHandler": null,
+      "legendPainted": null
     },
     {
       "lib": "chartkit",
       "case": "multi-line-5x20k",
       "nodes": 62,
       "firstHandler": {
-        "median": 2.5,
-        "p95": 3.3,
-        "min": 1.7,
-        "max": 3.3,
+        "median": 1.8,
+        "p95": 3.9,
+        "min": 1.6,
+        "max": 3.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.4,
-        "p95": 4.1,
+        "median": 2.4,
+        "p95": 5.4,
         "min": 2.3,
-        "max": 4.1,
+        "max": 5.4,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.5,
+        "p95": 0.7,
+        "min": 0.4,
+        "max": 0.7,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.9,
+        "p95": 1,
+        "min": 0.8,
+        "max": 1,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.5,
+        "p95": 0.6,
+        "min": 0.3,
+        "max": 0.7,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 1,
+        "p95": 12.4,
+        "min": 0.5,
+        "max": 14.3,
+        "n": 450
+      },
+      "legendHandler": {
+        "median": 0.5,
+        "p95": 0.6,
+        "min": 0.3,
+        "max": 0.7,
+        "n": 165
+      },
+      "legendPainted": {
+        "median": 14.2,
+        "p95": 14.8,
+        "min": 3.4,
+        "max": 15.8,
+        "n": 165
+      }
+    },
+    {
+      "lib": "uplot",
+      "case": "multi-line-5x20k",
+      "nodes": null,
+      "firstHandler": {
+        "median": 0.4,
+        "p95": 0.8,
+        "min": 0.2,
+        "max": 0.8,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 1.3,
+        "p95": 3,
+        "min": 1.1,
+        "max": 3,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.2,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.3,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 1.1,
+        "p95": 1.5,
+        "min": 0.5,
+        "max": 1.5,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.1,
+        "p95": 0.3,
+        "min": 0,
+        "max": 0.4,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 1,
+        "p95": 1.6,
+        "min": 0.3,
+        "max": 2,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "chartkit",
+      "case": "long-line-5x200",
+      "nodes": 1036,
+      "firstHandler": {
+        "median": 3.5,
+        "p95": 4.2,
+        "min": 1.8,
+        "max": 4.2,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 4.7,
+        "p95": 5.6,
+        "min": 2.4,
+        "max": 5.6,
         "n": 15
       },
       "restedHandler": {
@@ -212,77 +469,16 @@
       },
       "steadyHandler": {
         "median": 0.4,
-        "p95": 0.6,
+        "p95": 0.7,
         "min": 0.2,
-        "max": 0.8,
+        "max": 1,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.7,
-        "p95": 10.3,
-        "min": 0.4,
-        "max": 14,
-        "n": 450
-      },
-      "legendHandler": {
-        "median": 0.5,
-        "p95": 0.6,
-        "min": 0.3,
-        "max": 0.6,
-        "n": 165
-      },
-      "legendPainted": {
-        "median": 13.7,
-        "p95": 14.4,
-        "min": 12.6,
-        "max": 17.1,
-        "n": 165
-      }
-    },
-    {
-      "lib": "chartkit",
-      "case": "long-line-5x200",
-      "nodes": 1036,
-      "firstHandler": {
-        "median": 2.7,
-        "p95": 3.1,
-        "min": 1.8,
-        "max": 3.1,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 3.6,
-        "p95": 4.1,
-        "min": 2.4,
-        "max": 4.1,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.5,
-        "p95": 0.6,
-        "min": 0.3,
-        "max": 0.6,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.9,
         "p95": 1,
-        "min": 0.7,
-        "max": 1,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.4,
-        "p95": 0.6,
-        "min": 0.1,
-        "max": 1.1,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.6,
-        "p95": 0.9,
         "min": 0.4,
-        "max": 1.8,
+        "max": 1.7,
         "n": 450
       },
       "legendHandler": null,
@@ -293,44 +489,44 @@
       "case": "long-line-5x2k",
       "nodes": 36,
       "firstHandler": {
-        "median": 2.9,
-        "p95": 3.4,
-        "min": 2,
-        "max": 3.4,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 3.9,
+        "median": 3.7,
         "p95": 4.3,
-        "min": 2.8,
+        "min": 1.9,
         "max": 4.3,
         "n": 15
       },
+      "firstPainted": {
+        "median": 5,
+        "p95": 5.7,
+        "min": 2.6,
+        "max": 5.7,
+        "n": 15
+      },
       "restedHandler": {
-        "median": 0.4,
-        "p95": 0.6,
-        "min": 0.4,
-        "max": 0.6,
+        "median": 0.5,
+        "p95": 0.5,
+        "min": 0.3,
+        "max": 0.5,
         "n": 15
       },
       "restedPainted": {
         "median": 0.7,
-        "p95": 0.8,
-        "min": 0.6,
-        "max": 0.8,
+        "p95": 0.9,
+        "min": 0.5,
+        "max": 0.9,
         "n": 15
       },
       "steadyHandler": {
         "median": 0.4,
         "p95": 0.7,
         "min": 0.2,
-        "max": 1.7,
+        "max": 1.8,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.6,
         "p95": 1,
-        "min": 0.3,
+        "min": 0.4,
         "max": 2.5,
         "n": 450
       },
@@ -342,45 +538,45 @@
       "case": "bar-12",
       "nodes": 47,
       "firstHandler": {
-        "median": 1.9,
-        "p95": 3.2,
+        "median": 2.3,
+        "p95": 2.8,
         "min": 1.4,
-        "max": 3.2,
+        "max": 2.8,
         "n": 15
       },
       "firstPainted": {
-        "median": 2.7,
-        "p95": 4.4,
-        "min": 1.8,
-        "max": 4.4,
+        "median": 3.4,
+        "p95": 4,
+        "min": 2.1,
+        "max": 4,
         "n": 15
       },
       "restedHandler": {
         "median": 0.3,
-        "p95": 0.4,
-        "min": 0.3,
-        "max": 0.4,
+        "p95": 0.3,
+        "min": 0.2,
+        "max": 0.3,
         "n": 15
       },
       "restedPainted": {
-        "median": 0.6,
-        "p95": 0.7,
-        "min": 0.5,
-        "max": 0.7,
+        "median": 0.5,
+        "p95": 0.6,
+        "min": 0.4,
+        "max": 0.6,
         "n": 15
       },
       "steadyHandler": {
         "median": 0.2,
         "p95": 0.3,
         "min": 0,
-        "max": 0.6,
+        "max": 0.9,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.4,
         "p95": 0.6,
         "min": 0.1,
-        "max": 1.1,
+        "max": 1.8,
         "n": 450
       },
       "legendHandler": null,
@@ -391,17 +587,66 @@
       "case": "bar-50",
       "nodes": 83,
       "firstHandler": {
-        "median": 1.3,
-        "p95": 2.1,
+        "median": 2.2,
+        "p95": 2.9,
         "min": 1.1,
-        "max": 2.1,
+        "max": 2.9,
         "n": 15
       },
       "firstPainted": {
-        "median": 2,
-        "p95": 3.1,
+        "median": 3.3,
+        "p95": 4,
         "min": 1.6,
-        "max": 3.1,
+        "max": 4,
+        "n": 15
+      },
+      "restedHandler": {
+        "median": 0.3,
+        "p95": 0.4,
+        "min": 0.2,
+        "max": 0.4,
+        "n": 15
+      },
+      "restedPainted": {
+        "median": 0.5,
+        "p95": 0.6,
+        "min": 0.4,
+        "max": 0.6,
+        "n": 15
+      },
+      "steadyHandler": {
+        "median": 0.2,
+        "p95": 0.4,
+        "min": 0,
+        "max": 0.7,
+        "n": 450
+      },
+      "steadyPainted": {
+        "median": 0.4,
+        "p95": 0.7,
+        "min": 0.2,
+        "max": 1.5,
+        "n": 450
+      },
+      "legendHandler": null,
+      "legendPainted": null
+    },
+    {
+      "lib": "chartkit",
+      "case": "grouped-bar-3x12",
+      "nodes": 85,
+      "firstHandler": {
+        "median": 2.8,
+        "p95": 3.4,
+        "min": 2,
+        "max": 3.4,
+        "n": 15
+      },
+      "firstPainted": {
+        "median": 4.1,
+        "p95": 4.9,
+        "min": 2.9,
+        "max": 4.9,
         "n": 15
       },
       "restedHandler": {
@@ -420,72 +665,23 @@
       },
       "steadyHandler": {
         "median": 0.2,
-        "p95": 0.3,
+        "p95": 0.4,
         "min": 0,
-        "max": 0.6,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.4,
-        "p95": 0.6,
-        "min": 0.2,
-        "max": 1.1,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "chartkit",
-      "case": "grouped-bar-3x12",
-      "nodes": 85,
-      "firstHandler": {
-        "median": 1.9,
-        "p95": 2.6,
-        "min": 1.2,
-        "max": 2.6,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 2.7,
-        "p95": 3.4,
-        "min": 2.1,
-        "max": 3.4,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.3,
-        "max": 0.4,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 0.7,
-        "p95": 0.8,
-        "min": 0.5,
         "max": 0.8,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.3,
-        "p95": 0.4,
-        "min": 0.1,
-        "max": 0.7,
         "n": 450
       },
       "steadyPainted": {
         "median": 0.4,
         "p95": 0.7,
         "min": 0.2,
-        "max": 1.3,
+        "max": 1.6,
         "n": 450
       },
       "legendHandler": {
         "median": 0.3,
-        "p95": 0.5,
-        "min": 0.2,
-        "max": 0.5,
+        "p95": 0.4,
+        "min": 0.1,
+        "max": 0.6,
         "n": 165
       },
       "legendPainted": {
@@ -501,21 +697,21 @@
       "case": "grouped-bar-3x100",
       "nodes": 349,
       "firstHandler": {
-        "median": 1.9,
-        "p95": 2.3,
-        "min": 1.1,
-        "max": 2.3,
+        "median": 2.5,
+        "p95": 3,
+        "min": 1.4,
+        "max": 3,
         "n": 15
       },
       "firstPainted": {
-        "median": 2.6,
-        "p95": 3.5,
-        "min": 1.5,
-        "max": 3.5,
+        "median": 3.5,
+        "p95": 4.3,
+        "min": 1.9,
+        "max": 4.3,
         "n": 15
       },
       "restedHandler": {
-        "median": 0.4,
+        "median": 0.5,
         "p95": 0.6,
         "min": 0.3,
         "max": 0.6,
@@ -523,9 +719,9 @@
       },
       "restedPainted": {
         "median": 0.7,
-        "p95": 0.8,
-        "min": 0.6,
-        "max": 0.8,
+        "p95": 0.9,
+        "min": 0.5,
+        "max": 0.9,
         "n": 15
       },
       "steadyHandler": {
@@ -537,20 +733,20 @@
       },
       "steadyPainted": {
         "median": 0.5,
-        "p95": 0.8,
+        "p95": 0.7,
         "min": 0.3,
-        "max": 1.4,
+        "max": 1.8,
         "n": 450
       },
       "legendHandler": {
         "median": 0.6,
-        "p95": 0.9,
-        "min": 0.4,
+        "p95": 0.8,
+        "min": 0.5,
         "max": 1.1,
         "n": 165
       },
       "legendPainted": {
-        "median": 0.9,
+        "median": 0.8,
         "p95": 1.1,
         "min": 0.6,
         "max": 1.4,
@@ -562,17 +758,17 @@
       "case": "area-3x1k",
       "nodes": 3048,
       "firstHandler": {
-        "median": 2.9,
-        "p95": 3.5,
-        "min": 2.2,
-        "max": 3.5,
+        "median": 3.7,
+        "p95": 4.3,
+        "min": 1.9,
+        "max": 4.3,
         "n": 15
       },
       "firstPainted": {
-        "median": 3.8,
-        "p95": 4.5,
-        "min": 3.1,
-        "max": 4.5,
+        "median": 4.8,
+        "p95": 5.7,
+        "min": 2.5,
+        "max": 5.7,
         "n": 15
       },
       "restedHandler": {
@@ -583,236 +779,40 @@
         "n": 15
       },
       "restedPainted": {
-        "median": 1,
+        "median": 0.9,
         "p95": 1.1,
         "min": 0.9,
         "max": 1.1,
         "n": 15
       },
       "steadyHandler": {
-        "median": 0.5,
+        "median": 0.4,
         "p95": 0.7,
         "min": 0.2,
         "max": 1.3,
         "n": 450
       },
       "steadyPainted": {
-        "median": 0.7,
+        "median": 0.6,
         "p95": 1,
-        "min": 0.3,
-        "max": 1.9,
+        "min": 0.4,
+        "max": 2,
         "n": 450
       },
       "legendHandler": {
-        "median": 2.5,
+        "median": 2.4,
         "p95": 4.6,
-        "min": 2.1,
-        "max": 4.9,
+        "min": 2,
+        "max": 4.7,
         "n": 165
       },
       "legendPainted": {
-        "median": 2.7,
-        "p95": 4.8,
-        "min": 2.3,
-        "max": 5.2,
+        "median": 2.6,
+        "p95": 4.7,
+        "min": 2.2,
+        "max": 4.8,
         "n": 165
       }
-    },
-    {
-      "lib": "uplot",
-      "case": "line-1k",
-      "nodes": null,
-      "firstHandler": {
-        "median": 0.5,
-        "p95": 0.6,
-        "min": 0.2,
-        "max": 0.6,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 1.5,
-        "p95": 2,
-        "min": 1,
-        "max": 2,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.1,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.3,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1.4,
-        "p95": 1.8,
-        "min": 0.5,
-        "max": 1.8,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.1,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.3,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 0.9,
-        "p95": 1.5,
-        "min": 0.2,
-        "max": 1.9,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "uplot",
-      "case": "line-100k",
-      "nodes": null,
-      "firstHandler": {
-        "median": 0.5,
-        "p95": 0.6,
-        "min": 0.3,
-        "max": 0.6,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 1.6,
-        "p95": 2.2,
-        "min": 1.1,
-        "max": 2.2,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.2,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.3,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1.3,
-        "p95": 1.8,
-        "min": 0.4,
-        "max": 1.8,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.1,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.4,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 1,
-        "p95": 1.5,
-        "min": 0.1,
-        "max": 1.7,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "uplot",
-      "case": "multi-line-5x1k",
-      "nodes": null,
-      "firstHandler": {
-        "median": 0.5,
-        "p95": 0.8,
-        "min": 0.4,
-        "max": 0.8,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 2,
-        "p95": 2.6,
-        "min": 1.2,
-        "max": 2.6,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.2,
-        "p95": 0.4,
-        "min": 0,
-        "max": 0.4,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1.3,
-        "p95": 2.1,
-        "min": 0.6,
-        "max": 2.1,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.1,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.4,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 1.2,
-        "p95": 1.8,
-        "min": 0.2,
-        "max": 2.1,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
-    },
-    {
-      "lib": "uplot",
-      "case": "multi-line-5x20k",
-      "nodes": null,
-      "firstHandler": {
-        "median": 0.5,
-        "p95": 0.8,
-        "min": 0.3,
-        "max": 0.8,
-        "n": 15
-      },
-      "firstPainted": {
-        "median": 1.7,
-        "p95": 2.2,
-        "min": 1.3,
-        "max": 2.2,
-        "n": 15
-      },
-      "restedHandler": {
-        "median": 0.2,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.3,
-        "n": 15
-      },
-      "restedPainted": {
-        "median": 1.8,
-        "p95": 2.1,
-        "min": 0.4,
-        "max": 2.1,
-        "n": 15
-      },
-      "steadyHandler": {
-        "median": 0.1,
-        "p95": 0.3,
-        "min": 0,
-        "max": 0.5,
-        "n": 450
-      },
-      "steadyPainted": {
-        "median": 1,
-        "p95": 1.9,
-        "min": 0.2,
-        "max": 2.3,
-        "n": 450
-      },
-      "legendHandler": null,
-      "legendPainted": null
     }
   ]
 }

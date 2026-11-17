@@ -636,7 +636,11 @@ export function round13ReportLines() {
     for (const row of first) lines.push(`| ${row.afterMountMs} | ${one(row.chartkit)} | ${one(row.chartkitP95)} | ${one(row.chartkitHandler)} | ${one(row.uplot)} | ${one(row.uplotP95)} | ${one(row.uplotHandler)} |`);
     lines.push("");
     if (ck && up) {
-      lines.push(`Steady hover at 100,000 points is level: ChartKit's painted median is ${one(ck.paintedMs)} ms and uPlot's is ${one(up.paintedMs)} ms, which is inside the run-to-run spread. uPlot's handler is shorter. uPlot places no tooltip and ChartKit does.`);
+      const again = Array.isArray(hover.steadySecondRun) ? hover.steadySecondRun : [];
+      const ckAgain = again.find((row) => row.lib === "ChartKit");
+      const upAgain = again.find((row) => row.lib === "uPlot");
+      const second = ckAgain && upAgain ? `, and ${one(ckAgain.paintedMs)} ms and ${one(upAgain.paintedMs)} ms in the 50 ms run` : "";
+      lines.push(`Steady hover at 100,000 points is level: ChartKit's painted median is ${one(ck.paintedMs)} ms and uPlot's is ${one(up.paintedMs)} ms in the 200 ms run${second}. uPlot's handler is shorter. uPlot places no tooltip and ChartKit does. The table is the 200 ms run.`);
       lines.push("");
     }
     lines.push("| Library | Handler ms | Painted median ms | Painted p95 ms |");

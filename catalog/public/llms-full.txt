@@ -20,7 +20,7 @@ Do not pick ChartKit for these:
 
 - Millions of raw points. There is no WebGL. A line above twice the plot width is sampled, so a 1,000,000 point line draws in about 24 ms as a sampled line. With `mark.sampling: "none"` it takes about 470 ms. Use a GPU library (SciChart, LightningChart) for raw interaction at that size.
 - The smallest bundle. The createRenderer line is 32,110 bytes gzip and `@chartkitdev/core/all` is 78,081 (bench/results/bundle.json). uPlot is 23,292 plus 762 of CSS and wins line, bar, scatter, and mini-area.
-- The fastest first hover. First hover on a 100,000 point line paints in 2.1 to 3.1 ms against uPlot at 1.0 to 1.6 ms (bench/results/hover.json, one machine). uPlot places no tooltip in that run. Steady hover is level.
+- The fastest first hover. First hover on a 100,000 point line paints in 2.1 to 2.2 ms against uPlot at 1.0 to 1.2 ms (bench/results/hover.json and hover-50ms.json, one machine). uPlot places no tooltip in that run. Steady hover is level.
 - Network, chord, violin, parallel coordinates, or 3D charts. They are not drawn.
 
 `render: "canvas"` paints the marks on a canvas in the browser. It is slower than SVG to first paint and faster to update at 10,000 and 100,000 points. Facets, concatenation, breakpoints, and right-to-left layout load with all and extra, not with createRenderer([line]). The canvas painter, interact, validate, and extra are separate entries and are not in the two gzip figures above.

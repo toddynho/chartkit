@@ -658,7 +658,7 @@ The Browser render table above re-timed sampling none on a later commit (`bench/
 
 ### Hover against uPlot
 
-Measured 2026-11-17 on `d5e79aa8` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart. Cells are the median, with the p95 beside it. uPlot is 1.6.32 with default options: a cursor crosshair, a hover point and its live legend. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (Apple M4 Max, darwin 25.0.0 arm64). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.
+Measured 2026-11-17 on `a97fdc5c` with `bench/browser/hover.mjs`: Playwright Chromium, a 640×360 line of 100,000 points, frame-rate limit off, 15 fresh pages per library, Playwright's real mouse. Handler is from the first pointer event of a move to the end of the bubbling mousemove. Painted is to a task after the next animation frame. Raster and GPU time are in neither. Each fresh page gives one first hover and 30 steady moves 16 ms apart, and the two libraries alternate page by page. Cells are the median, with the p95 beside it. There are two runs: one waits 200 ms after mount before the first move (`bench/results/hover.json`), the other 50 ms (`bench/results/hover-50ms.json`). uPlot is 1.6.32 with default options: cursor lines, a hover point and its live legend, checked in the page. uPlot has no tooltip, so it places none. ChartKit fills and places a tooltip on every move. One machine (Apple M4 Max, darwin 25.0.0 arm64). The numbers move with the machine and from run to run, so compare the two columns, not a column against another page.
 
 Source: `bench/results/hover.json` and `bench/results/hover-50ms.json`, copied into `catalog/public/benchmarks.json` as `hoverSteady100k` and `firstHoverPainted`.
 
@@ -666,15 +666,15 @@ First hover on a fresh 100,000-point chart is a loss to uPlot in every row:
 
 | Ms after mount | ChartKit painted | ChartKit p95 | ChartKit handler | uPlot painted | uPlot p95 | uPlot handler |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 50 | 2.1 | 2.2 | 1.5 | 1.0 | 1.1 | 0.3 |
-| 200 | 3.1 | 4.0 | 2.3 | 1.6 | 2.2 | 0.5 |
+| 50 | 2.1 | 2.6 | 1.4 | 1.0 | 1.1 | 0.3 |
+| 200 | 2.2 | 4.3 | 1.6 | 1.2 | 2.4 | 0.3 |
 
-Steady hover at 100,000 points is level: ChartKit's painted median is 0.5 ms and uPlot's is 1.0 ms, which is inside the run-to-run spread. uPlot's handler is shorter. uPlot places no tooltip and ChartKit does.
+Steady hover at 100,000 points is level: ChartKit's painted median is 0.5 ms and uPlot's is 0.8 ms in the 200 ms run, and 0.4 ms and 0.5 ms in the 50 ms run. uPlot's handler is shorter. uPlot places no tooltip and ChartKit does. The table is the 200 ms run.
 
 | Library | Handler ms | Painted median ms | Painted p95 ms |
 | --- | ---: | ---: | ---: |
-| ChartKit | 0.3 | 0.5 | 0.7 |
-| uPlot | 0.1 | 1.0 | 1.5 |
+| ChartKit | 0.3 | 0.5 | 0.8 |
+| uPlot | 0.1 | 0.8 | 1.6 |
 
 The round 13 hover table also had Chart.js, Observable Plot, Recharts and ECharts. No script in the repository reproduces those rows, so they were removed.
 

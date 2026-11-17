@@ -46,7 +46,17 @@ export function hoverBench() {
   const main = load("hover.json");
   const early = load("hover-50ms.json");
   if (!main.uplot || !early.uplot) throw new Error("the hover run has no uPlot rows");
-  const steady = pair(main, "hover.json");
+  // The method sentence is written once for both files, so they must be the same build, run count and uPlot.
+  if (main.commit !== early.commit || main.runs !== early.runs || main.moves !== early.moves || main.uplot.version !== early.uplot.version || main.machine.cpu !== early.machine.cpu) {
+    throw new Error("hover.json and hover-50ms.json are not from the same commit, run count, uPlot version and machine. Re-run both.");
+  }
+  const steadyRow = (file: File) => {
+    const rows = pair(file, `hover at ${file.delayMs} ms`);
+    return [
+      { lib: "ChartKit", handlerMs: rows.chartkit.steadyHandler.median, paintedMs: rows.chartkit.steadyPainted.median, p95Ms: rows.chartkit.steadyPainted.p95 },
+      { lib: "uPlot", handlerMs: rows.uplot.steadyHandler.median, paintedMs: rows.uplot.steadyPainted.median, p95Ms: rows.uplot.steadyPainted.p95 },
+    ];
+  };
   const first = [early, main]
     .map((file) => {
       const rows = pair(file, `hover at ${file.delayMs} ms`);
@@ -73,10 +83,10 @@ export function hoverBench() {
     uplotVersion: main.uplot.version,
     uplotSetup: main.uplot.setup,
     protocol: main.method,
-    steady: [
-      { lib: "ChartKit", handlerMs: steady.chartkit.steadyHandler.median, paintedMs: steady.chartkit.steadyPainted.median, p95Ms: steady.chartkit.steadyPainted.p95 },
-      { lib: "uPlot", handlerMs: steady.uplot.steadyHandler.median, paintedMs: steady.uplot.steadyPainted.median, p95Ms: steady.uplot.steadyPainted.p95 },
-    ],
+    /** Steady moves from hover.json, the run the tables show. */
+    steady: steadyRow(main),
+    /** The same steady moves from hover-50ms.json: a second run to read the first against. */
+    steadyOther: steadyRow(early),
     first,
   };
 }
