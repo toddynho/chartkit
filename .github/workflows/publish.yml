@@ -80,6 +80,20 @@ jobs:
       - name: Build libraries
         run: npm run build:lib
 
+      # npm test also runs the rival-library checks in bench/, which need their own install
+      # and a Chromium. Same steps as ci.yml.
+      # Playwright 1.55 ships no Ubuntu 26 browser; the Ubuntu 24 build uses the same cache path.
+      - name: Install Playwright Chromium
+        run: PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64 npx playwright install chromium
+
+      - name: Install bench dependencies
+        run: npm ci
+        working-directory: bench
+
+      - name: Install bench Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: bench
+
       - name: Test
         run: npm test
 
