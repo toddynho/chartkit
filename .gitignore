@@ -48,3 +48,4 @@ visual-qa-report/
 *.tgz
 .turbo/
 
+.private/

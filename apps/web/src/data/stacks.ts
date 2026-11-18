@@ -1,4 +1,4 @@
-/** React, plain JavaScript and Node, Vue, Svelte, then the rest (docs/POSITIONING.md, D3). */
+/** React, plain JavaScript and Node, Vue, Svelte, then the rest. */
 export const stackIds = ["react", "vanilla", "vue", "svelte", "astro", "solid", "qwik", "angular", "element"] as const;
 
 export type StackId = (typeof stackIds)[number];
