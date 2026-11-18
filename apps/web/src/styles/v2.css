@@ -1437,6 +1437,32 @@ html[data-stack="element"] .gs .stack-chip[data-stack-chip="element"] {
   cursor: pointer;
 }
 
+.gs-agents { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.gs-agents__label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b8d93;
+}
+.gs-agents__btn {
+  border: 0;
+  border-radius: 8px;
+  background: #17181a;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.gs-agents__btn:hover { background: #2c2d31; }
+.gs-agents__btn:focus-visible,
+.gs-agents__link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gs-agents__link { font-size: 13px; font-weight: 500; color: #17181a; text-decoration: underline; text-decoration-color: #c9c9c4; text-underline-offset: 3px; }
+.gs-agents__link:hover { text-decoration-color: #17181a; }
+
 @keyframes hh-grow {
   from { transform: scaleY(0); }
   to { transform: scaleY(1); }
