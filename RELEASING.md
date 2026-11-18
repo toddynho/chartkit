@@ -6,7 +6,7 @@ Steady state uses GitHub OIDC. A token exists only for the one-time bootstrap, t
 
 `npm stage publish` packs the package directory it is run in. It does not understand npm workspaces, so the workflow runs it inside each package directory. Order is `scripts/public-packages.txt`: `@chartkitdev/core` and `@chartkitdev/geo` first, then the adapters, `@chartkitdev/mcp`, and `@derpdaderp/chartkit` last.
 
-The exact launch-day commands, in order, with a check after each, are in [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md).
+The exact launch-day commands, in order, with a check after each, are in [docs/internal/LAUNCH_CHECKLIST.md](./docs/internal/LAUNCH_CHECKLIST.md).
 
 ## Version and dist-tag (recommendation)
 
@@ -67,7 +67,7 @@ Do this only when the website is ready to tell people to `npm install` the packa
    ```
 
    `--allow-stage-publish` does not grant direct `npm publish`. Preview the commands with `scripts/npm-trust.sh --dry-run` (it does not call npm).
-   **Timing:** step 5 has to publish a version that is not on npm yet, and the bootstrap already published `0.5.0`. So run steps 4 and 5 together at the next release (for example `0.5.1`), not right after the bootstrap. Do steps 7 and 8 on launch day. LAUNCH_CHECKLIST.md uses that order.
+   **Timing:** step 5 has to publish a version that is not on npm yet, and the bootstrap already published `0.5.0`. So run steps 4 and 5 together at the next release (for example `0.5.1`), not right after the bootstrap. Do steps 7 and 8 on launch day. The launch checklist uses that order.
 5. Within **2 days**, run **Publish** again from main: bootstrap **false**, mode **`stage`**. This run must not have `NPM_TOKEN` set. It is the first OIDC publish and it binds each trusted publisher. If it does not succeed in time, delete the expired config and run `scripts/npm-trust.sh` again.
 6. Approve the staged versions (below). Confirm each version is public and the provenance is present.
 7. On npmjs.com, for every package, set Publishing access to **Require two-factor authentication and disallow tokens**.

@@ -39,7 +39,7 @@ npm run deploy:check --workspace=chartkit-web
 npm run deploy --workspace=chartkit-web
 ```
 
-`deploy:check` is a local dry run. `deploy` uploads `dist` as the Worker `chartkit-web` (see [`wrangler.jsonc`](wrangler.jsonc)) and needs `wrangler login` or `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Response headers for the agent files are in [`public/_headers`](public/_headers). The config has no route, so a deploy updates the `workers.dev` URL; the `chartkit.dev/*` route is attached in the Cloudflare dashboard. The launch-day order and checks are in [LAUNCH_CHECKLIST.md](../../LAUNCH_CHECKLIST.md), step 7. `wrangler` comes from the `apps/cloud` workspace's dev dependencies.
+`deploy:check` is a local dry run. `deploy` uploads `dist` as the Worker `chartkit-web` (see [`wrangler.jsonc`](wrangler.jsonc)) and needs `wrangler login` or `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Response headers for the agent files are in [`public/_headers`](public/_headers). The config has no route, so a deploy updates the `workers.dev` URL; the `chartkit.dev/*` route is attached in the Cloudflare dashboard. The launch-day order and checks are in [the launch checklist](../../docs/internal/LAUNCH_CHECKLIST.md), step 7. `wrangler` comes from the `apps/cloud` workspace's dev dependencies.
 
 ## Cloud render URL
 

@@ -6,7 +6,16 @@
 
 Charts an agent can write and a server can render. A chart is one JSON spec. `validate()` and `repair()` check and fix it locally, with no model call. `render()` returns an SVG string, in Node or in the browser. Thin adapters draw the same spec in nine stacks.
 
-The position, the claims to avoid, and the owner's decisions are in [docs/POSITIONING.md](docs/POSITIONING.md). Read section 4 before writing any marketing copy.
+Before writing any marketing copy, keep to what the numbers support:
+
+- Large data: "Draws 1M-point lines in about 24 ms by sampling to the pixel width." It is not a GPU library; for millions of raw points, point people to one.
+- Bundle size: "Per-chart entries from 6.7 KB. A line is 32 KB gzip." Do not say smallest; uPlot is smaller on several charts.
+- Interaction: do not headline hover speed. uPlot is about twice as fast on first hover; steady hover is level.
+- Agents: "`repair()` takes a first-try 21/42 to 42/42 with no model call." Do not say agents get it right first time.
+- Feature matrix: a reference tool, never a score.
+- MCP and agent docs: other libraries have them too. The claim is that validate and repair run locally.
+- Looks: show the gallery. Do not assert "best-looking".
+- Benchmarks: cite losses as well as wins (`BENCHMARKS.md`).
 
 ## The API is the spec
 
@@ -59,7 +68,7 @@ chartkit/
 │   └── cloud/              # render service for Cloudflare Workers: /render, /validate, /mcp
 ├── bench/                  # benchmark harness. Results in bench/results/*.json
 ├── catalog/                # llms.txt, feature matrix, published benchmark data, migrate.md
-├── docs/                   # POSITIONING.md and design notes
+├── docs/                   # design notes, size budget, internal/ (launch checklist)
 └── scripts/                # size gate, render harness, README drift test
 ```
 
@@ -105,4 +114,4 @@ npm run bench          # public comparison. Writes BENCHMARKS.md
 - Schema: https://chartkit.dev/schema/v1.json
 - Agent reference: https://chartkit.dev/llms.txt (short) and https://chartkit.dev/llms-full.txt (complete)
 - GitHub: https://github.com/toddynho/chartkit
-- Launch steps: `LAUNCH_CHECKLIST.md`. The packages are not on npm until that is done.
+- Launch steps: `docs/internal/LAUNCH_CHECKLIST.md`. The packages are not on npm until that is done.
