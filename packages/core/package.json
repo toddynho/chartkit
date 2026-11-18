@@ -18,7 +18,8 @@
     "./dist/features.js",
     "./dist/features.cjs",
     "./dist/themes/*.js",
-    "./dist/themes/*.cjs"
+    "./dist/themes/*.cjs",
+    "./dist/chunk-*.js"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -264,7 +265,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "npm run clean && tsup",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",

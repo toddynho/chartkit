@@ -277,6 +277,6 @@ Check: `npm view @chartkitdev/core dist-tags.latest` is the new version, and the
 
 ## Known follow-ups (not launch blockers)
 
-- `@chartkitdev/core` is 3.6 MB packed (15.6 MB unpacked) after dropping sourcemaps from the tarball. Most of that is because each `charts/*` entry is built with `splitting: false` and carries its own copy of the renderer (about 100 KB per entry, two formats). The size-budget work owns that build change.
+- `@chartkitdev/core` is 2.8 MB packed (12.1 MB unpacked, 414 files), down from 3.7 MB (15.7 MB, 356 files). The ESM `charts/*`, `themes/*` and helper entries now share code through `dist/chunk-*.js`. What is left is mostly CJS: 7.2 MB of the unpacked size, because each `charts/*.cjs` still carries its own copy of the renderer (about 100 KB per entry). Splitting CJS too was measured at 961 kB packed (4.5 MB unpacked), but a bundler cannot tree-shake a shared CJS chunk, so a one-chart `require()` bundle grew from 35.1 KB to 56.3 KB gzip. That trade is open. `all`, `validate`, `extra`, `sampling` and the `interact` entries stay self-contained in ESM as well, so their bundled size is byte-for-byte what it was, and the charts `load()` imports share code only with each other. The grouping and the measurement behind each choice are in `packages/core/tsup.config.ts`.
 - `@chartkitdev/vanilla` is 570 kB packed.
 - `llms.txt` is at 6,399 of its 6,400-byte cap, so it has no room for the v0 rename note. That note is in `llms-full.txt` and on `/docs/migrate`.
