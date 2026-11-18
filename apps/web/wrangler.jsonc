@@ -1,0 +1,15 @@
+// chartkit.dev as static assets on Cloudflare Workers. No Worker script: Cloudflare serves apps/web/dist.
+// Build first from the repo root (`npm run build`), then `npm run deploy --workspace=chartkit-web`.
+// Deploy from a shell that has CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, or after `wrangler login`.
+// The chartkit.dev route is NOT here on purpose: a deploy only updates the workers.dev URL.
+// Attaching the domain is a separate step in LAUNCH_CHECKLIST.md, so a deploy cannot cut the live site over.
+{
+  "name": "chartkit-web",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

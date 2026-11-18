@@ -1,0 +1,50 @@
+# Cloudflare reads this file and does not serve it. Astro copies it into dist.
+# The static build drops the headers src/lib/artifacts.ts sets, so they are restated here.
+
+# Agent files change at each release. An hour, not a day, so a stale copy clears quickly.
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
+/.well-known/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
+/benchmarks.md
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+# JSON that other origins fetch: the schema, the agent index and the catalog data.
+/llms.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/features.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/recipes.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/showcase.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/benchmarks.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/benchmarks.schema.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+/schema/v1.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+
+/features/*.md
+  Content-Type: text/markdown; charset=utf-8
+/dashboards/*.md
+  Content-Type: text/markdown; charset=utf-8
+/showcase/*.md
+  Content-Type: text/markdown; charset=utf-8
+
+# Astro's hashed bundles never change under the same name.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

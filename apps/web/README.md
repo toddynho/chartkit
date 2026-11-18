@@ -32,7 +32,14 @@ npm ci
 npm run build:web
 ```
 
-The site is the static files in `apps/web/dist`. Upload that directory to the chartkit.dev host, or serve it from there.
+The site is the static files in `apps/web/dist`. chartkit.dev serves them from Cloudflare Workers static assets:
+
+```bash
+npm run deploy:check --workspace=chartkit-web
+npm run deploy --workspace=chartkit-web
+```
+
+`deploy:check` is a local dry run. `deploy` uploads `dist` as the Worker `chartkit-web` (see [`wrangler.jsonc`](wrangler.jsonc)) and needs `wrangler login` or `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Response headers for the agent files are in [`public/_headers`](public/_headers). The config has no route, so a deploy updates the `workers.dev` URL; the `chartkit.dev/*` route is attached in the Cloudflare dashboard. The launch-day order and checks are in [LAUNCH_CHECKLIST.md](../../LAUNCH_CHECKLIST.md), step 7. `wrangler` comes from the `apps/cloud` workspace's dev dependencies.
 
 ## Cloud render URL
 
