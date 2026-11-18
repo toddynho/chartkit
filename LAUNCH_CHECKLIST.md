@@ -9,7 +9,7 @@ State before launch (checked 2026-11-16):
 - `@chartkitdev/*` returns 404 on npm. `@derpdaderp/chartkit` is at `0.4.1` (`latest`).
 - chartkit.dev still serves the v0 Next.js site through Cloudflare (`x-powered-by: Next.js`). `/llms.txt` is the v0 file (`@derpdaderp/chartkit v0.4.1`) with `cache-control: public, max-age=86400`. `/docs`, `/benchmarks`, `/when-to-use` and `/schema/v1.json` all 404.
 
-Order: publish packages, then deploy the site, then deprecate v0. Publishing first is invisible, because nothing links to `@chartkitdev/*` yet. Once the site is deployed, every install line on it resolves.
+Order: deploy the Cloud worker, publish packages, then deploy the site, then deprecate v0. Publishing first is invisible, because nothing links to `@chartkitdev/*` yet. Once the site is deployed, every install line on it resolves.
 
 ## 0. Merge to main
 
@@ -88,6 +88,20 @@ gh workflow run publish.yml --ref main -f package=all -f mode=dry-run -f bootstr
 Approve the `npm` environment when asked.
 
 Check: the run is green, and its summary says `dry-run 14 package(s)`.
+
+## 4b. Deploy ChartKit Cloud
+
+Do this before publishing. `@chartkitdev/mcp`'s `render_chart` tool calls `https://cloud.chartkit.dev` by default, and the README and site link to it, so the worker has to answer before either is public.
+
+Follow [apps/cloud/README.md, "Launch"](apps/cloud/README.md#launch), steps 0 to 8: confirm Workers Paid, create the KV namespace and paste its id into `apps/cloud/wrangler.toml`, uncomment the `cloud.chartkit.dev` route, `npm run deploy` from `apps/cloud`, issue a key, and run the smoke checks. If `cloud.chartkit.dev` already has a DNS record, remove it first: a custom domain cannot be created over an existing CNAME.
+
+Check:
+
+```bash
+curl -s https://cloud.chartkit.dev/health
+```
+
+Prints `"ok":true` with `"storage":"kv-binding"`. Then the smoke checks in the Cloud README all pass, including the oversized PNG returning `422 image/png`.
 
 ## 5. Publish (bootstrap)
 

@@ -13,6 +13,9 @@ export interface ChartStore {
   get(id: string): Promise<StoredChart | null>;
 }
 
+/** A chart stored without a valid key is kept this long. A chart stored with a key does not expire. */
+export const ANONYMOUS_CHART_TTL_SECONDS = 30 * 24 * 60 * 60;
+
 export function chartId(spec: unknown, clean = false): string {
   return createHash("sha256").update(canonical({ spec, clean })).digest("base64url").slice(0, 16);
 }
@@ -52,7 +55,7 @@ export function backendCharts(backend: KvBackend): ChartStore {
         if (stored) return stored;
       }
       const row: StoredChart = { id, spec, clean };
-      await backend.set(`ck:chart:${id}`, JSON.stringify({ v: 1, spec, clean }));
+      await backend.set(`ck:chart:${id}`, JSON.stringify({ v: 1, spec, clean }), clean ? undefined : ANONYMOUS_CHART_TTL_SECONDS);
       return row;
     },
     async get(id) {

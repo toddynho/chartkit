@@ -31,6 +31,17 @@ export interface Frame {
  */
 export const CLOUD_PLATE = "#ffffff";
 
+/** Longest side of a drawing, in SVG units. The `w` and `h` parameters and `spec.size` share it. */
+export const MAX_SIDE = 4096;
+/**
+ * Most pixels one PNG may hold: width x height x scale squared.
+ * resvg keeps the whole bitmap in memory and a Workers isolate has about 128 MB, so this is well under 4096 x 4096.
+ * 4,000,000 covers 1600 x 1200 at scale 1 and 1200 x 800 at scale 2.
+ */
+export const MAX_PNG_PIXELS = 4_000_000;
+/** Most rows in `spec.data`. The 1 MB body cap alone still lets through enough rows to take seconds to draw. */
+export const MAX_ROWS = 20_000;
+
 const TRANSPARENT_PRESETS = new Set(["auto", "soft", "refined", "editorial"]);
 
 export interface Drawn {
@@ -48,8 +59,17 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const checked = check(framed);
   const spec = applyCloudPlate(checked.spec, frame);
   let result = spec === checked.spec ? checked : { ...checked, spec };
-  const drawn = result.ok ? render(result.spec) : "";
-  const failure = result.ok ? drawFailure(result.spec, drawn) : null;
+  const tooBig = result.ok ? overLimit(result.spec) : null;
+  if (tooBig) result = failResult(result, tooBig);
+  let drawn = "";
+  if (result.ok) {
+    try {
+      drawn = render(result.spec);
+    } catch {
+      result = failResult(result, cloudError("/type", "the renderer failed on this spec"));
+    }
+  }
+  const failure = result.ok ? drawFailure(result.spec, drawn) ?? pngOverLimit(drawn, frame) : null;
   if (failure) result = failResult(result, failure);
   const failed = !result.ok;
   const dark = failed ? false : themeIsDark(frame.theme, drawn);
@@ -66,8 +86,18 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   );
   const size = svgSize(svg);
   if (frame.format === "png") {
-    const png = await rasterize(svg, frame.scale, family);
-    return { status: failed ? 422 : 200, svg, body: png, contentType: "image/png", result, width: size.width, height: size.height };
+    try {
+      // The error picture is a fixed 640 x 240, so it is drawn at scale 1 whatever the request asked for.
+      const png = await rasterize(svg, failed ? 1 : frame.scale, family);
+      return { status: failed ? 422 : 200, svg, body: png, contentType: "image/png", result, width: size.width, height: size.height };
+    } catch {
+      if (failed) throw new Error("could not rasterize the error picture");
+      const broken = failResult(result, cloudError("", "the PNG could not be rasterized", "Ask for format=svg, or a smaller size or scale."));
+      const picture = bakeFontFallback(presentSvg(errorPicture(broken), { watermark: true, dark: false, plate: CLOUD_PLATE }), "");
+      const pictureSize = svgSize(picture);
+      const png = await rasterize(picture, 1, "");
+      return { status: 422, svg: picture, body: png, contentType: "image/png", result: broken, width: pictureSize.width, height: pictureSize.height };
+    }
   }
   return {
     status: failed ? 422 : 200,
@@ -147,6 +177,41 @@ function drawFailure(spec: unknown, drawn: string): RepairResult["errors"][numbe
     message: unsupported ? `type "${type}" is unsupported on Cloud` : `renderer for "${type}" could not draw this spec`,
     hint: unsupported ? "This type is not loaded by the Cloud worker." : undefined,
   };
+}
+
+/** CK1006 with a Cloud-specific message: the spec is valid, but this service will not draw it. */
+function cloudError(path: string, message: string, hint?: string): RepairResult["errors"][number] {
+  return { code: "CK1006", severity: "error", path, message, hint };
+}
+
+/** Limits that are known before drawing: the frame and the row count. */
+function overLimit(spec: unknown): RepairResult["errors"][number] | null {
+  if (!isRecord(spec)) return null;
+  if (isRecord(spec.size)) {
+    for (const side of ["width", "height"] as const) {
+      const value = spec.size[side];
+      if (typeof value === "number" && value > MAX_SIDE) {
+        return cloudError(`/size/${side}`, `size.${side} is ${value}; Cloud draws at most ${MAX_SIDE}`, `Set size.${side} to ${MAX_SIDE} or less.`);
+      }
+    }
+  }
+  if (Array.isArray(spec.data) && spec.data.length > MAX_ROWS) {
+    return cloudError("/data", `data has ${spec.data.length} rows; Cloud draws at most ${MAX_ROWS}`, "Aggregate or sample the rows before sending them.");
+  }
+  return null;
+}
+
+/** A PNG holds width x height x scale squared pixels in memory. Checked against the drawn size, not the request. */
+function pngOverLimit(drawn: string, frame: Frame): RepairResult["errors"][number] | null {
+  if (frame.format !== "png") return null;
+  const size = svgSize(drawn);
+  const pixels = size.width * size.height * frame.scale * frame.scale;
+  if (pixels <= MAX_PNG_PIXELS) return null;
+  return cloudError(
+    "/size",
+    `a ${size.width} x ${size.height} PNG at scale ${frame.scale} is ${Math.round(pixels).toLocaleString("en-US")} pixels; Cloud draws at most ${MAX_PNG_PIXELS.toLocaleString("en-US")}`,
+    "Lower w, h or scale, or ask for format=svg, which has no pixel limit.",
+  );
 }
 
 function failResult(result: RepairResult, error: RepairResult["errors"][number]): RepairResult {
