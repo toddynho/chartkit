@@ -15,6 +15,9 @@ const onCloud = path === "/cloud";
 const onAgents = path === "/agents";
 const links = variant === "docs" ? docsNavLinks : primaryNav;
 const showRepo = path !== "/methodology/agent-eval";
+/** Shown until the browser has the live count, and when GitHub cannot be reached. */
+const STARS = 7;
+const repoApi = SITE.github.replace("https://github.com/", "https://api.github.com/repos/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
@@ -23,7 +26,7 @@ function mark(href: string): "page" | undefined {
 }
 ---
 
-<header class:list={["site-header", variant === "docs" && "site-header--docs"]} id="site-header">
+<header class:list={["site-header", variant === "docs" && "site-header--docs"]} id="site-header" data-repo-api={repoApi}>
   <div class="site-header__inner">
     <BrandLockup tag={variant === "docs" ? "Docs" : undefined} />
     {
@@ -47,7 +50,7 @@ function mark(href: string): "page" | undefined {
         {
           showRepo ? (
             <a class="nav-menu-star" href={SITE.github}>
-              <span aria-hidden="true">★</span> Star <strong>7</strong>
+              <span aria-hidden="true">★</span> Star <strong data-stars>{STARS}</strong>
             </a>
           ) : null
         }
@@ -65,7 +68,7 @@ function mark(href: string): "page" | undefined {
         {
           showRepo ? (
             <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
-              <span aria-hidden="true">★</span> Star <strong>7</strong>
+              <span aria-hidden="true">★</span> Star <strong data-stars>{STARS}</strong>
             </a>
           ) : null
         }
@@ -126,5 +129,36 @@ function mark(href: string): "page" | undefined {
         input.focus();
       }
     });
+  }
+
+  // Live star count. GitHub allows 60 unauthenticated calls an hour per visitor, so keep it for an hour.
+  const starNodes = document.querySelectorAll<HTMLElement>("[data-stars]");
+  const api = header?.dataset.repoApi;
+  const KEY = "ck-stars";
+  const HOUR = 3_600_000;
+  const short = (n: number) => (n < 1000 ? String(n) : `${(n / 1000).toFixed(n < 10_000 ? 1 : 0).replace(/\.0$/, "")}k`);
+  const paint = (n: number) => starNodes.forEach((node) => (node.textContent = short(n)));
+  if (starNodes.length && api) {
+    let fresh = false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) ?? "null");
+      if (saved && Number.isFinite(saved.n)) {
+        paint(saved.n);
+        fresh = Date.now() - saved.t < HOUR;
+      }
+    } catch {}
+    if (!fresh) {
+      fetch(api, { headers: { Accept: "application/vnd.github+json" } })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((repo) => {
+          const n = repo?.stargazers_count;
+          if (!Number.isFinite(n)) return;
+          paint(n);
+          try {
+            localStorage.setItem(KEY, JSON.stringify({ n, t: Date.now() }));
+          } catch {}
+        })
+        .catch(() => {});
+    }
   }
 </script>
