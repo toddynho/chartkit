@@ -193,7 +193,7 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    npx wrangler kv namespace create CHARTKIT_KV
    ```
 
-   Paste the printed `id` into the `[[kv_namespaces]]` block in `wrangler.toml` and uncomment that block.
+   Done for the production account: the `[[kv_namespaces]]` block in `wrangler.toml` carries that namespace's `id`. Only repeat this for a new account, and replace the `id`.
 
 2. **Check the rate-limit binding.** `[[ratelimits]]` with `name = "CHARTKIT_RATE_LIMIT"` is already on in `wrangler.toml`. If `namespace_id = "1201"` is taken by another Worker on the account, pick any other unused positive integer. Nothing else is created.
 
@@ -207,15 +207,7 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
 
 4. **Put the chartkit.dev zone on the account.** Add `chartkit.dev` in the Cloudflare dashboard on the same account as the worker, and point the registrar's nameservers at Cloudflare. Wait until the zone is Active.
 
-5. **Uncomment the route** in `wrangler.toml`:
-
-   ```toml
-   [[routes]]
-   pattern = "cloud.chartkit.dev"
-   custom_domain = true
-   ```
-
-   Wrangler creates the DNS record and certificate for a custom domain. Deploy fails if the zone is not on the account.
+5. **The route is on** in `wrangler.toml` (`cloud.chartkit.dev`, `custom_domain = true`). Deploy with credentials for the account that holds the `chartkit.dev` zone and the `chartkit-cloud` worker. A token needs Workers Scripts edit, Workers KV Storage edit, and Workers Routes edit on the zone. Deploying from another account creates a second worker and fails on the route.
 
 6. **Deploy.**
 

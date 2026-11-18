@@ -11,11 +11,11 @@ workers_dev = true
 # workers.dev URL: https://chartkit-cloud.<account-subdomain>.workers.dev
 # Wrangler prints the real host. The account subdomain is not stored in this repo.
 
-# Custom hostname. Leave commented until the chartkit.dev zone is on this account.
-# Uncommenting without the zone makes deploy fail.
-# [[routes]]
-# pattern = "cloud.chartkit.dev"
-# custom_domain = true
+# Custom hostname. The chartkit.dev zone is on the same account as this worker.
+# Deploy fails if the zone is not on the account the deploy runs against.
+[[routes]]
+pattern = "cloud.chartkit.dev"
+custom_domain = true
 
 # Runtime secrets, set with `wrangler secret put`, never in this file:
 # KV_REST_API_URL, KV_REST_API_TOKEN (Vercel KV or Upstash). Only needed when CHARTKIT_KV is not bound.
@@ -25,11 +25,10 @@ workers_dev = true
 
 # Durable store for API keys and stored charts (/c/<id>). Read before the REST vars above.
 # Without it (or the REST vars), /health answers 503 on Workers: keys and /c/<id> links would vanish with the isolate.
-# Create it with `npx wrangler kv namespace create CHARTKIT_KV`, paste the id, and uncomment.
-# A placeholder id makes deploy fail, so this stays commented until the namespace exists.
-# [[kv_namespaces]]
-# binding = "CHARTKIT_KV"
-# id = "00000000000000000000000000000000"
+# Created with `npx wrangler kv namespace create CHARTKIT_KV`. The id names the namespace; it is not a secret.
+[[kv_namespaces]]
+binding = "CHARTKIT_KV"
+id = "532ee8b3b649457c81896f3daf49ca2e"
 
 # Rate limit: 120 requests a minute per client IP, on every route but /health and checkout.
 # Counters are shared by the isolates in one Cloudflare location, not exact across the globe.
