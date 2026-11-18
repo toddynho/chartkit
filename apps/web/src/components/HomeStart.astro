@@ -1,6 +1,7 @@
 ---
 import FrameworkChips from "./FrameworkChips.astro";
 import { agentSwitchPrompt } from "../data/agent-prompt";
+import { mcpConfig } from "../data/mcp-config";
 import { stacks } from "../data/stacks";
 
 const splitAt = agentSwitchPrompt.indexOf("\n\n");
@@ -48,6 +49,15 @@ const body = splitAt === -1 ? "" : agentSwitchPrompt.slice(splitAt + 2);
         <button type="button" class="gs-copy" data-copy-prompt data-copied-ms="1500" data-copy-text={agentSwitchPrompt}>
           Copy
         </button>
+      </div>
+      <div class="gs-agents" aria-label="For agents">
+        <span class="gs-agents__label">For agents</span>
+        <button type="button" class="gs-agents__btn" data-copy-prompt data-copied-ms="1500" data-copy-text={mcpConfig} title="The mcpServers block for Cursor or Claude Desktop. It runs npx -y @chartkitdev/mcp.">
+          Copy MCP config
+        </button>
+        <a class="gs-agents__link" href="/llms.txt">llms.txt</a>
+        <a class="gs-agents__link" href="/schema/v1.json">Schema</a>
+        <a class="gs-agents__link" href="/agents">Agent guide →</a>
       </div>
     </article>
   </div>
