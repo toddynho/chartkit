@@ -1,0 +1,115 @@
+---
+import { repairReplay, replaySource } from "../data/repair-replay";
+
+const { cases, tally } = repairReplay();
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+---
+
+<section class="band band--repair" aria-labelledby="repair-title">
+  <div class="band-head">
+    <div class="band-head__copy">
+      <p class="eyebrow eyebrow--blue">Repair</p>
+      <h2 id="repair-title">
+        <span>The agent gets a key wrong.</span>
+        <span>repair() fixes it, no model call.</span>
+      </h2>
+      <p>
+        With no docs in the prompt, the model guesses at the spec. <code>validate()</code> says what is wrong and where, and <code>repair()</code> applies the fix as a JSON Patch. Both run locally with no network call, so a wrong first answer does not cost a second request.
+      </p>
+    </div>
+    <div class="band-stat">
+      <p class="band-stat__num">{tally.repaired}<span>of {tally.failed}</span></p>
+      <p class="band-stat__cap">
+        <strong>Failed first answers repaired.</strong> {tally.tasks} tasks, {replaySource.docs}. <a href="/methodology/agent-eval">How it was run →</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="rp" data-repair>
+    <div class="rp-bar">
+      <div class="rp-tabs" role="tablist" aria-label="Recorded answers">
+        {
+          cases.map((item, index) => (
+            <button type="button" role="tab" class="rp-tab" id={`rp-tab-${item.id}`} aria-selected={index === 0 ? "true" : "false"} aria-controls={`rp-panel-${item.id}`} tabindex={index === 0 ? 0 : -1} data-rp-tab={item.id}>
+              {item.label}
+            </button>
+          ))
+        }
+      </div>
+      <button type="button" class="rp-replay" data-rp-replay hidden>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"></path>
+          <path d="M2.5 2.5v3h3"></path>
+        </svg>
+        Replay
+      </button>
+    </div>
+
+    {
+      cases.map((item, index) => (
+        <div class="rp-panel" role="tabpanel" id={`rp-panel-${item.id}`} aria-labelledby={`rp-tab-${item.id}`} data-rp-panel={item.id} hidden={index !== 0} style={`--rp-lines:${item.lines}`}>
+          <div class="rp-code">
+            <div class="rp-code__bar">
+              <div class="rp-code__name">
+                <span data-rp-when="before">agent's first answer</span>
+                <span data-rp-when="after">after repair()</span>
+              </div>
+              <div class="tok-pill" title="Output tokens the model spent on this answer, as recorded in the eval">{item.tokens} tok</div>
+            </div>
+            <p class="rp-asked"><span>asked</span> {item.asked}</p>
+            <pre class="rp-pre" data-rp-typed data-text={item.wrote} aria-hidden="true" />
+            <pre class="rp-pre" data-rp-wrote>{item.wroteLines.map((line) => <span class:list={["rp-line", line.mark && `rp-line--${line.mark}`]}>{line.text + "\n"}</span>)}</pre>
+            <pre class="rp-pre" data-rp-fixed>{item.fixedLines.map((line) => <span class:list={["rp-line", line.mark && `rp-line--${line.mark}`]}>{line.text + "\n"}</span>)}</pre>
+          </div>
+
+          <div class="rp-side">
+            <ol class="rp-steps">
+              <li class="rp-step" data-rp-step="validate">
+                <div class="rp-step__head">
+                  <code>validate(spec)</code>
+                  <span class="rp-step__out rp-step__out--bad">{plural(item.errors.length, "error")}</span>
+                </div>
+                <ul class="rp-list">
+                  {
+                    item.errors.map((error) => (
+                      <li>
+                        <b>{error.code}</b> <i>{error.path}</i> {error.message}
+                      </li>
+                    ))
+                  }
+                </ul>
+              </li>
+              <li class="rp-step" data-rp-step="repair">
+                <div class="rp-step__head">
+                  <code>repair(spec)</code>
+                  <span class="rp-step__out">{plural(item.patches.length, "fix")} · 0 model calls</span>
+                </div>
+                <ul class="rp-list rp-list--patch">
+                  {item.patches.map((patch) => <li>{patch}</li>)}
+                </ul>
+              </li>
+              <li class="rp-step" data-rp-step="render">
+                <div class="rp-step__head">
+                  <code>render(spec)</code>
+                  <span class="rp-step__out rp-step__out--ok">SVG · {(item.svgBytes / 1024).toFixed(1)} KB</span>
+                </div>
+              </li>
+            </ol>
+            <div class="rp-chart" data-rp-chart role="img" aria-label={item.alt}>
+              <Fragment set:html={item.svg} />
+            </div>
+          </div>
+        </div>
+      ))
+    }
+
+    <p class="rp-note">
+      A recording, not a live model. Each answer is a first try from the agent eval ({replaySource.round}, {replaySource.model}, {replaySource.docs}), shown as the model wrote it. The diagnostics, fixes and chart are what <code>validate()</code>, <code>repair()</code> and <code>render()</code> return for it in this build.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { mountRepairReplay } from "../scripts/home-repair";
+  mountRepairReplay();
+</script>
