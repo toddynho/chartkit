@@ -8,21 +8,24 @@ import "@fontsource/geist-mono/latin-500.css";
 import "@fontsource/geist-mono/latin-600.css";
 import { ClientRouter } from "astro:transitions";
 import "../styles/dashboard-frame.css";
-import { SITE, canonicalPath } from "../data/site";
+import SocialMeta from "../components/SocialMeta.astro";
+import { SITE, SOCIAL, canonicalPath } from "../data/site";
 import type { DashTheme } from "../lib/dashboard-spec";
 
 interface Props {
   name: string;
   description: string;
   theme: DashTheme;
-  ogImage: string;
+  /** Share image. Defaults to the site card when a dashboard has no screenshot. */
+  ogImage?: string;
+  imageAlt?: string;
 }
 
-const { name, description, theme, ogImage } = Astro.props;
+const { name, description, theme, ogImage = SOCIAL.image, imageAlt } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
 const documentTitle = `${name} · Dashboards · ChartKit`;
 const canonical = new URL(path, Astro.site ?? SITE.url).href;
-const image = new URL(ogImage, Astro.site ?? SITE.url).href;
+const shareAlt = imageAlt ?? `${name} dashboard, drawn with ChartKit.`;
 const font = theme.font ?? "Geist, Helvetica, Arial, sans-serif";
 const track = theme.labelTrack ?? 0;
 const vars = [
@@ -64,9 +67,7 @@ const vars = [
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
-    <meta property="og:image" content={image} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <SocialMeta title={documentTitle} description={description} image={ogImage} imageAlt={shareAlt} />
     <script is:inline>
       (function () {
         var query = location.search;

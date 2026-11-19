@@ -17,6 +17,18 @@ export const SITE = {
   github: "https://github.com/toddynho/chartkit",
 } as const;
 
+/**
+ * Default share card. `apps/web/scripts/social-card.mjs` writes the PNG.
+ * Pages pass `image` to use another file. The URL is made absolute in the layout.
+ */
+export const SOCIAL = {
+  image: "/og/chartkit.png",
+  width: "1200",
+  height: "630",
+  twitter: "@toddo",
+  alt: "ChartKit. Charts an agent can write and a server can render. Revenue stays near the target and finishes the year above it, at 81 against a target of 73.",
+} as const;
+
 /** Drop a trailing slash so canonicals match the public URLs. Root stays `/`. */
 export function canonicalPath(pathname: string): string {
   if (pathname === "/") return "/";

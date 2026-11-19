@@ -12,13 +12,16 @@ interface Props {
   href: string;
   /** Chart-type index: breadcrumb, then the gallery grid. */
   browse?: boolean;
+  /** Share image. A path is resolved against the site origin. */
+  image?: string;
+  imageAlt?: string;
 }
 
-const { title, description, lede, href, browse = false } = Astro.props;
+const { title, description, lede, href, browse = false, image, imageAlt } = Astro.props;
 const crumbs = crumbsFor(href);
 ---
 
-<Base tone="light" title={title} description={description}>
+<Base tone="light" title={title} description={description} image={image} imageAlt={imageAlt}>
   <script slot="head" is:inline>
     try {
       var stored = localStorage.getItem("ck-docs-rail-width");
