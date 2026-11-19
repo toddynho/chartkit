@@ -19,6 +19,21 @@ export const EMBED_PAD_TOP = 24;
 export const EMBED_PAD_X = 16;
 export const EMBED_PAD_BOTTOM = 12;
 
+/** X summary_large_image crop is about 1.91:1. The card PNG is this frame at scale 1. */
+export const CARD_WIDTH = 1200;
+export const CARD_HEIGHT = 628;
+
+/**
+ * Library drawing size whose padded Cloud SVG is exactly CARD_WIDTH by CARD_HEIGHT.
+ * The watermark band is included only when the mark is drawn.
+ */
+export function cardDrawingSize(watermark: boolean): { width: number; height: number } {
+  return {
+    width: CARD_WIDTH - EMBED_PAD_X * 2,
+    height: CARD_HEIGHT - EMBED_PAD_TOP - EMBED_PAD_BOTTOM - (watermark ? BAND : 0),
+  };
+}
+
 const LIGHT = new Set(["", "auto", "soft", "refined", "editorial"]);
 
 export function themeIsDark(theme: string | undefined, svg: string): boolean {

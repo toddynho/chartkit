@@ -27,7 +27,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   </p>
   <h2>POST /charts and POST /validate</h2>
   <p>
-    <code>POST /charts</code> stores the repaired spec and returns <code>id</code>, <code>svgUrl</code>, and <code>pngUrl</code>. The same spec and the same mark state return the same id. A valid <code>Authorization: Bearer</code> stores it unmarked. <code>GET /c/&lt;id&gt;</code> serves that stored image and does not read a key. <code>POST /validate</code> does not draw. It returns the repaired spec, <code>applied</code>, and the remaining diagnostics.
+    <code>POST /charts</code> stores the repaired spec and returns <code>id</code>, <code>shareUrl</code>, <code>svgUrl</code>, and <code>pngUrl</code>. <code>shareUrl</code> is <code>/s/&lt;id&gt;</code>, an HTML page with a 1200×628 card so X, Slack, LinkedIn, and iMessage show a preview. The same spec and the same mark state return the same id. A valid <code>Authorization: Bearer</code> stores it unmarked. <code>GET /c/&lt;id&gt;</code> serves that stored image and does not read a key. <code>GET /c/&lt;id&gt;/card.png</code> is the card. <code>POST /validate</code> does not draw. It returns the repaired spec, <code>applied</code>, and the remaining diagnostics.
   </p>
   <h2>Headers</h2>
   <ul>

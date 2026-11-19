@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createApp, type CloudApp } from "./app.ts";
-import { ANONYMOUS_CHART_TTL_SECONDS, backendCharts, memoryCharts } from "./charts.ts";
+import { ANONYMOUS_CHART_TTL_SECONDS, SHARE_CHART_TTL_SECONDS, SHARE_REFRESH_AFTER_SECONDS, backendCharts, memoryCharts } from "./charts.ts";
 import { MAX_PNG_PIXELS, MAX_ROWS, MAX_SIDE } from "./draw.ts";
 import { handleFetch } from "./edge.ts";
 import { bindingBackend, memoryKeys, restBackend, type KvBackend } from "./keys.ts";
@@ -128,6 +128,51 @@ describe("stored chart expiry", () => {
     await charts.put(bar, false);
     await charts.put(bar, false);
     expect(backend.sets).toHaveLength(1);
+  });
+
+  it("keeps a share chart for a year and refreshes that year on a later read", async () => {
+    const backend = recording();
+    const charts = backendCharts(backend);
+    const shared = await charts.put(bar, false, true);
+    expect(backend.sets.map((row) => row.ttl)).toEqual([SHARE_CHART_TTL_SECONDS]);
+    expect(shared.share).toBe(true);
+    await charts.touch(shared.id);
+    expect(backend.sets).toHaveLength(1);
+    await charts.touch(shared.id, (shared.refreshedAt ?? 0) + SHARE_REFRESH_AFTER_SECONDS);
+    expect(backend.sets).toHaveLength(2);
+    expect(backend.sets[1]?.ttl).toBe(SHARE_CHART_TTL_SECONDS);
+
+    const image = await charts.put({ ...bar, title: "Image only" }, false);
+    expect(backend.sets.at(-1)?.ttl).toBe(ANONYMOUS_CHART_TTL_SECONDS);
+    const promoted = await charts.touch(image.id);
+    expect(promoted?.share).toBe(true);
+    expect(backend.sets.at(-1)?.ttl).toBe(SHARE_CHART_TTL_SECONDS);
+
+    const keyed = await charts.put(bar, true);
+    await charts.touch(keyed.id, (keyed.refreshedAt ?? 0) + SHARE_REFRESH_AFTER_SECONDS);
+    expect(backend.sets.filter((row) => row.key.endsWith(keyed.id)).map((row) => row.ttl)).toEqual([undefined]);
+  });
+
+  it("stores a POST /charts row with the share TTL", async () => {
+    const backend = recording();
+    const app = createApp({
+      keys: memoryKeys(),
+      charts: backendCharts(backend),
+      limiter: memoryLimiter(100, 60_000, () => 1_000),
+      stripe,
+      fetch: vi.fn(),
+    });
+    const response = await app.handle(
+      new Request("http://cloud.local/charts", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec: bar }),
+      }),
+    );
+    const body = (await response.json()) as { shareUrl: string; id: string };
+    expect(response.status).toBe(200);
+    expect(body.shareUrl).toBe(`http://cloud.local/s/${body.id}`);
+    expect(backend.sets.map((row) => row.ttl)).toEqual([SHARE_CHART_TTL_SECONDS]);
   });
 
   it("passes the expiry to Workers KV as expirationTtl and to the REST store as EX", async () => {

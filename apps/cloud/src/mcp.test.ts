@@ -60,10 +60,11 @@ describe("POST /mcp", () => {
     );
     const body = (await called.json()) as { result: { isError: boolean; content: { text: string }[] } };
     expect(body.result.isError).toBe(false);
-    const rendered = JSON.parse(body.result.content[0]?.text ?? "") as { watermark: boolean; url: string; svg: string };
+    const rendered = JSON.parse(body.result.content[0]?.text ?? "") as { watermark: boolean; url: string; shareUrl?: string; svg: string };
     expect(rendered.watermark).toBe(false);
     expect(rendered.svg).not.toContain("data-ck-watermark");
     expect(rendered.url).toMatch(/^http:\/\/cloud\.local\/c\/[A-Za-z0-9_-]{16}\.svg$/);
+    expect(rendered.shareUrl).toBe(rendered.url.replace(/\/c\/([A-Za-z0-9_-]{16})\.svg$/, "/s/$1"));
     expect(rendered.url).not.toContain("ck_test_known");
     expect(body.result.content[0]?.text).not.toContain("ck_test_known");
   });
