@@ -17,7 +17,9 @@
     "deploy": "wrangler deploy",
     "deploy:check": "wrangler deploy --dry-run",
     "precheck": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
-    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "social-card": "node scripts/social-card.mjs",
+    "test:social": "node --test scripts/social-meta.test.mjs"
   },
   "dependencies": {
     "@chartkitdev/astro": "^0.5.0",

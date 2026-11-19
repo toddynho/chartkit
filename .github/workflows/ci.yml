@@ -43,3 +43,4 @@ jobs:
       - run: npm ci
       - run: npm run check --workspace=chartkit-web
       - run: npm run build:web
+      - run: node --test apps/web/scripts/social-meta.test.mjs
