@@ -2,6 +2,8 @@ import type { RepairResult } from "@chartkitdev/core/validate";
 import type { ChartStore, StoredChart } from "./charts.ts";
 import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
+import { playgroundHref, shareDocument, shareMessage, specDescription, specTitle } from "./share.ts";
+import { cardDrawingSize } from "./watermark.ts";
 import { FONT_FALLBACK } from "./png.ts";
 import { keyStoreFromEnv, storeKind, type KeyStore, type StoreKind } from "./keys.ts";
 import { clientIp, limiterFrom, type RateLimiter } from "./limit.ts";
@@ -102,6 +104,11 @@ export function createApp(deps: CloudDeps = {}): CloudApp {
       if (path === "/render" && request.method === "POST") return renderPost(request, url, keys, charts, cache);
       if (path === "/charts" && request.method === "POST") return storeChart(request, url, keys, charts);
       if (path === "/validate" && request.method === "POST") return validatePost(request);
+      if (path === "/s" && request.method === "GET") return shareQuery(url, cache);
+      const shareId = path.match(/^\/s\/([A-Za-z0-9_-]{8,32})$/);
+      if (shareId && request.method === "GET") return shareStored(url, shareId[1] ?? "", charts, cache);
+      const cardPng = path.match(/^\/c\/([A-Za-z0-9_-]{8,32})\/card\.png$/);
+      if (cardPng && request.method === "GET") return renderStored(request, url, cardPng[1] ?? "", "card", charts, cache);
       const stored = path.match(/^\/c\/([A-Za-z0-9_-]{8,32})(?:\.(svg|png))?$/);
       if (stored && request.method === "GET") return renderStored(request, url, stored[1] ?? "", stored[2], charts, cache);
       return json(404, { ok: false, error: "Not found." });
@@ -130,7 +137,7 @@ async function renderPost(request: Request, url: URL, keys: KeyStore, charts: Ch
   frame.watermark = access.watermark;
   const drawn = await cachedDraw(spec, frame, access.state, cache);
   const marked = access.watermark || !drawn.result.ok;
-  const share = await shareUrl(url.origin, drawn.result.spec, frame, marked, charts);
+  const link = await publishedUrl(url.origin, drawn.result.spec, frame, marked, charts);
   return json(
     drawn.status,
     {
@@ -138,7 +145,8 @@ async function renderPost(request: Request, url: URL, keys: KeyStore, charts: Ch
       format: frame.format,
       width: drawn.width,
       height: drawn.height,
-      url: share,
+      url: link.url,
+      ...(link.shareUrl ? { shareUrl: link.shareUrl } : {}),
       watermark: marked,
       svg: frame.format === "svg" ? drawn.svg : undefined,
       png: frame.format === "png" ? Buffer.from(drawn.body).toString("base64") : undefined,
@@ -166,10 +174,11 @@ async function storeChart(request: Request, url: URL, keys: KeyStore, charts: Ch
   if (!drawn.result.ok) {
     return json(422, payload(drawn, ""), metaHeaders(drawn.result, { "X-ChartKit-Watermark": "1", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
   }
-  const stored = await charts.put(drawn.result.spec, !access.watermark);
+  const stored = await charts.put(drawn.result.spec, !access.watermark, access.watermark);
   const svgUrl = `${url.origin}/c/${stored.id}.svg`;
   const pngUrl = `${url.origin}/c/${stored.id}.png${frame.scale !== 1 ? `?scale=${frame.scale}` : ""}`;
-  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
+  const shareUrl = `${url.origin}/s/${stored.id}`;
+  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, shareUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
 }
 
 async function validatePost(request: Request): Promise<Response> {
@@ -203,9 +212,54 @@ async function renderStored(
 ): Promise<Response> {
   const stored = await charts.get(id);
   if (!stored) return imageError(404, "Unknown chart.", "POST /charts returns the id.");
-  if (extension) url.searchParams.set("format", extension);
+  if (extension === "card") url.searchParams.set("card", "1");
+  else if (extension) url.searchParams.set("format", extension);
   url.searchParams.delete("key");
   return renderImage(request, url, stored.spec, !stored.clean, cache, true);
+}
+
+async function shareStored(url: URL, id: string, charts: ChartStore, cache: Map<string, Cached>): Promise<Response> {
+  const stored = await charts.touch(id);
+  if (!stored) return htmlDocument(404, shareMessage("Unknown chart", "This share link does not match a stored chart. POST /charts returns the id."), "no-store");
+  return shareResponse(url, stored.spec, !stored.clean, `${url.origin}/s/${id}`, `${url.origin}/c/${id}/card.png`, cache);
+}
+
+async function shareQuery(url: URL, cache: Map<string, Cached>): Promise<Response> {
+  const raw = url.searchParams.get("spec");
+  if (!raw) return htmlDocument(400, shareMessage("Missing spec", "Pass spec as JSON on the query string, or POST /charts for a short /s/<id> link."), "no-store");
+  if (raw.length > MAX_BODY) return htmlDocument(413, shareMessage("Spec is too large", "POST /charts stores the spec and returns a short /s/<id> link."), "no-store");
+  const spec = parseSpec(raw);
+  if (spec instanceof Error) return htmlDocument(400, shareMessage("Spec is not JSON", spec.message), "no-store");
+  const image = new URL("/render", url.origin);
+  image.searchParams.set("format", "png");
+  image.searchParams.set("card", "1");
+  image.searchParams.set("spec", raw);
+  return shareResponse(url, spec, true, `${url.origin}${url.pathname}${url.search}`, image.toString(), cache);
+}
+
+async function shareResponse(
+  url: URL,
+  spec: unknown,
+  watermark: boolean,
+  pageUrl: string,
+  imageUrl: string,
+  cache: Map<string, Cached>,
+): Promise<Response> {
+  const drawn = await cachedDraw(spec, { format: "svg", scale: 1, watermark }, "absent", cache);
+  if (!drawn.result.ok) {
+    const detail = drawn.result.errors[0]?.message ?? "The spec is not drawable.";
+    return htmlDocument(422, shareMessage("ChartKit could not draw this spec", detail), "no-store");
+  }
+  const repaired = drawn.result.spec;
+  const html = shareDocument({
+    title: specTitle(repaired),
+    description: specDescription(repaired),
+    pageUrl,
+    imageUrl,
+    svg: drawn.svg,
+    playgroundHref: playgroundHref(repaired),
+  });
+  return htmlDocument(200, html, LONG_CACHE);
 }
 
 /** GET /render is always marked. A key in the query or Authorization header is ignored. */
@@ -222,9 +276,22 @@ async function renderImage(
   cache: Map<string, Cached>,
   stored: boolean,
 ): Promise<Response> {
+  if (url.searchParams.get("card") === "1") {
+    url.searchParams.delete("w");
+    url.searchParams.delete("h");
+    url.searchParams.delete("scale");
+    url.searchParams.set("format", "png");
+  }
   const frame = readFrame(url.searchParams);
   if (typeof frame === "string") return imageError(400, "Bad render query.", frame);
   frame.watermark = watermark;
+  if (frame.card) {
+    const drawing = cardDrawingSize(watermark);
+    frame.w = drawing.width;
+    frame.h = drawing.height;
+    frame.scale = 1;
+    frame.format = "png";
+  }
   const drawn = await cachedDraw(spec, frame, "absent", cache);
   if (request.headers.get("if-none-match") === `"${drawn.etag}"`) {
     return new Response(null, { status: 304, headers: drawn.headers });
@@ -285,15 +352,21 @@ async function accessFor(request: Request, keys: KeyStore): Promise<{ watermark:
   return valid ? { watermark: false, state: "valid" } : { watermark: true, state: "invalid" };
 }
 
-async function shareUrl(origin: string, spec: unknown, frame: Frame, watermark: boolean, charts: ChartStore): Promise<string> {
+async function publishedUrl(
+  origin: string,
+  spec: unknown,
+  frame: Frame,
+  watermark: boolean,
+  charts: ChartStore,
+): Promise<{ url: string; shareUrl?: string }> {
   if (!watermark) {
     const stored = await charts.put(spec, true);
-    return storedUrl(origin, stored, frame);
+    return { url: storedUrl(origin, stored, frame), shareUrl: `${origin}/s/${stored.id}` };
   }
   const json = JSON.stringify(spec);
   if (json.length > 1800) {
     const stored = await charts.put(spec, false);
-    return storedUrl(origin, stored, frame);
+    return { url: storedUrl(origin, stored, frame), shareUrl: `${origin}/s/${stored.id}` };
   }
   const params = new URLSearchParams();
   params.set("format", frame.format);
@@ -303,7 +376,7 @@ async function shareUrl(origin: string, spec: unknown, frame: Frame, watermark: 
   if (frame.h) params.set("h", String(frame.h));
   if (frame.theme) params.set("theme", frame.theme);
   if (frame.background) params.set("background", frame.background);
-  return `${origin}/render?${params}`;
+  return { url: `${origin}/render?${params}` };
 }
 
 function storedUrl(origin: string, stored: StoredChart, frame: Frame): string {
@@ -447,6 +520,13 @@ function html(status: number, body: string): Response {
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-store");
   return new Response(`<!doctype html><meta charset="utf-8"><title>ChartKit</title><body style="font-family:${FONT_FALLBACK};margin:40px">${body}</body>`, { status, headers });
+}
+
+function htmlDocument(status: number, document: string, cacheControl: string): Response {
+  const headers = cors(new Headers());
+  headers.set("content-type", "text/html; charset=utf-8");
+  headers.set("cache-control", cacheControl);
+  return new Response(document, { status, headers });
 }
 
 function cors(input: Headers | Response): Headers | Response {

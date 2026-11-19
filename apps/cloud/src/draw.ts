@@ -7,7 +7,7 @@ import { bakeFontFallback } from "../../../packages/core/src/font.ts";
 import { resolvePreset } from "../../../packages/core/src/theme.ts";
 import { canonical } from "./charts.ts";
 import { FONT_FALLBACK, rasterize } from "./png.ts";
-import { presentSvg, themeIsDark } from "./watermark.ts";
+import { CARD_HEIGHT, CARD_WIDTH, presentSvg, themeIsDark } from "./watermark.ts";
 
 export const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
 
@@ -23,6 +23,8 @@ export interface Frame {
   background?: string;
   format: "svg" | "png";
   watermark: boolean;
+  /** Draw the 1200×628 share card. w, h, scale, and format are forced in the handler. */
+  card?: boolean;
 }
 
 /**
@@ -76,7 +78,7 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const theme = isRecord(result.spec) ? result.spec.theme : undefined;
   const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
   const family = failed || !isRecord(result.spec) ? "" : resolvePreset(result.spec.theme).fontFamily ?? "";
-  const svg = bakeFontFallback(
+  let svg = bakeFontFallback(
     presentSvg(failed ? errorPicture(result) : drawn, {
       watermark: failed || frame.watermark,
       dark,
@@ -84,6 +86,7 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
     }),
     family,
   );
+  if (frame.card && !failed) svg = fitCard(svg);
   const size = svgSize(svg);
   if (frame.format === "png") {
     try {
@@ -148,7 +151,21 @@ export function readFrame(source: { get(name: string): string | null }): Frame |
   if (theme && !/^[A-Za-z0-9-]{1,32}$/.test(theme)) return "theme must be a short name";
   const background = readBackground(source.get("background"));
   if (background === "bad") return "background must be a CSS color such as #ffffff, rgb(), hsl(), oklch(), or transparent";
-  return { format, w, h, scale: scale ?? 1, theme, background, watermark: true };
+  const frame: Frame = { format, w, h, scale: scale ?? 1, theme, background, watermark: true };
+  if (source.get("card") === "1") frame.card = true;
+  return frame;
+}
+
+/** Nest a chart that did not land on the card frame so the PNG is still 1200×628. */
+function fitCard(svg: string): string {
+  const size = svgSize(svg);
+  if (size.width === CARD_WIDTH && size.height === CARD_HEIGHT) return svg;
+  const open = svg.match(/<svg\b[^>]*>/)?.[0];
+  const close = svg.lastIndexOf("</svg>");
+  if (!open || close < 0) return svg;
+  const box = open.match(/\bviewBox="([^"]+)"/)?.[1] ?? `0 0 ${size.width || CARD_WIDTH} ${size.height || CARD_HEIGHT}`;
+  const inner = svg.slice(open.length, close);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" role="img"><svg x="0" y="0" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="${box}" preserveAspectRatio="xMidYMid meet">${inner}</svg></svg>`;
 }
 
 function check(spec: unknown): RepairResult {
@@ -227,10 +244,14 @@ function withFrame(spec: unknown, frame: Frame): unknown {
   if (!isRecord(spec)) return spec;
   const next: Record<string, unknown> = { ...spec };
   if (frame.theme) next.theme = frame.theme;
-  if (frame.w || frame.h) {
+  if (frame.w || frame.h || frame.card) {
     const size = isRecord(next.size) ? { ...next.size } : {};
     if (frame.w) size.width = frame.w;
     if (frame.h) size.height = frame.h;
+    if (frame.card) {
+      delete size.minHeight;
+      delete size.aspectRatio;
+    }
     next.size = size;
   }
   return next;

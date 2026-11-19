@@ -26,9 +26,10 @@ Enforced in `src/draw.ts`, `src/app.ts` and `src/charts.ts`:
 | PNG scale | 1 to 4 | 400 |
 | PNG pixels (width × height × scale²) | 4,000,000 | 422, with a small PNG that says why |
 | Rows in `spec.data` | 20,000 | 422 |
-| A chart stored without a key (`/c/<id>`) | kept 30 days | 404 after that |
+| A chart stored without a key, and not as a share page | kept 30 days | 404 after that |
+| A share chart stored without a key (`POST /charts`, `/s/<id>`) | kept 365 days. `GET /s/<id>` starts another 365 days when the last refresh is 30 days old or older. Opening `/s/<id>` for a 30-day image row promotes it to this rule | 404 after a year with no share-page read |
 
-A chart stored with a valid key does not expire. SVG has no pixel limit. A 422 from a limit carries a `CK1006` error with the limit in the message. The PNG pixel limit is set for a Workers isolate's memory (about 128 MB); it was checked in the local runtime, not under production load.
+A chart stored with a valid key does not expire, including its share page. SVG has no pixel limit. A share card (`/c/<id>/card.png` or `GET /render?format=png&card=1`) is 1200×628 at scale 1, which is under the PNG pixel limit. `card=1` ignores `w`, `h`, and `scale` so the unfurl crop stays 1200×628. The mark follows the same rule as the other renders: a keyed stored chart has no mark, and every GET without a stored key has the mark. A 422 from a limit carries a `CK1006` error with the limit in the message. The PNG pixel limit is set for a Workers isolate's memory (about 128 MB); it was checked in the local runtime, not under production load.
 
 The Workers Free plan allows about 10 ms of CPU per request. A PNG render takes more than that, so the worker needs the Workers Paid plan.
 
@@ -124,7 +125,7 @@ Keys and stored charts use the first store that is configured: the `CHARTKIT_KV`
 
 Workers KV is eventually consistent. A chart written in one Cloudflare location can take up to about a minute to be readable in another, and a lookup that missed is cached for about as long. So a `/c/<id>` URL fetched at once from a far location (an image proxy, say) can 404 for that minute and then work. A key written with `wrangler kv key put` has the same delay. Each new stored chart is one KV write, so watch the plan's daily write quota. A failed write fails that `POST /render` or `POST /charts`.
 
-Both durable stores use the same layout: `ck:key:<key>` = `1`, `ck:session:<stripe session>` = `<key>`, `ck:chart:<id>` = the stored spec. Moving from REST to the binding means copying those keys. Nothing else changes.
+Both durable stores use the same layout: `ck:key:<key>` = `1`, `ck:session:<stripe session>` = `<key>`, `ck:chart:<id>` = `{"v":1,"spec":...,"clean":...}`. A share row also has `"share":true` and `"refreshedAt"` (unix seconds). Moving from REST to the binding means copying those keys. Nothing else changes. A share-page read rewrites an anonymous row at most once every 30 days, which is one extra KV write for a link people still open.
 
 ### Issue a key by hand
 
@@ -161,7 +162,8 @@ The rate limit is 120 a minute per IP, with or without a key. On Cloudflare the 
 - `GET /health`
 - `GET /render` and `POST /render`
 - `POST /validate`
-- `POST /charts` and `GET /c/<id>.svg` or `.png`
+- `POST /charts` returns `id`, `shareUrl`, `svgUrl`, and `pngUrl`. `GET /c/<id>.svg` or `.png` serves the stored image. `GET /c/<id>/card.png` serves the 1200×628 card.
+- `GET /s/<id>` is the share page (Open Graph and Twitter Card tags, absolute image URLs). `GET /s?spec=` is the same page with nothing stored. Its `og:image` is `GET /render?format=png&card=1&spec=`.
 - `POST /mcp` — stateless [Streamable HTTP](https://modelcontextprotocol.io). `GET /mcp` is 405. This is not `@chartkitdev/mcp` on stdio. Three tools:
   - `render_chart` calls the same render path as `POST /render`. Omit `format`, or pass `svg`. Pass `png` only when the host cannot display SVG (email, a GitHub README image, some Slack clients), and then set `scale` to 2 or higher.
   - `validate_chart` runs `@chartkitdev/core/validate` and returns `ok`, `errors`, and `warnings` with CK codes, paths, hints, and fix patches. It does not change the spec. Pass `data` to check other rows.
@@ -240,9 +242,13 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    curl -s "$HOST/mcp" -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
      -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"validate_chart\",\"arguments\":{\"spec\":$SPEC}}}"
 
-   # Stored chart: POST /charts returns an id, then /c/<id>.svg serves it
-   ID=$(curl -s "$HOST/charts" -H 'content-type: application/json' -d "{\"spec\":$SPEC}" | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')
+   # Stored chart: POST /charts returns an id and a share page, then /c/<id>.svg and /c/<id>/card.png serve it
+   BODY=$(curl -s "$HOST/charts" -H 'content-type: application/json' -d "{\"spec\":$SPEC}")
+   ID=$(printf '%s' "$BODY" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).id')
+   printf '%s' "$BODY" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).shareUrl'   # https://cloud.chartkit.dev/s/<id>
    curl -s -o /dev/null -w '%{http_code} %{content_type}\n' "$HOST/c/$ID.svg"
+   curl -s -o /dev/null -w '%{http_code} %{content_type}\n' "$HOST/c/$ID/card.png"   # 200 image/png, 1200x628
+   curl -s "$HOST/s/$ID" | head -n 20   # twitter:card and og:image
 
    # Limits: a PNG past 4,000,000 pixels is refused with a small PNG that says why
    curl -s -o /dev/null -w '%{http_code} %{content_type}\n' -G "$HOST/render?format=png&w=2400&h=2400" --data-urlencode "spec=$SPEC"   # 422 image/png

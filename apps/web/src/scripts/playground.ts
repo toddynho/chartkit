@@ -10,6 +10,7 @@ import {
 } from "@chartkitdev/core/options";
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
+import { chartkitCloudUrl } from "../data/cloud-url";
 import { previewSize, readExplicitSize, type PreviewPreset } from "../data/preview-size";
 import { readPlaygroundHash } from "../data/teach/spec";
 import { ensurePlayHeading } from "./play-heading";
@@ -1403,22 +1404,26 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   async function share(): Promise<void> {
-    const payload = { example: state.slug, spec: state.good, size: state.size, mode: state.mode };
-    const hash = `#${encodeURIComponent(JSON.stringify(payload))}`;
-    history.replaceState(null, "", hash);
-    const url = `${location.origin}${location.pathname}${hash}`;
+    const button = root.querySelector<HTMLButtonElement>("[data-share]");
+    if (!button || button.disabled) return;
+    button.disabled = true;
     try {
-      await navigator.clipboard.writeText(url);
-      const button = root.querySelector("[data-share]");
-      if (button) {
-        button.textContent = "Copied";
-        window.setTimeout(() => {
-          button.textContent = "Share";
-        }, 1200);
-      }
+      const response = await fetch(`${chartkitCloudUrl()}/charts`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec: state.good }),
+      });
+      const body = (await response.json()) as { shareUrl?: unknown };
+      if (!response.ok || typeof body.shareUrl !== "string") throw new Error("share");
+      await navigator.clipboard.writeText(body.shareUrl);
+      button.textContent = "Copied";
     } catch {
-      /* The hash is still updated. */
+      button.textContent = "Share failed";
     }
+    window.setTimeout(() => {
+      button.textContent = "Share";
+      button.disabled = false;
+    }, 1200);
   }
 
   async function exportAs(kind: string): Promise<void> {
