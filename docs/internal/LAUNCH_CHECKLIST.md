@@ -139,7 +139,7 @@ Check: the `node` line prints `true <svg`. `npm audit signatures` reports verifi
 
 ## 7. Deploy chartkit.dev (Cloudflare Workers static assets)
 
-The site is static. `apps/web/wrangler.jsonc` uploads `apps/web/dist` as a Worker named `chartkit-web` with no script. `apps/web/public/_headers` carries the CORS and cache headers for the agent files. The config has no `chartkit.dev` route on purpose: deploying only updates the `workers.dev` URL, and the live domain moves in 7c.
+The site is static. `apps/web/wrangler.jsonc` uploads `apps/web/dist` as a Worker named `chartkit-web` with no script. `apps/web/public/_headers` carries the CORS and cache headers for the agent files, and `apps/web/public/_redirects` carries the 301s for the old v0 URLs. The config has no `chartkit.dev` route on purpose: deploying only updates the `workers.dev` URL, and the live domain moves in 7c.
 
 ### 7a. Deploy to workers.dev
 
@@ -175,7 +175,11 @@ curl -s $CK_PREVIEW/llms.txt | cmp - catalog/public/llms.txt && curl -s $CK_PREV
 curl -sI $CK_PREVIEW/schema/v1.json | grep -i access-control-allow-origin
 ```
 
-Check: every line of the first starts with `200`, the second prints `llms ok`, and the third prints `access-control-allow-origin: *`. Open the URL in a browser and click through the home page, `/docs` and `/playground`.
+```bash
+for u in /getting-started /components/spike-chart /components/spike-chart/; do echo "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' $CK_PREVIEW$u) $u"; done
+```
+
+Check: every line of the first starts with `200`, the second prints `llms ok`, the third prints `access-control-allow-origin: *`, and every line of the fourth starts with `301` and names the new URL. Open the URL in a browser and click through the home page, `/docs` and `/playground`.
 
 ### 7c. Move chartkit.dev to the Worker
 
@@ -214,10 +218,10 @@ for u in / /docs /docs/migrate /benchmarks /when-to-use /schema/v1.json /llms-fu
 Every line starts with `200`.
 
 ```bash
-curl -s https://chartkit.dev/getting-started | grep -o 'url=/docs'
+for u in /getting-started /components/spike-chart /components/spike-chart/; do echo "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' https://chartkit.dev$u) $u"; done
 ```
 
-Prints `url=/docs`, so the v0 path redirects.
+Every line starts with `301` and then names the new URL (`/docs`, then `/docs/charts/spike` twice), so the v0 paths redirect. A `200` means Cloudflare served Astro's refresh stub instead of the rule in `_redirects`.
 
 `/llms.txt` was served with `max-age=86400`, so a client that fetched v0 within the last day can keep it until it expires. Nothing on our side shortens that. The v1 file is served with `max-age=3600`.
 
