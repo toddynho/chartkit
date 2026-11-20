@@ -12,6 +12,8 @@ export const GET: APIRoute = async () => {
       .replace(/\/index\.astro$/, "")
       .replace(/\.astro$/, "");
     if (route.endsWith("/404")) continue;
+    // /examples is a noindex page that forwards to /playground.
+    if (route === "/examples") continue;
     paths.add(route === "" ? "/" : route);
   }
   for (const board of boards) paths.add(`/dashboards/${board.data.id}`);
