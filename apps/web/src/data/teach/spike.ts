@@ -12,7 +12,7 @@ import { editMark, isRecord } from "./spec.ts";
 import { applyTooltip, tooltipMode } from "./tooltip.ts";
 import type { TeachAction, TeachExample, TeachModule, TeachRangeControl, TeachState } from "./types.ts";
 
-export const spikePageTitle = "Spike";
+export const spikePageTitle = "Spike chart";
 
 export const spikePageDescription =
   "How to build a ChartKit spike: thin stems for bursts over time, when to use it instead of a bar or a sparkline, the data shape, a spec that renders, and the baseline the stems rise from.";
