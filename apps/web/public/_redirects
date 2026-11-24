@@ -1,0 +1,47 @@
+# Cloudflare reads this file and does not serve it. Astro copies it into dist.
+# Old v0 URLs that search engines still hold. Astro's static build only writes a 200 refresh stub
+# for the redirects in astro.config.mjs, so these are restated here as real 301s.
+# Destinations must match astro.config.mjs. Change both together.
+# Cloudflare matches a static rule on the exact path, so each URL is listed with and without the slash.
+# Redirects whose destination has a fragment or a query string stay as Astro stubs.
+
+/getting-started /docs 301
+/getting-started/ /docs 301
+/about /agents 301
+/about/ /agents 301
+/demo /playground 301
+/demo/ /playground 301
+
+/components /docs 301
+/components/ /docs 301
+/components/line-chart /docs/charts/line 301
+/components/line-chart/ /docs/charts/line 301
+/components/bar-chart /docs/charts/bar 301
+/components/bar-chart/ /docs/charts/bar 301
+/components/donut-chart /docs/charts/donut 301
+/components/donut-chart/ /docs/charts/donut 301
+/components/stacked-area /docs/charts/stacked-area 301
+/components/stacked-area/ /docs/charts/stacked-area 301
+/components/scatter-chart /docs/charts/scatter 301
+/components/scatter-chart/ /docs/charts/scatter 301
+/components/combo-chart /docs/charts/combo 301
+/components/combo-chart/ /docs/charts/combo 301
+/components/heatmap /docs/charts/heatmap 301
+/components/heatmap/ /docs/charts/heatmap 301
+/components/gauge-chart /docs/charts/gauge 301
+/components/gauge-chart/ /docs/charts/gauge 301
+/components/kpi-card /docs/charts/kpi 301
+/components/kpi-card/ /docs/charts/kpi 301
+/components/sparkline /docs/charts/sparkline 301
+/components/sparkline/ /docs/charts/sparkline 301
+/components/mini-area /docs/charts/mini-area 301
+/components/mini-area/ /docs/charts/mini-area 301
+/components/progress-ring /docs/charts/progress-ring 301
+/components/progress-ring/ /docs/charts/progress-ring 301
+/components/spike-chart /docs/charts/spike 301
+/components/spike-chart/ /docs/charts/spike 301
+/components/candlestick-chart /docs/charts/candlestick 301
+/components/candlestick-chart/ /docs/charts/candlestick 301
+
+/utilities/responsive-chart /docs/spec 301
+/utilities/responsive-chart/ /docs/spec 301
