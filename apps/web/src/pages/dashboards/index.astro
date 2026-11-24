@@ -23,7 +23,7 @@ const description =
         boards.map((board) => (
           <a class="dash-card" href={`/dashboards/${board.data.id}`}>
             <div class="dash-cover" style={`--cover:${board.data.theme.bg}`}>
-              <img src={`/dashboards/${board.data.id}.png`} alt="" width="1280" height="840" />
+              <img src={`/dashboards/${board.data.id}.png`} alt={`${board.data.name}, an example dashboard built with ChartKit`} width="1280" height="840" />
             </div>
             <div class="dash-card__body">
               <div class="dash-card__row">
