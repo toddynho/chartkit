@@ -1,6 +1,9 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { chartPageTypes, docArticlePages } from "../data/docs-catalog";
 import { SITE } from "../data/site";
+import { themePages } from "../data/theme-pages";
+import { loadCompareIndex } from "../lib/batch3";
 
 export const GET: APIRoute = async () => {
   const boards = await getCollection("dashboards");
@@ -17,6 +20,11 @@ export const GET: APIRoute = async () => {
     paths.add(route === "" ? "/" : route);
   }
   for (const board of boards) paths.add(`/dashboards/${board.data.id}`);
+  // Generated routes, from the lists their getStaticPaths use. /examples/* and /showcase/* only redirect.
+  for (const { library } of loadCompareIndex().rivals) paths.add(`/compare/${library.id}`);
+  for (const { slug } of docArticlePages()) paths.add(`/docs/${slug}`);
+  for (const type of chartPageTypes) paths.add(`/docs/charts/${type}`);
+  for (const page of themePages) paths.add(`/docs/themes/${page.slug}`);
 
   const urls = [...paths].sort().map((path) => {
     const loc = new URL(path, SITE.url).href;

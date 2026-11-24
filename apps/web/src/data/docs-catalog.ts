@@ -195,6 +195,20 @@ export function articleHref(article: DocArticle): string {
   return article.slug ? `/docs/${article.slug}` : "/docs";
 }
 
+/** Articles `/docs/[...slug]` builds, with the slug each is served at. The sitemap lists the same set. */
+export function docArticlePages(): { article: DocArticle; slug: string }[] {
+  const retired = new Set(["themes", "themes-tokens"]);
+  const canonicalSlug: Record<string, string> = {
+    "spec-anatomy": "concepts/spec",
+  };
+  const frameworkPages = new Set(["react", "vue", "svelte", "astro", "vanilla"]);
+  return docArticles.flatMap((article) => {
+    if (!article.slug || article.slug === "mcp" || retired.has(article.slug) || frameworkPages.has(article.slug)) return [];
+    const slug = canonicalSlug[article.slug] ?? article.slug;
+    return [{ article, slug }];
+  });
+}
+
 /** Nav highlight for a URL, including legacy aliases such as `/docs/agents`. */
 export function activeDocsHref(path: string): string {
   if (path.startsWith("/docs/charts/")) return path;
