@@ -1,20 +1,11 @@
 ---
 import DocArticle from "../../components/DocArticle.astro";
 import ResponseRail from "../../components/ResponseRail.astro";
-import { articleChips, articleHref, articleSpec, docArticles, type DocArticle as Article } from "../../data/docs-catalog";
+import { articleChips, articleHref, articleSpec, docArticlePages, type DocArticle as Article } from "../../data/docs-catalog";
 import Docs from "../../layouts/Docs.astro";
 
 export function getStaticPaths() {
-  const retired = new Set(["themes", "themes-tokens"]);
-  const canonicalSlug: Record<string, string> = {
-    "spec-anatomy": "concepts/spec",
-  };
-  const frameworkPages = new Set(["react", "vue", "svelte", "astro", "vanilla"]);
-  return docArticles.flatMap((article) => {
-    if (!article.slug || article.slug === "mcp" || retired.has(article.slug) || frameworkPages.has(article.slug)) return [];
-    const slug = canonicalSlug[article.slug] ?? article.slug;
-    return [{ params: { slug }, props: { article, here: `/docs/${slug}` } }];
-  });
+  return docArticlePages().map(({ article, slug }) => ({ params: { slug }, props: { article, here: `/docs/${slug}` } }));
 }
 
 interface Props {
