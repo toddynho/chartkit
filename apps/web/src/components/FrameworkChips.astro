@@ -19,7 +19,7 @@ const marks: Record<string, string> = {
     stacks.map((stack) => (
       <button type="button" class="stack-chip" data-stack-chip={stack.id} aria-pressed="false" title={stack.label}>
         <span class="stack-chip__icon" aria-hidden="true">
-          <img src={marks[stack.id]} alt="" width="16" height="16" />
+          <img src={marks[stack.id]} alt="" aria-hidden="true" width="16" height="16" />
         </span>
         <span class="stack-chip__label">{stack.chip}</span>
       </button>
