@@ -1,6 +1,6 @@
 # Chart render sweep
 
-Seed `20261105`. Mode `full`. 34731 cases, 27319 rendered, 43.6s.
+Seed `20261105`. Mode `full`. 34731 cases, 27319 rendered, 38.9s.
 
 ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-set sizes are left as the example wrote them, except when the sweep itself sets `size`.
 
@@ -12,7 +12,7 @@ Compared 27317. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHas
 
 ## Timing
 
-Render p50 0.1 ms, p95 1.3 ms, max 1184.6 ms.
+Render p50 0.1 ms, p95 1.1 ms, max 1063.7 ms.
 
 ## Findings by check
 
