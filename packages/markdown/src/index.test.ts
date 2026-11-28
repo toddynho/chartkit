@@ -152,4 +152,9 @@ describe("generated alt text on converted Mermaid charts", () => {
       "Stock: Apples is the largest block at 30.",
     );
   });
+  it("counts what a gantt, timeline or journey holds", () => {
+    expect(painted("gantt\n title Launch\n dateFormat YYYY-MM-DD\n section Build\n Core :a1, 2026-03-02, 3d\n Docs :after a1, 2d").label).toBe("Launch: gantt chart of 2 items.");
+    expect(painted("timeline\n 2002 : LinkedIn\n 2004 : Facebook : Google").label).toBe("Timeline of 3 events.");
+    expect(painted("journey\n title Day\n section Work\n Make tea: 5: Me").label).toBe("Day: journey of 1 step.");
+  });
 });

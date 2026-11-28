@@ -37,7 +37,7 @@ pie showData
     "y": "value"
   },
   "a11y": {
-    "alt": "Kiln hours"
+    "alt": "Kiln hours: Glaze is the largest slice at 27."
   },
   "title": "Kiln hours",
   "legend": {
@@ -111,7 +111,7 @@ xychart-beta
     ]
   },
   "a11y": {
-    "alt": "Thrown and fired"
+    "alt": "Thrown and fired: Thrown peaks at Thu (14); Fired rises from 6 to 13."
   },
   "title": "Thrown and fired",
   "axes": {
@@ -261,7 +261,7 @@ radar-beta
     "series": "series"
   },
   "a11y": {
-    "alt": "A potter week"
+    "alt": "A potter week: Bo is highest on Glaze."
   },
   "title": "A potter week",
   "theme": "soft",
@@ -379,7 +379,7 @@ venn-beta
     }
   ],
   "a11y": {
-    "alt": "Wheel, glaze, kiln"
+    "alt": "Wheel, glaze, kiln: Wheel is a set in the diagram."
   },
   "title": "Wheel, glaze, kiln",
   "theme": "soft",

@@ -46,7 +46,7 @@ rehype().use(rehypeParse).use(rehypeChartkit);`;
     <li><code>venn-beta</code> <code>set</code> and <code>union</code> lines. Two sets are area-proportional. Three sets are approximate. Text and styles are not drawn.</li>
   </ul>
   <p>
-    A frontmatter title, <code>accTitle</code>, and <code>accDescr</code> are read. <code>accDescr</code> or the title becomes <code>a11y.alt</code>. If neither is present, ChartKit writes one factual sentence from the data. Unknown syntax returns a <code>CK8004</code> warning. Flowcharts and other diagrams return <code>CK8003</code> and no spec. <code>gantt</code>, <code>timeline</code>, <code>quadrantChart</code>, <code>venn-beta</code>, and <code>journey</code> load from <code>@chartkitdev/core/mermaid/phase4</code>. <code>fromMermaidAsync</code> loads that chunk, and Node can import <code>fromMermaid</code> from the phase-4 entry directly.
+    A frontmatter title, <code>accTitle</code>, and <code>accDescr</code> are read. <code>accDescr</code> becomes <code>a11y.alt</code>. Without it, ChartKit writes one factual sentence from the data, led by <code>accTitle</code> or the title. Unknown syntax returns a <code>CK8004</code> warning. Flowcharts and other diagrams return <code>CK8003</code> and no spec. <code>gantt</code>, <code>timeline</code>, <code>quadrantChart</code>, <code>venn-beta</code>, and <code>journey</code> load from <code>@chartkitdev/core/mermaid/phase4</code>. <code>fromMermaidAsync</code> loads that chunk, and Node can import <code>fromMermaid</code> from the phase-4 entry directly.
   </p>
   <img src="/mermaid-sheet.png" alt="Mermaid source beside the ChartKit chart for each supported kind, in light mode." />
   <h2>Markdown</h2>
