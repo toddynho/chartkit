@@ -1,0 +1,120 @@
+---
+import "../../styles/surfaces.css";
+import { fromMermaid } from "@chartkitdev/core/mermaid";
+import ChartMount from "../../components/ChartMount.astro";
+import DocsPage from "../../components/DocsPage.astro";
+import Prose from "../../components/Prose.astro";
+import {
+  astroConfig,
+  astroInstall,
+  fenceSpec,
+  markdownInstall,
+  markdownPost,
+  mermaidFence,
+  mermaidKinds,
+  mermaidOff,
+  mermaidPieSource,
+  mermaidUnsupported,
+  rehypeScript,
+  remarkScript,
+  renderFenceScript,
+} from "../../data/docs-examples";
+import { drawDocSpec } from "../../lib/doc-chart";
+
+const description = "Render a chartkit code fence in Markdown to SVG with the remark or rehype plugin from @chartkitdev/markdown.";
+const lede =
+  "A `chartkit` fence holds a v1 spec as JSON. `@chartkitdev/markdown` replaces the fence with the SVG that `@chartkitdev/core` draws. The output is static SVG with no client script.";
+
+const bar = drawDocSpec(fenceSpec);
+const converted = fromMermaid(mermaidPieSource);
+if (!converted.spec) throw new Error("The Mermaid pie on /docs/markdown did not convert.");
+const pie = drawDocSpec(converted.spec as Record<string, unknown>);
+const unsupported = mermaidUnsupported.map((item) => item.name);
+---
+
+<DocsPage title="Markdown fences" description={description} href="/docs/markdown" lede={lede}>
+  <h2>Install</h2>
+  <p>
+    The package is the plugin. <code>unified</code> and the three remark and rehype packages are the Markdown pipeline it plugs into. Skip them when your site generator already has one. Node 20 or newer.
+  </p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{markdownInstall}</code></pre></figure>
+
+  <h2>Write a fence</h2>
+  <p>
+    Save this as <code>post.md</code>. The fence language is <code>chartkit</code> and the body is one spec. <code>version</code>, <code>type</code>, <code>data</code>, <code>encoding</code>, and <code>a11y.alt</code> are the same keys every ChartKit chart uses.
+  </p>
+  <figure class="code"><figcaption>markdown</figcaption><pre><code>{markdownPost}</code></pre></figure>
+  <p>The fence becomes this chart:</p>
+  <ChartMount spec={bar.spec} svg={bar.svg} alt={bar.alt} />
+
+  <h2>remark</h2>
+  <p>
+    <code>remarkChartkit</code> runs on the Markdown tree. It replaces each <code>chartkit</code> code node with an HTML node that holds the SVG. Save this as <code>{remarkScript.file}</code> beside <code>post.md</code> and run <code>node {remarkScript.file}</code>. It writes <code>post.html</code> with the heading and an inline <code>&lt;svg&gt;</code>.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{remarkScript.code}</code></pre></figure>
+  <p>
+    Both <code>allowDangerousHtml</code> flags are required. Without the one on <code>remark-rehype</code>, the HTML node is dropped and the chart is missing from the page. Without the one on <code>rehype-stringify</code>, the SVG is printed as escaped text. The name is remark's word for raw HTML in general. The SVG here comes from the renderer, which escapes every label, and a fence whose output contains a script is left as source.
+  </p>
+
+  <h2>rehype</h2>
+  <p>
+    <code>rehypeChartkit</code> runs later, on the HTML tree. It replaces a <code>&lt;pre&gt;</code> whose <code>&lt;code&gt;</code> has the class <code>language-chartkit</code> with a raw SVG node. Use it when the Markdown is already HTML by the time your plugins run. <code>remark-rehype</code> needs no option here. <code>rehype-stringify</code> still needs <code>allowDangerousHtml</code>.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{rehypeScript.code}</code></pre></figure>
+  <p>Use one plugin or the other, not both.</p>
+
+  <h2>Your own pipeline</h2>
+  <p>
+    <code>renderFence(source, lang)</code> is the function both plugins call. It returns the SVG string, or <code>null</code> when the fence is not a chart and should stay as it is. Call it from markdown-it, marked, or any renderer that hands you a fence's text and language.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{renderFenceScript.code}</code></pre></figure>
+
+  <h2>Astro</h2>
+  <p>
+    Astro 7 runs remark plugins on the unified processor from <code>@astrojs/markdown-remark</code>, which it no longer installs by default. Install it with the plugin.
+  </p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{astroInstall}</code></pre></figure>
+  <p>
+    Add <code>remarkChartkit</code> to <code>astro.config.mjs</code>. Astro keeps the HTML node itself, so there is no <code>allowDangerousHtml</code> to set. Every <code>.md</code> page and content entry then draws its <code>chartkit</code> fences at build time.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{astroConfig}</code></pre></figure>
+  <p>
+    Use the remark plugin in Astro. By the time <code>rehypePlugins</code> run, Astro's syntax highlighter has rewritten the code block, and <code>rehypeChartkit</code> no longer finds the fence.
+  </p>
+
+  <h2>Mermaid fences</h2>
+  <p>
+    The same plugins convert a <code>mermaid</code> fence when the diagram is a chart. No Mermaid runtime is loaded.
+  </p>
+  <figure class="code"><figcaption>markdown</figcaption><pre><code>{mermaidFence}</code></pre></figure>
+  <ChartMount spec={pie.spec} svg={pie.svg} alt={pie.alt} />
+  <p>These Mermaid chart kinds are converted:</p>
+  <ul>
+    {
+      mermaidKinds.map((kind) => (
+        <li>
+          <Prose text={kind.note} />
+        </li>
+      ))
+    }
+  </ul>
+  <p>
+    Flowcharts are not supported. Neither is any other Mermaid diagram that is not a chart, such as {unsupported.slice(1).map((name, index) => (<>{index > 0 ? ", " : ""}<code>{name}</code></>))}. Those fences are left exactly as they were: a <code>mermaid</code> code block. Nothing is drawn and nothing is removed, so Mermaid's own script can still render them in the browser. To leave every <code>mermaid</code> fence alone, pass <code>mermaid: false</code>.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{mermaidOff}</code></pre></figure>
+  <p>
+    <a href="/docs/mermaid">Mermaid</a> lists the syntax each chart kind accepts, the browser scripts, and the limits.
+  </p>
+
+  <h2>When a fence does not draw</h2>
+  <ul>
+    <li>A <code>chartkit</code> fence that is not valid JSON stays as a code block.</li>
+    <li>A spec with an unknown <code>type</code> draws a small error card that names the code, such as <code>CK1010</code>.</li>
+    <li>The plugins draw the spec as written and do not report <code>validate()</code> errors. Check a spec in the <a href="/playground">playground</a>, or with <a href="/docs/validate">validate</a>, before you publish it.</li>
+    <li>The SVG is static. For tooltips and other pointer behavior, mount the fence in the browser with <code>autoRender</code>, described on <a href="/docs/mermaid">Mermaid</a>.</li>
+  </ul>
+</DocsPage>
+
+<script>
+  import "../../scripts/mount-charts.ts";
+</script>

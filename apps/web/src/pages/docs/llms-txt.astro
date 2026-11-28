@@ -1,0 +1,58 @@
+---
+import DocsPage from "../../components/DocsPage.astro";
+import { llmsClaudeMd, llmsCursorRules, llmsFetch, llmsFiles, llmsSystemPrompt, llmsVendored } from "../../data/docs-examples";
+import { mcpConfig } from "../../data/mcp-config";
+
+const description = "llms.txt, llms-full.txt, and llms.json are the ChartKit reference files for agents: what each holds, their URLs, and how to point an agent at them.";
+const lede =
+  "Three plain files tell a model how to write a ChartKit spec. They are served from this site, and you point an agent at them from its instructions.";
+---
+
+<DocsPage title="llms.txt" description={description} href="/docs/llms-txt" lede={lede}>
+  <h2>The files</h2>
+  <ul>
+    {
+      llmsFiles.map((file) => (
+        <li>
+          <a href={file.path}>{file.url}</a>. {file.what}
+        </li>
+      ))
+    }
+  </ul>
+  <p>
+    Start with <code>llms.txt</code>. Give an agent <code>llms-full.txt</code> when it needs a chart type or an option the short file does not show. The JSON Schema for the spec is at <a href="/schema/v1.json">https://chartkit.dev/schema/v1.json</a>.
+  </p>
+
+  <h2>System prompt</h2>
+  <p>
+    For an agent that can fetch a URL, name the file and the loop: write a spec, validate it, repair it, render it. Paste this into the system prompt.
+  </p>
+  <figure class="code"><figcaption>text</figcaption><pre><code>{llmsSystemPrompt}</code></pre></figure>
+  <p>
+    For a model with no network access, paste the contents of <code>llms.txt</code> into the prompt in place of the first line. It is under 6,400 bytes.
+  </p>
+
+  <h2>CLAUDE.md</h2>
+  <p>
+    Claude Code reads <code>CLAUDE.md</code> from the project root at the start of each session. Add this section.
+  </p>
+  <figure class="code"><figcaption>markdown</figcaption><pre><code>{llmsClaudeMd}</code></pre></figure>
+
+  <h2>.cursorrules</h2>
+  <p>Cursor reads <code>.cursorrules</code> from the project root. Add these lines.</p>
+  <figure class="code"><figcaption>text</figcaption><pre><code>{llmsCursorRules}</code></pre></figure>
+
+  <h2>Keep a copy in the repo</h2>
+  <p>
+    An agent that cannot reach the network, or a team that wants the reference pinned to the version it installed, can save the file and point at the path.
+  </p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{llmsFetch}</code></pre></figure>
+  <figure class="code"><figcaption>text</figcaption><pre><code>{llmsVendored}</code></pre></figure>
+
+  <h2>Or use the MCP server</h2>
+  <p>
+    The files tell an agent what to write. The <a href="/docs/mcp">MCP server</a> also gives it tools: <code>validate</code>, <code>repair</code>, and <code>render</code> run on your machine, and <code>llms.txt</code> is the resource <code>chartkit://llms.txt</code>. Use it when the agent's host supports MCP, so the agent checks its own spec before it answers.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{mcpConfig}</code></pre></figure>
+  <p><a href="/docs/mcp">MCP server</a> has the setup for Cursor, Claude Desktop, and Claude Code.</p>
+</DocsPage>

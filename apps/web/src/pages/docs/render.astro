@@ -1,0 +1,99 @@
+---
+import "../../styles/surfaces.css";
+import ChartMount from "../../components/ChartMount.astro";
+import DocsPage from "../../components/DocsPage.astro";
+import {
+  errorCheck,
+  extraScript,
+  featuresImport,
+  oneChartScript,
+  renderInstall,
+  renderRun,
+  renderScript,
+  renderSpec,
+  repairOutput,
+  repairScript,
+  ssrInstall,
+  ssrScript,
+} from "../../data/docs-examples";
+import { drawDocSpec } from "../../lib/doc-chart";
+
+const description = "Call render(spec) in Node to get an SVG string: the all and extra entries, a one-chart renderer, adapter SSR entries, and validate and repair before render.";
+const lede =
+  "`render(spec)` takes a spec and returns an SVG string. It runs in Node with no browser and no DOM. It does not validate and it does not throw: a spec it cannot draw comes back as a small error SVG.";
+
+const chart = drawDocSpec(renderSpec);
+---
+
+<DocsPage title="Render" description={description} href="/docs/render" lede={lede}>
+  <h2>Install</h2>
+  <p>Core has no runtime dependencies. Node 20 or newer.</p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{renderInstall}</code></pre></figure>
+
+  <h2>Render to a file</h2>
+  <p>
+    Save this as <code>{renderScript.file}</code>. The <code>.mjs</code> extension lets Node run the <code>import</code> lines without a <code>package.json</code> setting.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{renderScript.code}</code></pre></figure>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{renderRun}</code></pre></figure>
+  <p>
+    <code>chart.svg</code> is a complete SVG document. Open it in a browser, or write the string into an HTML response. This is the chart:
+  </p>
+  <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} />
+
+  <h2>Which entry to import</h2>
+  <ul>
+    <li>
+      <code>@chartkitdev/core/all</code> draws line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, and candlestick.
+    </li>
+    <li>
+      <code>@chartkitdev/core/extra</code> draws those and the rest of the library: histogram, boxplot, radar, funnel, treemap, sankey, the planning charts, and the others on the <a href="/gallery">gallery</a>. It is a larger import.
+    </li>
+    <li>
+      Choropleth and point maps are in <code>@chartkitdev/geo</code>, which has its own <code>render</code>.
+    </li>
+  </ul>
+  <p>The call is the same. Only the import changes.</p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{extraScript.code}</code></pre></figure>
+
+  <h2>One chart type</h2>
+  <p>
+    <code>createRenderer</code> builds a <code>render</code> function from the chart types you pass. A page that only draws lines can import one chart and leave the rest out of its bundle.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{oneChartScript.code}</code></pre></figure>
+  <p>
+    This renderer draws <code>line</code> and nothing else. Any other <code>type</code> returns the error SVG with <code>CK1010</code>. Annotations, the <code>refined</code>, <code>editorial</code>, and <code>midnight</code> themes, and the headline row are also left out until you import the features module. <code>@chartkitdev/core/all</code> already includes it.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{featuresImport}</code></pre></figure>
+
+  <h2>From an adapter</h2>
+  <p>
+    Each adapter has an <code>/ssr</code> entry with <code>renderToString</code>. It loads every chart type, so the server does not need to know which one a spec uses. With the vanilla adapter it returns the SVG string.
+  </p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{ssrInstall}</code></pre></figure>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{ssrScript.code}</code></pre></figure>
+  <p>
+    <code>@chartkitdev/react/ssr</code> has the same call and also returns the SVG string. <code>@chartkitdev/vue/ssr</code> returns a promise, and its string is the SVG inside the component's <code>&lt;div&gt;</code>, so <code>await</code> it.
+  </p>
+
+  <h2>Validate and repair first</h2>
+  <p>
+    <code>render()</code> draws what it is given. Check a spec that a person or a model wrote before you draw it. <code>validate()</code> returns every problem in one pass. <code>repair()</code> applies the safe fixes and returns a new spec. It does not change the object you pass in.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{repairScript.code}</code></pre></figure>
+  <p>The draft has no <code>a11y.alt</code> and uses a curve name that does not exist. The script prints both errors, then the two patches <code>repair()</code> applied, and writes <code>checked.svg</code>:</p>
+  <figure class="code"><figcaption>text</figcaption><pre><code>{repairOutput}</code></pre></figure>
+  <p>
+    <code>repair()</code> does not invent data. When <code>encoding.y</code> names a field that no row has, <code>fixed.ok</code> is <code>false</code> and the error stays in <code>fixed.errors</code>. Send those errors back to whoever wrote the spec. <a href="/docs/validate">Validate</a> and <a href="/docs/repair">Repair</a> cover the result shapes, and <a href="/docs/errors">Errors</a> lists the codes.
+  </p>
+
+  <h2>When render cannot draw</h2>
+  <p>
+    The error SVG has the class <code>ck-chart-error</code>, and its <code>aria-label</code> holds the code and the message. A script that must fail loudly can check for the class.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{errorCheck}</code></pre></figure>
+</DocsPage>
+
+<script>
+  import "../../scripts/mount-charts.ts";
+</script>

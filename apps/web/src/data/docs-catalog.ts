@@ -195,6 +195,9 @@ export function articleHref(article: DocArticle): string {
   return article.slug ? `/docs/${article.slug}` : "/docs";
 }
 
+/** Slugs with their own file in `pages/docs`. `[...slug].astro` must not build a second page at the same URL. */
+const dedicatedPages = new Set(["mcp", "markdown", "render", "llms-txt", "scales"]);
+
 /** Articles `/docs/[...slug]` builds, with the slug each is served at. The sitemap lists the same set. */
 export function docArticlePages(): { article: DocArticle; slug: string }[] {
   const retired = new Set(["themes", "themes-tokens"]);
@@ -203,7 +206,7 @@ export function docArticlePages(): { article: DocArticle; slug: string }[] {
   };
   const frameworkPages = new Set(["react", "vue", "svelte", "astro", "vanilla"]);
   return docArticles.flatMap((article) => {
-    if (!article.slug || article.slug === "mcp" || retired.has(article.slug) || frameworkPages.has(article.slug)) return [];
+    if (!article.slug || dedicatedPages.has(article.slug) || retired.has(article.slug) || frameworkPages.has(article.slug)) return [];
     const slug = canonicalSlug[article.slug] ?? article.slug;
     return [{ article, slug }];
   });
@@ -350,8 +353,14 @@ export const galleryChartCount = registryChartTypes.length;
 export const geoRegistryTypes = registryChartTypes.filter((type) => type === "choropleth" || type === "map-points");
 export const coreRegistryCount = registryChartTypes.length - geoRegistryTypes.length;
 
-/** Docs chart pages: registry types, plus the filled-line note at `/docs/charts/area`. */
+/** Docs chart pages: registry types, plus the filled-line note at `/docs/charts/area`. The sitemap and `/docs/charts/[type]` both read this list. */
 export const chartPageTypes = [...new Set([...chartTypes.map((chart) => chart.type), ...chartDocs.map((chart) => chart.type), ...registryChartTypes])];
+
+/**
+ * Chart pages that are not a chart type. `area` is not a `type` value: the page is a note
+ * for `type: "line"` with `mark.area`. It has a URL and no row in the sidebar, which lists types.
+ */
+export const chartNotePages = chartPageTypes.filter((type) => !registryChartTypes.includes(type));
 
 export type SidebarChartLink = { type: string; href: string; label: string };
 
@@ -373,18 +382,24 @@ function sidebarHref(type: string): string {
   return `/docs/charts/${type}`;
 }
 
-/** Chart types in the hero catalog, grouped the way the docs families read. */
+/** Chart pages that are chart types, in hero-catalog order, grouped the way the docs families read. */
+const sidebarTypes = new Set(chartPageTypes.filter((type) => !chartNotePages.includes(type)));
+
 export const sidebarChartGroups: { label: string; items: SidebarChartLink[] }[] = SIDEBAR_FAMILIES.flatMap((label) => {
   const items = heroTypes
-    .filter((chart) => sidebarFamily(chart.type) === label)
+    .filter((chart) => sidebarTypes.has(chart.type) && sidebarFamily(chart.type) === label)
     .map((chart) => ({ type: chart.type, href: sidebarHref(chart.type), label: sidebarLabel(chart.type, chart.label) }));
   return items.length ? [{ label, items }] : [];
 });
 
-export const sidebarChartCount = sidebarChartGroups.reduce((total, group) => total + group.items.length, 0);
+/** The number in "Show all N types": chart pages minus the note pages. */
+export const sidebarChartCount = chartPageTypes.length - chartNotePages.length;
 
-if (sidebarChartCount !== heroTypes.length) {
-  throw new Error(`Sidebar lists ${sidebarChartCount} chart types; the hero registry has ${heroTypes.length}.`);
+const sidebarListed = sidebarChartGroups.reduce((total, group) => total + group.items.length, 0);
+if (sidebarListed !== sidebarChartCount || sidebarChartCount !== galleryChartCount) {
+  throw new Error(
+    `Sidebar lists ${sidebarListed} chart types; ${sidebarChartCount} chart pages are chart types; the registry has ${galleryChartCount}.`,
+  );
 }
 
 /** Rows shown before the fade and the "Show all" control. */

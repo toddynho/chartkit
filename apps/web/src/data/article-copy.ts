@@ -59,12 +59,6 @@ export const articleSections: Record<string, DocSection[]> = {
       ],
     ),
   ],
-  markdown: [
-    section("Fence", [
-      "A `chartkit` fence is a v1 spec. The markdown package renders it with core. It does not invent a second chart language.",
-    ]),
-    section("Install", ["The package is `@chartkitdev/markdown`."], [], ["npm install @chartkitdev/markdown"]),
-  ],
   "spec-anatomy": [
     section("Required", [
       '`version` is `"1"`. `type` names the chart. `a11y.alt` is one sentence. `data` is an array of rows, or `{ "columns": { "field": [] } }` when the table is wide. It is not `{ "values": [] }`.',
@@ -90,12 +84,6 @@ export const articleSections: Record<string, DocSection[]> = {
     ]),
     section("Second axis", [
       'Put a channel on the right axis with `axis: "y2"`. The title is `axes.y2.title`. Combo does not use `encoding.bar`.',
-    ]),
-  ],
-  scales: [
-    section("Types", ["Field types are quantitative, temporal, ordinal, or nominal."]),
-    section("Domain", [
-      "`encoding.y.scale.domain` is `[min, max]`. Either end may be `null` to stay automatic, as in `[0, null]`. `scale.type` `log` is for a positive domain.",
     ]),
   ],
   axes: [
@@ -152,15 +140,6 @@ export const articleSections: Record<string, DocSection[]> = {
       "`repair()` returns the next spec and the JSON Patch it applied, then revalidates. It does not invent rows. A missing or unknown `type` is reported first.",
     ]),
   ],
-  render: [
-    section("Entries", [
-      "`render()` from `@chartkitdev/core/all` draws the core charts. `@chartkitdev/core/extra` draws the rest of the library, including the planning charts. Neither call validates, and neither throws on an unknown type: the SVG explains the error.",
-    ]),
-    section("This site", [
-      "The response rail validates first. When there are errors it shows the CK codes and skips `render()`. Warnings still draw the chart.",
-    ]),
-  ],
-  "llms-txt": [],
   mcp: [
     section("Install", [
       "`npx -y @chartkitdev/mcp` starts the server. It speaks stdio and calls `validate`, `repair`, and `render` in-process. `render_chart` is the tool that calls Cloud.",
