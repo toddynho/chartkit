@@ -1,0 +1,131 @@
+---
+import "../../styles/surfaces.css";
+import ChartMount from "../../components/ChartMount.astro";
+import DocsPage from "../../components/DocsPage.astro";
+import { fieldTypeSnippet, scaleSpecs, specText } from "../../data/docs-examples";
+import { drawDocSpec } from "../../lib/doc-chart";
+
+const description = "Scale types in a ChartKit spec: how a field's type is chosen, log and time scales, domain, nice, zero, and reverse, with a spec for each.";
+const lede =
+  "A scale maps a value to a position. It is chosen from the data, so most specs never set one. To override it, set `scale` on the encoding channel, not on `axes`.";
+
+const charts = Object.fromEntries(Object.entries(scaleSpecs).map(([id, spec]) => [id, drawDocSpec(spec)])) as Record<
+  keyof typeof scaleSpecs,
+  ReturnType<typeof drawDocSpec>
+>;
+---
+
+<DocsPage title="Scales" description={description} href="/docs/scales" lede={lede}>
+  <p>
+    Every spec on this page is complete. Paste one into the <a href="/playground">playground</a>, or pass it to <code>render()</code> as on <a href="/docs/render">Render</a>.
+  </p>
+
+  <h2>Where a scale goes</h2>
+  <p>
+    A channel is a field name, or an object with <code>field</code> and options. <code>scale</code> is one of those options. <code>"y": "users"</code> and <code>"y": {'{ "field": "users" }'}</code> are the same channel, and the second form has room for a scale.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{`"encoding": {
+  "x": "year",
+  "y": { "field": "users", "scale": { "type": "log" } }
+}`}</code></pre></figure>
+  <p>
+    <code>axes</code> is display only: titles, tick count, grid, and format. See <a href="/docs/axes">Axes</a>.
+  </p>
+
+  <h2>Scale types</h2>
+  <ul>
+    <li><code>linear</code>. Equal steps in the value are equal steps on the axis. The default for a number.</li>
+    <li><code>log</code>. Equal ratios are equal steps. For values that span several powers of ten. Every value must be above zero.</li>
+    <li><code>time</code>. Position by date and time, so a gap in the dates is a gap on the axis. The default for a date field.</li>
+    <li><code>band</code>. One equal slot per category, in row order. The default for text.</li>
+  </ul>
+  <p>
+    The schema also accepts <code>sqrt</code>, <code>symlog</code>, and <code>point</code>. In 0.5.0 a <code>sqrt</code> y axis draws the same as <code>linear</code>, so this page does not show it.
+  </p>
+
+  <h2>How a field's type is chosen</h2>
+  <p>
+    A field has one of four types: <code>quantitative</code> (a number), <code>temporal</code> (a date or time), <code>ordinal</code> (ordered categories), or <code>nominal</code> (names). The type picks the scale: quantitative is linear, temporal is time, and ordinal and nominal are band.
+  </p>
+  <p>You rarely write the type. ChartKit reads the values:</p>
+  <ul>
+    <li>A y field of numbers is quantitative.</li>
+    <li>
+      An x field is temporal when every value is a date: a string that starts with <code>YYYY-MM-DD</code>, such as <code>"2026-01-03"</code> or <code>"2026-01-03T09:30:00Z"</code>.
+    </li>
+    <li>Any other x field of strings is a category, drawn in the order of the rows.</li>
+  </ul>
+  <p>
+    The two charts below differ only in the x values. Dates are placed by time, so the eight weeks with no rows stay empty and the line crosses them. Release names are categories, so the four points are evenly spaced.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.time)}</code></pre></figure>
+  <ChartMount spec={charts.time.spec} svg={charts.time.svg} alt={charts.time.alt} />
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.category)}</code></pre></figure>
+  <ChartMount spec={charts.category.spec} svg={charts.category.svg} alt={charts.category.alt} />
+  <p>
+    To state the type yourself, add <code>type</code> to the channel. The four names above are the only values. <code>categorical</code> is not one of them: <code>validate()</code> reports <code>CK1007</code>, and <code>repair()</code> changes it to <code>nominal</code>.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{fieldTypeSnippet}</code></pre></figure>
+
+  <h2>Log scale</h2>
+  <p>
+    These users grow about tenfold a year. On the default linear axis the first three years sit on the baseline.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.linear)}</code></pre></figure>
+  <ChartMount spec={charts.linear.spec} svg={charts.linear.svg} alt={charts.linear.alt} />
+  <p>
+    Set <code>scale.type</code> to <code>log</code> on the y channel. The ticks become powers of ten and the line is nearly straight.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.log)}</code></pre></figure>
+  <ChartMount spec={charts.log.spec} svg={charts.log.svg} alt={charts.log.alt} />
+  <p>
+    A log scale has no zero. When a value is zero or negative, <code>validate()</code> reports <code>CK3001</code> and names the first row.
+  </p>
+
+  <h2>Time scale</h2>
+  <p>
+    An x field of dates gets a time scale with no extra keys, as in the deploys chart above. Write dates as ISO 8601 strings. A month name such as <code>"Jan"</code> or a label such as <code>"Q1"</code> is a category, not a date.
+  </p>
+
+  <h2 id="time-zones-and-tick-labels">Time zones and tick labels</h2>
+  {/* PLACEHOLDER (temporal-axes session): the time zone a time axis is read and labeled in, and how its tick labels are chosen automatically, go in this section. Keep the h2 and its id. */}
+  <p>
+    Time zones and the automatic tick labels of a time axis are not documented on this page yet. <a href="/docs/axes">Axes</a> covers <code>format</code> on an axis.
+  </p>
+
+  <h2>Domain</h2>
+  <p>
+    The domain is the range of values the axis covers. Left alone, a line chart fits it to the data, and a bar chart starts it at zero.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.auto)}</code></pre></figure>
+  <ChartMount spec={charts.auto.spec} svg={charts.auto.svg} alt={charts.auto.alt} />
+  <p>
+    <code>scale.domain</code> is <code>[min, max]</code>. Use <code>null</code> for an end that should stay automatic. <code>[0, null]</code> starts this axis at zero and leaves the top to the data.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.fromZero)}</code></pre></figure>
+  <ChartMount spec={charts.fromZero.spec} svg={charts.fromZero.svg} alt={charts.fromZero.alt} />
+  <p>Set both ends to pin the axis, for example to keep several charts on the same range.</p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.fixed)}</code></pre></figure>
+  <ChartMount spec={charts.fixed.spec} svg={charts.fixed.svg} alt={charts.fixed.alt} />
+  <p>
+    <code>scale.zero</code> is the short form for one case: <code>true</code> makes the axis include zero, and <code>false</code> on a bar chart lets it start above zero.
+  </p>
+
+  <h2>Nice</h2>
+  <p>
+    By default the ends of the domain are rounded outward to tidy tick values. The response times above run from 212 to 251, and the automatic axis runs from 210 to 260. Set <code>scale.nice</code> to <code>false</code> to end the axis at the data.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.exact)}</code></pre></figure>
+  <ChartMount spec={charts.exact.spec} svg={charts.exact.svg} alt={charts.exact.alt} />
+
+  <h2>Reverse</h2>
+  <p>
+    <code>scale.reverse</code> flips the direction. Use it when a smaller number is better, such as a rank.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{specText(scaleSpecs.reversed)}</code></pre></figure>
+  <ChartMount spec={charts.reversed.spec} svg={charts.reversed.svg} alt={charts.reversed.alt} />
+</DocsPage>
+
+<script>
+  import "../../scripts/mount-charts.ts";
+</script>
