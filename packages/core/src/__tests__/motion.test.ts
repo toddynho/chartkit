@@ -133,31 +133,118 @@ describe("motion", () => {
     ctl.destroy();
   });
 
-  it("lanes category labels that would otherwise pass through each other", () => {
+  it("fades re-ordered category labels in place instead of sliding them through each other", () => {
     const clock = framesOf();
     const spec = bars(regions);
     const host = hostOf(spec);
     const ctl = attach(host, spec, { render });
     const svg = host.querySelector("svg") as SVGSVGElement;
     const sorted = [...regions].sort((a, b) => b.output - a.output);
-    ctl.update(bars(sorted));
-    const labelY = () => Array.from(svg.querySelectorAll('text[data-ck-key^="x:"]'), (node) => Number(node.getAttribute("y")));
-    const start = labelY();
-    clock.at(0);
-    clock.at(160);
-    const mid = labelY();
-    expect(Math.max(...mid) - Math.min(...mid)).toBeGreaterThan(10);
-    expect(Math.max(...start) - Math.min(...start)).toBeLessThan(2);
-    clock.at(400);
-    const end = labelY();
-    expect(Math.max(...end) - Math.min(...end)).toBeLessThan(2);
     const done = settled(render(bars(sorted)));
+    const label = (root: ParentNode, name: string) => root.querySelector(`text[data-ck-key="x:${name}"]`) as SVGTextElement;
+    const startX = Number(label(svg, "Central").getAttribute("x"));
+    const endX = Number(label(done, "Central").getAttribute("x"));
+    expect(Math.abs(endX - startX)).toBeGreaterThan(20);
+    ctl.update(bars(sorted));
+    clock.at(0);
+    // The curve is slow at first: 100 of 320 ms is before its midpoint, 300 is after.
+    clock.at(100);
+    expect(Number(label(svg, "Central").getAttribute("x"))).toBe(startX);
+    expect(Number(label(svg, "Central").style.opacity)).toBeLessThan(1);
+    expect(Number(label(svg, "Central").style.opacity)).toBeGreaterThan(0);
+    clock.at(300);
+    expect(Number(label(svg, "Central").getAttribute("x"))).toBe(endX);
+    expect(Number(label(svg, "Central").style.opacity)).toBeLessThan(1);
+    clock.at(400);
+    expect(label(svg, "Central").style.opacity).toBe("");
     expect(svg.querySelector('[data-ck-key="b:output:Harbor"]')?.getAttribute("x")).toBe(
       done.querySelector('[data-ck-key="b:output:Harbor"]')?.getAttribute("x"),
     );
-    expect(svg.querySelector('[data-ck-key="x:Harbor"]')?.getAttribute("x")).toBe(
-      done.querySelector('[data-ck-key="x:Harbor"]')?.getAttribute("x"),
-    );
+    expect(label(svg, "Harbor").getAttribute("x")).toBe(label(done, "Harbor").getAttribute("x"));
+    ctl.destroy();
+  });
+
+  it("slides category labels that keep their order", () => {
+    const clock = framesOf();
+    const spec = bars(regions);
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg") as SVGSVGElement;
+    const fewer = bars(regions.slice(0, 4));
+    const done = settled(render(fewer));
+    const at = (root: ParentNode) => Number(root.querySelector('text[data-ck-key="x:West"]')?.getAttribute("x"));
+    const startX = at(svg);
+    ctl.update(fewer);
+    clock.at(0);
+    clock.at(200);
+    const mid = at(svg);
+    expect(Math.min(startX, at(done))).toBeLessThan(mid);
+    expect(mid).toBeLessThan(Math.max(startX, at(done)));
+    expect((svg.querySelector('text[data-ck-key="x:West"]') as SVGTextElement).style.opacity).toBe("");
+    ctl.destroy();
+  });
+
+  it("keys a value label to its bar for the tween, counts its number, and leaves no key behind", () => {
+    const clock = framesOf();
+    const labelled = (rows: typeof regions, format?: unknown) => bars(rows, { mark: { labels: true, ...(format ? { labelFormat: format } : {}) } });
+    const grown = regions.map((row) => (row.region === "Harbor" ? { ...row, output: 56 } : row));
+    const money = { style: "number", decimals: 1, prefix: "$" };
+    const spec = labelled(regions, money);
+    expect(render(spec)).not.toContain('data-ck-key="v:');
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg") as SVGSVGElement;
+    ctl.update(labelled(grown, money));
+    const label = svg.querySelector('text[data-ck-key="v:output:Harbor"]') as SVGTextElement;
+    expect(label.textContent).toBe("$50.0");
+    const bar = svg.querySelector('[data-ck-key="b:output:Harbor"]') as SVGRectElement;
+    clock.at(0);
+    clock.at(220);
+    const shown = Number(label.textContent?.slice(1));
+    expect(label.textContent).toMatch(/^\$5\d\.\d$/);
+    expect(shown).toBeGreaterThan(50);
+    expect(shown).toBeLessThan(56);
+    expect(Number(label.getAttribute("y"))).toBeCloseTo(Number(bar.getAttribute("y")) - 4, 1);
+    expect(svg.querySelector('text[data-ck-key="v:output:North"]')?.textContent).toBe("$42.0");
+    clock.at(400);
+    expect(svg.querySelector('[data-ck-key^="v:"]')).toBeNull();
+    expect(svg.outerHTML).toContain(">$56.0<");
+    ctl.destroy();
+  });
+
+  it("counts in whole numbers when the data is whole, and swaps at the midpoint when the format cannot be reproduced", () => {
+    const clock = framesOf();
+    const rows = [
+      { region: "North", output: 40, share: 0.25 },
+      { region: "South", output: 60, share: 0.5 },
+    ];
+    const grown = [
+      { region: "North", output: 48, share: 0.75 },
+      { region: "South", output: 60, share: 0.5 },
+    ];
+    const two = (data: typeof rows): InteractSpec => ({
+      ...bars(data, { mark: { labels: true } }),
+      encoding: { x: "region", y: ["output", { field: "share", format: "percent" }] },
+    });
+    const host = hostOf(two(rows));
+    const ctl = attach(host, two(rows), { render });
+    const svg = host.querySelector("svg") as SVGSVGElement;
+    ctl.update(two(grown));
+    const whole = svg.querySelector('text[data-ck-key="v:output:North"]') as SVGTextElement;
+    const other = svg.querySelector('text[data-ck-key="v:share:North"]') as SVGTextElement;
+    expect(whole.textContent).toBe("40");
+    const before = other.textContent;
+    expect(before).toBe("25%");
+    clock.at(0);
+    clock.at(100);
+    expect(whole.textContent).toMatch(/^4[0-8]$/);
+    expect(other.textContent).toBe(before);
+    expect(Number(other.style.opacity)).toBeLessThan(1);
+    clock.at(300);
+    expect(whole.textContent).toMatch(/^4[0-8]$/);
+    expect(other.textContent).toBe("75%");
+    clock.at(400);
+    expect(svg.querySelector('[data-ck-key^="v:"]')).toBeNull();
     ctl.destroy();
   });
 

@@ -1100,7 +1100,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         const nextSvg = host.querySelector("svg");
         if (nextSvg instanceof SVGSVGElement) svg = nextSvg;
         after();
-      });
+      }, (value) => fmt(value, (isRecord(base.mark) ? base.mark.labelFormat : undefined) ?? series[0]?.format, locale()));
       return;
     }
     patchSvg(host as PatchHost, markup, durationMs(base, n), easeOf(base));

@@ -45,8 +45,12 @@ interface Tween {
   leave: boolean;
   fade: boolean;
   line: boolean;
-  lane: number;
-  laneAxis: "x" | "y";
+  /** A category label that changes order. It fades out where it is, then in at the target. */
+  swap: Element | null;
+  /** A value label's text at `t`. */
+  text: ((t: number) => string) | null;
+  /** Fade through zero at the midpoint. Set with `swap`, and with a `text` that cannot count. */
+  dip: boolean;
   verts: { x: number; y: number }[] | null;
   xIds: string[];
 }
@@ -59,7 +63,14 @@ interface Delta {
   y0: number;
   x1: number;
   y1: number;
+  /** The bar this percent belongs to, and its value label when one is drawn. */
+  bar: Tween | null;
+  lab: Element | null;
+  w: number;
+  h: number;
 }
+
+type Box = { x: number; y: number; width: number; height: number };
 
 /** Milliseconds for this update. `0` means snap, which is the default. */
 export function motionMs(spec: { motion?: unknown; render?: unknown }, count: number): number {
@@ -78,7 +89,7 @@ export function motionMs(spec: { motion?: unknown; render?: unknown }, count: nu
  * Move keyed marks from the live SVG toward `markup`, then commit the exact render.
  * A second call should cancel the flight first. Pointer input should cancel and snap.
  */
-export function playMotion(host: HTMLElement, markup: string, ms: number, commit: () => void): MotionFlight {
+export function playMotion(host: HTMLElement, markup: string, ms: number, commit: () => void, label?: (value: number) => string): MotionFlight {
   const live = host.querySelector?.("svg");
   if (!(live instanceof SVGSVGElement) || ms <= 0 || reduced()) {
     commit();
@@ -89,6 +100,8 @@ export function playMotion(host: HTMLElement, markup: string, ms: number, commit
     commit();
     return { cancel() {} };
   }
+  stamp(live);
+  stamp(parsed);
   const prev = keyed(live);
   const next = keyed(parsed);
   if (!prev.size && !next.size) {
@@ -129,7 +142,47 @@ export function playMotion(host: HTMLElement, markup: string, ms: number, commit
     }
   }
 
-  const deltas = buildDeltas(host, prev, next, tweens);
+  // Category labels. Any pair that trades places means the moved ones fade in place instead of sliding through each other.
+  let last: Tween | null = null;
+  let reorder = false;
+  const span = (a: Tween, b: Tween, side: "from" | "to", name: string) => (a[side].get(name) ?? 0) - (b[side].get(name) ?? 0);
+  for (const tween of tweens) {
+    const key = tween.key;
+    const to = next.get(key)?.[0];
+    if (tween.enter || tween.leave || !to || tween.node.localName !== "text") continue;
+    if (key.startsWith("x:")) {
+      if (last && span(tween, last, "from", "x") * span(tween, last, "to", "x") + span(tween, last, "from", "y") * span(tween, last, "to", "y") < 0) reorder = true;
+      last = tween;
+      if (!still(tween)) tween.swap = to;
+    } else if (key.startsWith("v:")) {
+      const bar = "b:" + key.slice(2);
+      const rawA = prev.get(bar)?.[0]?.getAttribute("data-ck-value") || "";
+      const rawB = next.get(bar)?.[0]?.getAttribute("data-ck-value") || "";
+      const a = Number(rawA || NaN);
+      const b = Number(rawB || NaN);
+      // Count at the precision of the data, so 50 to 56 does not pass through 53.27.
+      const digits = Math.max((rawA.split(".")[1] || "").length, (rawB.split(".")[1] || "").length);
+      const old = tween.node.textContent || "";
+      const now = to.textContent || "";
+      if (old === now) continue;
+      // Count through the format only when it reproduces both ends. Otherwise the text changes at the midpoint, at zero opacity.
+      tween.dip = !label || label(a) !== old || label(b) !== now;
+      tween.text = tween.dip ? (t) => (t < 0.5 ? old : now) : (t) => (label as (value: number) => string)(Number((a + (b - a) * t).toFixed(digits)));
+    }
+  }
+  for (const tween of tweens) {
+    if (reorder && tween.swap) tween.dip = true;
+    else tween.swap = null;
+  }
+
+  const size = parseFloat(parsed.style?.fontSize) || 11;
+  const deltas = buildDeltas(host, prev, next, tweens, size);
+  // Text that stays put for the whole tween. A percent label never sits on it.
+  const fixed: Box[] = [];
+  // Past 200 value labels a percent label checks only its own bar's.
+  const labs = tweens.filter((tween) => tween.key.startsWith("v:")).map((tween) => tween.node);
+  if (labs.length > 200) labs.length = 0;
+  if (deltas.length) live.querySelectorAll(":scope>text:not([data-ck-key],[transform])").forEach((node) => fixed.push(boxOf(node)));
   const summary = deltas.map((delta) => `${delta.name} ${delta.text}`).join(", ");
   const polite = summary ? liveRegion(host, summary) : null;
   if (tweens.every(still) && !deltas.length) {
@@ -159,7 +212,7 @@ export function playMotion(host: HTMLElement, markup: string, ms: number, commit
       origin = now;
     }
     const t = ms <= 0 ? 1 : Math.min(1, Math.max(0, (now - origin) / ms));
-    draw(tweens, deltas, live, host, ease(t), fromScale, toScale, ticks);
+    draw(tweens, deltas, live, host, ease(t), fromScale, toScale, ticks, fixed, labs);
     if (t >= 1) finish(true);
     else frame = requestAnimationFrame(step);
   };
@@ -167,7 +220,7 @@ export function playMotion(host: HTMLElement, markup: string, ms: number, commit
     finish(true);
     return { cancel() {} };
   }
-  draw(tweens, deltas, live, host, 0, fromScale, toScale, ticks);
+  draw(tweens, deltas, live, host, 0, fromScale, toScale, ticks, fixed, labs);
   frame = requestAnimationFrame(step);
   return {
     cancel(snap: boolean) {
@@ -207,6 +260,47 @@ function parseSvg(markup: string): SVGSVGElement | null {
   const doc = new DOMParser().parseFromString(markup, "image/svg+xml");
   const svg = doc.documentElement;
   return svg.localName === "svg" ? (svg as unknown as SVGSVGElement) : null;
+}
+
+function num(node: Element, name: string): number {
+  return Number(node.getAttribute(name));
+}
+
+function boxOf(node: Element): Box {
+  return (node as SVGGraphicsElement).getBBox?.() ?? { x: 0, y: 0, width: 0, height: 0 };
+}
+
+/**
+ * Bar value labels have no key in the SVG. Give each one its bar's, as `v:`, for the length of the tween.
+ * The pairing reads the anchor `queueBarLabel` wrote: the row centre for a horizontal bar, the column centre for a vertical one.
+ */
+function stamp(root: Element): void {
+  const bars = root.querySelectorAll('rect[data-ck-key^="b:"]');
+  const texts = root.querySelectorAll(":scope>text[text-anchor]:not([data-ck-key],[transform])");
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i];
+    const lx = num(text, "x");
+    const ly = num(text, "y");
+    let best = Infinity;
+    let key = "";
+    for (let j = 0; j < bars.length; j++) {
+      const bar = bars[j];
+      const x = num(bar, "x");
+      const y = num(bar, "y");
+      const w = num(bar, "width");
+      const h = num(bar, "height");
+      const flat = bar.getAttribute("data-ck-orient") === "h";
+      if (Math.abs(flat ? ly - y - h / 2 - 3 : lx - x - w / 2) > 0.05) continue;
+      // A horizontal label can be pulled back from the canvas edge, so any distance along its own row counts. A vertical one is exact.
+      const near = (at: number, spots: number[]) => Math.min(...spots.map((spot) => Math.abs(at - spot)));
+      const far = flat ? near(lx - x, [w + 4, w / 2, 4, -4]) : near(ly - y, [-4, h - 2, Math.min(h - 2, Math.max(12, h / 2))]) * 99;
+      if (far < best) {
+        best = far;
+        key = bar.getAttribute("data-ck-key") || "";
+      }
+    }
+    if (key && best < 99) text.setAttribute("data-ck-key", "v:" + key.slice(2));
+  }
 }
 
 function keyed(root: ParentNode): Map<string, Element[]> {
@@ -252,15 +346,6 @@ function shared(key: string, from: Element, to: Element, ticks: Map<string, Tick
   tween.path = path;
   if (fromD && toD && !path) from.setAttribute("d", toD);
   if (key.startsWith("x:") && from.localName === "text") {
-    const dx = (toGeom.get("x") ?? 0) - (fromGeom.get("x") ?? 0);
-    const dy = (toGeom.get("y") ?? 0) - (fromGeom.get("y") ?? 0);
-    if (Math.abs(dx) > 6 && Math.abs(dx) >= Math.abs(dy)) {
-      tween.lane = dx > 0 ? -1 : 1;
-      tween.laneAxis = "y";
-    } else if (Math.abs(dy) > 6) {
-      tween.lane = dy > 0 ? 1 : -1;
-      tween.laneAxis = "x";
-    }
     const x0 = fromGeom.get("x");
     const x1 = toGeom.get("x");
     if (x0 != null && x1 != null) ticks.set(key, { from: x0, to: x1 });
@@ -310,8 +395,9 @@ function blank(key: string, node: Element, from: Map<string, number>, to: Map<st
     leave,
     fade: false,
     line: false,
-    lane: 0,
-    laneAxis: "y",
+    swap: null,
+    text: null,
+    dip: false,
     verts: null,
     xIds: [],
   };
@@ -341,7 +427,7 @@ function pathTween(from: string, to: string): PathTween | null {
 }
 
 function still(tween: Tween): boolean {
-  if (tween.enter || tween.leave || tween.line) return false;
+  if (tween.enter || tween.leave || tween.line || tween.text) return false;
   for (const [name, to] of tween.to) {
     if (Math.abs(to - (tween.from.get(name) ?? to)) > 0.05) return false;
   }
@@ -362,6 +448,8 @@ function draw(
   fromScale: Scale | null,
   toScale: Scale | null,
   ticks: Map<string, TickSpan>,
+  fixed: Box[],
+  labs: Element[],
 ): void {
   for (let i = 0; i < tweens.length; i++) {
     const tween = tweens[i];
@@ -380,10 +468,16 @@ function draw(
     for (const [name, to] of tween.to) {
       const from = tween.from.get(name);
       if (from == null) continue;
-      let value = from + (to - from) * t;
-      if (tween.lane && name === tween.laneAxis) value += Math.sin(Math.PI * t) * 12 * tween.lane;
-      tween.node.setAttribute(name, px(value));
+      tween.node.setAttribute(name, px(from + (to - from) * (tween.swap ? Math.round(t) : t)));
     }
+    if (tween.text) tween.node.textContent = tween.text(t);
+    if (tween.swap && t >= 0.5 && tween.swap !== tween.node) {
+      // Rotation and wrapped rows belong to the target position.
+      tween.node.setAttribute("transform", tween.swap.getAttribute("transform") || "");
+      tween.node.innerHTML = tween.swap.innerHTML;
+      tween.swap = tween.node;
+    }
+    if (tween.dip) (tween.node as SVGElement).style.opacity = String(Math.abs(1 - 2 * t));
     if (tween.path) {
       const nums = new Array<number>(tween.path.to.length);
       for (let n = 0; n < nums.length; n++) nums[n] = (tween.path.from[n] ?? 0) + ((tween.path.to[n] ?? 0) - (tween.path.from[n] ?? 0)) * t;
@@ -394,13 +488,64 @@ function draw(
       (tween.node as SVGElement).style.opacity = String(opacity);
     }
   }
+  if (!deltas.length) return;
+  const view = toHost(svg, host);
+  // Every value label, where it is in this frame.
+  const taken = fixed.slice();
+  for (const lab of labs) taken.push(boxOf(lab));
+  const clear = (x: number, y: number, w: number, h: number) =>
+    x >= 0 && y >= 0 && x + w <= view.w && y + h <= view.h && !taken.some((box) => x < box.x + box.width && x + w > box.x && y < box.y + box.height && y + h > box.y);
   for (let i = 0; i < deltas.length; i++) {
     const delta = deltas[i];
     if (!delta) continue;
-    const point = toHost(svg, host, delta.x0 + (delta.x1 - delta.x0) * t, delta.y0 + (delta.y1 - delta.y0) * t);
-    delta.el.style.left = `${point.left}px`;
-    delta.el.style.top = `${point.top}px`;
-    delta.el.style.opacity = t < 0.72 ? "1" : String(Math.max(0, 1 - (t - 0.72) / 0.28));
+    const el = delta.el;
+    if (!delta.w) {
+      el.style.fontSize = `${delta.h * view.sy}px`;
+      delta.w = (el.offsetWidth || 1) / view.sx;
+      delta.h = (el.offsetHeight || 1) / view.sy;
+    }
+    const w = delta.w;
+    const h = delta.h;
+    let x = delta.x0 + (delta.x1 - delta.x0) * t - w / 2;
+    let y = delta.y0 + (delta.y1 - delta.y0) * t - h * 1.2;
+    let ok = true;
+    let inside = false;
+    const bar = delta.bar;
+    if (bar) {
+      const at = (name: string) => (bar.from.get(name) ?? 0) + ((bar.to.get(name) ?? 0) - (bar.from.get(name) ?? 0)) * t;
+      const bx = at("x");
+      const by = at("y");
+      const end = bx + at("width");
+      const lab = delta.lab && boxOf(delta.lab);
+      if (bar.node.getAttribute("data-ck-orient") === "h") {
+        // Past the bar end, and past the value label when it sits there. A negative bar ends on the left.
+        const left = num(bar.node, "data-ck-base") > bx + 0.5;
+        y = by + at("height") / 2 - h / 2;
+        x = left ? Math.min(bx, lab ? lab.x : bx) - 2 - w : Math.max(end, lab ? lab.x + lab.width : end) + 2;
+        ok = clear(x, y, w, h);
+        if (!ok) {
+          x = left ? bx + 2 : end - 2 - w;
+          inside = true;
+        }
+      } else {
+        // Above the bar top, and above the value label when it sits there.
+        x = (bx + end) / 2 - w / 2;
+        y = Math.min(by, lab ? lab.y : by) - 1 - h;
+        ok = clear(x, y, w, h);
+        if (!ok) {
+          y = by + 2;
+          inside = true;
+        }
+      }
+    }
+    // No free place past the bar: sit inside its end on a plate. No free place there either: this percent is not drawn.
+    if (inside || !bar) ok = clear(x, y, w, h);
+    el.toggleAttribute("data-in", inside);
+    el.style.display = ok ? "" : "none";
+    if (ok) taken.push({ x, y, width: w, height: h });
+    el.style.left = `${view.left + x * view.sx}px`;
+    el.style.top = `${view.top + y * view.sy}px`;
+    el.style.opacity = t < 0.72 ? "1" : String(Math.max(0, 1 - (t - 0.72) / 0.28));
   }
 }
 
@@ -451,7 +596,7 @@ function invertY(pixel: number, scale: Scale): number {
   return scale.min + ((pixel - scale.p0) / span) * (scale.max - scale.min);
 }
 
-function buildDeltas(host: HTMLElement, prev: Map<string, Element[]>, next: Map<string, Element[]>, tweens: Tween[]): Delta[] {
+function buildDeltas(host: HTMLElement, prev: Map<string, Element[]>, next: Map<string, Element[]>, tweens: Tween[], size: number): Delta[] {
   const found: { score: number; delta: Delta }[] = [];
   const byNode = new Map<Element, Tween>();
   for (let i = 0; i < tweens.length; i++) {
@@ -468,13 +613,18 @@ function buildDeltas(host: HTMLElement, prev: Map<string, Element[]>, next: Map<
       if (!text) continue;
       const tween = byNode.get(from);
       if (!tween) continue;
-      found.push({ score: Math.abs(parsePercent(text)), delta: barDelta(host, nameOf(key), text, tween) });
+      const delta = pointDelta(nameOf(key), text, size, { x: 0, y: 0 }, { x: 0, y: 0 });
+      if (from.localName === "rect") {
+        delta.bar = tween;
+        delta.lab = prev.get("v:" + key.slice(2))?.[0] ?? null;
+      }
+      found.push({ score: Math.abs(parsePercent(text)), delta });
       continue;
     }
     if (!key.startsWith("l:")) continue;
     const move = lineMove(from, to);
     if (!move) continue;
-    found.push({ score: Math.abs(move.percent), delta: pointDelta(host, nameOf(key), move.text, move.from, move.to) });
+    found.push({ score: Math.abs(move.percent), delta: pointDelta(nameOf(key), move.text, size, move.from, move.to) });
   }
   found.sort((a, b) => b.score - a.score);
   const kept = found.slice(0, 12).map((item) => item.delta);
@@ -482,24 +632,14 @@ function buildDeltas(host: HTMLElement, prev: Map<string, Element[]>, next: Map<
   return kept;
 }
 
-function barDelta(host: HTMLElement, name: string, text: string, tween: Tween): Delta {
-  const box = (geomMap: Map<string, number>) => ({
-    x: (geomMap.get("x") ?? 0) + (geomMap.get("width") ?? 0) / 2,
-    y: geomMap.get("y") ?? 0,
-  });
-  const from = box(tween.from);
-  const to = box(tween.to);
-  return pointDelta(host, name, text, from, to);
-}
-
-function pointDelta(host: HTMLElement, name: string, text: string, from: { x: number; y: number }, to: { x: number; y: number }): Delta {
+function pointDelta(name: string, text: string, size: number, from: { x: number; y: number }, to: { x: number; y: number }): Delta {
   const el = document.createElement("div");
   el.className = "ck-delta";
   el.setAttribute("data-ck-delta", "");
   if (text.startsWith("-")) el.setAttribute("data-down", "");
   el.textContent = text;
-  void host;
-  return { el, name, text, x0: from.x, y0: from.y, x1: to.x, y1: to.y };
+  // `h` holds the font size until the first frame measures the box.
+  return { el, name, text, x0: from.x, y0: from.y, x1: to.x, y1: to.y, bar: null, lab: null, w: 0, h: size };
 }
 
 function lineMove(from: Element, to: Element): { text: string; percent: number; from: { x: number; y: number }; to: { x: number; y: number } } | null {
@@ -572,15 +712,14 @@ function liveRegion(host: HTMLElement, text: string): HTMLElement {
   return live;
 }
 
-function toHost(svg: SVGSVGElement, host: HTMLElement, x: number, y: number): { left: number; top: number } {
+/** Where the SVG's user space sits in the host: its origin and scale in CSS pixels, and its size in user units. */
+function toHost(svg: SVGSVGElement, host: HTMLElement): { left: number; top: number; sx: number; sy: number; w: number; h: number } {
   const rect = svg.getBoundingClientRect();
   const bounds = host.getBoundingClientRect();
-  const box = svg.viewBox?.baseVal;
-  const vw = box?.width || Number(svg.getAttribute("viewBox")?.split(/[\s,]+/)[2]) || rect.width || 1;
-  const vh = box?.height || Number(svg.getAttribute("viewBox")?.split(/[\s,]+/)[3]) || rect.height || 1;
-  const sx = (rect.width || vw) / vw;
-  const sy = (rect.height || vh) / vh;
-  return { left: rect.left + x * sx - bounds.left, top: rect.top + y * sy - bounds.top };
+  const box = (svg.getAttribute("viewBox") || "").split(/[\s,]+/);
+  const w = Number(box[2]) || rect.width || 1;
+  const h = Number(box[3]) || rect.height || 1;
+  return { left: rect.left - bounds.left, top: rect.top - bounds.top, sx: (rect.width || w) / w, sy: (rect.height || h) / h, w, h };
 }
 
 function clearStyle(node: Element): void {
@@ -596,7 +735,7 @@ function ensureStyle(): void {
   const style = document.createElement("style");
   style.id = "ck-motion-style";
   style.textContent =
-    ".ck-delta{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-120%);font:650 12px/1 sans-serif;font-family:var(--ck-font-family, inherit);font-variant-numeric:tabular-nums;color:#15803d;white-space:nowrap}.ck-delta[data-down]{color:#be123c}@media (prefers-reduced-motion:reduce){.ck-delta{display:none}}";
+    ".ck-delta{position:absolute;z-index:6;pointer-events:none;padding:1px 4px;border-radius:4px;font:650 11px/1 sans-serif;font-family:var(--ck-font-family, inherit);font-variant-numeric:tabular-nums;color:#15803d;white-space:nowrap}.ck-delta[data-down]{color:#be123c}.ck-delta[data-in]{background:var(--ck-background,Canvas)}@media (prefers-reduced-motion:reduce){.ck-delta{display:none}}";
   document.head.append(style);
 }
 
