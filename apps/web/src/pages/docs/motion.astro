@@ -29,7 +29,24 @@ const streamSvg = render(stream);
     Identity comes from the data. Bars, slices, and category labels are keyed by the category. A repeated label becomes <code>Oak</code>, then <code>Oak#2</code>. A line series is keyed by its field. The renderers stamp <code>data-ck-key</code> on the marks. The attribute does not animate.
   </p>
   <p>
-    When a bar, slice, or short line keeps its key and its number changes, the chart writes the percent, <code>(next − previous) / |previous|</code>, in an HTML label. The label is not in the SVG, so export does not keep it. One polite summary is announced. Reduced motion skips it.
+    Value labels move with their bars. Turn them on with <code>"mark": {"{"} "labels": true {"}"}</code>. A label past the bar end stays 4px past it for the whole tween, and a label inside the bar stays inside it. The number counts from the old value to the new one through <code>mark.labelFormat</code>, at the precision of the data, so 50 to 56 shows whole numbers and $6.10B to $6.40B shows two decimals. When the chart cannot rebuild a label from its value, for example a second series with its own format, that label fades out, changes at the midpoint, and fades back in. Value labels carry no key in the SVG. The tween pairs each one with its bar and the committed SVG is the plain <code>render()</code>.
+  </p>
+  <pre class="motion-code"><code>{`import { mount } from "@chartkitdev/vanilla";
+
+const spec = {
+  version: "1",
+  type: "bar",
+  data: [{ day: "Sat", spend: 5.3 }, { day: "Sun", spend: 5.6 }],
+  encoding: { x: "day", y: "spend" },
+  mark: { labels: true, labelFormat: { style: "number", decimals: 2, prefix: "$", suffix: "B" } },
+  motion: "auto",
+  a11y: { alt: "Spend by day." }
+};
+const chart = mount(document.getElementById("chart"), spec);
+// Same spec, new data. The bars grow and the labels count up with them.
+chart.update({ ...spec, data: [{ day: "Sat", spend: 5.8 }, { day: "Sun", spend: 6.0 }] });`}</code></pre>
+  <p>
+    When a bar, slice, or short line keeps its key and its number changes, the chart writes the percent, <code>(next − previous) / |previous|</code>, in an HTML label. On a horizontal bar it sits past the bar end on the bar's own row, after the value label when there is one. On a vertical bar it sits above the bar top, above the value label. Its size is <code>theme.tokens.fontSize</code>, 11px when that is not set. It is not drawn over the title, the subtitle, a value label, or another percent. With no room past the bar it moves inside the bar end on a plate. With no room there either it is not drawn. The label is not in the SVG, so export does not keep it. One polite summary is announced for every change, drawn or not. Reduced motion skips it.
   </p>
   <h2>Value change</h2>
   <p>Harbor goes from 50 to 56. That is +12%. The other bars stay.</p>
@@ -37,7 +54,7 @@ const streamSvg = render(stream);
     <Fragment set:html={valueSvg} />
   </div>
   <h2>Sort</h2>
-  <p>Each bar keeps its category and slides to the new order. Labels that pass take opposite lanes, so they do not draw through each other.</p>
+  <p>Each bar keeps its category and slides to the new order, and its value label rides with it. A category label that changes place does not slide. It fades out where it was and fades in at its new place, so two category labels never draw through each other and none leaves the canvas. No label is shortened.</p>
   <div class="motion-stage" data-motion="sort">
     <Fragment set:html={sortSvg} />
   </div>
@@ -51,7 +68,7 @@ const streamSvg = render(stream);
     12,000 samples, 18 new ones each frame. The first frame draws the axes. Later frames stroke the polyline on the canvas. This is not the SVG morpher. The line under the chart is this browser.
   </p>
   <p>
-    Measured here, headless Chrome, window 1280×900, esbuild minify and gzip level 9, the same method as <code>npm run size</code>. The motion module alone is 4,478 bytes gzip. The minimal line bundle is 32,621 bytes gzip and does not include it. A 12,000-point window painted in 0.20 ms median, and the frame gap was 16.7 ms median.
+    Measured here, headless Chrome, window 1280×900, esbuild minify and gzip level 9, the same method as <code>npm run size</code>. The motion module alone is 5,606 bytes gzip. The minimal line bundle is 32,621 bytes gzip and does not include it. A 12,000-point window painted in 0.20 ms median, and the frame gap was 16.7 ms median.
   </p>
   <div class="motion-stage" data-motion="stream">
     <Fragment set:html={streamSvg} />
@@ -63,7 +80,11 @@ const streamSvg = render(stream);
     <li>A line whose commands change, a null break, a curve change, or a different vertex count, snaps that series.</li>
     <li>Color follows series order. Removing a middle series recolors the ones that remain.</li>
     <li>Canvas charts do not morph marks. A same-length window strokes only while the new samples stay inside the first scale.</li>
-    <li>One curve, ease-out. Duration is the only knob, and it clamps at 800ms.</li>
+    <li>Value labels move on bar charts only. Labels on lines and points, and a vertical bar's left or right label, change when the tween commits.</li>
+    <li>Bars that trade places pass over each other on the way, and their value labels pass with them.</li>
+    <li>A re-ordered category label fades in place. It does not travel with its bar.</li>
+    <li>At most 12 percent labels are drawn, the largest changes first. A slice gets the announcement but no drawn percent. Above 200 value labels a percent label checks only its own bar's label for overlap.</li>
+    <li>One curve, and duration is the only knob. It clamps at 800ms. The curve is described as ease-out, but what is painted starts slow and ends fast: half the distance is covered at about 70% of the time.</li>
   </ul>
   <h2>Line chart race</h2>
   <p>

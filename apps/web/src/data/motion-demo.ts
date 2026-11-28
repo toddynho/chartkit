@@ -11,13 +11,14 @@ const regions = [
   { region: "Harbor", output: 50 },
 ];
 
-function bars(rows: { region: string; output: number }[]): ChartSpec {
+function bars(rows: { region: string; output: number }[], labels = false): ChartSpec {
   return {
     version: "1",
     type: "bar",
     title: "Output",
     data: rows,
     encoding: { x: "region", y: "output" },
+    ...(labels ? { mark: { labels: true } } : {}),
     motion: "auto",
     legend: false,
     size: { width: 640, height: 280 },
@@ -31,7 +32,7 @@ export function valueSpecs(): ChartSpec[] {
 
 export function sortSpecs(): ChartSpec[] {
   const sorted = regions.slice().sort((a, b) => b.output - a.output);
-  return [bars(regions), bars(sorted)];
+  return [bars(regions, true), bars(sorted, true)];
 }
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
