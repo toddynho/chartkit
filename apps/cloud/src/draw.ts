@@ -6,8 +6,9 @@ import { repairPhase4 } from "@chartkitdev/core/validate/phase4";
 import { bakeFontFallback } from "../../../packages/core/src/font.ts";
 import { resolvePreset } from "../../../packages/core/src/theme.ts";
 import { canonical } from "./charts.ts";
-import { FONT_FALLBACK, rasterize } from "./png.ts";
-import { CARD_HEIGHT, CARD_WIDTH, presentSvg, themeIsDark } from "./watermark.ts";
+import { applyHeading, cardTextOnly, cardZoom, insideCard, planHeading } from "./card.ts";
+import { FONT_FALLBACK, inkBox, rasterize } from "./png.ts";
+import { CARD_HEIGHT, CARD_WIDTH, CARD_ZOOM, cardDrawingSize, presentSvg, themeIsDark } from "./watermark.ts";
 
 export const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
 
@@ -23,7 +24,10 @@ export interface Frame {
   background?: string;
   format: "svg" | "png";
   watermark: boolean;
-  /** Draw the 1200×628 share card. w, h, scale, and format are forced in the handler. */
+  /**
+   * Draw the 1200×628 share card. The handler forces scale 1 and PNG, and drops w and h.
+   * drawSpec picks the layout frame: see drawCard.
+   */
   card?: boolean;
 }
 
@@ -57,36 +61,8 @@ export interface Drawn {
 }
 
 export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
-  const framed = withFrame(input, frame);
-  const checked = check(framed);
-  const spec = applyCloudPlate(checked.spec, frame);
-  let result = spec === checked.spec ? checked : { ...checked, spec };
-  const tooBig = result.ok ? overLimit(result.spec) : null;
-  if (tooBig) result = failResult(result, tooBig);
-  let drawn = "";
-  if (result.ok) {
-    try {
-      drawn = render(result.spec);
-    } catch {
-      result = failResult(result, cloudError("/type", "the renderer failed on this spec"));
-    }
-  }
-  const failure = result.ok ? drawFailure(result.spec, drawn) ?? pngOverLimit(drawn, frame) : null;
-  if (failure) result = failResult(result, failure);
-  const failed = !result.ok;
-  const dark = failed ? false : themeIsDark(frame.theme, drawn);
-  const theme = isRecord(result.spec) ? result.spec.theme : undefined;
-  const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
-  const family = failed || !isRecord(result.spec) ? "" : resolvePreset(result.spec.theme).fontFamily ?? "";
-  let svg = bakeFontFallback(
-    presentSvg(failed ? errorPicture(result) : drawn, {
-      watermark: failed || frame.watermark,
-      dark,
-      plate,
-    }),
-    family,
-  );
-  if (frame.card && !failed) svg = fitCard(svg);
+  const composed = frame.card ? await composeCard(input, frame) : compose(input, frame);
+  const { result, failed, family, svg } = composed;
   const size = svgSize(svg);
   if (frame.format === "png") {
     try {
@@ -111,6 +87,127 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
     width: size.width,
     height: size.height,
   };
+}
+
+interface Composed {
+  /** The Cloud SVG: the library drawing, or the error picture, with the margin, the plate, and the mark. */
+  svg: string;
+  /** The library drawing alone. Empty when the spec could not be drawn. */
+  drawn: string;
+  result: RepairResult;
+  failed: boolean;
+  family: string;
+}
+
+/**
+ * Repair, check the limits, draw, and dress the drawing as a Cloud SVG. No rasterizing.
+ * `redraw` edits the library drawing before it is dressed. Only the share card passes one.
+ */
+function compose(input: unknown, frame: Frame, redraw?: (drawn: string) => string): Composed {
+  const framed = withFrame(input, frame);
+  const checked = check(framed);
+  const spec = applyCloudPlate(checked.spec, frame);
+  let result = spec === checked.spec ? checked : { ...checked, spec };
+  const tooBig = result.ok ? overLimit(result.spec) : null;
+  if (tooBig) result = failResult(result, tooBig);
+  let drawn = "";
+  if (result.ok) {
+    try {
+      drawn = render(result.spec);
+    } catch {
+      result = failResult(result, cloudError("/type", "the renderer failed on this spec"));
+    }
+  }
+  const failure = result.ok ? drawFailure(result.spec, drawn) ?? pngOverLimit(drawn, frame) : null;
+  if (failure) result = failResult(result, failure);
+  const failed = !result.ok;
+  if (!failed && redraw) drawn = redraw(drawn);
+  const dark = failed ? false : themeIsDark(frame.theme, drawn);
+  const theme = isRecord(result.spec) ? result.spec.theme : undefined;
+  const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
+  const family = failed || !isRecord(result.spec) ? "" : resolvePreset(result.spec.theme).fontFamily ?? "";
+  const svg = bakeFontFallback(
+    presentSvg(failed ? errorPicture(result) : drawn, {
+      watermark: failed || frame.watermark,
+      dark,
+      plate,
+    }),
+    family,
+  );
+  return { svg, drawn: failed ? "" : drawn, result, failed, family };
+}
+
+/** Smaller zooms tried, in order, when text does not fit the card at the legibility floor. 1 is the card laid out at full size. */
+const CARD_FALLBACK_ZOOMS = [1.75, 1.5, 1.25, 1];
+/** A wrapped title may not squeeze the chart below this layout height. A smaller zoom is used instead. */
+const CARD_MIN_CHART_HEIGHT = 150;
+
+/**
+ * The share card is its own frame. It ignores the size in the spec and in the request.
+ *
+ * The chart is laid out on a frame CARD_ZOOM times smaller than 1200×628, so the library places every
+ * label for that width, and fitCard enlarges the result to the card. A 568 px wide layout shown at twice
+ * the size has type twice as large: the library's 15 px title is 30 px and its 10 to 12 px labels 20 to 24.
+ * A spec that asks for smaller type (theme.tokens.fontSize under 10) is drawn with 10 on the card alone.
+ * If a renderer still draws something smaller, the frame shrinks further, up to CARD_ZOOM_MAX (see cardZoom).
+ *
+ * Text is never cut off to get there. A title or subtitle too long for the frame is broken into lines
+ * (see card.ts). If any text would still leave the card, the frame grows a step at a time, which
+ * trades type size for room. At zoom 1 the card is what it was before the floor existed.
+ */
+async function composeCard(sent: unknown, frame: Frame): Promise<Composed> {
+  const input = cardInput(sent);
+  const first = cardAt(input, frame, CARD_ZOOM);
+  if (first.failed) return first;
+  const spec = isRecord(first.result.spec) ? first.result.spec : {};
+  const floor = cardZoom(first.drawn, spec.title);
+  const zooms = [floor, ...CARD_FALLBACK_ZOOMS.filter((zoom) => zoom < floor)];
+  let card = first;
+  for (const zoom of zooms) {
+    const plain = zoom === CARD_ZOOM ? first : cardAt(input, frame, zoom);
+    if (plain.failed) continue;
+    card = await wrapHeading(input, frame, zoom, plain);
+    card = { ...card, svg: fitCard(card.svg) };
+    if (insideCard(await inkBox(cardTextOnly(card.svg), card.family))) return card;
+  }
+  return card;
+}
+
+/**
+ * Smallest theme.tokens.fontSize a card is drawn with. At 10 the library's title is 14 px and its smallest
+ * label 9 px, which CARD_ZOOM turns into the 28 px and 18 px floor.
+ */
+const CARD_MIN_FONT_TOKEN = 10;
+
+/** The spec as sent, except that a font token under the floor is raised for this render. Only the card's own drawing sees it. */
+function cardInput(input: unknown): unknown {
+  if (!isRecord(input) || !isRecord(input.theme) || !isRecord(input.theme.tokens)) return input;
+  const size = input.theme.tokens.fontSize;
+  if (typeof size !== "number" || !(size < CARD_MIN_FONT_TOKEN)) return input;
+  return { ...input, theme: { ...input.theme, tokens: { ...input.theme.tokens, fontSize: CARD_MIN_FONT_TOKEN } } };
+}
+
+function cardAt(input: unknown, frame: Frame, zoom: number, shorter = 0, redraw?: (drawn: string) => string): Composed {
+  const layout = cardDrawingSize(frame.watermark, zoom);
+  const cardFrame: Frame = { ...frame, w: Math.round(layout.width), h: Math.round(layout.height) - shorter, scale: 1, format: "png" };
+  return compose(input, cardFrame, redraw);
+}
+
+/** Lay the chart out again, shorter, when its title or subtitle needs more than one line on this frame. */
+async function wrapHeading(input: unknown, frame: Frame, zoom: number, plain: Composed): Promise<Composed> {
+  const spec = isRecord(plain.result.spec) ? plain.result.spec : {};
+  const layout = cardDrawingSize(frame.watermark, zoom);
+  const measure = async (text: string, attrs: string): Promise<number> => {
+    const size = /(?:^|\s)font-size="([^"]*)"/.exec(attrs)?.[1] ?? "12";
+    const weight = /(?:^|\s)font-weight="([^"]*)"/.exec(attrs)?.[1] ?? "400";
+    const line = `<svg xmlns="http://www.w3.org/2000/svg" width="8000" height="200"><text x="0" y="100" font-size="${size}" font-weight="${weight}" font-family="${plain.family || FONT_FALLBACK}">${escapeXml(text)}</text></svg>`;
+    const box = await inkBox(line, plain.family);
+    return box ? box.x + box.width : 0;
+  };
+  const plan = await planHeading(plain.drawn, spec.title, spec.subtitle, Math.round(layout.width), measure);
+  if (!plan || Math.round(layout.height) - plan.extra < CARD_MIN_CHART_HEIGHT) return plain;
+  const wrapped = cardAt(input, frame, zoom, plan.extra, (drawn) => applyHeading(drawn, plan, spec.title, spec.subtitle));
+  return wrapped.failed ? plain : wrapped;
 }
 
 export function repairSpec(input: unknown, frame: Pick<Frame, "w" | "h" | "theme">): RepairResult {
@@ -156,7 +253,7 @@ export function readFrame(source: { get(name: string): string | null }): Frame |
   return frame;
 }
 
-/** Nest a chart that did not land on the card frame so the PNG is still 1200×628. */
+/** Enlarge the layout frame to the card. The nested viewBox is the zoom, so the PNG is 1200×628 at scale 1. */
 function fitCard(svg: string): string {
   const size = svgSize(svg);
   if (size.width === CARD_WIDTH && size.height === CARD_HEIGHT) return svg;
@@ -165,7 +262,10 @@ function fitCard(svg: string): string {
   if (!open || close < 0) return svg;
   const box = open.match(/\bviewBox="([^"]+)"/)?.[1] ?? `0 0 ${size.width || CARD_WIDTH} ${size.height || CARD_HEIGHT}`;
   const inner = svg.slice(open.length, close);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" role="img"><svg x="0" y="0" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="${box}" preserveAspectRatio="xMidYMid meet">${inner}</svg></svg>`;
+  // A layout frame that is not exactly the card's shape leaves a strip under a fraction of a pixel. Paint it the plate color.
+  const fill = svg.match(/<rect data-ck-plate="[^"]*"[^>]*\bfill="([^"]*)"/)?.[1];
+  const plate = fill ? `<rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="${fill}" />` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" role="img">${plate}<svg x="0" y="0" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="${box}" preserveAspectRatio="xMidYMid meet">${inner}</svg></svg>`;
 }
 
 function check(spec: unknown): RepairResult {

@@ -29,7 +29,7 @@ Enforced in `src/draw.ts`, `src/app.ts` and `src/charts.ts`:
 | A chart stored without a key, and not as a share page | kept 30 days | 404 after that |
 | A share chart stored without a key (`POST /charts`, `/s/<id>`) | kept 365 days. `GET /s/<id>` starts another 365 days when the last refresh is 30 days old or older. Opening `/s/<id>` for a 30-day image row promotes it to this rule | 404 after a year with no share-page read |
 
-A chart stored with a valid key does not expire, including its share page. SVG has no pixel limit. A share card (`/c/<id>/card.png` or `GET /render?format=png&card=1`) is 1200×628 at scale 1, which is under the PNG pixel limit. `card=1` ignores `w`, `h`, and `scale` so the unfurl crop stays 1200×628. The mark follows the same rule as the other renders: a keyed stored chart has no mark, and every GET without a stored key has the mark. A 422 from a limit carries a `CK1006` error with the limit in the message. The PNG pixel limit is set for a Workers isolate's memory (about 128 MB); it was checked in the local runtime, not under production load.
+A chart stored with a valid key does not expire, including its share page. SVG has no pixel limit. A share card (`/c/<id>/card.png` or `GET /render?format=png&card=1`) is 1200×628 at scale 1, which is 753,600 pixels and under the PNG pixel limit. `card=1` ignores `w`, `h`, `scale`, and the size in the spec so the unfurl crop stays 1200×628. See [Share card layout](#share-card-layout). The mark follows the same rule as the other renders: a keyed stored chart has no mark, and every GET without a stored key has the mark. A 422 from a limit carries a `CK1006` error with the limit in the message. The PNG pixel limit is set for a Workers isolate's memory (about 128 MB); it was checked in the local runtime, not under production load.
 
 The Workers Free plan allows about 10 ms of CPU per request. A PNG render takes more than that, so the worker needs the Workers Paid plan.
 
@@ -236,6 +236,19 @@ The rate limit is 120 a minute per IP, with or without a key. On Cloudflare the 
    Post `shareUrl`. X, Slack, LinkedIn, and iMessage read its Open Graph and Twitter tags and show `cardUrl` as the preview. `svgUrl` and `pngUrl` are the chart at its own size, for an `<img>`. `url` repeats `svgUrl`, as `POST /charts` does.
 
 The stdio server `@chartkitdev/mcp` has a `share_chart` tool that POSTs to `/charts` and returns the same links. It is in the source after 0.5.0 and ships with the next npm release of that package.
+
+### Share card layout
+
+A feed shows the 1200×628 card at about 500 px wide, so the card is drawn for that. It is a frame of its own, not the stored chart scaled to fit:
+
+- The chart is laid out on a 600×314 frame (a 568×262 drawing plus the Cloud margin and mark) and enlarged 2×. The library places ticks, labels, and the legend for that narrower width, the way it would for any 568 px chart, so it may show fewer ticks than the full-size chart does.
+- In the 1200×628 PNG the title is 30 px, and tick labels, data labels, the legend, and the subtitle are 20 to 24 px. The floor is 28 px for the title and 18 px for everything else. The margin and the mark are enlarged with the chart.
+- `spec.size`, `w`, `h`, and `scale` do not apply to the card. `theme` and `background` do.
+- A spec that sets `theme.tokens.fontSize` under 10 is drawn with 10 on the card, so its type meets the same floor. If a renderer still draws type that would land under the floor, the layout frame shrinks further (up to 3×).
+- Text is not cut off or shortened. A title or subtitle too long for one line is broken into lines and the chart moves down to make room. If some text still would not fit, the card is laid out on a larger frame (1.75×, 1.5×, 1.25×, then 1×) until it does, which gives up type size for room.
+- `journey` is the one bundled chart type under the floor: it draws at the height its steps need and ignores the frame's height, so its card is laid out at 1×, as it was before the floor.
+
+Only the card is drawn this way. The stored spec is not changed, and `/render`, `/c/<id>.svg`, `/c/<id>.png`, and the chart on the `/s/<id>` page are the chart at its own size. `src/card.test.ts` measures the card's text with resvg for a bar, a line, a donut, and every example spec.
 
 Cloud SVGs add an outer margin so a chat attachment is not flush with the image edge: 24px on top, 16px on each side, and 12px under the 16px watermark band. The library drawing is unchanged. A keyed render gets the same margin without the mark. `/cloud` marketing previews are local SVGs and do not use this margin.
 

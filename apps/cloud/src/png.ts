@@ -42,6 +42,25 @@ export async function rasterize(svg: string, scale: number, requested = ""): Pro
   }
 }
 
+/**
+ * The box of everything an SVG paints, from resvg's own layout with the bundled faces. No pixels are drawn.
+ * For an SVG that holds only text, this is where that text will land in the PNG.
+ */
+export async function inkBox(svg: string, requested = ""): Promise<{ x: number; y: number; width: number; height: number } | undefined> {
+  await loadWasm();
+  const { Resvg } = await import("@resvg/resvg-wasm");
+  const face = rasterFace(explicitFamily(svg) || requested || FONT_FALLBACK);
+  const renderer = new Resvg(forRaster(svg, darkSvg(svg), requested), {
+    font: { fontBuffers: fontBuffers(), defaultFontFamily: face, sansSerifFamily: face },
+  });
+  try {
+    const box = renderer.getBBox();
+    return box ? { x: box.x, y: box.y, width: box.width, height: box.height } : undefined;
+  } finally {
+    renderer.free();
+  }
+}
+
 export function forRaster(svg: string, dark: boolean, requested = ""): string {
   const named = explicitFamily(svg);
   const ask = requested.trim();
