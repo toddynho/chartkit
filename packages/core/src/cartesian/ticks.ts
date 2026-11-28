@@ -1,4 +1,4 @@
-import { formatZoned, zonedTimeTicks } from "../timezone";
+import { distinctLabels, timeLevel, zonedText, zonedTimeTicks } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { ch, logTicks, symlogTicks, ticks } from "../svg";
 import type { PlotModel } from "./types";
@@ -97,33 +97,32 @@ export function timeTicks(min: number, max: number, count: number, zone = "UTC")
   return out.length ? out : [min, max];
 }
 
-export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown, zone = "UTC"): string {
-  if (format !== undefined) return formatValue(ms, format, locale, zone);
-  if (zone !== "UTC") return formatZoned(ms, span, locale, zone);
+function timeText(ms: number, level: number, locale: string, zone: string): string {
+  if (zone !== "UTC" || locale !== "en-US") return zonedText(ms, level, locale, zone);
   const date = new Date(ms);
   if (date.getTime() !== date.getTime()) return "";
-  if (locale !== "en-US") {
-    const opt: Intl.DateTimeFormatOptions =
-      span < 1728e5
-        ? { timeZone: "UTC", hour: "2-digit", minute: "2-digit" }
-        : span < 6048e6
-          ? { timeZone: "UTC", month: "short", day: "numeric" }
-          : span < 6912e7
-            ? { timeZone: "UTC", month: "short", year: "numeric" }
-            : { timeZone: "UTC", year: "numeric" };
-    return new Intl.DateTimeFormat(locale, opt).format(date);
-  }
-  if (span < 1728e5) {
-    const hour = date.getUTCHours();
-    const minute = date.getUTCMinutes();
-    const h12 = hour % 12 || 12;
-    return (h12 < 10 ? "0" : "") + h12 + ":" + (minute < 10 ? "0" : "") + minute + (hour < 12 ? " AM" : " PM");
-  }
+  const hour = date.getUTCHours();
+  const minute = date.getUTCMinutes();
+  const h12 = hour % 12 || 12;
+  const time = (h12 < 10 ? "0" : "") + h12 + ":" + (minute < 10 ? "0" : "") + minute + (hour < 12 ? " AM" : " PM");
+  if (!level) return time;
   const mo = date.getUTCMonth() * 3;
   const mon = MONTHS.slice(mo, mo + 3);
-  if (span < 6048e6) return mon + " " + date.getUTCDate();
+  // 1 is the day. 4 is the day and the time.
+  if (level % 3 === 1) return mon + " " + date.getUTCDate() + (level > 3 ? ", " + time : "");
   const year = date.getUTCFullYear();
-  return span < 6912e7 ? mon + " " + year : "" + year;
+  return level === 2 ? mon + " " + year : "" + year;
+}
+
+/** One label at the format the span picks. An axis uses `timeLabels`, which also keeps its ticks distinct. */
+export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown, zone = "UTC"): string {
+  return format !== undefined ? formatValue(ms, format, locale, zone) : timeText(ms, timeLevel(span), locale, zone);
+}
+
+/** Labels for one temporal axis. A spec format wins. Without one, no two ticks read the same. */
+export function timeLabels(values: number[], span: number, locale: string, format: unknown, zone = "UTC"): string[] {
+  if (format !== undefined) return values.map((value) => formatValue(value, format, locale, zone));
+  return distinctLabels(values, span, zone, (ms, level) => timeText(ms, level, locale, zone));
 }
 
 export function tickLabel(model: PlotModel, index: number): string {

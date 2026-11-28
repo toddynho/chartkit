@@ -3,6 +3,7 @@ import { CHROME_TOP } from "../chrome";
 import { layoutPaint } from "../layout-hook";
 import { brokenScale, isRecord, logNice, niceDomain, padExtent, round } from "../svg";
 import { slots } from "../feature-hooks";
+import { parseTime } from "../timezone";
 import type { DomainLock, Layers, PlotModel, Series, XScale, YChannel } from "./types";
 import { floatExtent, linearExtent, num } from "./data";
 
@@ -387,7 +388,7 @@ export function locateX(model: PlotModel, xScale: XScale, value: number | string
     return null;
   }
   if (model.xTemporal && model.x) {
-    const parsed = Date.parse(value);
+    const parsed = parseTime(value, model.zone);
     if (Number.isFinite(parsed)) return xScale.at(parsed);
   }
   const index = model.labels.indexOf(value);

@@ -3,7 +3,10 @@ import type { DataTable } from "../../data";
 import { column, fieldOf, readColor } from "../../frame";
 import { legendPinned, legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
 import { cssVar, paint } from "../../theme";
-import { formatZoned, instantOf, zoneOf } from "../../timezone";
+import { formatZoned, instantOf, utcTime, zoneOf } from "../../timezone";
+
+/** A string with no offset is UTC here, on any host. The spec timezone only labels it. */
+const when = (value: unknown) => instantOf(value, utcTime);
 import { formatValue } from "../../format";
 import { clientIntent, n, readAxis } from "../../svg";
 import {
@@ -230,7 +233,7 @@ function buildLayers(table: DataTable, encoding: Record<string, unknown>): Built
     layers = names.map((name, index) => ({ name, values: grid[index] ?? blank() }));
   }
   if (!layers.length) return null;
-  const temporal = rawX.every((value) => instantOf(value) !== null);
+  const temporal = rawX.every((value) => when(value) !== null);
   return { labels: keys, rawX, layers, temporal, bad };
 }
 
@@ -380,7 +383,7 @@ function xScale(built: Built, box: Box, reverse: boolean, nominal: boolean): (in
   const width = Math.max(1, box.right - box.left);
   const flip = (px: number) => (reverse ? box.left + box.right - px : px);
   if (built.temporal && !nominal) {
-    const ms = built.rawX.map((value) => instantOf(value) ?? 0);
+    const ms = built.rawX.map((value) => when(value) ?? 0);
     const min = Math.min(...ms);
     const max = Math.max(...ms);
     const span = max - min || 1;
@@ -401,10 +404,10 @@ function xScale(built: Built, box: Box, reverse: boolean, nominal: boolean): (in
 function noteX(built: Built, xAt: (index: number) => number): (value: number | string) => number | null {
   if (built.temporal) {
     return (value) => {
-      const ms = instantOf(value);
+      const ms = when(value);
       if (ms === null) return categoryX(built.labels, xAt)(value);
-      const start = instantOf(built.rawX[0]);
-      const end = instantOf(built.rawX[built.rawX.length - 1]);
+      const start = when(built.rawX[0]);
+      const end = when(built.rawX[built.rawX.length - 1]);
       if (start === null || end === null || end === start) return xAt(0);
       const t = (ms - start) / (end - start);
       return xAt(0) + t * (xAt(built.labels.length - 1) - xAt(0));
@@ -593,11 +596,11 @@ function xTickLabels(frame: { locale: string; preset: { muted: string }; width: 
   const axis = readAxis(spec, "x");
   if (axis.labels === false) return "";
   const zone = zoneOf(spec);
-  const span = built.temporal ? Math.abs((instantOf(built.rawX[built.rawX.length - 1]) ?? 0) - (instantOf(built.rawX[0]) ?? 0)) : 0;
+  const span = built.temporal ? Math.abs((when(built.rawX[built.rawX.length - 1]) ?? 0) - (when(built.rawX[0]) ?? 0)) : 0;
   const encodedX = isRecord(spec.encoding) && isRecord(spec.encoding.x) ? spec.encoding.x.format : undefined;
   const xFormat = explicitFormat(spec, "x") ?? encodedX;
   const labels = built.labels.map((label, index) => {
-    const ms = instantOf(built.rawX[index]);
+    const ms = when(built.rawX[index]);
     const shown = built.temporal && ms !== null
       ? xFormat !== undefined
         ? formatValue(ms, xFormat, frame.locale)
@@ -621,12 +624,12 @@ function xTickLabels(frame: { locale: string; preset: { muted: string }; width: 
 
 function tickInset(frame: { locale: string }, spec: Record<string, unknown>, built: Built): number {
   const zone = zoneOf(spec);
-  const span = built.temporal ? Math.abs((instantOf(built.rawX[built.rawX.length - 1]) ?? 0) - (instantOf(built.rawX[0]) ?? 0)) : 0;
+  const span = built.temporal ? Math.abs((when(built.rawX[built.rawX.length - 1]) ?? 0) - (when(built.rawX[0]) ?? 0)) : 0;
   const encodedX = isRecord(spec.encoding) && isRecord(spec.encoding.x) ? spec.encoding.x.format : undefined;
   const xFormat = explicitFormat(spec, "x") ?? encodedX;
   let widest = 24;
   for (let index = 0; index < built.labels.length; index++) {
-    const ms = instantOf(built.rawX[index]);
+    const ms = when(built.rawX[index]);
     const shown = built.temporal && ms !== null
       ? xFormat !== undefined
         ? formatValue(ms, xFormat, frame.locale)

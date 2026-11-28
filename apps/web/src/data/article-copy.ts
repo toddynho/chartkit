@@ -97,6 +97,36 @@ export const articleSections: Record<string, DocSection[]> = {
     section("Domain", [
       "`encoding.y.scale.domain` is `[min, max]`. Either end may be `null` to stay automatic, as in `[0, null]`. `scale.type` `log` is for a positive domain.",
     ]),
+    section(
+      "Dates and times",
+      [
+        'Set `type: "temporal"` on `encoding.x` and write each value as an ISO 8601 string or as epoch milliseconds. A string with no offset is clock time in the spec `timezone`, which is an IANA name such as `America/New_York`. With no `timezone` it is UTC. The zone of the machine that renders is never used, so a server in UTC, a laptop in Tokyo, and the browser that hydrates the page paint the same ticks.',
+      ],
+      [
+        "`2026-11-27` is midnight at the start of that day in the spec timezone.",
+        "`2026-11-27T07:40`, `2026-11-27 07:40`, `2026-11-27T07:40:15`, and `2026-11-27T07:40:15.250` are that clock time in the spec timezone.",
+        "`2026-11-27T07:40Z` and `2026-11-27T07:40-05:00` name one instant. The timezone does not move them. It only decides how the ticks read.",
+        "A number is epoch milliseconds: `1795802400000` is 18:00 UTC on November 27, 2026.",
+        'Any other text, such as `Nov 27, 2026` or `11/27/2026`, is handed to the JavaScript engine and can differ between hosts. Write ISO strings.',
+        "When clocks jump forward, a time inside the skipped hour moves forward by that hour. When clocks fall back, a time that happens twice is the first of the two. Add an offset to say which one you mean.",
+      ],
+      [
+        'import { render } from "@chartkitdev/core/all";\n\nconst svg = render({\n  version: "1",\n  type: "line",\n  timezone: "America/New_York",\n  data: [\n    { t: "2026-11-27T07:40", visits: 120 },\n    { t: "2026-11-27T13:00", visits: 310 },\n    { t: "2026-11-27T22:30", visits: 180 },\n  ],\n  encoding: { x: { field: "t", type: "temporal" }, y: "visits" },\n  a11y: { alt: "Visits peaked at 310 at 1 PM." },\n});\n\n// x ticks on any host: 09:00 AM, 12:00 PM, 03:00 PM, 06:00 PM, 09:00 PM.\n// They are New York clock times. Remove `timezone` and the same strings are UTC.',
+      ],
+    ),
+    section(
+      "Tick labels on a time axis",
+      [
+        "With no format set, the axis picks the shortest labels that still tell every tick apart. One day reads as times. Several days read as dates. When ticks fall inside a day on a span of several days, the tick at midnight shows the date and the others show the date and the time. Labels are never shortened. When they need more room, the axis draws fewer ticks.",
+        "The chart below spans two and a half days at the default 640 pixel width. Its ticks read `Nov 25, 12:00 PM`, `Nov 26`, `Nov 26, 12:00 PM`, `Nov 27`, `Nov 27, 12:00 PM`.",
+        'To override the text, set `encoding.x.format` to `date`, `time`, `datetime`, `weekday`, `month`, or `year`. The format in the spec wins, even when it makes two ticks read the same: `"format": "time"` on this chart prints `12:00 PM`, `12:00 AM`, `12:00 PM`, `12:00 AM`, `12:00 PM`. To choose the ticks themselves, set `axes.x.ticks` to epoch milliseconds: `"axes": { "x": { "ticks": [1795651200000, 1795737600000] } }` draws two ticks, `Nov 26` and `Nov 27`.',
+        "Line, area, scatter, combo, and the other charts on the shared x axis follow both rules. Spike, candlestick, and area-range read dates the same way and still label by span alone, so their ticks can repeat across days. Streamgraph reads a string with no offset as UTC whatever the timezone. The hover tooltip reads one in the browser's zone when `timezone` is set. Write an offset or `Z` on those until they follow.",
+      ],
+      [],
+      [
+        'import { render } from "@chartkitdev/core/all";\n\nconst svg = render({\n  version: "1",\n  type: "line",\n  data: [\n    { t: "2026-11-25T08:30Z", load: 41 },\n    { t: "2026-11-25T20:10Z", load: 58 },\n    { t: "2026-11-26T08:00Z", load: 44 },\n    { t: "2026-11-26T21:00Z", load: 63 },\n    { t: "2026-11-27T08:30Z", load: 47 },\n    { t: "2026-11-27T19:45Z", load: 52 },\n  ],\n  encoding: { x: { field: "t", type: "temporal" }, y: "load" },\n  a11y: { alt: "Load peaked at 63 on the evening of November 26." },\n});\n\n// To override: encoding: { x: { field: "t", type: "temporal", format: "time" }, y: "load" }',
+      ],
+    ),
   ],
   axes: [
     section("Titles", [

@@ -24,33 +24,87 @@ export function zoneOf(spec: { timezone?: unknown }): string {
   return namedZone(spec.timezone) ?? "UTC";
 }
 
-/** Epoch millis for an ISO instant or a large numeric timestamp. */
-export function instantOf(value: unknown): number | null {
+/** A date, or a date and a clock time, with no `Z` and no offset. */
+const BARE = /^\d{4}(-\d\d){2}([T ][\d:.]+)?$/;
+
+/** Epoch millis for a date string, with a string that has no offset read as UTC. Never the host zone. */
+export function utcTime(value: string): number {
+  return Date.parse(value.length > 10 && BARE.test(value) ? value.replace(" ", "T") + "Z" : value);
+}
+
+/**
+ * Epoch millis for a date string. `2026-11-27`, `2026-11-27T07:40` and
+ * `2026-11-27 07:40:15.5` carry no offset, so they are clock time in `zone`,
+ * never in the host zone. A string with `Z` or an offset is that instant.
+ * A clock time skipped by a DST jump moves forward by the jump. One that
+ * happens twice is the first of the two.
+ */
+export function parseTime(value: string, zone: string): number {
+  const utc = utcTime(value);
+  if (zone === "UTC" || utc !== utc || !BARE.test(value)) return utc;
+  // Try the offset a day before, then a day after. Neither fits inside a DST gap.
+  const before = zoneOffset(utc - 86400000, zone);
+  const first = utc - before;
+  if (zoneOffset(first, zone) === before) return first;
+  const after = zoneOffset(utc + 86400000, zone);
+  return zoneOffset(utc - after, zone) === after ? utc - after : first;
+}
+
+/**
+ * Epoch millis for a date string or a large numeric timestamp. Pass `utcTime`,
+ * or `parseTime` bound to the spec zone, as `parse`. The `Date.parse` default
+ * reads a string with no offset in the host zone. Only the hover tooltip still
+ * uses it, because its bundle has no room for the parser.
+ */
+export function instantOf(value: unknown, parse: (text: string) => number = Date.parse): number | null {
   if (typeof value === "number" && Number.isFinite(value) && Math.abs(value) > 1e11) return value;
-  if (typeof value === "string" && value.length >= 10 && /\d{4}-\d{2}-\d{2}/.test(value)) {
-    const ms = Date.parse(value);
+  if (typeof value === "string" && /\d{4}-\d{2}-\d{2}/.test(value)) {
+    const ms = parse(value);
     if (Number.isFinite(ms)) return ms;
   }
   return null;
 }
 
-/** Tick text in `zone`. The UTC en-US path stays in the cartesian formatter. */
-export function formatZoned(ms: number, span: number, locale: string, zone: string): string {
+/** Tick format for a span: 0 time, 1 month and day, 2 month and year, 3 year. */
+export function timeLevel(span: number): number {
+  return span < 1728e5 ? 0 : span < 6048e6 ? 1 : span < 6912e7 ? 2 : 3;
+}
+
+/** Tick text in `zone` at one level. Level 4 is date and time. The UTC en-US path stays in the cartesian formatter. */
+export function zonedText(ms: number, level: number, locale: string, zone: string): string {
   const date = new Date(ms);
   if (Number.isNaN(date.getTime())) return "";
   const options: Intl.DateTimeFormatOptions = { timeZone: zone };
-  if (span < 1728e5) {
+  // Time on 0 and 4, day on 1 and 4, month on 1, 2 and 4, year on 2 and 3.
+  if (!(level % 4)) {
     options.hour = "2-digit";
     options.minute = "2-digit";
     if (locale === "en-US") options.hourCycle = "h12";
-  } else if (span < 6048e6) {
-    options.month = "short";
-    options.day = "numeric";
-  } else if (span < 6912e7) {
-    options.month = "short";
-    options.year = "numeric";
-  } else options.year = "numeric";
+  }
+  if (level % 3 === 1) options.day = "numeric";
+  if (level % 3) options.month = "short";
+  if (level >> 1 === 1) options.year = "numeric";
   return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+/** Tick text in `zone` for one value, at the level the span picks. */
+export function formatZoned(ms: number, span: number, locale: string, zone: string): string {
+  return zonedText(ms, timeLevel(span), locale, zone);
+}
+
+/**
+ * Labels for a whole axis. Starts at the level the span picks and moves to a
+ * finer one while two ticks would read the same: year, month and year, month
+ * and day. The last step shows the date at midnight on the `zone` clock and
+ * date with time on every other tick.
+ */
+export function distinctLabels(values: number[], span: number, zone: string, text: (ms: number, level: number) => string): string[] {
+  // The start is `timeLevel(span)`, written out so a bundle with only this function stays small.
+  for (let level = span < 1728e5 ? 0 : span < 6048e6 ? 1 : span < 6912e7 ? 2 : 3; ; level = level > 1 ? level - 1 : 4) {
+    // Midnight on the zone clock: the clock reading, taken as UTC, is a whole day.
+    const labels = values.map((value) => text(value, level > 3 && (value + zoneOffset(value, zone)) % 86400000 === 0 ? 1 : level));
+    if (level > 3 || new Set(labels).size === labels.length) return labels;
+  }
 }
 
 const MINUTE = 60000;
@@ -66,9 +120,12 @@ interface Wall {
   second: number;
 }
 
+/** One clock per zone. Building one for every data point is the slow part of reading a column. */
+const clocks: Record<string, Intl.DateTimeFormat> = {};
+
 function wall(ms: number, zone: string): Wall {
   const bag: Record<string, number> = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
+  const clock = (clocks[zone] ||= new Intl.DateTimeFormat("en-US", {
     timeZone: zone,
     hourCycle: "h23",
     year: "numeric",
@@ -77,7 +134,8 @@ function wall(ms: number, zone: string): Wall {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  }).formatToParts(new Date(ms))) {
+  }));
+  for (const part of clock.formatToParts(ms)) {
     if (part.type !== "literal") bag[part.type] = Number(part.value);
   }
   return {
@@ -90,9 +148,11 @@ function wall(ms: number, zone: string): Wall {
   };
 }
 
-function zoneOffset(ms: number, zone: string): number {
+/** How far the `zone` clock is ahead of UTC at `ms`, in millis. Negative west of Greenwich. */
+export function zoneOffset(ms: number, zone: string): number {
+  // The clock reads whole seconds, so the instant is cut to the second it falls in.
   const p = wall(ms, zone);
-  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - ms;
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - Math.floor(ms / 1000) * 1000;
 }
 
 /** UTC instant for a wall-clock time, or null when that clock time does not exist. */

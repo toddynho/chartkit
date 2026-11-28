@@ -13,6 +13,7 @@
  */
 import { clamp, esc, linear, niceNum, ticks } from "./svg";
 import type { LineRaceOptions, LineRaceSeries } from "./race-data";
+import { utcTime } from "./timezone";
 
 export type { LineRaceOptions, LineRaceSeries } from "./race-data";
 export { lineRaceFromCsv, lineRaceFromJson } from "./race-data";
@@ -186,7 +187,7 @@ function parseX(value: string | number | null): { kind: "time"; ms: number } | {
   const iso = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(text);
   if (iso) return { kind: "time", ms: Date.UTC(Number(iso[1]), Number(iso[2]) - 1, iso[3] ? Number(iso[3]) : 1) };
   if (/^\d{4}-\d{2}-\d{2}T/.test(text)) {
-    const ms = Date.parse(text);
+    const ms = utcTime(text);
     if (Number.isFinite(ms)) return { kind: "time", ms };
   }
   const named = /^([A-Za-z]+)\s+(\d{4})$/.exec(text);
