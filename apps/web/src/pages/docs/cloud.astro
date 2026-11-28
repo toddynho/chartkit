@@ -27,7 +27,20 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   </p>
   <h2>POST /charts and POST /validate</h2>
   <p>
-    <code>POST /charts</code> stores the repaired spec and returns <code>id</code>, <code>shareUrl</code>, <code>svgUrl</code>, and <code>pngUrl</code>. <code>shareUrl</code> is <code>/s/&lt;id&gt;</code>, an HTML page with a 1200×628 card so X, Slack, LinkedIn, and iMessage show a preview. The same spec and the same mark state return the same id. A valid <code>Authorization: Bearer</code> stores it unmarked. <code>GET /c/&lt;id&gt;</code> serves that stored image and does not read a key. <code>GET /c/&lt;id&gt;/card.png</code> is the card. <code>POST /validate</code> does not draw. It returns the repaired spec, <code>applied</code>, and the remaining diagnostics.
+    <code>POST /charts</code> stores the repaired spec and returns <code>id</code>, <code>shareUrl</code>, <code>svgUrl</code>, <code>pngUrl</code>, and <code>cardUrl</code>. <code>shareUrl</code> is <code>/s/&lt;id&gt;</code>, an HTML page with a 1200×628 card so X, Slack, LinkedIn, and iMessage show a preview. The same spec and the same mark state return the same id. A valid <code>Authorization: Bearer</code> stores it unmarked. <code>GET /c/&lt;id&gt;</code> serves that stored image and does not read a key. <code>GET /c/&lt;id&gt;/card.png</code> is the card, and <code>cardUrl</code> is its address. An agent gets the same result from the <code>share_chart</code> tool on the remote MCP at <code>/mcp</code>: see <a href="/docs/mcp#cloud-mcp">Cloud MCP</a>. <code>POST /validate</code> does not draw. It returns the repaired spec, <code>applied</code>, and the remaining diagnostics.
+  </p>
+  <h2 id="share-card">Share card</h2>
+  <p>
+    The card is the image a feed shows when someone posts <code>shareUrl</code>. It is always 1200×628, and it is drawn for a feed, where it appears at about 500 pixels wide. The chart is laid out on a 600×314 frame and enlarged 2×, so in the card the title is 30 px and tick labels, data labels, the legend, and the subtitle are 20 to 24 px. The library places the ticks and labels for that narrower frame, so the card may show fewer ticks than the chart at its own size.
+  </p>
+  <ul>
+    <li>The card ignores <code>size</code> in the spec, and <code>w</code>, <code>h</code>, and <code>scale</code>. A chart authored at 960×540 and a chart with no size get the same card frame.</li>
+    <li>Text is not cut off or shortened. A long title or subtitle is broken into lines and the chart moves down. If some text still would not fit, the card uses a larger layout frame with smaller type.</li>
+    <li>A spec with <code>theme.tokens.fontSize</code> under 10 is drawn with 10 on the card.</li>
+    <li>Only the card is drawn this way. The stored spec, <code>svgUrl</code>, <code>pngUrl</code>, <code>GET /render</code>, and the chart on the share page stay at the chart's own size.</li>
+  </ul>
+  <p>
+    To see a card without storing anything, open <code>GET /render?format=png&amp;card=1&amp;spec=…</code>. To check how a link unfurls, paste <code>shareUrl</code> into a draft post.
   </p>
   <h2>Headers</h2>
   <ul>

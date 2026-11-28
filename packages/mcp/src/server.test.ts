@@ -71,7 +71,7 @@ describe("MCP tools", () => {
     await withClient(async (client) => {
       const listed = await client.listTools();
       const names = listed.tools.map((tool) => tool.name).sort();
-      expect(names).toEqual(["get_example", "list_chart_types", "lookup_feature", "render", "render_chart", "repair", "validate"]);
+      expect(names).toEqual(["get_example", "list_chart_types", "lookup_feature", "render", "render_chart", "repair", "share_chart", "validate"]);
       for (const tool of listed.tools) {
         if (tool.name === "list_chart_types") continue;
         expect(tool.inputSchema.type).toBe("object");
@@ -290,8 +290,83 @@ describe("render_chart", () => {
   });
 });
 
+describe("share_chart", () => {
+  const spec = { version: "1", type: "bar" };
+  const stored = {
+    ok: true,
+    id: "AbCdEfGh12345678",
+    url: "https://cloud.chartkit.dev/c/AbCdEfGh12345678.svg",
+    shareUrl: "https://cloud.chartkit.dev/s/AbCdEfGh12345678",
+    svgUrl: "https://cloud.chartkit.dev/c/AbCdEfGh12345678.svg",
+    pngUrl: "https://cloud.chartkit.dev/c/AbCdEfGh12345678.png",
+    cardUrl: "https://cloud.chartkit.dev/c/AbCdEfGh12345678/card.png",
+    watermark: true,
+    applied: [{ op: "add", path: "/a11y" }],
+    warnings: [],
+    errors: [],
+    spec,
+  };
+
+  it("posts the spec to /charts and returns the share links and the repairs", async () => {
+    fetchSpy.mockResolvedValueOnce(new Response(JSON.stringify(stored), { status: 200, headers: { "content-type": "application/json" } }));
+    await withClient(async (client) => {
+      const listed = await client.listTools();
+      const tool = listed.tools.find((item) => item.name === "share_chart");
+      expect(tool?.description).toContain("shareUrl");
+      expect(tool?.description).toContain("365 days");
+      expect(tool?.inputSchema.required).toEqual(["spec"]);
+      expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(["spec", "w", "h", "scale", "theme", "background", "key"]);
+      expect(tool?.annotations?.readOnlyHint).toBe(false);
+
+      const body = payload((await client.callTool({ name: "share_chart", arguments: { spec, theme: "midnight", key: "ck_test_secret" } })) as ToolText) as typeof stored;
+      expect(body.id).toBe(stored.id);
+      expect(body.shareUrl).toBe(stored.shareUrl);
+      expect(body.svgUrl).toBe(stored.svgUrl);
+      expect(body.pngUrl).toBe(stored.pngUrl);
+      expect(body.cardUrl).toBe(stored.cardUrl);
+      expect(body.applied[0]?.path).toBe("/a11y");
+      expect(JSON.stringify(body)).not.toContain("ck_test_secret");
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(String(fetchSpy.mock.calls[0]?.[0])).toBe("https://cloud.chartkit.dev/charts");
+      const init = fetchSpy.mock.calls[0]?.[1] as { method: string; headers: Record<string, string>; body: string };
+      expect(init.method).toBe("POST");
+      expect(init.headers.authorization).toBe("Bearer ck_test_secret");
+      expect(JSON.parse(init.body)).toEqual({ spec, theme: "midnight" });
+    });
+  });
+
+  it("builds cardUrl when an older Cloud deploy leaves it out", async () => {
+    const { cardUrl: _omitted, ...older } = stored;
+    fetchSpy.mockResolvedValueOnce(new Response(JSON.stringify(older), { status: 200, headers: { "content-type": "application/json" } }));
+    await withClient(async (client) => {
+      const body = payload((await client.callTool({ name: "share_chart", arguments: { spec } })) as ToolText) as typeof stored;
+      expect(body.cardUrl).toBe(stored.cardUrl);
+    });
+  });
+
+  it("returns the errors and no link when Cloud could not repair the spec", async () => {
+    // What POST /charts returns for this spec. Keys are quoted so the CK code scan in core does not read it as a definition.
+    const errors = [{ "code": "CK1005", "severity": "error", "path": "/type", "message": 'unknown chart type "nope"' }];
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: false, url: "", watermark: true, applied: [], warnings: [], errors, spec: { version: "1", type: "nope" } }), {
+        status: 422,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    await withClient(async (client) => {
+      const result = (await client.callTool({ name: "share_chart", arguments: { spec: { version: "1", type: "nope" } } })) as ToolText & { isError?: boolean };
+      expect(result.isError).toBe(true);
+      const body = payload(result) as { ok: boolean; error: string; errors: typeof errors; shareUrl?: string };
+      expect(body.ok).toBe(false);
+      expect(body.error).toContain("nothing was stored");
+      expect(body.errors).toEqual(errors);
+      expect(body.shareUrl).toBeUndefined();
+    });
+  });
+});
+
 describe("source", () => {
-  it("keeps network calls inside render_chart", () => {
+  it("keeps network calls inside render_chart and share_chart", () => {
     const files = readdirSync(join(pkgRoot, "src")).filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"));
     const local = files.filter((name) => name !== "render-chart.ts");
     const combined = local.map((name) => readFileSync(join(pkgRoot, "src", name), "utf8")).join("\n");
@@ -300,6 +375,8 @@ describe("source", () => {
     const cloud = readFileSync(join(pkgRoot, "src/render-chart.ts"), "utf8");
     expect(cloud).toContain("https://cloud.chartkit.dev");
     expect(cloud).toContain("fetcher(`${origin}/render`");
+    expect(cloud).toContain("fetcher(`${origin}/charts`");
+    expect(cloud.match(/\bfetcher\(/g)).toHaveLength(2);
   });
 });
 

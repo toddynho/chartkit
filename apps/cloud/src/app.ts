@@ -3,7 +3,6 @@ import type { ChartStore, StoredChart } from "./charts.ts";
 import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
 import { playgroundHref, shareDocument, shareMessage, specDescription, specTitle } from "./share.ts";
-import { cardDrawingSize } from "./watermark.ts";
 import { FONT_FALLBACK } from "./png.ts";
 import { keyStoreFromEnv, storeKind, type KeyStore, type StoreKind } from "./keys.ts";
 import { clientIp, limiterFrom, type RateLimiter } from "./limit.ts";
@@ -95,9 +94,9 @@ export function createApp(deps: CloudDeps = {}): CloudApp {
 
       if (path === "/mcp") {
         return handleMcp(request, async (call) => {
-          const nextUrl = new URL("/render", url.origin);
+          const nextUrl = new URL(call.route === "charts" ? "/charts" : "/render", url.origin);
           const next = new Request(nextUrl, { method: "POST", headers: call.headers, body: call.body });
-          return renderPost(next, nextUrl, keys, charts, cache);
+          return call.route === "charts" ? storeChart(next, nextUrl, keys, charts) : renderPost(next, nextUrl, keys, charts, cache);
         });
       }
       if (path === "/render" && request.method === "GET") return renderGet(request, url, cache);
@@ -178,7 +177,8 @@ async function storeChart(request: Request, url: URL, keys: KeyStore, charts: Ch
   const svgUrl = `${url.origin}/c/${stored.id}.svg`;
   const pngUrl = `${url.origin}/c/${stored.id}.png${frame.scale !== 1 ? `?scale=${frame.scale}` : ""}`;
   const shareUrl = `${url.origin}/s/${stored.id}`;
-  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, shareUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
+  const cardUrl = `${url.origin}/c/${stored.id}/card.png`;
+  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, shareUrl, cardUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
 }
 
 async function validatePost(request: Request): Promise<Response> {
@@ -286,9 +286,9 @@ async function renderImage(
   if (typeof frame === "string") return imageError(400, "Bad render query.", frame);
   frame.watermark = watermark;
   if (frame.card) {
-    const drawing = cardDrawingSize(watermark);
-    frame.w = drawing.width;
-    frame.h = drawing.height;
+    // drawSpec lays the card out on its own frame. A size on the query never reaches it.
+    frame.w = undefined;
+    frame.h = undefined;
     frame.scale = 1;
     frame.format = "png";
   }

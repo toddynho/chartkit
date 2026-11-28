@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { readData, packageVersion } from "./paths.js";
-import { renderChart } from "./render-chart.js";
+import { renderChart, shareChart } from "./render-chart.js";
 import { getExample, listChartTypes, lookupFeature, renderSpec, repairSpec, validateSpec } from "./tools.js";
 
 const READ_ONLY = {
@@ -23,7 +23,7 @@ function failure(message: string) {
   return { content: [{ type: "text" as const, text: message }], isError: true as const };
 }
 
-/** stdio MCP server. Tool handlers read local files and call core. They do not use the network. */
+/** stdio MCP server. Tool handlers read local files and call core. Only render_chart and share_chart use the network. */
 export function createServer(): McpServer {
   const server = new McpServer(
     { name: "chartkit", version: packageVersion() },
@@ -33,7 +33,8 @@ export function createServer(): McpServer {
         "validate returns that function's diagnostics, including JSON Patch fixes.",
         "repair applies those fixes and returns the repaired spec plus whatever diagnostics remain. It also converts Chart.js, ECharts, Vega-Lite, Plotly, and Recharts configs, and accepts a fenced or JSON5-style string. Call repair on any failing spec before rewriting it by hand.",
         "render returns SVG from @chartkitdev/core/extra (every chart type, including the extra types). PNG is not available from that local tool.",
-        "render_chart calls ChartKit Cloud and returns the image URL plus repairs and warnings. Omit format, or pass svg. Pass png only when the host cannot display SVG, and set scale to 2 or higher for that PNG. The chart background defaults to #ffffff. Pass background to override it, or theme midnight when the host is dark. Free images include a chartkit.dev mark. CHARTKIT_CLOUD_KEY or the key argument is sent as Authorization: Bearer and is not part of the returned URL. A valid key returns a stored chart with the mark removed. The other tools do not use the network.",
+        "render_chart calls ChartKit Cloud and returns the image URL plus repairs and warnings. Omit format, or pass svg. Pass png only when the host cannot display SVG, and set scale to 2 or higher for that PNG. The chart background defaults to #ffffff. Pass background to override it, or theme midnight when the host is dark. Free images include a chartkit.dev mark. CHARTKIT_CLOUD_KEY or the key argument is sent as Authorization: Bearer and is not part of the returned URL. A valid key returns a stored chart with the mark removed.",
+        "share_chart stores the spec on ChartKit Cloud and returns shareUrl, a page that X, Slack, LinkedIn, and iMessage unfurl as an image card, plus svgUrl, pngUrl, and cardUrl. Use it when someone asks for a link to post or send. A spec that repair cannot fix returns its errors and stores nothing. Without a key the chart carries the mark and is kept for 365 days. render_chart and share_chart are the two tools that use the network.",
         "lookup_feature reads the bundled copy of features.json. Statuses are that file's cells. partial is not native. Every other library is listed, including none.",
         "list_chart_types and get_example return the example specs shipped with this package.",
         "Resources are the bundled llms.txt and the ChartKit v1 JSON Schema.",
@@ -114,6 +115,35 @@ export function createServer(): McpServer {
     async ({ spec, format, w, h, scale, theme, background, key }) => {
       const result = await renderChart({ spec, format, w, h, scale, theme, background, key });
       if ("error" in result) return failure(result.error);
+      return text(result);
+    },
+  );
+
+  server.registerTool(
+    "share_chart",
+    {
+      title: "Store a spec on ChartKit Cloud and get a share link",
+      description:
+        "POST the spec to ChartKit Cloud's /charts route, which stores it, and return id, shareUrl, svgUrl, pngUrl, cardUrl, and the repairs and warnings. Use this when someone asks for a link to post or send: shareUrl is a web page that X, Slack, LinkedIn, and iMessage unfurl as a large image card, and cardUrl is that 1200x628 card image. The spec is repaired first and the repaired spec is what is stored. A spec that repair cannot fix returns its errors and stores nothing. The same spec returns the same id. Without a key the chart carries a chartkit.dev mark and is kept for 365 days; each visit to shareUrl after 30 days starts another 365. Pass key, or set CHARTKIT_CLOUD_KEY, to store it without the mark and without an expiry. The key is sent as Authorization: Bearer and is not part of any returned URL. w, h, theme, and background are written into the stored spec. Anyone with a link can open it, so do not share data that must stay private. CHARTKIT_CLOUD_URL overrides the default https://cloud.chartkit.dev. This tool calls the network and writes to that service. To get an image without storing anything, use render_chart.",
+      inputSchema: {
+        spec: specField,
+        w: z.number().optional().describe("Width in pixels, up to 4096. Written to size.width in the stored spec."),
+        h: z.number().optional().describe("Height in pixels, up to 4096. Written to size.height in the stored spec."),
+        scale: z.number().optional().describe("PNG zoom from 1 to 4, carried on pngUrl. The share page, the card, and svgUrl ignore it."),
+        theme: z.string().optional().describe('Preset name, such as "soft" or "midnight". Written to the stored spec.'),
+        background: z
+          .string()
+          .optional()
+          .describe('Chart background. Hex, rgb(), hsl(), oklch(), or "transparent". Omit for #ffffff. Written to theme.tokens.background in the stored spec.'),
+        key: z.string().optional().describe("API key that removes the chartkit.dev mark and the expiry."),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    },
+    async ({ spec, w, h, scale, theme, background, key }) => {
+      const result = await shareChart({ spec, w, h, scale, theme, background, key });
+      if ("error" in result) {
+        return failure(result.errors ? JSON.stringify({ ok: false, error: result.error, errors: result.errors }, null, 2) : result.error);
+      }
       return text(result);
     },
   );

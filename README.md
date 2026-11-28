@@ -28,7 +28,7 @@ npm install @chartkitdev/core
 
 A line chart is 32 KB gzip. uPlot is smaller at 24 KB. We publish the benchmarks we lose as well as the ones we win: [BENCHMARKS.md](BENCHMARKS.md).
 
-**Nothing to install:** ChartKit Cloud does the same render over HTTP. Send a spec to `/render` and get an SVG or PNG back. Agents can call its remote MCP, which has three tools: `render_chart`, `validate_chart` and `repair_chart`. It goes live at `cloud.chartkit.dev` with v1. The service is in [apps/cloud](apps/cloud/README.md).
+**Nothing to install:** ChartKit Cloud does the same render over HTTP. Send a spec to `/render` and get an SVG or PNG back. Agents can call its remote MCP, which has four tools: `render_chart`, `share_chart`, `validate_chart` and `repair_chart`. It goes live at `cloud.chartkit.dev` with v1. The service is in [apps/cloud](apps/cloud/README.md).
 
 **[Docs](https://chartkit.dev/docs)** | **[Gallery](https://chartkit.dev/gallery)** | **[Playground](https://chartkit.dev/playground)** | **[Compare](https://chartkit.dev/compare)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
 

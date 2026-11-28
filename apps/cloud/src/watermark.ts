@@ -24,13 +24,25 @@ export const CARD_WIDTH = 1200;
 export const CARD_HEIGHT = 628;
 
 /**
- * Library drawing size whose padded Cloud SVG is exactly CARD_WIDTH by CARD_HEIGHT.
- * The watermark band is included only when the mark is drawn.
+ * A feed shows the 1200-wide card at about 500 px, so card text is read at well under half size.
+ * The chart is laid out on a frame CARD_ZOOM times smaller than the card and enlarged by that factor.
+ * At 2, the library's 15 px title is 30 px in the card and its 10 to 12 px labels are 20 to 24 px.
  */
-export function cardDrawingSize(watermark: boolean): { width: number; height: number } {
+export const CARD_ZOOM = 2;
+/** The most a card is enlarged. Past this the layout frame is too small to hold a chart. */
+export const CARD_ZOOM_MAX = 3;
+/** Smallest title, and smallest other text, in card pixels. A spec with smaller type than the library default gets a larger zoom. */
+export const CARD_TITLE_MIN = 28;
+export const CARD_LABEL_MIN = 18;
+
+/**
+ * Library drawing size whose padded Cloud SVG, enlarged `zoom` times, is exactly CARD_WIDTH by CARD_HEIGHT.
+ * The watermark band is included only when the mark is drawn. The margin and the mark are enlarged with the chart.
+ */
+export function cardDrawingSize(watermark: boolean, zoom = CARD_ZOOM): { width: number; height: number } {
   return {
-    width: CARD_WIDTH - EMBED_PAD_X * 2,
-    height: CARD_HEIGHT - EMBED_PAD_TOP - EMBED_PAD_BOTTOM - (watermark ? BAND : 0),
+    width: CARD_WIDTH / zoom - EMBED_PAD_X * 2,
+    height: CARD_HEIGHT / zoom - EMBED_PAD_TOP - EMBED_PAD_BOTTOM - (watermark ? BAND : 0),
   };
 }
 
