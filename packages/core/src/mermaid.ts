@@ -263,6 +263,10 @@ function build(kind: Kind, headerRest: string, body: string[], meta: Meta, maxPo
 interface Series {
   mark: "bar" | "line";
   name?: string;
+  /** The name was generated, so it must not title the shared y-axis. */
+  auto?: boolean;
+  /** Lower-case name for the alt sentence when the name was generated from the mark. */
+  plain?: string;
   values: number[];
   field: string;
 }
@@ -357,13 +361,15 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
     horizontal = false;
     warnings.push(warn("CK8004", "Horizontal orientation is only drawn for bar charts.", "/mark/orientation"));
   }
-  nameUnnamed(series, yTitle);
+  if (series.length === 1) series[0].name ||= yTitle;
   const xKey = claimKey(slugKey(xTitle), "x", new Set());
   const used = new Set<string>([xKey]);
+  let blank = 0;
   for (const item of series) {
-    const label = series.length === 1 ? yTitle || item.name : item.name || yTitle;
+    const label = series.length === 1 ? yTitle || item.name : item.name || (yTitle && (blank++ ? `${yTitle} ${blank}` : yTitle));
     item.field = claimKey(slugKey(label), "value", used);
   }
+  nameUnnamed(series);
   const split = secondAxis(series, type, warnings);
 
   const rows = labels.map((label, index) => {
@@ -382,6 +388,7 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
   const axes: Record<string, unknown> = {};
   if (xTitle) axes.x = { title: xTitle };
   if (yTitle) axes.y = { title: yTitle };
+  else if (!split.size && series.some((item) => item.auto)) axes.y = { title: "" };
   if (split.size) {
     const titled = series.find((item, index) => split.has(index) && item.name);
     axes.y2 = titled?.name ? { title: titled.name } : true;
@@ -394,7 +401,7 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
       x: numeric && type === "line" ? { field: xKey, type: "quantitative", ...(xTitle ? { title: xTitle } : {}) } : xKey,
       y: channels.length === 1 ? channels[0] : channels,
     },
-    a11y: { alt: chooseAlt(meta, diagramTitle, xyAlt(diagramTitle, series, labels)) },
+    a11y: { alt: chooseAlt(meta, diagramTitle, xyAlt(series, categories ? labels : labels.map((label) => `${xTitle || "x"} ${label}`)), true) },
   };
   if (diagramTitle) spec.title = diagramTitle;
   if (Object.keys(axes).length) spec.axes = axes;
@@ -402,11 +409,16 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
   return spec;
 }
 
-function nameUnnamed(series: Series[], yTitle: string | undefined): void {
-  if (!yTitle) return;
-  const unnamed = series.filter((item) => !item.name);
-  unnamed.forEach((item, index) => {
-    item.name = index === 0 ? yTitle : `${yTitle} ${index + 1}`;
+/** Unnamed series are named for their mark, or numbered when two share a mark. A lone series keeps the y-axis title. */
+function nameUnnamed(series: Series[]): void {
+  const count = (mark: string) => series.filter((item) => item.mark === mark).length;
+  const numbered = series.some((item) => !item.name && count(item.mark) > 1);
+  series.forEach((item, index) => {
+    if (item.name) return;
+    item.auto = series.length > 1;
+    if (numbered) item.name = `Series ${index + 1}`;
+    else if (series.length > 1) item.name = item.mark === "bar" ? "Bars" : "Line";
+    if (!numbered) item.plain = item.mark === "bar" ? "bars" : "line";
   });
 }
 
@@ -476,21 +488,29 @@ function secondAxis(series: Series[], type: string, warnings: ImportWarning[]): 
   return split;
 }
 
-function xyAlt(title: string | undefined, series: Series[], labels: string[]): string {
-  let best = series[0]?.values[0] ?? 0;
-  let name = series[0]?.name ?? "Series";
-  let at = labels[0] ?? "1";
-  for (const item of series) {
-    item.values.forEach((value, index) => {
-      if (value >= best) {
-        best = value;
-        name = item.name ?? "Series";
-        at = labels[index] ?? at;
-      }
-    });
+/** One clause per series, every number read from the data. More than three series are summed up by the highest point. */
+function xyAlt(series: Series[], labels: string[]): string {
+  if (series.length > 3) {
+    let top = series[0];
+    for (const item of series) if (Math.max(...item.values) > Math.max(...top.values)) top = item;
+    const best = Math.max(...top.values);
+    return `${series.length} series; ${top.name} is highest at ${labels[top.values.indexOf(best)]} (${best}).`;
   }
-  const subject = title ? `${title}: ` : "";
-  return `${subject}${name} peaks at ${best} on ${at}.`;
+  return `${series.filter((item) => item.values.length).map((item) => seriesClause(item, labels)).join("; ")}.`;
+}
+
+function seriesClause(item: Series, labels: string[]): string {
+  const values = item.values;
+  const first = values[0];
+  const last = values[values.length - 1];
+  const s = item.plain === "bars" ? "" : "s";
+  const name = item.plain ?? item.name;
+  if (values.length < 2) return `${name} ${s ? "is" : "are"} ${first} at ${labels[0]}`;
+  if (values.every((value) => value === first)) return `${name} stay${s} at ${first}`;
+  if (values.every((value, index) => !index || value >= values[index - 1])) return `${name} rise${s} from ${first} to ${last}`;
+  if (values.every((value, index) => !index || value <= values[index - 1])) return `${name} fall${s} from ${first} to ${last}`;
+  const best = Math.max(...values);
+  return `${name} peak${s} at ${labels[values.indexOf(best)]} (${best})`;
 }
 
 function buildPie(headerRest: string, body: string[], meta: Meta, maxPoints: number, warnings: ImportWarning[]): Record<string, unknown> | null {

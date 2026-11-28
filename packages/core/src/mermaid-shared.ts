@@ -36,11 +36,13 @@ export function dropDirective(line: string, warnings: ImportWarning[]): boolean 
   return false;
 }
 
-export function chooseAlt(meta: Meta, title: string | undefined, factual: string): string {
-  const provided = (meta.accDescr || title || meta.accTitle || "").trim();
-  if (provided.length >= 10) return provided;
-  if (provided) return `${provided}. ${factual}`;
-  return factual.length >= 10 ? factual : `${factual} Values are plotted.`;
+/** `accDescr` is the author's alt and wins. Otherwise the title (accTitle first) leads the factual sentence once. */
+export function chooseAlt(meta: Meta, title: string | undefined, factual: string, cap?: boolean): string {
+  const described = (meta.accDescr || "").trim();
+  if (described.length >= 10) return described;
+  const lead = described || (meta.accTitle || title || "").trim().replace(/[.:]+$/, "");
+  const alt = lead ? `${lead}${described ? "." : ":"} ${factual}` : cap ? factual[0].toUpperCase() + factual.slice(1) : factual;
+  return alt.length >= 10 ? alt : `${alt} Values are plotted.`;
 }
 
 export function capList<T>(items: T[], max: number, warnings: ImportWarning[], what: string): T[] {
