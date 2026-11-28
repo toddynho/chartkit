@@ -68,3 +68,80 @@ export async function renderChart(input: RenderChartInput): Promise<RenderChartR
     spec: body.spec,
   };
 }
+
+export interface ShareChartInput {
+  spec: unknown;
+  w?: number;
+  h?: number;
+  scale?: number;
+  theme?: string;
+  background?: string;
+  key?: string;
+  origin?: string;
+  fetch?: typeof fetch;
+}
+
+export interface ShareChartResult {
+  ok: boolean;
+  id: string;
+  shareUrl: string;
+  svgUrl: string;
+  pngUrl: string;
+  cardUrl: string;
+  watermark: boolean;
+  applied: unknown[];
+  warnings: unknown[];
+  errors: unknown[];
+  spec?: unknown;
+}
+
+/** Calls POST /charts on ChartKit Cloud, which stores the repaired spec and returns its links. */
+export async function shareChart(input: ShareChartInput): Promise<ShareChartResult | { error: string; errors?: unknown[] }> {
+  const origin = (input.origin || process.env.CHARTKIT_CLOUD_URL || DEFAULT_ORIGIN).replace(/\/$/, "");
+  const fetcher = input.fetch ?? fetch;
+  const key = input.key || process.env.CHARTKIT_CLOUD_KEY;
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (key) headers.authorization = `Bearer ${key}`;
+  let response: Response;
+  try {
+    response = await fetcher(`${origin}/charts`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        spec: input.spec,
+        w: input.w,
+        h: input.h,
+        scale: input.scale,
+        theme: input.theme,
+        background: input.background,
+      }),
+    });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
+  let body: Partial<ShareChartResult> & { error?: string };
+  try {
+    body = (await response.json()) as Partial<ShareChartResult> & { error?: string };
+  } catch {
+    return { error: `ChartKit Cloud returned HTTP ${response.status} with a body that is not JSON.` };
+  }
+  const errors = Array.isArray(body.errors) ? body.errors : [];
+  if (!body.id || !body.shareUrl || !body.svgUrl || !body.pngUrl) {
+    const error = body.error || (errors.length ? "ChartKit Cloud could not repair this spec, so nothing was stored." : `ChartKit Cloud returned HTTP ${response.status}.`);
+    return errors.length ? { error, errors } : { error };
+  }
+  return {
+    ok: Boolean(body.ok),
+    id: body.id,
+    shareUrl: body.shareUrl,
+    svgUrl: body.svgUrl,
+    pngUrl: body.pngUrl,
+    // A Cloud deploy from before cardUrl was added to the response still serves the card at this path.
+    cardUrl: body.cardUrl || `${origin}/c/${body.id}/card.png`,
+    watermark: Boolean(body.watermark),
+    applied: Array.isArray(body.applied) ? body.applied : [],
+    warnings: Array.isArray(body.warnings) ? body.warnings : [],
+    errors,
+    spec: body.spec,
+  };
+}

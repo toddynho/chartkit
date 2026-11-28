@@ -95,9 +95,9 @@ export function createApp(deps: CloudDeps = {}): CloudApp {
 
       if (path === "/mcp") {
         return handleMcp(request, async (call) => {
-          const nextUrl = new URL("/render", url.origin);
+          const nextUrl = new URL(call.route === "charts" ? "/charts" : "/render", url.origin);
           const next = new Request(nextUrl, { method: "POST", headers: call.headers, body: call.body });
-          return renderPost(next, nextUrl, keys, charts, cache);
+          return call.route === "charts" ? storeChart(next, nextUrl, keys, charts) : renderPost(next, nextUrl, keys, charts, cache);
         });
       }
       if (path === "/render" && request.method === "GET") return renderGet(request, url, cache);
@@ -178,7 +178,8 @@ async function storeChart(request: Request, url: URL, keys: KeyStore, charts: Ch
   const svgUrl = `${url.origin}/c/${stored.id}.svg`;
   const pngUrl = `${url.origin}/c/${stored.id}.png${frame.scale !== 1 ? `?scale=${frame.scale}` : ""}`;
   const shareUrl = `${url.origin}/s/${stored.id}`;
-  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, shareUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
+  const cardUrl = `${url.origin}/c/${stored.id}/card.png`;
+  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, shareUrl, cardUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
 }
 
 async function validatePost(request: Request): Promise<Response> {

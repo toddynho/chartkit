@@ -1,6 +1,7 @@
 /**
  * Stateless Streamable HTTP MCP at POST /mcp.
  * render_chart calls the same POST /render path as the HTTP API.
+ * share_chart calls the same POST /charts path, so it stores, limits, and expires a chart the same way.
  * validate_chart and repair_chart run @chartkitdev/core/validate in process and draw nothing.
  * This is not the stdio server in @chartkitdev/mcp.
  */
@@ -83,17 +84,53 @@ const REPAIR_TOOL = {
   },
 } as const;
 
-const TOOLS = [RENDER_TOOL, VALIDATE_TOOL, REPAIR_TOOL];
+const SHARE_TOOL = {
+  name: "share_chart",
+  description:
+    "Store a ChartKit spec on this Cloud service and return links to it. Use this when someone asks for a link to post or send: shareUrl is a web page (/s/<id>) that X, Slack, LinkedIn, and iMessage unfurl as a large image card. Returns id, shareUrl, svgUrl, pngUrl, cardUrl (the 1200x628 card image), the stored spec, and the repairs, warnings, and errors. This is the same call as POST /charts. The spec is repaired first and the repaired spec is what is stored. A spec that repair cannot fix returns its errors with isError true, and nothing is stored. The same spec returns the same id. Without a key the chart carries a chartkit.dev mark and is kept for 365 days; each visit to shareUrl after 30 days starts another 365. Pass key, or send Authorization: Bearer, to store it without the mark and without an expiry. The key is not part of any returned URL. w, h, theme, and background are written into the stored spec. Anyone with a link can open it, so do not share data that must stay private. To get an image without storing anything, use render_chart.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      spec: { description: "ChartKit spec object or JSON string." },
+      w: { type: "number", description: "Width in pixels, up to 4096. Written to size.width in the stored spec. Omit to keep the spec's own size." },
+      h: { type: "number", description: "Height in pixels, up to 4096. Written to size.height in the stored spec. Omit to keep the spec's own size." },
+      scale: { type: "number", description: "PNG zoom from 1 to 4, carried on pngUrl as ?scale=. The share page, the card, and svgUrl ignore it." },
+      theme: {
+        type: "string",
+        description: 'Preset name such as "soft" or "midnight". Written to the stored spec. midnight is an opaque dark plate with light text.',
+      },
+      background: {
+        type: "string",
+        description:
+          "Chart background CSS color. Hex, rgb(), hsl(), oklch(), or transparent. Omit for #ffffff. Written to theme.tokens.background in the stored spec. Named colors such as white are rejected.",
+      },
+      key: { type: "string", description: "Sent as Authorization: Bearer. Removes the mark and the expiry. Omitted from every returned URL." },
+    },
+    required: ["spec"],
+    additionalProperties: false,
+  },
+} as const;
+
+const TOOLS = [RENDER_TOOL, SHARE_TOOL, VALIDATE_TOOL, REPAIR_TOOL];
 const TOOL_NAMES = TOOLS.map((tool) => tool.name).join(", ");
 
 type JsonRpcId = string | number | null;
 
+/** The HTTP route a tool forwards to: POST /render or POST /charts. */
+export type ToolRoute = "render" | "charts";
+
 interface ToolCall {
+  route: ToolRoute;
   headers?: HeadersInit;
   body: string;
 }
 
-export async function handleMcp(request: Request, render: (call: ToolCall) => Promise<Response>): Promise<Response> {
+const FORWARDED = {
+  render_chart: { route: "render", fields: ["format", "w", "h", "scale", "theme", "background"] },
+  share_chart: { route: "charts", fields: ["w", "h", "scale", "theme", "background"] },
+} as const;
+
+export async function handleMcp(request: Request, forward: (call: ToolCall) => Promise<Response>): Promise<Response> {
   if (request.method === "GET" || request.method === "DELETE") {
     return reply(request, 405, rpcError(null, -32600, "POST a single JSON-RPC message to /mcp. This server is stateless and does not open an SSE stream."));
   }
@@ -127,7 +164,7 @@ export async function handleMcp(request: Request, render: (call: ToolCall) => Pr
     if (method === "initialize") return reply(request, 200, { jsonrpc: "2.0", id, result: initializeResult(message.params) });
     if (method === "ping") return reply(request, 200, { jsonrpc: "2.0", id, result: {} });
     if (method === "tools/list") return reply(request, 200, { jsonrpc: "2.0", id, result: { tools: TOOLS } });
-    if (method === "tools/call") return reply(request, 200, await callTool(id, message.params, request, render));
+    if (method === "tools/call") return reply(request, 200, await callTool(id, message.params, request, forward));
     return reply(request, 200, rpcError(id, -32601, `Unknown method ${method}.`));
   } catch (error) {
     const text = error instanceof Error ? error.message : String(error);
@@ -144,29 +181,30 @@ function initializeResult(params: unknown): { protocolVersion: string; capabilit
   };
 }
 
-async function callTool(id: JsonRpcId, params: unknown, request: Request, render: (call: ToolCall) => Promise<Response>): Promise<unknown> {
+async function callTool(id: JsonRpcId, params: unknown, request: Request, forward: (call: ToolCall) => Promise<Response>): Promise<unknown> {
   if (!isRecord(params)) return toolError(id, `tools/call expects { name, arguments }. The tools are ${TOOL_NAMES}.`);
   const name = params.name;
   if (name === "validate_chart" || name === "repair_chart") return checkTool(id, name, params.arguments);
-  if (name !== "render_chart") return toolError(id, `Unknown tool. The tools are ${TOOL_NAMES}.`);
+  if (name !== "render_chart" && name !== "share_chart") return toolError(id, `Unknown tool. The tools are ${TOOL_NAMES}.`);
+  const target = FORWARDED[name];
   const args = isRecord(params.arguments) ? params.arguments : null;
-  if (!args || !("spec" in args)) return toolError(id, "render_chart expects { spec }.");
+  if (!args || !("spec" in args)) return toolError(id, `${name} expects { spec }.`);
   const body: Record<string, unknown> = { spec: args.spec };
-  for (const name of ["format", "w", "h", "scale", "theme", "background"] as const) {
-    const value = args[name];
-    if (typeof value === "string" || typeof value === "number") body[name] = value;
+  for (const field of target.fields) {
+    const value = args[field];
+    if (typeof value === "string" || typeof value === "number") body[field] = value;
   }
   const header = request.headers.get("authorization") ?? "";
   const key = typeof args.key === "string" ? args.key.trim() : "";
   const authorization = header || (key ? `Bearer ${key}` : "");
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (authorization) headers.authorization = authorization;
-  const response = await render({ headers, body: JSON.stringify(body) });
+  const response = await forward({ route: target.route, headers, body: JSON.stringify(body) });
   let payload: unknown;
   try {
     payload = (await response.json()) as unknown;
   } catch {
-    return toolError(id, `Render returned HTTP ${response.status} with a body that is not JSON.`);
+    return toolError(id, `${name} returned HTTP ${response.status} with a body that is not JSON.`);
   }
   const failed = !response.ok || (isRecord(payload) && payload.ok === false);
   return {

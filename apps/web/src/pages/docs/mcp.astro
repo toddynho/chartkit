@@ -5,6 +5,59 @@ import { mcpConfig } from "../../data/mcp-config";
 const description = "ChartKit's MCP server validates, repairs, and renders a spec, and looks up feature support.";
 const local = `npm run build --workspace=@chartkitdev/mcp
 node packages/mcp/dist/cli.js`;
+const cloudAdd = `claude mcp add --transport http chartkit-cloud https://cloud.chartkit.dev/mcp`;
+const cloudConfig = `{
+  "mcpServers": {
+    "chartkit-cloud": {
+      "url": "https://cloud.chartkit.dev/mcp"
+    }
+  }
+}`;
+const cloudKeyConfig = `{
+  "mcpServers": {
+    "chartkit-cloud": {
+      "url": "https://cloud.chartkit.dev/mcp",
+      "headers": { "Authorization": "Bearer <your key>" }
+    }
+  }
+}`;
+const shareCall = `{
+  "name": "share_chart",
+  "arguments": {
+    "spec": {
+      "version": "1",
+      "type": "bar",
+      "title": "Signups by month",
+      "data": [
+        { "month": "Jan", "signups": 100 },
+        { "month": "Feb", "signups": 180 },
+        { "month": "Mar", "signups": 150 }
+      ],
+      "encoding": { "x": "month", "y": "signups" },
+      "a11y": { "alt": "Signups peaked in February at 180." }
+    }
+  }
+}`;
+const shareCurl = `curl -s https://cloud.chartkit.dev/mcp \\
+  -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"share_chart","arguments":{"spec":{"version":"1","type":"bar","title":"Signups by month","data":[{"month":"Jan","signups":100},{"month":"Feb","signups":180},{"month":"Mar","signups":150}],"encoding":{"x":"month","y":"signups"},"a11y":{"alt":"Signups peaked in February at 180."}}}}}'`;
+const shareResult = `{
+  "ok": true,
+  "id": "t0auscsmxSSdHwbC",
+  "shareUrl": "https://cloud.chartkit.dev/s/t0auscsmxSSdHwbC",
+  "svgUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.svg",
+  "pngUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.png",
+  "cardUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC/card.png",
+  "url": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.svg",
+  "width": 672,
+  "height": 372,
+  "watermark": true,
+  "spec": { "version": "1", "type": "bar", "title": "Signups by month", ... },
+  "applied": [],
+  "warnings": [],
+  "errors": [],
+  "diagnostics": []
+}`;
 ---
 
 <DocsPage title="MCP server" description={description} href="/docs/mcp">
@@ -13,7 +66,7 @@ node packages/mcp/dist/cli.js`;
     <code>npx -y @chartkitdev/mcp</code>
   </div>
   <p>
-    The server speaks stdio. <code>validate</code> and <code>repair</code> come from <code>@chartkitdev/core/validate</code>. <code>render</code> uses <code>@chartkitdev/core/extra</code> for the core chart types. Choropleth and point maps are in <code>@chartkitdev/geo</code>, not in that entry. Those tools do not call the network. <code>render_chart</code> does: it asks ChartKit Cloud for an image URL. <code>lookup_feature</code> reads a build-time copy of <a href="/features.json">features.json</a>, synonyms included. A <code>partial</code> cell is not reported as native. Other libraries come back with ChartKit.
+    The server speaks stdio. <code>validate</code> and <code>repair</code> come from <code>@chartkitdev/core/validate</code>. <code>render</code> uses <code>@chartkitdev/core/extra</code> for the core chart types. Choropleth and point maps are in <code>@chartkitdev/geo</code>, not in that entry. Those tools do not call the network. <code>render_chart</code> does: it asks ChartKit Cloud for an image URL. To get a link to post from an agent, use <code>share_chart</code> on the <a href="#cloud-mcp">Cloud MCP</a>. <code>lookup_feature</code> reads a build-time copy of <a href="/features.json">features.json</a>, synonyms included. A <code>partial</code> cell is not reported as native. Other libraries come back with ChartKit.
   </p>
   <h2>Tools</h2>
   <ul>
@@ -26,6 +79,43 @@ node packages/mcp/dist/cli.js`;
     <li><code>lookup_feature(query)</code> searches the matrix. The result has ChartKit's status, the spec snippet when the matrix has one, the docs URL, and the other libraries.</li>
     <li><code>list_chart_types()</code> and <code>get_example(type)</code> return the example specs from the repo.</li>
   </ul>
+  <h2 id="cloud-mcp">Cloud MCP</h2>
+  <p>
+    ChartKit Cloud is also a remote MCP server at <code>https://cloud.chartkit.dev/mcp</code>. There is nothing to install: the client connects over HTTP. It has four tools. <code>render_chart</code> returns an image. <code>share_chart</code> stores a chart and returns a link to post. <code>validate_chart</code> and <code>repair_chart</code> check and fix a spec without drawing it.
+  </p>
+  <h3>1. Add the server</h3>
+  <p>Claude Code:</p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{cloudAdd}</code></pre></figure>
+  <p>Cursor (<code>.cursor/mcp.json</code>) and other clients that take a URL:</p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{cloudConfig}</code></pre></figure>
+  <h3>2. Ask for a link</h3>
+  <p>
+    Ask the agent to chart some data and give you a link to post. It calls <code>share_chart</code> with a spec:
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{shareCall}</code></pre></figure>
+  <p>The same call by hand, with no client:</p>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{shareCurl}</code></pre></figure>
+  <h3>3. Read the result</h3>
+  <p>The tool's text result is this JSON:</p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{shareResult}</code></pre></figure>
+  <p>
+    Post <code>shareUrl</code>. X, Slack, LinkedIn, and iMessage unfurl that page as a large image card, and <code>cardUrl</code> is the 1200×628 card image. <code>svgUrl</code> and <code>pngUrl</code> are the chart at its own size, for an <code>img</code>. <code>spec</code> is what was stored, and <code>applied</code>, <code>warnings</code>, and <code>errors</code> are the repair diagnostics.
+  </p>
+  <ul>
+    <li><code>share_chart</code> runs the same code as <code>POST /charts</code>. See <a href="/docs/cloud">Cloud render</a> for that route.</li>
+    <li>A spec that <code>repair()</code> can fix is stored repaired, and <code>applied</code> lists the patches. A spec it cannot fix returns <code>ok: false</code> with the <code>errors</code>. Nothing is stored and no link comes back.</li>
+    <li>The optional arguments are <code>w</code>, <code>h</code>, <code>theme</code>, and <code>background</code>, which are written into the stored spec, and <code>scale</code>, which is carried on <code>pngUrl</code>.</li>
+    <li>Without a key the chart has the <code>chartkit.dev</code> mark and is kept for 365 days. Each visit to <code>shareUrl</code> after 30 days starts another 365. Anyone with the link can open it.</li>
+    <li>The limits are the ones on the HTTP route: 1 MB of request body, 4096 pixels a side, 20,000 rows, and the per-IP request limit.</li>
+  </ul>
+  <h3>With a key</h3>
+  <p>
+    A key stores the chart with no mark and no expiry. Send it as an <code>Authorization: Bearer</code> header on the MCP connection. <code>render_chart</code> and <code>share_chart</code> both read it, and neither puts it in a URL. Both tools also take a <code>key</code> argument. The header wins when both are sent.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{cloudKeyConfig}</code></pre></figure>
+  <p>
+    The stdio server has a <code>share_chart</code> tool too. It calls Cloud the way <code>render_chart</code> does and reads <code>CHARTKIT_CLOUD_KEY</code>. It is new after <code>@chartkitdev/mcp</code> 0.5.0 and ships with the next npm release. Until then, use the Cloud MCP above or run the server from a checkout.
+  </p>
   <h2>Resources</h2>
   <ul>
     <li><code>chartkit://llms.txt</code></li>

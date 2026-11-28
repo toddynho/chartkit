@@ -33,14 +33,14 @@ function rpc(method: string, params?: unknown, id: number | null = 1, accept = "
 }
 
 describe("POST /mcp", () => {
-  it("lists render_chart, validate_chart, and repair_chart, and renders through the same path", async () => {
+  it("lists render_chart, share_chart, validate_chart, and repair_chart, and renders through the same path", async () => {
     const app = appFor();
     const listed = await app.handle(rpc("tools/list"));
     const tools = (await listed.json()) as {
       result: { tools: { name: string; description: string; inputSchema: { properties: { format: { default?: string; description?: string; enum?: string[] }; scale: { description?: string } } } }[] };
     };
     expect(listed.headers.get("content-type")).toContain("application/json");
-    expect(tools.result.tools.map((tool) => tool.name)).toEqual(["render_chart", "validate_chart", "repair_chart"]);
+    expect(tools.result.tools.map((tool) => tool.name)).toEqual(["render_chart", "share_chart", "validate_chart", "repair_chart"]);
     const tool = tools.result.tools[0];
     expect(tool?.description).toMatch(/Omit format, or pass svg/);
     expect(tool?.description).toMatch(/GitHub README image/);

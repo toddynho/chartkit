@@ -162,12 +162,80 @@ The rate limit is 120 a minute per IP, with or without a key. On Cloudflare the 
 - `GET /health`
 - `GET /render` and `POST /render`
 - `POST /validate`
-- `POST /charts` returns `id`, `shareUrl`, `svgUrl`, and `pngUrl`. `GET /c/<id>.svg` or `.png` serves the stored image. `GET /c/<id>/card.png` serves the 1200×628 card.
+- `POST /charts` returns `id`, `shareUrl`, `svgUrl`, `pngUrl`, and `cardUrl`. `GET /c/<id>.svg` or `.png` serves the stored image. `GET /c/<id>/card.png` (`cardUrl`) serves the 1200×628 card.
 - `GET /s/<id>` is the share page (Open Graph and Twitter Card tags, absolute image URLs). `GET /s?spec=` is the same page with nothing stored. Its `og:image` is `GET /render?format=png&card=1&spec=`.
-- `POST /mcp` — stateless [Streamable HTTP](https://modelcontextprotocol.io). `GET /mcp` is 405. This is not `@chartkitdev/mcp` on stdio. Three tools:
+- `POST /mcp` — stateless [Streamable HTTP](https://modelcontextprotocol.io). `GET /mcp` is 405. This is not `@chartkitdev/mcp` on stdio. Four tools:
   - `render_chart` calls the same render path as `POST /render`. Omit `format`, or pass `svg`. Pass `png` only when the host cannot display SVG (email, a GitHub README image, some Slack clients), and then set `scale` to 2 or higher.
+  - `share_chart` calls the same path as `POST /charts`: it stores the repaired spec and returns `id`, `shareUrl`, `svgUrl`, `pngUrl`, `cardUrl`, and the diagnostics. See [Share a chart from an agent](#share-a-chart-from-an-agent).
   - `validate_chart` runs `@chartkitdev/core/validate` and returns `ok`, `errors`, and `warnings` with CK codes, paths, hints, and fix patches. It does not change the spec. Pass `data` to check other rows.
   - `repair_chart` applies the safe fix patches and returns the repaired `spec`, the `applied` patches, and what is left. It takes `w`, `h`, and `theme` the way `render_chart` does. It is what `POST /validate` returns over HTTP.
+
+### Share a chart from an agent
+
+`share_chart` is the tool for "chart this and give me a link I can post". It takes `spec`, and optionally `w`, `h`, `theme`, `background`, `scale`, and `key`. It runs the `POST /charts` handler, so everything below is that route's behavior:
+
+- A valid spec is stored and its links come back.
+- An invalid spec that `repair()` can fix is stored repaired. `applied` lists the patches.
+- A spec that `repair()` cannot fix returns the `POST /charts` 422 body (`ok: false`, `errors`) with `isError: true`. Nothing is stored and no link is returned.
+- `w`, `h`, `theme`, and `background` are written into the stored spec. `scale` is only carried on `pngUrl`.
+- The same spec with the same mark state returns the same `id`.
+- Without a key the chart has the mark and is kept 365 days, renewed by share-page reads (the share row in [Limits](#limits)). With a valid key it has no mark and no expiry.
+- Each MCP request counts once against the 120-a-minute limit. The 1 MB body, 4096 side, and 20,000-row limits apply. The stored chart's `pngUrl` is checked against the PNG pixel limit when it is fetched, as for any `/c/<id>.png`.
+- A key goes in the `Authorization: Bearer` header of the MCP request, or in the tool's `key` argument. The header wins when both are sent. It is the same rule as `render_chart`. The key is in no returned URL.
+
+1. **Add the server.** It is remote, so there is nothing to install. Claude Code:
+
+   ```bash
+   claude mcp add --transport http chartkit-cloud https://cloud.chartkit.dev/mcp
+   ```
+
+   Cursor (`.cursor/mcp.json`) and other clients that take a URL:
+
+   ```json
+   {
+     "mcpServers": {
+       "chartkit-cloud": {
+         "url": "https://cloud.chartkit.dev/mcp"
+       }
+     }
+   }
+   ```
+
+   With a key, so stored charts have no mark and do not expire, add the header: `claude mcp add --transport http chartkit-cloud https://cloud.chartkit.dev/mcp --header "Authorization: Bearer $KEY"`, or `"headers": { "Authorization": "Bearer <key>" }` beside `"url"`.
+
+2. **Call the tool.** An agent sends this `tools/call`. The same request by hand:
+
+   ```bash
+   curl -s https://cloud.chartkit.dev/mcp \
+     -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"share_chart","arguments":{"spec":{"version":"1","type":"bar","title":"Signups by month","data":[{"month":"Jan","signups":100},{"month":"Feb","signups":180},{"month":"Mar","signups":150}],"encoding":{"x":"month","y":"signups"},"a11y":{"alt":"Signups peaked in February at 180."}}}}}'
+   ```
+
+3. **Read the result.** `result.content[0].text` is this JSON, and `result.isError` is `false`:
+
+   ```json
+   {
+     "ok": true,
+     "id": "t0auscsmxSSdHwbC",
+     "shareUrl": "https://cloud.chartkit.dev/s/t0auscsmxSSdHwbC",
+     "svgUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.svg",
+     "pngUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.png",
+     "cardUrl": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC/card.png",
+     "url": "https://cloud.chartkit.dev/c/t0auscsmxSSdHwbC.svg",
+     "width": 672,
+     "height": 372,
+     "watermark": true,
+     "spec": { "version": "1", "type": "bar", "title": "Signups by month", "…": "the stored spec, with theme.tokens.background #ffffff added" },
+     "applied": [],
+     "warnings": [],
+     "errors": [],
+     "diagnostics": []
+   }
+   ```
+
+   Post `shareUrl`. X, Slack, LinkedIn, and iMessage read its Open Graph and Twitter tags and show `cardUrl` as the preview. `svgUrl` and `pngUrl` are the chart at its own size, for an `<img>`. `url` repeats `svgUrl`, as `POST /charts` does.
+
+The stdio server `@chartkitdev/mcp` has a `share_chart` tool that POSTs to `/charts` and returns the same links. It is in the source after 0.5.0 and ships with the next npm release of that package.
 
 Cloud SVGs add an outer margin so a chat attachment is not flush with the image edge: 24px on top, 16px on each side, and 12px under the 16px watermark band. The library drawing is unchanged. A keyed render gets the same margin without the mark. `/cloud` marketing previews are local SVGs and do not use this margin.
 
@@ -234,7 +302,7 @@ Cloud launches with the v1 npm publish. Do these in order from `apps/cloud`, on 
    # PNG
    curl -sG -o chart.png -w '%{http_code} %{content_type}\n' "$HOST/render" --data-urlencode "spec=$SPEC" --data-urlencode format=png
 
-   # MCP: lists render_chart, validate_chart, repair_chart
+   # MCP: lists render_chart, share_chart, validate_chart, repair_chart
    curl -s "$HOST/mcp" -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 
