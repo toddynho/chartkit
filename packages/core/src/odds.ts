@@ -10,6 +10,7 @@
  */
 import { clamp, esc, linear } from "./svg";
 import { parseCsv } from "./race-data";
+import { utcTime } from "./timezone";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -172,7 +173,7 @@ function parseTime(value: string | number | null): number {
     const month = MONTHS.findIndex((item) => item.toLowerCase() === named[1]!.slice(0, 3).toLowerCase());
     if (month >= 0) return Date.UTC(named[3] ? Number(named[3]) : 2026, month, Number(named[2]));
   }
-  const parsed = Date.parse(text);
+  const parsed = utcTime(text);
   if (Number.isFinite(parsed)) return parsed;
   throw new Error(`Could not read "${text}" as a time.`);
 }

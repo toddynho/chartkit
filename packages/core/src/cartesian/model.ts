@@ -189,7 +189,7 @@ export function toModel(
     } else {
       const temporal = !isTypedArray(raw) && (columnTemporal(raw) || shell.xIsTemporal);
       if (temporal && type !== "bar") {
-        x = mapNumbers(raw, toNumber);
+        x = mapNumbers(raw, (value) => toNumber(value, shell.zone));
         xTemporal = true;
       } else labels = stringLabels(raw);
     }

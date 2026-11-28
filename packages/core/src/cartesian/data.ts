@@ -5,6 +5,7 @@ import { notedLinear } from "../sampling";
 import { asNumber } from "../frame";
 import { domainEnds, isRecord, repeatKey, scaleClamp, scalePad } from "../svg";
 import { paint, type PresetTokens } from "../theme";
+import { parseTime } from "../timezone";
 import type { PlotModel, Series, YChannel } from "./types";
 
 const catCache = new WeakMap<PlotModel, string[]>();
@@ -240,10 +241,10 @@ export function columnTemporal(column: ArrayLike<unknown>): boolean {
   return false;
 }
 
-export function toNumber(value: unknown): number | null {
+export function toNumber(value: unknown, zone: string): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
-    const parsed = Date.parse(value);
+    const parsed = parseTime(value, zone);
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;

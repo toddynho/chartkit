@@ -1,6 +1,7 @@
 import type { Diagnostic, JsonPatchOperation } from "../diagnostics";
 import { readData, type DataTable } from "../data";
 import { nearMatches } from "../walker";
+import { utcTime } from "../timezone";
 
 export interface Channel {
   field?: string;
@@ -229,7 +230,7 @@ export function firstUnsorted(values: ArrayLike<unknown>, type: string): number 
 function timeValue(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
-    const parsed = Date.parse(value);
+    const parsed = utcTime(value);
     return Number.isFinite(parsed) ? parsed : undefined;
   }
   return undefined;

@@ -3,7 +3,8 @@ import { ch, esc, font, n } from "../svg";
 import { cssVar } from "../theme";
 import type { AxisBox, PlotBox, PlotModel, XScale } from "./types";
 import { catKey, numKey } from "./data";
-import { formatTimeLabel, resolveTicks, TICK_PX, tickLabel, tickText, timeTicks, xAngle, xStep } from "./ticks";
+import { resolveTicks, TICK_PX, tickLabel, tickText, timeLabels, timeTicks, widest, xAngle, xStep } from "./ticks";
+import { zoneOffset } from "../timezone";
 import { crossAt } from "./scales";
 import { zigPoints } from "./paths";
 import { bottomLegendFoot, colorLegendFoot } from "./chrome";
@@ -361,20 +362,34 @@ function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
   const width = Math.max(1, plot.right - plot.left);
   const explicit = model.xAxis.ends || model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
   const at = (value: number) => xScale.at(value);
-  if (explicit || model.zone === "UTC") {
-    const values = explicit
-      ? resolveTicks(model, "x", min, max, model.xAxis.count ?? 6, false)
-      : timeTicks(min, max, Math.max(2, Math.floor(width / 72)));
-    const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
-    return along(model, values, labels, at, plot, 4);
-  }
-  let count = Math.max(2, Math.floor(width / 84));
-  let values = timeTicks(min, max, count, model.zone);
-  let labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
-  while (count > 2 && model.xAxis.skip !== false && timeLabelsCollide(values, labels, at, plot.left, plot.right)) {
-    count -= 1;
-    values = timeTicks(min, max, count, model.zone);
-    labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
+  const span = max - min;
+  const text = (ticks: number[]) => timeLabels(ticks, span, model.locale, model.xFormat, model.zone);
+  let values = explicit ? resolveTicks(model, "x", min, max, model.xAxis.count ?? 6, false) : [];
+  let labels = text(values);
+  if (!explicit) {
+    const utc = model.zone === "UTC";
+    let count = Math.max(2, Math.floor(width / (utc ? 72 : 84)));
+    /** The zone clock reading, as if it were UTC. A multiple of a day is midnight there. */
+    const clock = (tick: number) => tick + zoneOffset(tick, model.zone);
+    const lay = () => {
+      values = timeTicks(min, max, count, model.zone);
+      // The last instant is a tick so the axis reaches the data. On the same day
+      // as the tick before it, it would only say that day again.
+      const end = values.length - 1;
+      if (end > 1 && values[end] - values[end - 1] < values[1] - values[0] && Math.floor(clock(values[end]) / 86400000) === Math.floor(clock(values[end - 1]) / 86400000)) values.pop();
+      labels = text(values);
+    };
+    // Data that starts and ends at midnight on the zone clock is daily data. Ticks
+    // inside a day would name hours it has no points at. A step is picked when the
+    // span holds at most count + 1 of it, so this cap rules out the 12 hour step.
+    if (span >= 1728e5 && !(clock(min) % 86400000 || clock(max) % 86400000)) count = Math.min(count, Math.floor(span / 432e5) - 2);
+    lay();
+    // A UTC label that fits its 72px slot with the 8px gap keeps the tick count.
+    // Date-with-time labels are wider, so the count drops until they clear.
+    while (count > 2 && model.xAxis.skip !== false && (!utc || widest(labels) > 64) && timeLabelsCollide(values, labels, at, plot.left, plot.right)) {
+      count--;
+      lay();
+    }
   }
   return along(model, values, labels, at, plot, 4);
 }
@@ -426,7 +441,9 @@ function along(
     }
   }
   const endLabel = endAt >= 0 ? labels[endAt] : "";
-  const reserved = endAt >= 0 ? at(values[endAt]) - ch(endLabel.length || 1, 6.4) / 2 : Infinity;
+  // A label near the right edge is end-anchored inside the view box, so it starts further left than a centred one.
+  const endWidth = ch(endLabel.length || 1, 6.4);
+  const reserved = endAt >= 0 ? Math.min(at(values[endAt]) - endWidth / 2, model.width - 4 - endWidth) : Infinity;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -444,7 +461,8 @@ function along(
     out += drawn;
     if (!angle && !keep && x >= plot.left - slack && x <= plot.right + slack) {
       const width = ch((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length, 6.4);
-      if (x - width / 2 >= last) last = x + width / 2 + 8;
+      // A label start-anchored at the left edge ends further right than a centred one.
+      if (x - width / 2 >= last) last = Math.max(x + width / 2, 4 + width) + 8;
     }
   }
   return out;

@@ -1,6 +1,6 @@
 import { formatValue } from "./format";
 import { isRecord } from "./svg";
-import { formatZoned, instantOf, zoneOf, zonedTimeTicks } from "./timezone";
+import { formatZoned, instantOf, parseTime, zoneOf, zonedTimeTicks } from "./timezone";
 
 export interface TimeScale {
   /** Pixel x for one row. Endpoints sit inset, like a category slot. */
@@ -20,7 +20,8 @@ export function readTimeScale(spec: Record<string, unknown>, values: unknown[]):
   const type = isRecord(channel) && typeof channel.type === "string" ? channel.type : "";
   if (type === "nominal" || type === "ordinal" || type === "quantitative" || type === "linear") return null;
   const forced = type === "temporal" || type === "time" || type === "utc";
-  const ms = values.map((value) => instantOf(value));
+  const zone = zoneOf(spec);
+  const ms = values.map((value) => instantOf(value, (text) => parseTime(text, zone)));
   if (!forced && ms.some((value) => value === null)) return null;
   const finite = ms.filter((value): value is number => value !== null);
   if (finite.length < 2) return null;
@@ -35,7 +36,6 @@ export function readTimeScale(spec: Record<string, unknown>, values: unknown[]):
   min -= dataSpan * padMin;
   max += dataSpan * padMax;
   const span = max - min || 1;
-  const zone = zoneOf(spec);
   const format = isRecord(channel) ? channel.format : undefined;
   const place = (t: number, width: number, origin: number) => {
     const inset = width / Math.max(2, values.length);
