@@ -23,7 +23,7 @@ describe("fromMermaid", () => {
     expect(codes(result.warnings)).not.toContain("CK8006");
     expect(result.spec?.type).toBe("combo");
     expect(result.spec?.title).toBe("Weekly orders");
-    expect(result.spec?.a11y).toMatchObject({ alt: "Weekly orders" });
+    expect(result.spec?.a11y).toMatchObject({ alt: "Weekly orders: Placed peaks at Fri (30); Shipped rises from 10 to 28." });
     const data = result.spec?.data as { x: string; placed: number; shipped: number }[];
     expect(data.map((row) => row.x)).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri"]);
     expect(data.map((row) => row.placed)).toEqual([12, 18, 15, 22, 30]);
@@ -73,7 +73,7 @@ describe("fromMermaid", () => {
     expect(result.spec?.type).toBe("pie");
     expect(result.spec?.mark).toBeUndefined();
     expect(result.spec?.legend).toMatchObject({ values: true });
-    expect(result.spec?.a11y).toMatchObject({ alt: "Share of workshop hours" });
+    expect(result.spec?.a11y).toMatchObject({ alt: "Share of workshop hours: Design is the largest slice at 42." });
     expect(validate(result.spec).ok).toBe(true);
     const svg = render(result.spec);
     expect(svg).toContain("Design");
@@ -299,14 +299,15 @@ describe("fromMermaid", () => {
     expect((plain.spec?.encoding as { y: { axis?: string }[] }).y.every((channel) => !channel.axis)).toBe(true);
   });
 
-  it("names every unnamed series from the y-axis title", () => {
+  it("names unnamed series for their mark and keeps the y-axis title on the axis and the fields", () => {
     const result = fromMermaid(`xychart-beta
     x-axis [Mon, Tue]
     y-axis "Orders"
     bar [4, 9]
     line [5, 8]`);
     const y = (result.spec?.encoding as { y: { field: string; title: string }[] }).y;
-    expect(y.map((channel) => channel.title)).toEqual(["Orders", "Orders 2"]);
+    expect(y.map((channel) => channel.title)).toEqual(["Bars", "Line"]);
+    expect(result.spec?.axes).toEqual({ y: { title: "Orders" } });
     expect(y.map((channel) => channel.field)).toEqual(["orders", "orders_2"]);
     expect(JSON.stringify(result.spec)).not.toContain("Bar 1");
     expect(JSON.stringify(result.spec)).not.toContain("Line 1");

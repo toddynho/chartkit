@@ -59,7 +59,7 @@ gantt
     }
   ],
   "a11y": {
-    "alt": "Paper Kite"
+    "alt": "Paper Kite: gantt chart of 4 items."
   },
   "title": "Paper Kite",
   "theme": "soft",
@@ -107,7 +107,7 @@ timeline
     }
   ],
   "a11y": {
-    "alt": "Lumen and Co"
+    "alt": "Lumen and Co: timeline of 4 events."
   },
   "title": "Lumen and Co",
   "theme": "soft",
@@ -172,7 +172,7 @@ journey
     }
   ],
   "a11y": {
-    "alt": "Paper Kite playtest"
+    "alt": "Paper Kite playtest: journey of 5 steps."
   },
   "title": "Paper Kite playtest",
   "theme": "soft",
@@ -239,7 +239,7 @@ quadrantChart
     }
   },
   "a11y": {
-    "alt": "Paper Kite bets"
+    "alt": "Paper Kite bets: Kite skin is plotted at 0.24, 0.78."
   },
   "quadrants": [
     "Do it now",

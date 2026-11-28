@@ -354,7 +354,7 @@ function scheduleSpec(
     version: "1",
     type,
     data: kept,
-    a11y: { alt: chooseAlt(meta, diagramTitle, factual ?? `${type} has ${kept.length} rows.`) },
+    a11y: { alt: chooseAlt(meta, diagramTitle, factual ?? `${type}${type === "gantt" ? " chart" : ""} of ${kept.length} ${type === "timeline" ? "event" : type === "journey" ? "step" : "item"}${kept.length > 1 ? "s" : ""}.`, true) },
   };
   if (diagramTitle) spec.title = diagramTitle;
   return spec;
