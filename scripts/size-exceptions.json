@@ -316,5 +316,17 @@
     "cap": 181245,
     "reason": "Hover reads the drawn SVG once per draw and not on every pointer move. bench/browser/hover.mjs, handler median of 15 runs, alternated with main: on five lines of 1,000 points steady hover 5.1 to 0.8 ms and first hover 12.6 to 2.9 ms; on a 100,000-point line steady 0.7 to 0.3 ms and first 3.7 to 2.1 ms. interact grows 24,638 to 24,909 B and stays inside its own cap (its minified size fell 428 B). global had 2 B of headroom and cannot carry the 235 B. Measured 179450 + 1%.",
     "pr": "#183"
+  },
+  {
+    "key": "interact",
+    "cap": 26322,
+    "reason": "Three motion label fixes on bar charts, all in motion.ts: value labels ride their bars and count through mark.labelFormat, re-ordered category labels fade in place instead of overlapping in side lanes, and the percent label sits at the bar end, follows theme.tokens.fontSize and avoids other text. interact grows 24,909 to 26,061 B gzip against a cap of 24,916. Measured 26061 + 1%.",
+    "pr": "#205"
+  },
+  {
+    "key": "globalAuto",
+    "cap": 127629,
+    "reason": "Three motion label fixes on bar charts, all in motion.ts: value labels ride their bars and count through mark.labelFormat, re-ordered category labels fade in place instead of overlapping in side lanes, and the percent label sits at the bar end, follows theme.tokens.fontSize and avoids other text. globalAuto carries interact and grows 125,223 to 126,365 B gzip against a cap of 126,225. Measured 126365 + 1%.",
+    "pr": "#205"
   }
 ]
